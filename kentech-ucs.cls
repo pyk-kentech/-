@@ -456,6 +456,16 @@
         \fontsize{16pt}{16pt}\selectfont \@kentech \\
         \vspace*{1.5cm}
 
+        \ifdefined\@advisorMajorEng
+            \fontsize{14pt}{14pt}\selectfont
+            \ifdefined\@advisorCooprEng
+                Thesis Advisors: \@advisorMajorEng\ and \@advisorCooprEng \\
+            \else
+                Thesis Advisor: \@advisorMajorEng \\
+            \fi
+            \vspace*{1.2cm}
+        \fi
+
         % Degree statement
         \fontsize{16pt}{16pt}\selectfont
         \if@isFinal

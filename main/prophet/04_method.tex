@@ -1,5 +1,25 @@
-\chapter{Prediction Models}
+\chapter{Prediction Model Design}
 \label{ch:method}
+
+The predictor receives the audit prefix $X_t$ and returns one
+probability for each of the 18 action categories. Its two principal
+inputs are the order in which records reached the collector and
+the observed relationships among records. Order can locate an
+event relative to preceding activity. Target membership can
+distinguish which of several earlier outcomes belongs to the object
+currently in view. The design retains a sequence path so the
+predictor can still use received events when the available records
+do not identify an eligible target.
+
+The comparisons vary three design choices. The event-only and
+flat attention models test how much a forecast can recover from
+order and flexible history retrieval. THM and REL add explicit
+observed target membership, while varying whether they summarize
+each group before or after modeling relationships among events.
+The Local and Final History variants retain a target-aware readout
+and vary the recurrent state attached to each event. The sequence
+and relation paths of the original residual predictors are shown
+in Figure~\ref{fig:model}.
 
 \section{Receipt-order predictor}
 
@@ -27,10 +47,16 @@ each nonempty target group,
   m_g = |I_g|^{-1}\!\sum_{i \in I_g} e_i .
 \end{equation}
 The final event-history state queries these slots and the readout
-contributes a correction to the event prediction. The relation
+contributes a correction to the event prediction. Averaging before
+the readout makes the target group the unit of retrieval in THM.
+Two groups that have the same mean event representation present
+the same slot to that readout. The relation
 attention model (REL) first lets events associated with the same
 target attend to each other. A history query then reads the
-relation-enriched events. At the level of the output head, the
+relation-enriched events. Group membership limits where the
+within-target context comes from. The readout can then combine
+evidence across observed groups for the same forecast. At the level
+of the output head, the
 original residual models can be written as
 \begin{equation}
   z(X_t) = z_{\mathrm{event}}(X_t) + \Delta z(X_t,\{I_g\}),
