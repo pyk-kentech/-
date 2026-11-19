@@ -1,0 +1,91 @@
+\chapter{Evaluation Protocol}
+\label{ch:evaluation}
+
+\section{Splits and observation views}
+
+The base training split contains 404 executions and 3,003 natural
+decision rows. The original development split contains 75 other
+executions and 555 rows. The first target-aware comparison extends the
+training set to 476 executions and 3,427 natural rows. Permitted
+delivery schedules provide 58,259 natural and delayed views in that
+comparison. The schedules change the events available at a fixed
+request boundary while retaining its label. All views of a given
+execution remain in its split, and a vocabulary fixed from training
+data is used at evaluation.
+
+The first target-aware comparison fitted EVENT GRU, flat history
+attention, THM and REL for 900 updates, using 32 sampled execution
+occurrences per update and the fixed seeds 11, 29 and 47. Their
+reported active model sizes were 48,970, 57,658, 57,658 and 59,962
+parameters, respectively. The target-aware models use the same
+observed parser for this comparison. Later cohorts with benign
+workloads use separate training fits and saved checkpoints.
+For example, the later C-fold comparison uses 603 training
+executions, preprocessing from the 404-run split, and 1,346
+updates of 32 execution occurrences. Its reported scores are compared
+within their own model and data lineage.
+
+\begin{table}[tb]
+\centering
+\caption{Selected evaluation cohorts. Repeated evaluations on the
+same saved executions are grouped in one row.}
+\label{tab:cohorts}
+\begin{tabularx}{\textwidth}{@{}Xrr@{}}
+\toprule
+Condition and use & Executions & Rows \\
+\midrule
+Repeated runs in held target configurations & 64 & 512 \\
+Four targets with unseen names & 64 & 704 \\
+New runs for event-wise history comparison & 111 & 1,163 \\
+New runs for the fixed probability average & 135 & 1,427 \\
+Original action task for receipt-history lookup & 64 & 472 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Metrics and uncertainty}
+
+For seed $s$, let $R$ be the set of eligible executions, with $n_r$
+natural prediction rows in execution $r$. The primary metric is
+negative log likelihood (NLL) with equal weight on each execution,
+\begin{equation}
+  L_s = -\frac{1}{|R|}
+         \sum_{r\in R}\frac{1}{n_r}\sum_{j=1}^{n_r}
+         \log p_s(y_{rj}\mid X_{rj}),
+  \qquad L = \frac{1}{|S|}\sum_{s\in S} L_s .
+  \label{eq:nll}
+\end{equation}
+The seed-specific scores are averaged across the set $S$.
+Top-1 accuracy measures how often the predicted action with
+the highest probability matches the observed label. When reported
+as row accuracy, it gives each natural row equal weight. Accuracy
+can stay constant while NLL changes because the probability
+assigned to the observed label can change without changing the
+highest-scoring action.
+
+For comparisons on repeated configurations, paired resampling keeps
+predictions from the same executions together across systems. The
+specific resampling unit differs by comparison. The initial
+target-aware comparison resamples repeated runs within fixed
+configurations. The later fixed-system comparisons resample
+complete configurations with both repetitions together. A table
+point estimate can include every eligible execution even when a
+reported interval uses only complete configurations. The tables
+identify this distinction. Multiplicity adjustment uses the
+family of contrasts specified for each comparison. Fixed-seed
+intervals characterize the listed checkpoints. The separate
+retraining comparison adds resampling over the new training seeds.
+
+\section{Evidence and comparison scope}
+
+Models were frozen before the new repeats in the fixed-system
+evaluations. The configurations and workloads of those repeats
+come from the same controlled Windows environment. The four-target
+test changes the number and names of objects. It provides a narrower
+generalization test than introducing entirely new attack procedures
+or a different organization. Reused evaluation inputs and post-hoc
+analyses are identified where the results are presented. The
+predictions use the collector's evidence available at each boundary
+under Equation~\ref{eq:receipt}. The experimental record includes
+checks of saved-output alignment, probability normalization and
+execution-level score recomputation for the later studies.

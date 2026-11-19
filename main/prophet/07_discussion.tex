@@ -1,0 +1,80 @@
+\chapter{Discussion}
+\label{ch:discussion}
+
+\section{When target membership helps}
+
+A target-linked representation can preserve which process outcome
+belongs to which object as events from unrelated processes arrive.
+The held-configuration comparison and the correct-versus-exchanged
+membership control support that interpretation. The four-target
+setting provides evidence that the model can exploit the relation
+with unfamiliar target names. The parser still depends on observable
+paths and a reliable START--END association. It can therefore provide
+little extra information on prefixes with no recoverable target.
+
+The timing contract has a separate consequence. Including a result
+because its process has already exited can make the evidence look
+stronger than it would be at a real prediction boundary. Preserving
+the receipt boundary during training and evaluation exposes this
+ambiguity. For an event with a received START and a delayed END,
+the model must use the available prefix. An operational deployment
+would also need a defined trigger for the forecast. The instrumented
+source request supplies the trigger in these experiments.
+
+\section{Interpreting improvements under benign activity}
+
+The effect of benign interleaving varies across workload families.
+In the B+C repeats, the within-architecture control supports
+using the history state available at each event. In A+C, the
+fixed two-model average reduced NLL on newly collected repetitions
+under the specified training seeds. On the same runs, the wider
+single-history and BiTA-inspired controls narrowed this difference
+when all models were retrained. The comparisons therefore suggest
+separate conclusions about a useful fixed predictor and the
+repeatability of the architectural advantage.
+
+A practical system would also account for inference cost.
+For the fixed A+C system, the reported CPU measurement for a
+batch of 32 prepared rows was a median of 9.32 milliseconds for the
+baseline and 30.91 milliseconds for the two-model combination.
+Those timings concern batched inference in the measured environment.
+The operational cost would also include log receipt, preprocessing
+and model loading where applicable.
+
+\section{Threats to validity}
+
+\textbf{Population.}
+The study uses controlled Windows executions of known source
+procedures and specified benign workloads. Separate repetitions
+reduce sensitivity to one recording, while unfamiliar paths and
+target counts change particular aspects of the input. Transfer to
+unseen procedures, hosts in other organizations, and arbitrary
+benign work remains an empirical question.
+
+\textbf{Evidence availability.}
+Command-line visibility and reliable process-event linkage depend
+on the auditing setup and the received data. The application-specific
+exit status is evidence about the corresponding process. The
+source-designated label describes the executed behavior, whose
+category can remain ambiguous from indirect audit evidence.
+Windows logs may also carry sensitive command arguments in
+deployment~\cite{ms4688}, making handling and retention of the
+input a consideration.
+
+\textbf{Repeated selection.}
+Several model decisions were made during iterative development.
+Separately marked frozen evaluations estimate performance on new
+runs from known conditions. Post-hoc comparisons reuse some of
+these same runs. The reported intervals describe the sampled
+repetitions, configurations or training seeds stated with each
+comparison. The uncertainty introduced by iterative model
+selection requires an additional holdout to estimate.
+
+\textbf{Verification.}
+The quantitative tables are drawn from completed experiment reports.
+Those reports describe saved-prediction checks and, for the later
+evaluations, exact matching of the baseline output on target-free
+prefixes. Independent replication from event manifests and checkpoints
+remains open. A future field evaluation should specify the trigger
+policy, define its label acquisition procedure, and retain the
+receipt-time evidence contract.

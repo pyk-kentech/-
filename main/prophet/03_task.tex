@@ -1,0 +1,107 @@
+\chapter{Prediction Task and Data}
+\label{ch:task}
+
+\section{An execution and a prediction row}
+
+An execution is one run of a source procedure on the instrumented
+Windows host. At a source request, the collection records a decision
+boundary $t$. The corresponding prediction row consists of the
+received evidence at $t$ and the category of the next requested
+meaningful action that begins execution. The label is checked against
+its native process creation record. The corresponding termination
+record supports verification when the label is constructed after the
+run. Several boundaries are collected within one execution, so the
+number of rows differs from the number of independent runs.
+
+The 18-action vocabulary covers host, directory-service and network
+enumeration, registry queries, and operations on synthetic files.
+Appendix~\ref{app:actions} lists the categories. A process start or
+termination is an observation. The prediction label identifies the
+operation associated with the source request. The collector may
+receive many other observations between two labeled actions.
+
+\section{Receipt-bounded evidence}
+
+Let $r(e)$ denote the collector's receipt time for an event $e$,
+and $\prec_r$ its order in the received stream. The input at boundary
+$t$ is
+\begin{equation}
+  X_t = \operatorname{sort}_{\prec_r}\bigl\{e : r(e) < t\bigr\}.
+  \label{eq:receipt}
+\end{equation}
+All admitted events precede the boundary strictly. When a receipt
+unit contains multiple events, it is admitted as a unit. In the
+event-wise models, the recurrent encoder then advances once
+for each event in its admitted input. This separates the
+collector's unit of availability from the model's unit of computation.
+
+Windows Security event 4688 records process creation. With command-line
+auditing enabled, it can include the command line~\cite{ms4688}. Event 4689
+records termination and includes an application-specific exit status~\cite{ms4689}. A received START may be represented before
+its END arrives. At such a boundary the result remains unobserved.
+Process and record identifiers support linking and audit. The
+predictor uses observed fields such as the executable, available
+command content, receipt order, elapsed time and received exit
+status. Source action and target annotations are reserved for labeling
+and audit, and benign-worker identity is excluded from inference
+input.
+
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  event/.style={circle,inner sep=1.8pt,fill=blue!60!black},
+  later/.style={circle,inner sep=1.8pt,fill=black!55},
+  txt/.style={font=\footnotesize,align=center}]
+  \fill[blue!5,rounded corners=2pt] (0.5,0.75) rectangle (7.35,1.65);
+  \draw[->,black!64] (0.5,2.8) -- (12.1,2.8);
+  \draw[->,black!64] (0.5,1.2) -- (12.1,1.2);
+  \node[txt,anchor=west] at (0.5,3.6) {Windows event time};
+  \node[txt,anchor=west] at (0.5,0.45) {Collector receipt time};
+  \draw[thick,orange!75!black,dashed] (7.45,0.85) -- (7.45,3.65);
+  \node[txt,text=orange!70!black] at (7.45,3.87) {Prediction boundary};
+  \draw[->,blue!44!black!45] (2.15,2.74) -- (3.05,1.25);
+  \draw[->,blue!44!black!45] (4.05,2.74) -- (5.0,1.25);
+  \draw[->,black!48] (6.12,2.74) -- (8.78,1.25);
+  \node[event,label={[txt]above:{A starts}}] at (2.15,2.8) {};
+  \node[event,label={[txt]above:{B starts}}] at (4.05,2.8) {};
+  \node[later,label={[txt]above:{A exits}}] at (6.12,2.8) {};
+  \node[later,label={[txt]above:{Next labeled\\action starts}}] at (10.62,2.8) {};
+  \node[event,label={[txt]below:{A START}}] at (3.05,1.2) {};
+  \node[event,label={[txt]below:{B START}}] at (5.0,1.2) {};
+  \node[later,label={[txt]below:{A END}}] at (8.78,1.2) {};
+  \node[txt,anchor=east,text=blue!60!black] at (7.14,0.45) {Admitted prefix};
+  \node[txt,anchor=west,text=black!65] at (8.12,0.45) {Received after boundary};
+\end{tikzpicture}
+\caption{A schematic prediction boundary. A and B denote two observed
+processes. The predictor receives both START records before the
+boundary. The END of A arrives afterward even though A has already
+exited. The next source-designated action supplies the evaluation label.}
+\label{fig:cutoff}
+\end{figure}
+
+Figure~\ref{fig:cutoff} shows why availability cannot be reconstructed
+from occurrence time alone. A later receipt can change a later forecast.
+It leaves the earlier evidence prefix intact. A prefix may also have no
+observed event associated with a usable file target, in which case the
+predictor still returns 18 probabilities.
+
+\section{Target identity and benign work}
+
+For target-aware conditions, the adapter recovers target identities
+from observed command paths. The same canonical target can appear in
+several processes. Where a received END has a unique compatible
+START, the END inherits the observed target relation of that START.
+Ambiguous and orphaned records remain in the event stream with
+unassigned target membership. Source and destination are represented
+as distinct roles for an observed copy operation. The group plan is
+rebuilt for each receipt boundary.
+
+Evaluation includes runs in which benign tasks run concurrently with
+the source procedure. The three workload families are denoted
+A, B and C. A comprises routine file searches and process or service
+queries, B comprises file listing and hashing work, and C comprises
+service or network state queries. In joint workloads such as B+C the
+same input stream contains both benign workloads and the source
+activity. C-only denotes the added workload type and still includes
+the source actions. Flat and nested layouts distinguish file-target
+path structures so the two conditions can be reported separately.

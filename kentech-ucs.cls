@@ -75,16 +75,22 @@
 %% 추가 패키지 설정
 \RequirePackage{ifthen}       
 
-%%%% Hangul-ucs preamble.......
-\RequirePackage[nonfrench]{dhucs}
+%%%% Korean typesetting and graphics driver
+\RequirePackage{iftex}
 \RequirePackage{ifpdf}
-\ifpdf
-\def\@drivername{pdftex}
+\ifXeTeX
+  \RequirePackage{xetexko}
+  \def\@drivername{xetex}
 \else
-\def\@drivername{dvipdfmx}
-\fi
-\if@dvips
-\def\@drivername{dvips}
+  \RequirePackage[nonfrench]{dhucs}
+  \ifpdf
+    \def\@drivername{pdftex}
+  \else
+    \def\@drivername{dvipdfmx}
+  \fi
+  \if@dvips
+    \def\@drivername{dvips}
+  \fi
 \fi
 
 \RequirePackage[\@drivername]{graphicx,xcolor}
@@ -103,8 +109,8 @@
 \definecolor{darkyellow}{cmyk}{0,0,0.75,0}
 
 \if@PDFdoc
-    \RequirePackage[unicode,%
-    \@drivername=true,%
+    \RequirePackage[final,unicode,%
+    \@drivername,%
     bookmarks=true,%
     colorlinks=true,%
     linkcolor=black,      %black
@@ -115,8 +121,8 @@
     urlcolor=darkcyan,          %cyan
     ]{hyperref}
 \else
-    \RequirePackage[unicode,%
-    \@drivername=true,%
+    \RequirePackage[final,unicode,%
+    \@drivername,%
     bookmarks=false,%
     colorlinks=false,%
     colorlinks=true,    %remove square
@@ -135,14 +141,14 @@
 \DeclareTextFontCommand{\textgt}{\gt}
 %%%% end of Hangul-ucs preamble
 
-\AtBeginDocument{%                     % \begin{document}와 함께 실행
-	\checkparameters                   % 문서 변수가 올바른지 점검
-	\if@isFinal                        % final 옵션이 지정되어 있으면
-	\makefrontcover                    % 앞표지, 속표지 생성
-    \makeapproval                      % 제출승인서, 심사완료검인 생성
-	% \else \fi 
+\AtBeginDocument{%
+    \if@isFinal
+        \checkparameters
+        \makefrontcover
+        \makeapproval
+    \fi
     \renewcommand\thesection{\thechapter-\arabic{section}}%
-    }
+}
 \AtEndDocument{}                       % \end{document}와 함께 실행
 
 %% 편집용지 설정
@@ -570,8 +576,8 @@
 \newcommand{\@lastRomanPage}{\pageref{paperlastromanpagelabel}} % 총 로마자 페이지 수 계산용
 
 
-\renewcommand{\baselinestretch}{1.0}
 \renewenvironment{abstract}{%
+  \linespread{1.0}
   \clearpage
   \pagenumbering{roman}
   \setcounter{page}{1}
@@ -595,8 +601,8 @@
   \textbf{Keywords:}%
 }{}
 
-\renewcommand{\baselinestretch}{2.5}
 \newenvironment{korabstract}{%
+  \linespread{1.0}
     \clearpage
     \thispagestyle{plain}
     \vspace*{32pt}
@@ -624,10 +630,12 @@
 %%
 %% 목차 일괄 생성
 %%
-\newcommand{\makecontents}{                      % TOC, LOT, LOF 생성
-	\setcounter{pagemarker}{\value{page}}        % 마지막 페이지 번호를 저장
-	\pagenumbering{roman}                        % 로마자 페이지 시작
-	\tableofcontents
+\newcommand{\makecontents}{%
+    \clearpage
+    \setcounter{pagemarker}{\value{page}}%
+    \pagenumbering{roman}%
+    \setcounter{page}{\value{pagemarker}}%
+    \tableofcontents
     \listoftables
 	\listoffigures
 }
@@ -1035,12 +1043,13 @@
 		%%
 		
 		\newcommand{\l@content}{\large\bf\@dottedtocline{1}{0em}{0em}}
+        \providecommand*{\toclevel@content}{0}
 		\renewcommand{\@dotsep}{0.0}  
         \renewcommand*\l@chapter[2]{%
             \ifnum \c@tocdepth >\m@ne
             \addpenalty{-\@highpenalty}%
             \vskip 1.0em \@plus\p@
-            \setlength\@tempdima{1.6em}
+            \setlength\@tempdima{2.6em}
             \begingroup
             \parindent \z@ \rightskip \@pnumwidth
             \parfillskip -\@pnumwidth

@@ -1,0 +1,135 @@
+\chapter{Prediction Models}
+\label{ch:method}
+
+\section{Receipt-order predictor}
+
+The event encoder maps each admitted START or END to a vector $e_i$.
+A gated recurrent unit (GRU)~\cite{cho2014gru} processes the resulting
+sequence in receipt order. For the event-wise checkpoints used in
+the later comparisons, its state advances as
+\begin{equation}
+  h_i = \operatorname{GRU}(e_i,h_{i-1}),
+  \qquad z_{\mathrm{event}} = f(h_T).
+  \label{eq:eventgru}
+\end{equation}
+Here $T$ is the number of admitted events and $f$ outputs 18 action
+scores. The softmax of these scores is the event-only distribution.
+A zero-initialized history handles a boundary with an empty prefix.
+The flat history attention comparator adds a history-conditioned
+readout over the received events with a common pool.
+
+\section{Target history and relation attention}
+
+Let $I_g$ be the index set of received events assigned to observed
+target $g$. The target history model (THM) computes a mean slot for
+each nonempty target group,
+\begin{equation}
+  m_g = |I_g|^{-1}\!\sum_{i \in I_g} e_i .
+\end{equation}
+The final event-history state queries these slots and the readout
+contributes a correction to the event prediction. The relation
+attention model (REL) first lets events associated with the same
+target attend to each other. A history query then reads the
+relation-enriched events. At the level of the output head, the
+original residual models can be written as
+\begin{equation}
+  z(X_t) = z_{\mathrm{event}}(X_t) + \Delta z(X_t,\{I_g\}),
+  \qquad p(y\mid X_t) = \operatorname{softmax}(z(X_t))_y .
+  \label{eq:relation}
+\end{equation}
+The relation path in these models uses observed membership, roles and
+timing. An input without usable target evidence follows the event-only
+path. Figure~\ref{fig:model} shows how identical audit evidence feeds
+both the ordered history and the target readout. The equations isolate
+the difference in aggregation and omit implementation-specific
+projection layers.
+
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}[>=Stealth,font=\small,
+  box/.style={draw=black!55,rounded corners=2pt,align=center,inner sep=5pt,
+    minimum width=3.1cm,minimum height=0.9cm},
+  resultbox/.style={box,fill=black!4,minimum width=2cm},
+  bluepath/.style={->,semithick,draw=blue!57!black},
+  greenpath/.style={->,semithick,draw=teal!70!black}]
+  \node[box,fill=black!4] (input) at (0,0) {Received events\\before cutoff};
+  \node[box,fill=blue!5] (history) at (4,0.9) {Receipt order\\Event GRU};
+  \node[box,fill=teal!7] (rel) at (4,-0.9) {Observed target groups\\Relation readout};
+  \node[draw,circle,fill=black!4,inner sep=3pt] (plus) at (8.25,0) {$+$};
+  \node[resultbox] (pred) at (10.55,0) {Softmax\\18 probabilities};
+  \draw[bluepath] (input.east) -- ++(0.44,0) |- (history.west);
+  \draw[greenpath] (input.east) -- ++(0.44,0) |- (rel.west);
+  \draw[bluepath] (history.east) -| node[pos=.32,above] {Base scores} (plus.north);
+  \draw[greenpath] (rel.east) -| node[pos=.32,below] {Correction} (plus.south);
+  \draw[->,dashed,black!60] (history.south) -- node[midway,right,font=\scriptsize]
+    {History query} (rel.north);
+  \draw[->,semithick] (plus.east) -- (pred.west);
+\end{tikzpicture}
+\caption{Target-aware prediction in the residual models. The
+receipt-order history supplies the base scores and a query for the
+target-linked evidence. The readout supplies an action-score correction.}
+\label{fig:model}
+\end{figure}
+
+\section{History exposure at each event}
+
+Under interleaved benign activity, the final history vector summarizes
+evidence from every admitted event. An older target-linked event can
+carry a different context from the boundary's final state. The
+Local History variant attaches the history state $h_i$ to the
+relation-enriched representation of event $i$ before pooling. The
+Final History control attaches the same final state $h_T$ to
+each event. Both choices use the same input prefix and readout
+structure. Replacing $h_i$ by $h_T$ changes both the states exposed to
+the readout and the paths through which the recurrent encoder
+receives training gradients. The comparison therefore tests these
+two complete placements of history, with the same model capacity.
+
+\section{Target-conditioned probability average}
+
+A later comparison uses a single-history reference model $p_{\mathrm{base}}$
+and a separately trained model $p_{\mathrm{dual}}$ with two independent
+64-dimensional recurrent states. The two recurrent cells in the
+Full Step model each receive the event history and update once
+per admitted event using their standard GRU updates. The model is
+trained with the action objective and the two states feed its
+relation and output pathways. They do not have assigned attacker and
+benign roles.
+
+For each seed, the fixed combination averages the separately trained
+probabilities on a prefix with at least one observed target.
+\begin{equation}
+  p_{\mathrm{mix}}(\cdot\mid X_t)=
+  \begin{cases}
+    \tfrac12 p_{\mathrm{base}}(\cdot\mid X_t)
+      + \tfrac12 p_{\mathrm{dual}}(\cdot\mid X_t), & G(X_t)\ne\varnothing,\\
+    p_{\mathrm{base}}(\cdot\mid X_t), & G(X_t)=\varnothing,
+  \end{cases}
+  \label{eq:mixture}
+\end{equation}
+where $G(X_t)$ is the set of observed target groups. The fallback copies
+the full baseline distribution on a target-free prefix. The paired
+controls use the same rule with a single wider recurrent model, a
+BiTA-inspired aggregator, or an independently trained instance of the
+baseline. The fixed average provides a test of the complete predictor.
+The same-model-count controls are needed to assess the contribution
+of the two-memory architecture.
+
+\section{Observed-history frequency baseline}
+
+For target-poor inputs, a non-neural baseline summarizes the received
+START order for records with an observed action hint and indicates
+whether the latest such START has a uniquely linked received END.
+The key uses the hints derived from observed commands. Each training
+execution contributes one vote per key, with its own labeled
+occurrences averaged before voting. If $C_k$ is the resulting count
+vector, $n_k$ the number of training executions supporting key $k$,
+and $\pi$ the training action prior, then
+\begin{equation}
+  q_k = \frac{C_k+\pi}{n_k+1}.
+  \label{eq:table}
+\end{equation}
+An unseen key returns $\pi$. In the probability-mixing comparison
+on target-free inputs, the same small fixed weight is used for
+either $q_k$ or $\pi$. This controls for the effect of injecting
+additional probability mass independently of the key.

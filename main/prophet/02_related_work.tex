@@ -1,0 +1,55 @@
+\chapter{Related Work}
+\label{ch:related}
+
+\section{Security sequence forecasting}
+
+Tiresias applies recurrent models to the prediction of the next
+security event on a machine from previously observed intrusion
+prevention events~\cite{shen2018tiresias}. It establishes recurrent
+sequence forecasting as a natural comparison for security prediction.
+In this thesis the target is the semantic category assigned to an
+actual execution step, with the observed Windows event prefix serving
+as evidence. A single such action may produce multiple audit records,
+and a benign process may generate the next observed record while the
+attacker's next action still lies ahead.
+
+DeepCASE uses a sequence model to build context for the analysis of
+security events~\cite{vanede2022deepcase}. Its combination of
+recurrent sequence context and attention motivates a flat history
+readout. The comparison in this work asks whether knowledge of
+\emph{which observed events refer to the same target} improves a
+forecast over reading the event history as one pool.
+
+\section{Attack knowledge and provenance}
+
+CL-AP$^{2}$ represents attack context with a temporal attack knowledge
+graph and derives a next attack technique from an attack
+portrait~\cite{liu2024clap2}. Its prediction target is a technique
+under the attack portrayal pipeline. PROPHET constructs relations
+from the audit evidence available for each individual prediction
+boundary. The grouped evidence is used directly by an 18-way
+classifier.
+
+ORTHRUS addresses provenance-based intrusion detection and attribution
+at the node level~\cite{jiang2025orthrus}. Its graph encoder offers a
+reference for modeling interactions between system events. The
+provenance-inspired comparison in this thesis uses the same
+receipt-bounded Windows input as the other predictors and an
+action-level output head. Its results concern this task adaptation.
+
+\section{Target-wise temporal aggregation}
+
+BiTA combines bidirectional recurrent aggregation and a Transformer
+within a temporal graph network for network alert
+prediction~\cite{nayeri2026bita}. A task adaptation uses the
+aggregator's within-group and between-group pattern over received
+target histories. Bidirectional aggregation is confined to the
+already received prefix. This provides a comparison that also has
+access to target grouping and can combine information across targets.
+
+Together, these studies motivate controls at three levels. A plain
+sequence baseline establishes what is learned from the same event
+prefix alone. A flat attention model checks whether a more flexible
+history readout suffices. Target-aware and prior-inspired alternatives
+show how the results change when a competitor is given the same
+observed relationships.

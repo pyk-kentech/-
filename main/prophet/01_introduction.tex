@@ -1,0 +1,59 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+During a multi-stage incident, an analyst may need to decide which
+activity to investigate before the next attacker action is visible. A
+forecast can prioritize this investigation by assigning probabilities
+to plausible follow-up actions. It is important that the forecast
+reflect the evidence that could actually have reached the analyst or
+detector. Audit records carry an occurrence time, while their availability
+to a predictor depends on when the collector receives them.
+
+Consider a sequence of file-related activities involving two targets.
+A termination record for one process may arrive after another process
+starts. Benign activity on the host may add further start and termination
+records in between. A model that treats the most recent exit code as the
+result relevant to every subsequent decision can confuse the two
+targets. A model that reconstructs a past prefix using all audit
+records by occurrence time can also inadvertently give the predictor
+information that the collector had yet to receive.
+
+This thesis studies \textbf{next actual attacker action prediction}
+from Windows audit logs. The label is the semantic category of the
+first source-designated attacker action that actually starts after
+the prediction boundary. The output is a distribution over 18 action
+categories. An execution can provide several prediction rows, each
+with its own evidence prefix and label. The task is evaluated at known
+decision boundaries in a controlled environment. Inferring those
+boundaries in an operational deployment is a separate problem.
+
+PROPHET represents the evidence at each boundary in two complementary
+forms. A gated recurrent unit summarizes the events in receipt order.
+A target adapter connects observed events through process identity and
+observed target membership. These links allow the predictor to use
+the result of an operation on the relevant target even when unrelated
+events intervene. A target-free path produces a prediction when the
+observed prefix supplies no usable target relation.
+
+The evaluation addresses three questions.
+\begin{enumerate}
+  \item How much does observed target membership improve prediction
+    relative to sequence-only and flat-attention predictors in held
+    configurations and executions with unseen target names?
+  \item How do target-aware predictors behave when benign work is
+    interleaved, and how much of an observed gain persists across
+    workloads, matched baselines, and training seeds?
+  \item How informative is a simple observed-history frequency table
+    on target-poor prefixes, and how does the answer depend on the
+    support of its lookup keys?
+\end{enumerate}
+
+The contributions are a receipt-bounded task definition with execution-level
+evaluation, a study of target-linked forecasting with direct controls on
+membership and history exposure, and a characterization of the limits of
+these gains under benign interleaving and sparse target evidence.
+Chapter~\ref{ch:related} situates the task in security prediction and
+provenance analysis. Chapters~\ref{ch:task} and~\ref{ch:method} define
+the inputs and model comparisons. Chapters~\ref{ch:evaluation}
+and~\ref{ch:results} provide the evaluation protocol and results.
+Chapter~\ref{ch:discussion} describes their interpretation and scope.

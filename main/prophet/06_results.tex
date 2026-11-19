@@ -1,0 +1,195 @@
+\chapter{Results}
+\label{ch:results}
+
+\section{Observed target relations}
+
+Table~\ref{tab:relations} compares four fixed models on 64 additional
+executions of 16 held configurations. REL has the lowest loss and the
+highest row accuracy in this comparison. THM also performs better
+than either relation-free model. THM's NLL difference from EVENT GRU
+was $-0.149750$ with a Bonferroni-adjusted 97.5\% interval of
+$[-0.156307,-0.143693]$. Its difference from flat history attention
+was $-0.174032$ with an interval of $[-0.180327,-0.166922]$.
+These two intervals are for THM. The comparison of REL with THM
+in the table is descriptive. The resampling design draws repetitions
+within the same configurations, so its uncertainty concerns repeated
+runs under those configurations.
+
+\begin{table}[tb]
+\centering
+\caption{Target-aware prediction on 64 new executions and 512 rows from
+16 previously evaluated held configurations. NLL is execution-weighted
+and accuracy is measured per row. The table averages three seed scores.}
+\label{tab:relations}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Predictor & NLL & Top-1 accuracy \\
+\midrule
+EVENT GRU & 0.217124 & 89.06\% \\
+Flat history attention & 0.241406 & 87.76\% \\
+Target history model (THM) & 0.067375 & 97.27\% \\
+Relation attention (REL) & \textbf{0.045797} & \textbf{97.98\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the separate 64-execution, 704-row evaluation with four targets
+and unseen target names, REL scored 0.066618, compared with 0.402682
+for EVENT GRU. Training used two- and three-target configurations.
+This comparison tests transfer to more targets and new names within
+the same task family.
+
+A membership intervention tests whether the benefit can come from
+the group layout alone. THM was trained with either observed
+memberships or exchanged memberships that preserve the number and
+sizes of the groups. START and its linked END were moved together.
+On 16 development executions, correct and exchanged memberships
+produced losses of 0.035109 and 0.120010. On a separate set of
+127 previously viewed executions, the two losses were 0.058365 and
+0.086855. The corresponding paired 95\% intervals for correct minus
+exchanged membership were $[-0.166172,-0.024583]$ and
+$[-0.052213,-0.002666]$. Exchanging membership can contradict a
+visible path. This intervention provides evidence for the value of
+the observed membership under that corruption.
+
+\section{Event-wise history under benign interleaving}
+
+In a separate collection of 111 eligible executions and 1,163 rows,
+the most consistent advantage of Local History over the
+same-capacity Final History control occurred when B and C
+ran concurrently. Table~\ref{tab:local} reports both training folds.
+The adjusted intervals for local minus final NLL were
+$[-0.364155,-0.152826]$ in the B-fold and
+$[-0.494571,-0.210046]$ in the C-fold. These are Bonferroni-adjusted
+99.375\% intervals over eight contrasts. With only C running in the
+C-fold, the final-state comparator performed better. This reversal
+establishes the importance of reporting the benign workload and
+the training fold with each score.
+
+\begin{table}[tb]
+\centering
+\caption{Event-wise and final-state history exposure on selected
+conditions of the 111-execution collection. B+C has 32 executions and
+352 rows, and C-only has 32 executions and 352 rows. Both folds use
+the same evaluation executions for a given condition.}
+\label{tab:local}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Benign workload & Training fold & Local history & Final history & Event-only \\
+\midrule
+B+C & B & \textbf{0.155520} & 0.409578 & 0.5101 \\
+B+C & C & \textbf{0.061857} & 0.409930 & 0.6728 \\
+C-only & C & 0.328044 & \textbf{0.136957} & 1.2040 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A further collection of 110 eligible executions compared local history
+with task adaptations of three prior architectures. In the C-fold
+B+C condition, the NLLs were 0.071534 for the local model,
+0.079912 for BiTA, 0.193812 for ORTHRUS, and 1.051944 for CL-AP$^2$.
+The adjusted interval for the local versus BiTA difference
+included zero. In the C-only C-fold condition, the BiTA adaptation
+scored 0.125017 against 0.280621 for local history. The adjusted interval
+for BiTA minus local history was $[-0.247739,-0.073143]$.
+These comparisons concern prediction-stage adaptations with this
+thesis's input and label contract.
+
+\section{Fixed probability combination and training-seed repeat}
+
+For the probability combination in Equation~\ref{eq:mixture}, 144
+executions were attempted and 135 were eligible, yielding 1,427
+natural rows. The models and mixing rule were frozen before
+collection. Table~\ref{tab:mix} compares them on the same
+eligible inputs. The five seeds were 53, 67, 79, 97 and 113.
+All rows in the two A+C layouts had observed targets, so
+conditional mixing and an unconditional half-average produced the
+same predictions in those layouts. The improvement there reflects
+the system that combines the two predictions.
+
+\begin{table}[tb]
+\centering
+\caption{Fixed probability combination on newly collected runs from the
+same laboratory. All values are execution-weighted NLL. Rows with no
+usable target receive the baseline distribution.}
+\label{tab:mix}
+\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+\toprule
+Condition & Runs / rows & Baseline & Full Step & Conditional average \\
+\midrule
+A+C, flat & 31 / 341 & 0.135230 & 0.107396 & \textbf{0.080156} \\
+A+C, nested & 29 / 319 & 0.160900 & \textbf{0.075783} & 0.077815 \\
+C-only & 27 / 297 & \textbf{0.060420} & 0.091372 & 0.062979 \\
+B+C & 32 / 352 & 0.052914 & 0.059751 & \textbf{0.039371} \\
+Original 18-action task & 16 / 118 & 0.645963 & 0.668895 & \textbf{0.640501} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+For the full eligible set, the average's loss differences versus the
+baseline were $-0.055074$ in the flat A+C layout and $-0.083086$ in the
+nested layout. In paired bootstrap estimates using complete
+configurations, the Bonferroni-adjusted 97.5\% intervals were
+$[-0.092701,-0.027024]$ and $[-0.145118,-0.038204]$,
+respectively. The intervals used 30 flat and 26 nested runs from
+configurations with both repetitions. The system improved in
+four of five seeds on each A+C layout. The conditional rule
+retained the baseline distribution on all 96 target-free rows of
+the original-task subset. C-only shows the trade-off of the rule:
+the conditional average scored 0.062979, compared with 0.060420
+for the baseline and 0.054544 for the unconditional average.
+
+A matched retraining comparison fitted all models from scratch with
+five new seeds (127, 149, 163, 181 and 199) and reused the same 135
+evaluation executions. Table~\ref{tab:matched} shows the resulting
+A+C scores. The dual-history average reduced NLL versus its own
+baseline in both layouts. Relative to the wider single-history
+and BiTA combinations, all four adjusted 98.75\% intervals included
+zero. The separate, post-hoc comparison against an average of two
+independent baseline checkpoints also yielded intervals that
+included zero in both layouts. These results support gains from a
+fixed combination on particular workloads and place limits on what
+can be attributed to the two-memory structure.
+
+\begin{table}[tb]
+\centering
+\caption{A+C comparison after training with five new seeds. All
+combinations apply the same target-conditioned 50:50 average and share
+the same baseline within each seed. The evaluation executions are
+reused from Table~\ref{tab:mix}.}
+\label{tab:matched}
+\begin{tabularx}{\textwidth}{@{}Xrr@{}}
+\toprule
+Predictor & A+C, flat & A+C, nested \\
+\midrule
+Single baseline & 0.192507 & 0.176440 \\
+Baseline + two histories & 0.123421 & \textbf{0.108952} \\
+Baseline + wider single history & \textbf{0.120299} & 0.113041 \\
+Baseline + BiTA-inspired aggregator & 0.124414 & 0.129035 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Observed-history support on target-poor prefixes}
+
+The frequency table in Equation~\ref{eq:table} was constructed
+from 603 training executions and 4,824 natural rows. For the
+64-execution, 472-row original-action cohort, the stand-alone
+table scored 0.495788, versus 2.843204 for the training prior alone.
+For 386 target-free rows in this cohort, mixing the table into
+a frozen model yielded 0.313385 overall, compared with 0.317622
+for the same mixture using the training prior. The adjusted
+98.75\% interval for the difference between the mixtures was
+$[-0.026307,0.021147]$. The table thus provides a useful simple
+forecast in this cohort, with uncertain additional value once
+the learned model and prior mixing are available.
+
+The same key definition was also checked on the 660 natural rows
+across the two A+C layouts in Table~\ref{tab:mix}. None had an
+exact key supported in training, so the table returned the same
+training prior on every row. Preserving unclassified START
+records in the key yielded the same fallback pattern. A coarser
+stage key found support on 161 of 341 flat rows and 148 of 319
+nested rows. It scored 1.181161 and 1.268327, respectively.
+These observations show the cost of sparse lookup support when
+benign activity changes the sequence of received events.
