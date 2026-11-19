@@ -35,25 +35,23 @@ the result of an operation on the relevant target even when unrelated
 events intervene. A target-free path produces a prediction when the
 observed prefix supplies no usable target relation.
 
-The evaluation addresses three questions.
-\begin{enumerate}
-  \item How much does observed target membership improve prediction
-    relative to sequence-only and flat-attention predictors in held
-    configurations and executions with unseen target names?
-  \item How do target-aware predictors behave when benign work is
-    interleaved, and how much of an observed gain persists across
-    workloads, matched baselines, and training seeds?
-  \item How informative is a simple observed-history frequency table
-    on target-poor prefixes, and how does the answer depend on the
-    support of its lookup keys?
-\end{enumerate}
+The main question is whether linking events to the correct target
+improves the forecast. On 64 new runs of previously evaluated
+configurations, relation attention reduced execution-weighted negative
+log likelihood (NLL) from 0.2171 to 0.0458 compared with a sequence-only
+GRU. In a separate comparison, the target history model used the same
+events and the same group sizes while event membership was exchanged.
+On 127 previously examined executions, this exchange increased NLL
+from 0.0584 to 0.0869. The first result measures the gain of the
+target-aware predictor as a whole. The second tests whether correct
+membership contributes to that gain in the target history model.
 
-The contributions are a receipt-bounded task definition with execution-level
-evaluation, a study of target-linked forecasting with direct controls on
-membership and history exposure, and a characterization of the limits of
-these gains under benign interleaving and sparse target evidence.
-Chapter~\ref{ch:related} situates the task in security prediction and
-provenance analysis. Chapters~\ref{ch:task} and~\ref{ch:method} define
-the inputs and model comparisons. Chapters~\ref{ch:evaluation}
-and~\ref{ch:results} provide the evaluation protocol and results.
-Chapter~\ref{ch:discussion} describes their interpretation and scope.
+The thesis defines an evaluation in which every forecast uses records
+already received at its decision boundary. It tests observed target
+membership against sequence and grouping controls, including new
+executions with unfamiliar target names. It then tests how to present
+recurrent history to the readout when benign activity is interleaved.
+Chapter~\ref{ch:task} follows a recorded prediction to show what
+the target links carry. Chapter~\ref{ch:method} defines the models,
+and Chapters~\ref{ch:evaluation} and~\ref{ch:results} report the
+comparisons and the conditions under which the gains hold.

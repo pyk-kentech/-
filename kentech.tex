@@ -14,11 +14,25 @@
 \title[eng-full]{Predicting the Next Attacker Action from Windows Audit Logs}
 \title[kor]{윈도우 감사 로그를 이용한 공격자의 다음 행동 예측}
 \department{BA}
-\hypersetup{pdftitle={Predicting the Next Attacker Action from Windows Audit Logs}}
+\author[korean]{박}{윤근}
+\author[english]{Park}{Isaac Yoonkeun}
+% Edit these fields once the graduation year and committee are confirmed.
+\gradyear{[Graduation year]}
+\referee[1]{[Name pending]}
+\referee[2]{[Name pending]}
+\hypersetup{
+  pdftitle={Predicting the Next Attacker Action from Windows Audit Logs},
+  pdfauthor={Isaac Yoonkeun Park}
+}
 
-% In final mode, supply the author, advisor, examiners, and approval dates
-% through the metadata commands in the KENTECH template.
+% Before submission, supply \advisor and \refereedate, replace the
+% placeholder fields above, select final mode, and remove the manual
+% front-matter calls (the class makes them automatically in final mode).
 \begin{document}
+\hypersetup{pageanchor=false}
+\makefrontcover
+\makeapproval
+\hypersetup{pageanchor=true}
 \input{main/00_abstract}
 \makecontents
 
@@ -36,5 +50,6 @@
 
 \appendix
 \input{main/prophet/a_actions}
+\input{main/prophet/b_supplemental_results}
 \label{paperlastpagelabel}
 \end{document}

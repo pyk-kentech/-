@@ -458,7 +458,11 @@
 
         % Degree statement
         \fontsize{16pt}{16pt}\selectfont
-        Accepted in partial fulfillment of the requirements for the \\
+        \if@isFinal
+            Accepted in partial fulfillment of the requirements for the \\
+        \else
+            Submitted in partial fulfillment of the requirements for the \\
+        \fi
         degree of
         \if@isPhD
             Doctor of Philosophy
@@ -472,7 +476,9 @@
         \vspace*{1.5cm}
 
         % Date
-        \fontsize{14pt}{14pt}\selectfont \@dateUSenglish{\@refereeYear}{\@refereeMonth}{\@refereeDay} \\
+        \fontsize{14pt}{14pt}\selectfont
+        \@ifundefined{@refereeYear}{[Examination date]}{%
+            \@dateUSenglish{\@refereeYear}{\@refereeMonth}{\@refereeDay}} \\
         \vspace*{4cm}
 
         % Committee table
@@ -590,8 +596,8 @@
   \vspace{16pt}
   \setlength{\parindent}{2em}  % 들여쓰기
   \setlength{\parskip}{0pt}    % 문단 간 간격 없음
-  \fontsize{11pt}{11pt}\selectfont  % 줄간격 2줄
-}{\vspace*{66pt}}
+  \fontsize{11pt}{14.3pt}\selectfont % 11pt at 130% leading
+}{\par\vspace*{66pt}}
 
 % Keywords 환경
 \newenvironment{Engkeyword}{%
@@ -615,8 +621,8 @@
     \vspace{16pt}
     \setlength{\parindent}{2em}  % 들여쓰기
     \setlength{\parskip}{0pt}    % 문단 간 간격 없음
-    \fontsize{11pt}{22pt}\selectfont  % 줄간격 2줄
-}{\vspace*{66pt}}
+    \fontsize{11pt}{14.3pt}\selectfont % 11pt at 130% leading
+}{\par\vspace*{66pt}}
 
 
 %% Keywords 환경

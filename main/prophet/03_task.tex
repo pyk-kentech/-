@@ -105,3 +105,45 @@ same input stream contains both benign workloads and the source
 activity. C-only denotes the added workload type and still includes
 the source actions. Flat and nested layouts distinguish file-target
 path structures so the two conditions can be reported separately.
+
+\section{A recorded file-processing decision}
+\label{sec:recorded-case}
+
+Table~\ref{tab:recorded-case} shows part of the received prefix
+for execution \texttt{THME0064}, before its first file-processing
+decision (\texttt{SEQ\_5}). The path names distinguish three
+synthetic targets. The marker concerns \texttt{alpha}, whose earlier
+payload search returned a nonzero exit status. The marker's own
+zero exit status belongs to a different process. Grouping the two
+processes by target lets the model read them together while preserving
+their separate results.
+
+\begin{table}[htbp]
+\centering
+\caption{Selected records received before the decision in
+\texttt{THME0064}. Rows show the observed target groups. For the
+two other targets, only the search termination is shown.}
+\label{tab:recorded-case}
+\begin{tabularx}{\textwidth}{@{}llX@{}}
+\toprule
+Target group & Record ID & Evidence available before the decision \\
+\midrule
+\texttt{bravo}, \texttt{charlie} & & Payload search END at each target, zero exit status \\
+\texttt{alpha} & 207481 & Payload search END, nonzero exit status \\
+\texttt{alpha} & 207483 & Marker START \\
+\texttt{alpha} & 207485 & Marker END, zero exit status \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The next recorded action was synthetic file search. In the
+three-seed post-hoc comparison on the three-target development set,
+the target-wise GRU ranked
+file copy first on all three seeds. The relation-attention variant
+ranked file search first on two seeds. Across those same seeds,
+the probabilities assigned to file search were 0.434, 0.450
+and 0.481 for the target-wise GRU, and 0.984, 0.483 and 0.517 for
+relation attention. This case illustrates how the forecast changed
+between two target-aware variants. The controlled membership
+comparison in Section~\ref{sec:membership} tests the effect of
+reassigning received events across a larger set of executions.

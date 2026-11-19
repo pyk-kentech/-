@@ -6,17 +6,16 @@ executed action. Modeling which received events concern the same
 target improved execution-weighted NLL and top-1 accuracy on
 controlled held configurations. The benefit also appeared when the
 number and names of the targets changed within the same procedure
-family.
+family. A controlled comparison with the target history model also
+showed that exchanging event membership while preserving group sizes
+and START--END pairs increased loss on both development sets.
 
 Benign interleaving revealed more specific conditions for the
 improvement. Exposing the recurrent history at each event helped
-in the B+C condition, and a fixed probability combination improved
-NLL in new A+C repetitions. Matched comparisons after retraining
-left the added benefit of the two-memory structure uncertain.
-Target-poor prefixes provided a complementary lesson: an observed
-history lookup forecast outperformed the global prior when its keys
-had support, and lost that advantage on interleaved inputs with
-unseen keys.
+when the B and C workloads ran together. Performance varied across
+workload and training-fold combinations. The results apply to
+controlled procedures with known decision boundaries and to target
+relationships that can be recovered from the available audit logs.
 
 The results motivate forecasting from both receipt order and
 observable target membership. They identify the evidence boundary,
