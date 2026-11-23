@@ -4,56 +4,63 @@
 During a multi-stage incident, an analyst may need to decide which
 activity to investigate before the next attacker action is visible. A
 forecast can prioritize this investigation by assigning probabilities
-to plausible follow-up actions. It is important that the forecast
-reflect the evidence that could actually have reached the analyst or
-detector. Audit records carry an occurrence time, while their availability
-to a predictor depends on when the collector receives them.
+to plausible follow-up actions, but only if it reflects the evidence
+that could actually have reached the analyst or detector. Audit records
+carry an occurrence time, whereas their availability to a predictor
+depends on when the collector receives them.
 
 Consider a sequence of file-related activities involving two targets.
 A termination record for one process may arrive after another process
-starts. Benign activity on the host may add further start and termination
-records in between. A model that treats the most recent exit code as the
-result relevant to every subsequent decision can confuse the two
-targets. A model that reconstructs a past prefix using all audit
-records by occurrence time can also inadvertently give the predictor
-information that the collector had yet to receive.
+starts, and benign activity on the host may add further start and
+termination records in between. A model that treats the most recent exit
+code as the result relevant to every subsequent decision can confuse the
+two targets. A model that reconstructs a past prefix from all audit
+records ordered by occurrence time can instead give the predictor
+information that the collector had not yet received.
 
-This thesis studies \textbf{next actual attacker action prediction}
-from Windows audit logs. The label is the semantic category of the
-first source-designated attacker action that actually starts after
-the prediction boundary. The output is a distribution over 18 action
-categories. An execution can provide several prediction rows, each
-with its own evidence prefix and label. The task is evaluated at known
-decision boundaries in a controlled environment. Inferring those
-boundaries in an operational deployment is a separate problem.
+This thesis studies \textbf{next attacker action prediction} from
+Windows audit logs. The \emph{next attacker action} at a prediction
+boundary $t$ is the first source-designated attacker action whose
+process starts after $t$; its semantic category is the label, and the
+output is a distribution over 18 action categories. An execution can
+provide several prediction rows, each with its own evidence prefix and
+label. The task is evaluated at known decision boundaries in a
+controlled environment; inferring those boundaries in an operational
+deployment is a separate problem.
 
 PROPHET represents the evidence at each boundary in two complementary
-forms. A gated recurrent unit summarizes the events in receipt order.
-A target adapter connects observed events through process identity and
-observed target membership. These links allow the predictor to use
+forms. A gated recurrent unit summarizes the events in receipt order,
+and a target adapter connects observed events through process identity
+and observed target membership. These links allow the predictor to use
 the result of an operation on the relevant target even when unrelated
-events intervene. A target-free path produces a prediction when the
-observed prefix supplies no usable target relation.
+events intervene. When the observed prefix supplies no usable target
+relation, a target-free path still produces a prediction.
 
 The main question is whether linking events to the correct target
 improves the forecast. On 64 new runs of previously evaluated
 configurations, relation attention reduced execution-weighted negative
-log likelihood (NLL) from 0.2171 to 0.0458 compared with a sequence-only
-GRU. In a separate comparison, the target history model used the same
-events and the same group sizes while event membership was exchanged.
-On 127 previously examined executions, this exchange increased NLL
-from 0.0584 to 0.0869. The first result measures the gain of the
-target-aware predictor as a whole. The second tests whether correct
-membership contributes to that gain in the target history model.
+log likelihood (NLL) from 0.2171 to 0.0458 compared with a receipt-order
+GRU baseline (EVENT GRU). In a separate membership exchange control,
+the target history model received the same events and the same group
+sizes, but events were exchanged between targets. On a reused set of
+127 executions, this exchange increased NLL from 0.0584 to 0.0869. The
+first result measures the gain of the target-aware predictor as a
+whole; the second tests whether correct membership contributes to that
+gain in the target history model.
 
-Chapter~\ref{ch:related} places these comparisons in the context of ATT\&CK, attack graphs, and prior forecasting systems.
+The thesis makes three contributions. First, it defines an evaluation
+in which every forecast uses only the records already received at its
+decision boundary. Second, it tests observed target membership against
+sequence and grouping controls, including new executions with
+unfamiliar target names. Third, it tests how recurrent history should
+be presented to the readout when benign activity is interleaved.
 
-The thesis defines an evaluation in which every forecast uses records
-already received at its decision boundary. It tests observed target
-membership against sequence and grouping controls, including new
-executions with unfamiliar target names. It then tests how to present
-recurrent history to the readout when benign activity is interleaved.
-Chapter~\ref{ch:task} follows a recorded prediction to show what
-the target links carry. Chapter~\ref{ch:method} defines the models,
-and Chapters~\ref{ch:evaluation} and~\ref{ch:results} report the
+Chapter~\ref{ch:related} places these comparisons in the context of
+ATT\&CK, attack graphs, and prior forecasting systems.
+Chapter~\ref{ch:task} defines the task and follows a recorded
+prediction to show what the target links carry. Chapter~\ref{ch:method}
+defines the models, and Chapters~\ref{ch:evaluation}
+and~\ref{ch:results} describe the evaluation and report the
 comparisons and the conditions under which the gains hold.
+Chapter~\ref{ch:discussion} discusses these conditions and the threats
+to validity.

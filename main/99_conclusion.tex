@@ -1,19 +1,20 @@
 \chapter{Conclusion}
 
 This thesis studied whether Windows audit events available at a
-decision boundary can support prediction of an attacker's next
-executed action. Modeling which received events concern the same
-target improved execution-weighted NLL and top-1 accuracy on
-controlled held configurations. The benefit also appeared when the
-number and names of the targets changed within the same procedure
-family. A controlled comparison with the target history model also
-showed that exchanging event membership while preserving group sizes
-and START--END pairs increased loss on both development sets.
+decision boundary can support prediction of the next attacker
+action. Modeling which received events concern the same target
+improved execution-weighted NLL and top-1 accuracy on controlled held
+configurations, and the benefit persisted when the number and names
+of the targets changed within the same procedure family. In the
+membership exchange control, exchanging events between targets while
+preserving group sizes and START--END pairs increased the loss of the
+target history model on both the 16-run development set and the
+127-run reused set.
 
 Benign interleaving revealed more specific conditions for the
 improvement. Exposing the recurrent history at each event helped
-when the B and C workloads ran together. Performance varied across
-workload and training-fold combinations. The results apply to
+when the B and C workloads ran together, but with workload C alone the
+final-state variant performed better in the C-fold. The results apply to
 controlled procedures with known decision boundaries and to target
 relationships that can be recovered from the available audit logs.
 

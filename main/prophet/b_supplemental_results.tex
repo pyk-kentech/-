@@ -7,11 +7,11 @@ For the probability combination in Equation~\ref{eq:mixture}, 144
 executions were attempted and 135 were eligible, yielding 1,427
 natural rows. The models and mixing rule were frozen before
 collection. Table~\ref{tab:mix} compares them on the same
-eligible inputs. The five seeds were 53, 67, 79, 97 and 113.
+eligible inputs. The five seeds were 53, 67, 79, 97, and 113.
 All rows in the two A+C layouts had observed targets, so
 conditional mixing and an unconditional half-average produced the
-same predictions in those layouts. The improvement there reflects
-the system that combines the two predictions.
+same predictions in those layouts, and the improvement there is that
+of the combined system rather than of the conditioning rule.
 
 \begin{table}[tb]
 \centering
@@ -21,7 +21,7 @@ usable target receive the baseline distribution.}
 \label{tab:mix}
 \begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
 \toprule
-Condition & Runs / rows & Baseline & Full Step & Conditional average \\
+Condition & Runs / rows & Baseline & Full Step (dual history) & Conditional average \\
 \midrule
 A+C, flat & 31 / 341 & 0.135230 & 0.107396 & \textbf{0.080156} \\
 A+C, nested & 29 / 319 & 0.160900 & \textbf{0.075783} & 0.077815 \\
@@ -46,16 +46,16 @@ the conditional average scored 0.062979, compared with 0.060420
 for the baseline and 0.054544 for the unconditional average.
 
 A matched retraining comparison fitted all models from scratch with
-five new seeds (127, 149, 163, 181 and 199) and reused the same 135
+five new seeds (127, 149, 163, 181, and 199) and reused the same 135
 evaluation executions. Table~\ref{tab:matched} shows the resulting
 A+C scores. The dual-history average reduced NLL versus its own
 baseline in both layouts. Relative to the wider single-history
 and BiTA combinations, all four adjusted 98.75\% intervals included
 zero. The separate, post-hoc comparison against an average of two
 independent baseline checkpoints also yielded intervals that
-included zero in both layouts. These results support gains from a
-fixed combination on particular workloads and place limits on what
-can be attributed to the two-memory structure.
+included zero in both layouts. Because these intervals cross zero,
+the gains of the fixed combination cannot be attributed to the
+dual-history architecture itself.
 
 \begin{table}[tb]
 \centering
@@ -69,7 +69,7 @@ reused from Table~\ref{tab:mix}.}
 Predictor & A+C, flat & A+C, nested \\
 \midrule
 Single baseline & 0.192507 & 0.176440 \\
-Baseline + two histories & 0.123421 & \textbf{0.108952} \\
+Baseline + dual history & 0.123421 & \textbf{0.108952} \\
 Baseline + wider single history & \textbf{0.120299} & 0.113041 \\
 Baseline + BiTA-inspired aggregator & 0.124414 & 0.129035 \\
 \bottomrule
@@ -90,12 +90,12 @@ $[-0.026307,0.021147]$. The table thus provides a useful simple
 forecast in this cohort, with uncertain additional value once
 the learned model and prior mixing are available.
 
-The same key definition was also checked on the 660 natural rows
-across the two A+C layouts in Table~\ref{tab:mix}. None had an
+The same key definition was checked on the 660 natural rows across
+the two A+C layouts in Table~\ref{tab:mix}. None had an
 exact key supported in training, so the table returned the same
 training prior on every row. Preserving unclassified START
 records in the key yielded the same fallback pattern. A coarser
 stage key found support on 161 of 341 flat rows and 148 of 319
-nested rows. It scored 1.181161 and 1.268327, respectively.
-These observations show the cost of sparse lookup support when
-benign activity changes the sequence of received events.
+nested rows. It scored 1.181161 and 1.268327, respectively. Exact lookup thus
+loses its support when benign activity changes the sequence of
+received events on which the key depends.

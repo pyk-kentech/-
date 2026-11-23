@@ -5,16 +5,17 @@
 \label{sec:membership}
 
 Table~\ref{tab:relations} compares four fixed models on 64 additional
-executions of 16 held configurations. REL has the lowest loss and the
-highest row accuracy in this comparison. THM also performs better
+executions of 16 held configurations. REL had the lowest loss and the
+highest row accuracy in this comparison, and THM also performed better
 than either relation-free model. THM's NLL difference from EVENT GRU
 was $-0.149750$ with a Bonferroni-adjusted 97.5\% interval of
-$[-0.156307,-0.143693]$. Its difference from flat history attention
+$[-0.156307,-0.143693]$, and its difference from flat history attention
 was $-0.174032$ with an interval of $[-0.180327,-0.166922]$.
-These two intervals are for THM. The comparison of REL with THM
-in the table is descriptive. The resampling design draws repetitions
-within the same configurations, so its uncertainty concerns repeated
-runs under those configurations.
+Intervals were computed only for these two THM contrasts, so the
+comparison of REL with THM in the table is descriptive. Because the
+resampling draws repetitions within the same configurations, the
+intervals describe uncertainty over repeated runs under those
+configurations.
 
 \begin{table}[tb]
 \centering
@@ -40,32 +41,31 @@ for EVENT GRU. Training used two- and three-target configurations.
 This comparison tests transfer to more targets and new names within
 the same task family.
 
-A membership intervention tests whether the benefit can come from
-the group layout alone. THM was trained with either observed
+The membership exchange control tests whether the benefit can come
+from the group layout alone. THM was trained with either the observed
 memberships or exchanged memberships that preserve the number and
-sizes of the groups. START and its linked END were moved together.
-On 16 development executions, correct and exchanged memberships
-produced losses of 0.035109 and 0.120010. On a separate set of
-127 previously viewed executions, the two losses were 0.058365 and
-0.086855. The corresponding paired 95\% intervals for correct minus
-exchanged membership were $[-0.166172,-0.024583]$ and
-$[-0.052213,-0.002666]$. Exchanging membership can contradict a
-visible path. This intervention provides evidence for the value of
-the observed membership under that corruption.
+sizes of the groups, with each START and its linked END moved
+together. On the 16-run development set, correct and exchanged
+memberships produced losses of 0.035109 and 0.120010. On the 127-run
+reused set, which had been viewed during earlier development, the two
+losses were 0.058365 and 0.086855. The corresponding paired 95\%
+intervals for correct minus exchanged membership were
+$[-0.166172,-0.024583]$ and $[-0.052213,-0.002666]$. Because an
+exchanged membership can contradict a visible command path, these
+results show the value of the observed membership relative to such
+contradictory groupings.
 
 \section{Event-wise history under benign interleaving}
 
 In a separate collection of 111 eligible executions and 1,163 rows,
-the most consistent advantage of Local History over the
-same-capacity Final History control occurred when B and C
-ran concurrently. Table~\ref{tab:local} reports both training folds.
-The adjusted intervals for local minus final NLL were
-$[-0.364155,-0.152826]$ in the B-fold and
-$[-0.494571,-0.210046]$ in the C-fold. These are Bonferroni-adjusted
-99.375\% intervals over eight contrasts. With only C running in the
-C-fold, the final-state comparator performed better. This reversal
-establishes the importance of reporting the benign workload and
-the training fold with each score.
+Local History outperformed the same-capacity Final History control
+most consistently when B and C ran concurrently. Table~\ref{tab:local}
+reports both training folds. The Bonferroni-adjusted 99.375\%
+intervals over eight contrasts for Local minus Final History NLL were
+$[-0.364155,-0.152826]$ in the B-fold and $[-0.494571,-0.210046]$ in
+the C-fold. With only C running, Final History performed better in the
+C-fold, so scores must be reported together with the benign workload
+and the training fold.
 
 \begin{table}[tb]
 \centering
@@ -76,7 +76,7 @@ the same evaluation executions for a given condition.}
 \label{tab:local}
 \begin{tabular}{@{}llrrr@{}}
 \toprule
-Benign workload & Training fold & Local history & Final history & Event-only \\
+Benign workload & Training fold & Local History & Final History & Event-only \\
 \midrule
 B+C & B & \textbf{0.155520} & 0.409578 & 0.5101 \\
 B+C & C & \textbf{0.061857} & 0.409930 & 0.6728 \\
@@ -84,26 +84,27 @@ C-only & C & 0.328044 & \textbf{0.136957} & 1.2040 \\
 \bottomrule
 \end{tabular}
 \end{table}
+% TODO(사람): Is the "Event-only" column in Table~\ref{tab:local} the EVENT GRU baseline of Table~\ref{tab:relations}, or the event path of the Local History model? If it is EVENT GRU, the column can be renamed. Its values also have four decimals while the other columns have six; please decide the precision.
 
-A further collection of 110 eligible executions compared local history
+A further collection of 110 eligible executions compared Local History
 with task adaptations of three prior architectures. In the C-fold
-B+C condition, the NLLs were 0.071534 for the local model,
-0.079912 for BiTA, 0.193812 for ORTHRUS, and 1.051944 for CL-AP$^2$.
-The adjusted interval for the local versus BiTA difference
+B+C condition, the NLLs were 0.071534 for Local History, 0.079912 for
+BiTA, 0.193812 for ORTHRUS, and 1.051944 for CL-AP$^2$, and the
+adjusted interval for the Local History versus BiTA difference
 included zero. In the C-only C-fold condition, the BiTA adaptation
-scored 0.125017 against 0.280621 for local history. The adjusted interval
-for BiTA minus local history was $[-0.247739,-0.073143]$.
-These comparisons concern prediction-stage adaptations with this
-thesis's input and label contract.
+scored 0.125017 against 0.280621 for Local History, with an adjusted
+interval for BiTA minus Local History of $[-0.247739,-0.073143]$.
+These comparisons concern prediction-stage adaptations that use this
+thesis's inputs, labels, and receipt boundary.
 
 \section{Probability averaging and frequency baselines}
 
-A fixed average of separately trained single- and dual-history
-models reduced NLL from 0.1352 to 0.0802 on flat A+C runs and from
-0.1609 to 0.0778 on nested A+C runs. After retraining with five new
-seeds, matched comparisons left the added benefit of the dual-history
-architecture uncertain. An observed-history frequency table improved
-on the global prior in the original-action cohort. In the two
-A+C layouts, all 660 rows had unseen exact keys and the table
-returned the global prior throughout. Appendix~\ref{app:secondary-results}
+A fixed average of a separately trained single-history baseline and
+dual-history model reduced NLL from 0.1352 to 0.0802 on flat A+C runs
+and from 0.1609 to 0.0778 on nested A+C runs. After retraining with
+five new seeds, matched comparisons left the added benefit of the
+dual-history architecture uncertain. The observed-history frequency
+table improved on the training prior in the original-action cohort,
+but in the two A+C layouts all 660 rows had unseen exact keys, so the
+table returned the training prior throughout. Appendix~\ref{app:secondary-results}
 reports the full comparisons and intervals.

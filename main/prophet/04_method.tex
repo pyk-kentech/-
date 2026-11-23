@@ -4,22 +4,24 @@
 The predictor receives the audit prefix $X_t$ and returns one
 probability for each of the 18 action categories. Its two principal
 inputs are the order in which records reached the collector and
-the observed relationships among records. Order can locate an
-event relative to preceding activity. Target membership can
-distinguish which of several earlier outcomes belongs to the object
-currently in view. The design retains a sequence path so the
-predictor can still use received events when the available records
-do not identify an eligible target.
+the observed relationships among records. Order locates an event
+relative to preceding activity, while target membership distinguishes
+which of several earlier outcomes belongs to the object currently in
+view. The design retains a sequence path so that the predictor can
+still use received events when the available records do not identify
+an eligible target.
 
-The comparisons vary three design choices. The event-only and
-flat attention models test how much a forecast can recover from
-order and flexible history retrieval. THM and REL add explicit
-observed target membership, while varying whether they summarize
-each group before or after modeling relationships among events.
-The Local and Final History variants retain a target-aware readout
-and vary the recurrent state attached to each event. The sequence
-and relation paths of the original residual predictors are shown
-in Figure~\ref{fig:model}.
+The chapter defines the following models. EVENT GRU and flat history
+attention test how much a forecast can recover from order and
+flexible history retrieval. The target history model (THM) and
+relation attention (REL) add explicit observed target membership and
+differ in whether they summarize each group before or after modeling
+relationships among events; both are residual predictors that add a
+target-based correction to EVENT GRU (Figure~\ref{fig:model}). Local
+History and Final History retain a target-aware readout and differ in
+the recurrent state attached to each event. The dual-history model and
+its probability average with a single-history baseline, and a
+non-neural frequency baseline, complete the comparisons.
 
 \section{Receipt-order predictor}
 
@@ -33,10 +35,11 @@ the later comparisons, its state advances as
   \label{eq:eventgru}
 \end{equation}
 Here $T$ is the number of admitted events and $f$ outputs 18 action
-scores. The softmax of these scores is the event-only distribution.
-A zero-initialized history handles a boundary with an empty prefix.
-The flat history attention comparator adds a history-conditioned
-readout over the received events with a common pool.
+scores. The softmax of these scores is the distribution of the
+EVENT GRU baseline. A zero-initialized history handles a boundary with
+an empty prefix. The flat history attention comparator adds a readout,
+queried by the history state, that attends over all received events
+as a single pool without target grouping.
 
 \section{Target history and relation attention}
 
@@ -46,25 +49,25 @@ each nonempty target group,
 \begin{equation}
   m_g = |I_g|^{-1}\!\sum_{i \in I_g} e_i .
 \end{equation}
-The final event-history state queries these slots and the readout
-contributes a correction to the event prediction. Averaging before
-the readout makes the target group the unit of retrieval in THM.
-Two groups that have the same mean event representation present
-the same slot to that readout. The relation
-attention model (REL) first lets events associated with the same
-target attend to each other. A history query then reads the
-relation-enriched events. Group membership limits where the
-within-target context comes from. The readout can then combine
-evidence across observed groups for the same forecast. At the level
-of the output head, the
-original residual models can be written as
+The final event-history state queries these slots, and the readout
+contributes a correction to the EVENT GRU prediction. Because THM
+averages before the readout, the target group is its unit of
+retrieval, and two groups with the same mean event representation
+present the same slot to the readout.
+
+REL instead keeps individual events. It first lets events associated
+with the same target attend to each other, so that group membership
+limits where the within-target context comes from; a history query
+then reads the relation-enriched events and can combine evidence
+across observed groups for the same forecast. At the level of the
+output head, both residual models can be written as
 \begin{equation}
   z(X_t) = z_{\mathrm{event}}(X_t) + \Delta z(X_t,\{I_g\}),
   \qquad p(y\mid X_t) = \operatorname{softmax}(z(X_t))_y .
   \label{eq:relation}
 \end{equation}
 The relation path in these models uses observed membership, roles and
-timing. An input without usable target evidence follows the event-only
+timing. An input without usable target evidence follows the EVENT GRU
 path. Figure~\ref{fig:model} shows how identical audit evidence feeds
 both the ordered history and the target readout. The equations isolate
 the difference in aggregation and omit implementation-specific
@@ -78,7 +81,7 @@ projection layers.
   resultbox/.style={box,fill=black!4,minimum width=2cm},
   bluepath/.style={->,semithick,draw=blue!57!black},
   greenpath/.style={->,semithick,draw=teal!70!black}]
-  \node[box,fill=black!4] (input) at (0,0) {Received events\\before cutoff};
+  \node[box,fill=black!4] (input) at (0,0) {Received events\\before boundary};
   \node[box,fill=blue!5] (history) at (4,0.9) {Receipt order\\Event GRU};
   \node[box,fill=teal!7] (rel) at (4,-0.9) {Observed target groups\\Relation readout};
   \node[draw,circle,fill=black!4,inner sep=3pt] (plus) at (8.25,0) {$+$};
@@ -109,18 +112,18 @@ each event. Both choices use the same input prefix and readout
 structure. Replacing $h_i$ by $h_T$ changes both the states exposed to
 the readout and the paths through which the recurrent encoder
 receives training gradients. The comparison therefore tests these
-two complete placements of history, with the same model capacity.
+two complete placements of history at the same model capacity.
 
 \section{Target-conditioned probability average}
 
-A later comparison uses a single-history reference model $p_{\mathrm{base}}$
-and a separately trained model $p_{\mathrm{dual}}$ with two independent
-64-dimensional recurrent states. The two recurrent cells in the
-Full Step model each receive the event history and update once
-per admitted event using their standard GRU updates. The model is
-trained with the action objective and the two states feed its
-relation and output pathways. They do not have assigned attacker and
-benign roles.
+A later comparison uses a single-history baseline $p_{\mathrm{base}}$
+and a separately trained dual-history model $p_{\mathrm{dual}}$ with
+two independent 64-dimensional recurrent states; tables label the
+dual-history model as Full Step. Its two recurrent cells each receive
+the event history and update once per admitted event using standard
+GRU updates. The model is trained with the action objective, and the
+two states feed its relation and output pathways without assigned
+attacker and benign roles.
 
 For each seed, the fixed combination averages the separately trained
 probabilities on a prefix with at least one observed target.
@@ -137,9 +140,9 @@ where $G(X_t)$ is the set of observed target groups. The fallback copies
 the full baseline distribution on a target-free prefix. The paired
 controls use the same rule with a single wider recurrent model, a
 BiTA-inspired aggregator, or an independently trained instance of the
-baseline. The fixed average provides a test of the complete predictor.
-The same-model-count controls are needed to assess the contribution
-of the two-memory architecture.
+baseline. The fixed average tests the complete predictor, whereas the
+same-model-count controls are needed to assess the contribution of
+the dual-history architecture.
 
 \section{Observed-history frequency baseline}
 
@@ -155,7 +158,8 @@ and $\pi$ the training action prior, then
   q_k = \frac{C_k+\pi}{n_k+1}.
   \label{eq:table}
 \end{equation}
-An unseen key returns $\pi$. In the probability-mixing comparison
-on target-free inputs, the same small fixed weight is used for
-either $q_k$ or $\pi$. This controls for the effect of injecting
-additional probability mass independently of the key.
+An unseen key returns $\pi$. In a separate comparison on target-free
+inputs, either $q_k$ or $\pi$ is mixed into a frozen model's
+distribution with the same small fixed weight, which controls for the
+effect of injecting additional probability mass independently of the
+key.

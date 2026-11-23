@@ -1,23 +1,24 @@
 \begin{abstract}
-A process can finish before a prediction request while its termination
-record reaches the collector afterward. PROPHET predicts which of
-18 semantic actions the attacker will execute next using Windows audit
-records received before the request. It combines the order in which
-records arrive with links between events that concern the same target.
+PROPHET predicts which of 18 semantic actions an attacker will execute
+next, using only the Windows audit records that the collector has
+received before a prediction request. Receipt time matters because a
+process can finish before the request while its termination record
+reaches the collector only afterward. PROPHET combines the order in
+which records arrive with links between events that concern the same
+target.
 
 On 64 new executions of 16 previously evaluated configurations,
 relation attention reduced execution-weighted negative log likelihood
-from 0.2171 to 0.0458 relative to a sequence-only GRU and increased
-top-1 accuracy from 89.06\% to 97.98\%. A separate control tested
-the contribution of target membership within the target history model.
-On 127 previously examined executions, reassigning events to other
-targets while preserving group sizes and START--END pairs increased
-the loss from 0.0584 to 0.0869. When two benign workloads ran
-concurrently, giving the readout the history state at each event
+from 0.2171 to 0.0458 relative to a receipt-order GRU baseline and
+increased top-1 accuracy from 89.06\% to 97.98\%. A separate
+membership exchange control tested whether correct target membership
+contributes within the target history model. On a reused set of 127
+executions, exchanging events between targets while preserving group
+sizes and process start--end pairs increased the loss from 0.0584 to
+0.0869. When two benign workloads ran concurrently, using the
+recurrent state at each event, rather than only the final state,
 reduced loss in both training folds. With one workload alone, the
-final-state readout performed better in one fold. These results show
-where target links and event-wise history help in controlled Windows
-executions.
+final-state variant performed better in one fold.
 \end{abstract}
 
 \begin{Engkeyword}
@@ -30,8 +31,8 @@ Attack action prediction, Windows audit logs, receipt time, target relations
 대상에 관한 사건의 연결 관계를 함께 사용한다. 기존 실험 구성에서 새로 수집한
 64회 실행에서 관계 모델은 순서 기반 GRU의 실행 단위 예측 손실을
 0.2171에서 0.0458로 줄였고, 최상위 후보 정확도를 89.06\%에서
-97.98\%로 높였다. 이전에 검토한 127회 실행을 사용한 별도 비교에서는 그룹의 크기와
-프로세스 시작·종료 쌍을 유지한 채 사건의 대상 소속을 섞었을 때 대상 이력
+97.98\%로 높였다. 재사용한 127회 실행을 사용한 별도 비교에서는 그룹의 크기와
+프로세스 시작·종료 쌍을 유지한 채 사건의 대상 소속을 서로 맞바꾸었을 때 대상 이력
 모델의 손실이 0.0584에서 0.0869로 증가했다. 두 정상 작업을 동시에
 수행한 조건에서는 사건별 이력을 사용했을 때 두 학습 분할 모두에서 손실이
 줄었다. 정상 작업을 하나만 수행한 조건 중 한 학습 분할에서는 최종 이력을
