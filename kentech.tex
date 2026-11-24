@@ -11,6 +11,18 @@
       \IfFontExistsTF{NanumMyeongjo}{\setmainhangulfont{NanumMyeongjo}}{}}}
 \fi
 
+% TODO(사람): 제목은 answers 2에 따라 지금 제목을 유지한다. 본문의 논지가
+% "무라벨 환경 합의 증류"로 바뀌었으므로 아래 후보 중 하나로 바꿀지 결정할 것.
+%   1. Seed Instability in Next Attacker Action Prediction and Its Reduction
+%      by Unlabeled Consensus Distillation
+%   2. Predicting the Next Attacker Action under Unseen Benign Workloads:
+%      Measuring and Reducing Seed Instability
+%   3. Consensus Distillation on Unlabeled Environment Inputs for Stable
+%      Attacker Action Prediction
+% 제목이 졸업논문 계획서와 달라지면 심사 신청 전에 포털(통합정보시스템)에서
+% 제목 변경을 신청해 승인을 받아야 한다(작성 안내 PDF). 바꿀 경우
+% \title[kor]와 \hypersetup{pdftitle=...}도 함께 고칠 것. 안내 PDF에 따라
+% 영문 제목은 전치사·접속사를 뺀 단어의 첫 글자만 대문자로 쓴다.
 \title[eng-full]{Predicting the Next Attacker Action from Windows Audit Logs}
 \title[kor]{윈도우 감사 로그를 이용한 공격자의 다음 행동 예측}
 \department{BA}
@@ -18,18 +30,33 @@
 \author[english]{Park}{Isaac Yoonkeun}
 \advisor[major]{이현우}{Hyunwoo Lee}{nosign}
 \advisor[coopr]{임티아즈 카림}{Imtiaz Karim}{nosign}
-% Edit these fields once the graduation year and committee are confirmed.
-\gradyear{[Graduation year]}
-\referee[1]{[Name pending]}
-\referee[2]{[Name pending]}
+% TODO(사람): 학번을 넣을 것.
+\studentid{}
+% TODO(사람): 졸업 연도를 넣을 것(앞표지 맨 아래에 찍힌다).
+\gradyear{}
+% TODO(사람): 심사위원장(\referee[1])과 심사위원(\referee[2])을 넣을 것.
+% 안내 PDF: 심사위원장은 본교 논문지도교수 1인, 심사위원은 대학이 선임하는
+% 본교 교원 1인.
+\referee[1]{}
+\referee[2]{}
+% TODO(사람): 심사 통과일을 넣을 것. 인자는 {연}{월}{일}이며 인준서에
+% "November 20, 2025" 형식으로 찍힌다. 비워 두면 인준서에
+% "[Examination date]"가 나온다.
+% \refereedate{}{}{}
 \hypersetup{
   pdftitle={Predicting the Next Attacker Action from Windows Audit Logs},
   pdfauthor={Isaac Yoonkeun Park}
 }
 
-% Before submission, supply \refereedate, replace the
-% placeholder fields above, select final mode, and remove the manual
-% front-matter calls (the class makes them automatically in final mode).
+% 제출 전 할 일: 위 빈칸을 채우고, 클래스 선택지를 draft에서 final로 바꾼 뒤
+% 아래의 \makefrontcover·\makeapproval 두 줄을 지울 것(final 모드에서는
+% 클래스가 \begin{document}에서 두 쪽을 자동으로 만든다).
+%
+% 문서 순서는 작성 안내 PDF를 따른다: 앞표지 → 인준서 → Abstract → 국문초록
+% → 목차(표목차·그림목차 포함) → 본문 → 참고문헌 → 감사문.
+% 안내 PDF는 부록의 자리를 따로 정하지 않는다. 참고문헌과 감사문이 이어지도록
+% 부록을 본문 뒤, 참고문헌 앞에 둔다. 이 클래스의 참고문헌은 \chapter*로
+% 찍히므로 \appendix 뒤에 와도 번호가 붙지 않고 목차에 "References"로 들어간다.
 \begin{document}
 \hypersetup{pageanchor=false}
 \makefrontcover
@@ -51,13 +78,20 @@
 \input{main/prophet/07_discussion}
 \input{main/99_conclusion}
 
-\bibliographystyle{plain}
-\bibliography{ref}
-
 \appendix
 \input{main/prophet/a_actions}
 \input{main/prophet/b_supplemental_results}
 \input{main/prophet/c_rejected}
 \input{main/prophet/d_ads24_data}
+
+\bibliographystyle{ieeetr}
+\bibliography{ref}
+
+% TODO(사람): 감사문은 안내 PDF상 생략할 수 있다. 쓸 경우 아래 주석을 풀고
+% 내용을 넣을 것(줄 간격 2배수). [3]은 본문·감사문 모두 영어일 때,
+% [4]는 본문이 영어이고 감사문이 한국어일 때 쓴다.
+% \acknowledgment[3]
+%
+
 \label{paperlastpagelabel}
 \end{document}
