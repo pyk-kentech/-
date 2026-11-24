@@ -1,0 +1,222 @@
+\chapter{External Replication on ADS-24}
+\label{ch:ads24}
+
+The in-house results of Chapter~\ref{ch:results} come from one
+laboratory, so we repeated the study on data collected elsewhere. We
+did not find a public dataset that could reproduce the PROPHET task as
+defined in Chapter~\ref{ch:task}, and three of its conditions were
+relaxed. Alerts are ordered by the time at which they occurred rather
+than by the receipt boundary of Section~\ref{sec:receipt}. The labels
+are the attack-stage labels that come with the dataset rather than
+source-designated attacker actions. And the unseen environment is a
+held-out condition with simulated users rather than a held-out benign
+worker. Under these relaxations we used ADS-24, the Crate dataset
+released by KTH under the CC BY-SA~4.0 licence~\cite{tmp_ads24}.
+Appendix~\ref{app:ads24-data} describes how the task was built from it
+and why six other candidates were not used.
+% 근거: RECORD:212, 236, 265--275 (선정 경위, 후보 7행 표는 부록 D).
+% ADS24_CONTRACT_SEALED.md "과제와 자료": cutoff 이전 Wazuh @timestamp 경보만
+% 입력. 이 시각이 수신 시각인지 확인되지 않아 계약은 "경보 시각 예측"이라 부른다.
+% TODO(사람): 부록 D(d_ads24_data.tex)의 label을 app:ads24-data로 가정했습니다.
+% 부록 D를 쓸 때 같은 이름인지 확인해 주세요.
+% TODO(사람): ADS-24/Crate 자료 논문(arXiv 2609.16541)이 ref.bib에 없어 임시 key
+% tmp_ads24로 인용했습니다. CC BY-SA 4.0 표기를 각주나 감사의 글 등 다른 자리에
+% 둘지도 정해 주세요.
+
+\section{Task and data roles}
+\label{sec:ads24-task}
+
+The input at a prediction boundary is the sequence of Wazuh alerts
+recorded before it, read through the alert fields \texttt{rule.id} and
+\texttt{rule.level}~\cite{tmp_wazuh} together with host role and alert
+timing. The target is the ATT\&CK tactic of the next attack segment, one
+of nine classes. A segment merges consecutive stages that share a
+tactic, and every segment after the first starts a boundary. We fixed
+this merging rule before any model was scored, because without it most
+boundaries would simply repeat the previous tactic
+(Appendix~\ref{app:ads24-data}). The contract assigns the runs to four
+roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
+15 further runs without users (2,982 boundaries) check preservation;
+the condition without users is therefore the seen one. The 34 runs
+with simulated users supply unlabeled adaptation inputs (5,811
+boundaries), and 35 other runs with users (5,639 boundaries) form the
+environment evaluation, the unseen condition. The model is the ADS-24
+adaptation of REL\_GLOBAL in Section~\ref{sec:method-transfer}; we
+call it REL\_GLOBAL in this chapter.
+% 근거: RECORD:214, 247, 251, 254; ADS24_CONTRACT_SEALED.md "과제와 자료",
+% "입력과 모델 이식"; ADS24_STAGE2_REPORT.md "계보" (8,461/2,982/5,811/5,639경계).
+% 연속 경계의 약 62.7%가 같은 전술이라는 수치는 개요에 따라 부록 D에 둔다.
+% 원 보고서의 REL_BASE = 이 장의 REL_GLOBAL, KD_ENV_TOP5 = CD student,
+% KD_SELF = self-distillation control.
+% TODO(사람): Wazuh 문서가 ref.bib에 없어 임시 key tmp_wazuh로 인용했습니다.
+
+The study ran in two stages, each under its own sealed contract.
+Stage~1 trained 30 REL\_GLOBAL seeds on FIT and asked only whether they
+diverged enough on the environment evaluation to justify distillation;
+the gate required a seed standard deviation of at least 0.050 with the
+lower end of its 95\% interval at least 0.020, and it passed with 0.163
+$[0.140, 0.191]$. Stage~2 then trained 60 new models from the same 30
+seeds: a CD student whose teachers are the five REL\_GLOBAL seeds with
+the highest top-1 agreement on the 34 adaptation runs, and a
+self-distillation control in which each seed is distilled from its own
+frozen stage-1 model. All other settings were carried over from the
+in-house method unchanged. Because stage~1 had already scored
+REL\_GLOBAL on the 35 environment-evaluation runs, the stage-2 criteria
+were sealed before the students were trained but not before those runs
+were inspected. The result below is therefore a sealed criterion with
+that qualification (Table~\ref{tab:rounds}, note~a), and we do not
+describe it as an external test on unseen data.
+% 근거: RECORD:256--261; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (관문 SD≥.050,
+% 10,000회 95% 구간 하단≥.020), "2단계 예정 계약" (교사: ADAPT_ON34에서만,
+% 자기 포함 30모델 다수결; KD_SELF는 같은 seed의 동결 REL_BASE);
+% ADS24_STAGE1_REPORT.md:3 (.162925 [.140425, .190702]); ADS24_STAGE2_REPORT.md
+% "계보" (새 학생 60 fit, 교사 301030, 301026, 301025, 301003, 301022, KL 교사‖학생,
+% 온도 1, 계수 .25). 1단계의 별도 pilot 9 fit은 표 tab:rounds에 있다.
+
+\section{Results}
+\label{sec:ads24-results}
+
+The CD student passed all three criteria
+(Tables~\ref{tab:ads24-groups} and~\ref{tab:ads24-criteria}). On the
+environment evaluation the seed standard deviation fell from 0.163 to
+0.025 and the mean NLL from 2.276 to 2.060; the worst seed moved from
+2.690 to 2.121. On the preservation runs the mean NLL fell from 1.449
+to 1.430, so the interval stays well below the limit of $+0.043$. The
+self-distillation control, which uses the same KL term with each seed
+as its own teacher, left the environment loss where it was, at 2.275
+with a seed standard deviation of 0.162. As a secondary contrast with
+individual 95\% intervals, the CD student minus the control was
+$-0.215$ $[-0.248, -0.181]$ in mean NLL and $-0.137$
+$[-0.163, -0.115]$ in seed standard deviation. The reduction is thus
+tied to the consensus of several models, not to the distillation step
+as such.
+% 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
+% "봉인한 주 판정", "TOP5−SELF 보조 대비" (env_mean −0.214832 [−0.248399, −0.181309];
+% env_sd −0.136728 [−0.162917, −0.114904]). 여섯 자리 원값은 부록 B.6.
+% TODO(사람): 부록 B.6의 label이 아직 없어 본문에서 참조하지 않았습니다.
+
+\begin{table}[htbp]
+\centering
+\caption{The three groups of 30 seeds on ADS-24. Environment columns
+are the 35 runs with simulated users (5,639 boundaries); preservation is
+the 15 runs without users (2,982 boundaries). NLL is execution-weighted
+as in Equation~\ref{eq:nll}; accuracy is the run-weighted top-1
+accuracy. The last column counts the seeds whose environment NLL is
+below that of the majority-class baseline.}
+\label{tab:ads24-groups}
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Group & Env.\ NLL & Seed SD & Worst seed & Env.\ accuracy
+  & Pres.\ NLL & Below baseline \\
+\midrule
+REL\_GLOBAL                & 2.276 & 0.163 & 2.690 & 28.4\% & 1.449 & 0/30 \\
+CD student                 & 2.060 & 0.025 & 2.121 & 31.5\% & 1.430 & 0/30 \\
+Self-distillation control  & 2.275 & 0.162 & 2.681 & 28.2\% & 1.438 & 0/30 \\
+Majority-class baseline    & 1.830 & ---   & ---   & 33.9\% & ---   & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: RECORD:216--221; ADS24_STAGE2_REPORT.md "세 군의 전체 성과", "FIT 다수 전술
+% 기준선과 비교" (0/30 세 군 모두). 정확도는 원 파일의 0.283592, 0.315363, 0.282060,
+% 0.339311을 소수 첫째 자리 %로 줄였다.
+
+\begin{table}[htbp]
+\centering
+\caption{Sealed primary criteria of the ADS-24 second stage, CD student
+minus REL\_GLOBAL, with two-sided Bonferroni-adjusted 98.3333\% intervals
+from 100,000 execution resamples stratified by scenario. The 30 seeds
+are fixed. The 35 environment-evaluation runs had been scored in
+stage~1.}
+\label{tab:ads24-criteria}
+\small
+\begin{tabular}{@{}llrlrl@{}}
+\toprule
+Runs & Contrast & Estimate & Interval & Limit & Outcome \\
+\midrule
+Environment  & seed SD difference & $-0.138$ & $[-0.167, -0.113]$ & $0$
+  & passed \\
+Environment  & mean NLL difference & $-0.216$ & $[-0.257, -0.174]$ & $0$
+  & passed \\
+Preservation & mean NLL difference & $-0.019$ & $[-0.024, -0.015]$
+  & $+0.043$ & passed \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: RECORD:223--227; ADS24_STAGE2_REPORT.md "봉인한 주 판정" (−0.137581
+% [−0.167053, −0.113060]; −0.215652 [−0.256788, −0.174157]; −0.019398
+% [−0.024140, −0.015072]; 한도 +0.043482, PCG64 2026112003).
+
+The pattern that motivated the method in the in-house lab appeared on
+ADS-24 as well. On the preservation runs the 30 REL\_GLOBAL seeds had a
+standard deviation of 0.015; on the environment evaluation it was
+0.163, about eleven times larger. The seen condition also says little
+about which seed will hold up on the unseen one. In a post hoc
+computation the Spearman correlation between the seeds' preservation
+and environment losses was $-0.39$, so ranking seeds by their score on
+the condition without users would not have found the good seeds under
+simulated users, much as \texttt{ORIGINAL\_18} did not for A+C in
+Section~\ref{sec:diag-size}.
+% 근거: RECORD:231; ADS24_STAGE2_REPORT.md (REL_BASE 보존 seed SD 0.015182).
+% −0.39는 기록의 사후 계산이다. ADS24_STAGE1_REPORT.md의 30 seed 표에서 환경
+% NLL과 보존 OFF NLL의 Spearman을 다시 계산해 −0.3878을 확인했다.
+
+One in-house observation did not replicate. In the lab, a seed's
+agreement with the other seeds on unlabeled environment inputs ranked
+the seeds much as their losses did (Section~\ref{sec:diag-agreement}).
+On ADS-24 the stage-1 contract tested this as a separate diagnostic,
+using each seed's top-1 agreement with the majority of the other 29
+models on the environment-evaluation inputs. The expected direction was
+negative, with the condition set at $\rho \le -0.50$ and a permutation
+$p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
+permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
+more with the rest did not have lower loss. Choosing a seed by
+agreement is therefore supported only in the in-house lab. The same
+weakness reaches the teacher rule of Section~\ref{sec:method-teachers},
+which ranks seeds by agreement. On ADS-24 the CD student still passed
+with teachers chosen this way, but the data give no evidence that
+agreement picked good teachers.
+% 근거: RECORD:233, 260, 405; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (Spearman
+% ρ≤−.50, 100,000회 양측 순열 p<.05; 진단 조건이며 증류 관문이 아님);
+% ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125).
+
+The reduction in spread did not bring the models to a useful absolute
+level. On the environment evaluation all 30 CD seeds were worse than the
+majority-class baseline, a constant predictor fixed on the FIT runs
+alone whose top-1 choice is the most frequent FIT tactic; its NLL is
+1.830. The CD mean exceeded it by $+0.231$, against $+0.446$ for
+REL\_GLOBAL, and CD accuracy was 31.5\% against 33.9\% for the baseline.
+Not every seed gained either. The best REL\_GLOBAL seed scored 1.953,
+lower than every CD seed, whose best was 2.020; consensus distillation
+pulled that seed back toward the group. On ADS-24 the method makes the
+seeds behave alike. It does not remove the loss that the move to
+simulated users causes, and Chapter~\ref{ch:discussion} discusses what
+this implies.
+% 근거: RECORD:212, 221, 234, 423; ADS24_STAGE2_REPORT.md "FIT 다수 전술 기준선과
+% 비교" (기준선 1.829580; 평균 차 +0.446462, +0.230810, +0.445642; 0/30) 및
+% 최고 seed (REL_BASE 301008 1.953153, KD_ENV_TOP5 301008 2.020009).
+% 이 기준선(FIT만으로 정한 다수 전술, 환경 ON35)은 부록 D의 라벨 기준선
+% (132실행 5-fold, 1.8547/32.0%)과 다르다.
+% TODO(사람): 기준선의 확률 분포가 FIT 전술 빈도(사전 분포)인지 원 파일에서
+% 확인하지 못했습니다. 정의 문장("a constant predictor fixed on the FIT runs alone")이
+% 맞는지 확인해 주세요.
+
+Stage~1 also fixed in advance three breakdowns of the environment loss,
+none of which entered a criterion. Boundaries with no new alert since
+the previous one were easier for REL\_GLOBAL than the rest, 1.987
+against 2.323, and the CD student lowered both, to 1.790 and 2.103. The
+loss also depended on the defender agent, ranging for REL\_GLOBAL from
+1.770 with NOPAgent to 2.544 with WhackAMoleAgent. One further quantity
+was computed only after the primary results, and we report it as a
+post hoc analysis. The probability average of the five teachers scored
+2.038 on the environment evaluation, and that of all 30 REL\_GLOBAL
+seeds 1.945. The full average was the better target here, which is
+consistent with the failed agreement diagnostic above; whether a
+student of all 30 would also be better was not tested.
+% 근거: RECORD:262--263; ADS24_STAGE2_REPORT.md "사전 지정 보조 분해" (new_alerts_zero
+% 852경계 1.987007/1.790397, new_alerts_positive 4,787경계 2.322911/2.103257;
+% 방어자 NOPAgent 1.770317, WhackAMoleAgent 2.544174, bustling-doe-36 2.303870,
+% nebulous-snail-417 2.423497). 사용자 활동량 상·하위 절반(2.096/2.446)은 분량 때문에
+% 본문에서 뺐다. 교사 평균 2.0379, 1.9454는 기록의 사후 계산이다.
+% 개요는 이 장을 7문단으로 잡았으나, 지위(1·2단계, 열람 여부)를 과제 문단과 나눠
+% 8문단이 되었다.
