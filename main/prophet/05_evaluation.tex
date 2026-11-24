@@ -131,18 +131,11 @@ improvement, and preservation.
 
 The contracts call these limits practical limits but do not derive
 them from an operational requirement, such as a tolerable change in an
-analyst's decisions, or from a measured spread, so the outcomes near
-the limit should be read with it in view. Two upper ends lie within
-0.001 of $+0.020$: $+0.0198$ for the in-house plain GRU in the
-generality study, which met preservation, and $+0.0207$ for KD\_ALL in
-the PAG1 re-inference, which did not. A limit of $+0.015$ would have
-reversed the first outcome and a limit of $+0.025$ the second.
-KD\_ENV\_TOP5 failed with upper ends of $+0.0392$ in PAG1 and $+0.0535$
-in the v2 recheck, so those outcomes stand for any limit up to about
-$+0.039$. The v3 result, with an upper end of $-0.0041$, meets any
-non-negative limit, and every other interval that met its limit in
-Chapters~\ref{ch:results}--\ref{ch:generality} ends at least 0.019
-below it.
+analyst's decisions, or from a measured spread. We therefore report the
+upper end of every preservation interval, so that a reader can apply
+another limit, and Section~\ref{sec:disc-threats} lists the outcomes
+that a different limit would reverse.
+% 한도 근처 값의 비교(+0.0198, +0.0207 등)는 문장 리뷰 P2-6에 따라 11.5절로 옮겼다.
 % 근거: ARCH_GENERALITY_STAGE2_REPORT.md 주 판정(PLAIN_GRU 상단 0.019818, 나머지
 % 자체 상단 −0.015341, −0.034626; ADS −0.020109, −0.008179, −0.010914);
 % V3_REINFERENCE 상단 0.020741; v2 재확인 상단 0.053519.
@@ -169,7 +162,9 @@ family that adds temperature scaling (99.1667\%,
 Section~\ref{sec:gen-methods}). The 30 seeds are held fixed and are
 never resampled. Each interval therefore
 describes these 30 checkpoints on resampled executions and contains no
-uncertainty about the population of seeds from which they were drawn.
+uncertainty about the population of seeds from which they were drawn,
+and every conclusion about seed spread in this thesis is a statement
+about these checkpoints.
 % 근거: CONTRACT_V3.md:11 (100,000회, 98.3333%); ADS24_STAGE2_REPORT.md:15;
 % ARCH_GENERALITY_STAGE2_REPORT.md:9 (98.3333% 자료별 / 99.1667% 여섯 대비);
 % METHOD_BASELINES_CONTRACT_SEALED.md:37 (99%); RECORD:446.
@@ -187,16 +182,25 @@ level were fixed in a contract before the round's models were trained
 and its executions collected, and which was then read once on those
 executions. A \emph{development comparison} is any contrast computed on
 executions that had already been inspected, or one that was not fixed
-in advance; this covers the 135-run development set used for the
-diagnosis of Chapter~\ref{ch:diagnosis} and the ADS-24 results of
-Chapter~\ref{ch:generality}. A \emph{post hoc analysis} is a quantity
+in advance. This covers the 135-run development set used for the
+diagnosis of Chapter~\ref{ch:diagnosis} and every contrast whose
+contract was sealed after its evaluation runs had been scored in an
+earlier stage: the second stage of the ADS-24 study, the PAG1
+re-inference, and the second stage of the generality study, on both
+datasets. A contract sealed before the models of such a stage were
+trained still fixes what is compared, but the runs had already
+informed the decision to run the stage, so its outcome is not a
+confirmation. A \emph{post hoc analysis} is a quantity
 defined after the primary experiments, such as the decomposition of
 Chapter~\ref{ch:decomposition}; it supports interpretation and was used
 in no criterion. A sealed criterion on new in-house executions is
 still a repetition within one laboratory and one configuration design,
 not a test on another organization's hosts.
 % 근거: 개요 전체 규칙 "증거의 지위 표시"; RECORD:126, 334, 442, 443.
-% ADS-24 2단계는 표 각주 a의 단서를 단 sealed criterion으로 분류했다(개요 8장 주장 3).
+% 방법 리뷰 P1-1, P1-2와 answers 2026-11-24 07:10 4번에 따라 ADS-24 2단계와 구조
+% 일반성 2단계를 개발 비교로 낮췄다. PAG1 재추론도 같은 이유(PAG1 실행이 구조
+% 일반성 1단계에서 이미 채점된 뒤 사전 등록됨, ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md)로
+% 함께 낮췄다. TODO(사람): PAG1 재추론의 분류가 맞는지 확인해 주세요.
 
 Table~\ref{tab:rounds} is the ledger of every round in which the method
 was tested, including the rounds that failed. The code names
@@ -233,23 +237,26 @@ v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
 v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
   & sealed criterion & all three criteria passed \\
 PAG1 re-inference & 0 & 156 / 1,600
-  & sealed criterion & stability passed; preservation not shown \\
+  & development comparison$^{a}$ & stability favorable; preservation not shown \\
 ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982
   & sealed criterion & instability gate passed \\
 ADS-24, stage 2 & 60 & as stage 1
-  & sealed criterion$^{a}$ & all three criteria passed \\
+  & development comparison$^{a}$ & all three contrasts favorable \\
 Generality, stage 1 & 180 (+24 pilot) & 156 / 1,600; ADS-24 as stage 1
   & sealed / development$^{b}$ & baseline models measured \\
 Generality, stage 2 & 210 & as stage 1
-  & sealed / development$^{b}$ & criteria met in all six combinations \\
+  & development comparison$^{a}$ & contrasts favorable in all six combinations \\
 Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
   & sealed / development$^{b,c}$ & reported contrasts; no pass rule \\
 \bottomrule
 \end{tabularx}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-$^{a}$The 35 environment-evaluation runs had been scored once in
-stage~1, before the stage-2 contract was sealed.
+$^{a}$The contract was sealed before the stage's models were trained or
+run, but after its evaluation runs had been scored in an earlier stage:
+the 35 ADS-24 environment-evaluation runs in ADS-24 stage~1, and the
+156 PAG1 runs in generality stage~1, whose baseline spreads also
+decided which combinations entered stage~2.
 $^{b}$Sealed for the new in-house runs; a development comparison for
 ADS-24, whose evaluation runs had been inspected in earlier stages.
 $^{c}$The contract fixed the contrasts and their intervals but no

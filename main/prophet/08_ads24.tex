@@ -31,7 +31,9 @@ used.
 
 The input at a prediction boundary is the sequence of Wazuh alerts
 recorded before it, read through the Wazuh rule identifier and rule
-level, \texttt{rule.id} and \texttt{rule.level}~\cite{tmp_wazuh},
+level, \texttt{rule.id} and
+\texttt{rule.level},\footnote{Wazuh rule syntax:
+\url{https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html}.}
 together with host role and alert timing. The target is the ATT\&CK tactic of the next attack segment, one
 of nine classes. A segment merges consecutive stages that share a
 tactic, and every segment after the first starts a boundary. We fixed
@@ -50,13 +52,21 @@ REL\_GLOBAL-ADS, the ADS-24 adaptation of
 Section~\ref{sec:method-transfer}. The two conditions also differ in
 collection period: the runs without users were collected mostly in
 early April and those with users in mid-April, so the split is
-associated with the users and with the period at once.
+associated with the users and with the period at once. The results
+below compare models across this combined split and do not estimate
+an effect of the simulated users alone.
+% TODO(사람): (1) 계약의 132실행과 자료 논문의 134실행의 관계, (2) episode와 run이
+% 같은 단위인지, (3) Lore 단계와 Wazuh 경보를 묶은 시각 앵커(SMB 흔적, 시차 중앙값
+% 11.47초)의 정렬식과 그것이 수신 시각인지, (4) 역할별 run ID manifest와 제외 규칙
+% 파일의 위치를 알려 주세요. 지어내지 않고 비워 두었다.
 % 근거: RECORD:214, 247, 251, 254; ADS24_CONTRACT_SEALED.md "과제와 자료",
 % "입력과 모델 이식"; ADS24_STAGE2_REPORT.md "계보" (8,461/2,982/5,811/5,639경계).
 % 연속 경계의 약 62.7%가 같은 전술이라는 수치는 개요에 따라 부록 D에 둔다.
 % 원 보고서의 REL_BASE = 이 장의 REL_GLOBAL-ADS, KD_ENV_TOP5 = CD student,
 % KD_SELF = self-distillation control.
-% RECORD:441 (OFF 4월 초, ON 4월 중순). tmp_wazuh는 Wazuh 규칙 문서(인용 요청).
+% RECORD:441 (OFF 4월 초, ON 4월 중순). Wazuh 문서는 answers 07:10 2번에 따라
+% 각주 URL로 바꿨다. TODO(사람): 접근일과, 수집에 쓰인 Wazuh 버전에 맞는 문서 판을
+% 확인해 주세요(지금 URL은 current 판).
 
 The study ran in two stages, each under its own sealed contract.
 Stage~1 trained 30 REL\_GLOBAL-ADS seeds on FIT and asked only whether they
@@ -69,11 +79,13 @@ the highest top-1 agreement on the 34 adaptation runs, and a
 self-distillation control in which each seed is distilled from its own
 frozen stage-1 model. All other settings were carried over from the
 in-house method unchanged. Because stage~1 had already scored
-REL\_GLOBAL-ADS on the 35 environment-evaluation runs, the stage-2 criteria
-were sealed before the students were trained but not before those runs
-were inspected. The result below is therefore a sealed criterion with
-that qualification (Table~\ref{tab:rounds}, note~a), and we do not
-describe it as an external test on unseen data.
+REL\_GLOBAL-ADS on the 35 environment-evaluation runs, the stage-2
+contrasts were fixed before the students were trained but after those
+runs had been inspected and used to decide that stage~2 should run.
+Stage~2 is therefore a development comparison on previously inspected
+runs (Table~\ref{tab:rounds}, note~a). Its intervals summarize the
+technical uncertainty of that comparison; they are not an external test
+on unseen data, which would need ADS-24 runs that no stage has used.
 % 근거: RECORD:256--261; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (관문 SD≥.050,
 % 10,000회 95% 구간 하단≥.020), "2단계 예정 계약" (교사: ADAPT_ON34에서만,
 % 자기 포함 30모델 다수결; KD_SELF는 같은 seed의 동결 REL_BASE);
@@ -84,8 +96,8 @@ describe it as an external test on unseen data.
 \section{Results}
 \label{sec:ads24-results}
 
-All three criteria were met
-(Tables~\ref{tab:ads24-groups} and~\ref{tab:ads24-criteria}). On the
+All three pre-specified contrasts fell on the favorable side of their
+thresholds (Tables~\ref{tab:ads24-groups} and~\ref{tab:ads24-criteria}). On the
 environment evaluation the seed standard deviation fell from 0.163 to
 0.025 and the mean NLL from 2.276 to 2.060; the worst seed moved from
 2.690 to 2.121. On the preservation runs the mean NLL fell from 1.449
@@ -109,14 +121,14 @@ as such.
 are the 35 runs with simulated users (5,639 boundaries); preservation is
 the 15 runs without users (2,982 boundaries). NLL is execution-weighted
 as in Equation~\ref{eq:nll}; accuracy is top-1 accuracy. The last
-column counts the seeds whose environment NLL is below that of the FIT
-prior baseline.}
+column counts the seeds whose environment NLL is lower than that of the
+FIT prior baseline defined below.}
 \label{tab:ads24-groups}
 \small
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
 Group & Env.\ NLL & Seed SD & Worst seed & Env.\ accuracy
-  & Pres.\ NLL & Below baseline \\
+  & Pres.\ NLL & Seeds beating baseline \\
 \midrule
 REL\_GLOBAL-ADS            & 2.276 & 0.163 & 2.690 & 28.4\% & 1.449 & 0/30 \\
 CD student                 & 2.060 & 0.025 & 2.121 & 31.5\% & 1.430 & 0/30 \\
@@ -131,11 +143,11 @@ FIT prior baseline         & 1.830 & ---   & ---   & 33.9\% & ---   & --- \\
 
 \begin{table}[htbp]
 \centering
-\caption{Sealed primary criteria of the ADS-24 second stage, CD student
-minus REL\_GLOBAL-ADS, with two-sided Bonferroni-adjusted 98.3333\% intervals
-from 100,000 execution resamples stratified by scenario. The 30 seeds
-are fixed. The 35 environment-evaluation runs had been scored in
-stage~1.}
+\caption{Pre-specified contrasts of the ADS-24 second stage, a
+development comparison: CD student minus REL\_GLOBAL-ADS, with two-sided
+Bonferroni-adjusted 98.3333\% intervals from 100,000 execution resamples
+stratified by scenario. The 30 seeds are fixed. The 35
+environment-evaluation runs had been scored in stage~1.}
 \label{tab:ads24-criteria}
 \small
 \begin{tabular}{@{}llrlrl@{}}
@@ -143,11 +155,11 @@ stage~1.}
 Runs & Contrast & Estimate & Interval & Limit & Outcome \\
 \midrule
 Environment  & seed SD difference & $-0.138$ & $[-0.167, -0.113]$ & $0$
-  & passed \\
+  & favorable \\
 Environment  & mean NLL difference & $-0.216$ & $[-0.257, -0.174]$ & $0$
-  & passed \\
+  & favorable \\
 Preservation & mean NLL difference & $-0.019$ & $[-0.024, -0.015]$
-  & $+0.043$ & passed \\
+  & $+0.043$ & favorable \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -178,12 +190,13 @@ models on the environment-evaluation inputs. The expected direction was
 negative, with the condition set at $\rho \le -0.50$ and a permutation
 $p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
 permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
-more with the rest did not have lower loss. Choosing a seed by
-agreement is therefore supported only in the in-house lab. The same
-weakness reaches the teacher rule of Section~\ref{sec:method-teachers},
-which ranks seeds by agreement. On ADS-24 the CD student still met its
-criteria with teachers chosen this way, but the data give no evidence
-that agreement picked good teachers.
+more with the rest did not have lower loss. The rank correlation
+between agreement and loss thus held only in the in-house lab, and even
+there the top-ranked seed failed preservation
+(Section~\ref{sec:method-teachers}). The same weakness reaches the
+teacher rule, which ranks seeds by agreement. On ADS-24 the CD student
+still reduced the spread with teachers chosen this way, but the data
+give no evidence that agreement picked good teachers.
 % 근거: RECORD:233, 260, 405; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (Spearman
 % ρ≤−.50, 100,000회 양측 순열 p<.05; 진단 조건이며 증류 관문이 아님);
 % ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125).
@@ -191,9 +204,11 @@ that agreement picked good teachers.
 Absolute performance stayed low. We compare it with the \emph{FIT
 prior baseline}, which predicts at every boundary the tactic
 frequencies of the FIT runs, weighting each run equally, and whose
-top-1 choice is therefore the majority tactic of FIT. On the
-environment evaluation its NLL is 1.830, and all 30 CD seeds were worse
-than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
+top-1 choice is therefore the majority tactic of FIT. It is estimated
+from the 48 FIT runs alone and scored, like the models, on the 35
+environment-evaluation runs; the stored reports do not say whether the
+frequencies were smoothed. On the environment evaluation its NLL is
+1.830, and all 30 CD seeds were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
 baseline. Not every seed gained either. The best REL\_GLOBAL-ADS seed
 scored 1.953, lower than every CD seed, whose best was 2.020; consensus

@@ -15,12 +15,18 @@ datasets; each section opens by stating it.
 \section{Generality across encoders}
 \label{sec:gen-arch}
 
-The in-house results of this section are sealed criteria read on 156
-new runs (1,600 rows) collected for this study in the PAG1 round. They
-repeat the laboratory, benign workers, and configuration design of the
-earlier rounds. The ADS-24 results reuse the 35 environment-evaluation
-runs scored in Chapter~\ref{ch:ads24} and are therefore development
-comparisons (Section~\ref{sec:eval-rounds}). The three encoders are the
+All results of this section are development comparisons on runs that
+had already been inspected (Section~\ref{sec:eval-rounds}). The
+in-house runs are 156 runs (1,600 rows) collected for this study in the
+PAG1 round under a sealed contract, in the laboratory, benign workers,
+and configuration design of the earlier rounds. Stage~1 scored the
+baseline seeds on them, and only combinations whose baseline seed
+standard deviation reached 0.020 went on to stage~2, so the stage-2
+contrasts were read on the same runs that selected them. Because the
+selection favored combinations with a large baseline spread, part of
+the later reduction could be regression toward the mean, which this
+design cannot rule out. The ADS-24 results reuse the 35
+environment-evaluation runs scored in Chapter~\ref{ch:ads24}. The three encoders are the
 LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
 adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 baseline seeds of
@@ -31,7 +37,8 @@ from the same encoder's baselines by unlabeled agreement, and a
 self-distillation control for the in-house plain GRU (210 fits).
 % 근거: RECORD:279--281; ORIG:ARCH_GENERALITY_STAGE2_20261122/
 % ARCH_GENERALITY_STAGE2_REPORT.md:3 (ADS-24 ON35 = 이미 열람한 평가 실행의 개발 비교,
-% PAG1 새 156실행 = 같은 lab·worker·구성 설계의 확인), :20 (1단계 seed SD ≥ .020인
+% PAG1 새 156실행 = 원 보고서는 "확인"이라 부르나, 1단계에서 채점·조합 선택에 쓰였으므로
+% 방법 리뷰 P1-2와 answers 07:10 4번에 따라 개발 비교로 낮췄다), :20 (1단계 seed SD ≥ .020인
 % 여섯 조합만 실행), :161 (학생 fit 210/210); ARCH_GENERALITY_STAGE1_REPORT.md:13
 % (PROPHET 총합 160계획, 156적격, 1,600행). 1단계 180 fit(+24 pilot)은 표 tab:rounds.
 % 원 파일 이름 대응: DEEPLOG_LSTM = LSTM encoder (DeepLog-style),
@@ -62,7 +69,8 @@ more than the preservation runs did.
 \caption{Baseline and CD student for the three general encoders
 (30 seeds each). In-house values are on \texttt{A+C FLAT} of the new
 PAG1 runs (31 runs, 341 rows); ADS-24 values are on the 35
-environment-evaluation runs (5,639 rows), a development comparison.
+environment-evaluation runs (5,639 rows). Both halves are development
+comparisons.
 Each cell gives baseline model $\rightarrow$ CD student; accuracy is
 execution-weighted. The last two rows are the predictors of
 Chapters~\ref{ch:results} and~\ref{ch:ads24} on the same runs, for
@@ -110,38 +118,37 @@ ADS-24 & REL\_GLOBAL-ADS (reference)
 % ADS-24 REL_GLOBAL의 seed 정확도 범위는 기록에 없어 비웠다.
 
 CD lowered both the spread and the mean in all six combinations. The
-contract judges each criterion, stability, mean improvement, and
-preservation, as one family of six encoder--dataset contrasts with
+contract groups each contrast, stability, mean improvement, and
+preservation, into one family of six encoder--dataset contrasts with
 99.1667\% intervals (Section~\ref{sec:eval-criteria}). Every one of the
-18 intervals fell on the favorable side of its threshold. The status of
-the two halves differs. The three in-house combinations met the
-criteria on new runs, as sealed criteria. The three ADS-24 combinations
-met the same intervals on runs that had been inspected, as a
-development comparison. No joint family of all 18 contrasts was
-defined, so the result is not a claim that all 18 hold together at a
-5\% familywise level. The closest stability result was the ADS-24 Transformer
-encoder, with a seed standard deviation difference of $-0.099$
-$[-0.127, -0.075]$; the closest mean result was the ADS-24 plain GRU, at
-$-0.092$ $[-0.113, -0.071]$. Every interval for preservation also lay
-below its limit, although one only narrowly, as discussed below. The
-students' spread was also small relative to the baselines' spread: in
-every combination, even the worst CD seed scored better than the median
-baseline seed.
+18 intervals fell on the favorable side of its threshold. Since every
+run had been inspected, these intervals describe the uncertainty of a
+development comparison and do not amount to confirmation. No joint
+family of all 18 contrasts was defined either, so the result is not a
+claim that all 18 hold together at a 5\% familywise level. The closest
+stability result was the ADS-24 Transformer encoder, with a seed
+standard deviation difference of $-0.099$ $[-0.127, -0.075]$; the
+closest mean result was the ADS-24 plain GRU, at $-0.092$
+$[-0.113, -0.071]$. Every interval for preservation also lay below its
+limit, although one only narrowly, as discussed below.
 % 근거: RECORD:279, 294; ARCH_GENERALITY_STAGE2_REPORT.md "주 판정" (99.1667% 구간:
 % ADS LOGBERT SD −0.099170 [−0.127209, −0.075001]; ADS PLAIN_GRU 평균 −0.091707
 % [−0.112726, −0.071334]; 여섯 조합 모두 Y·Y·Y). PROPHET 대비는 A+C FLAT/NESTED 1:1
 % 평균이다(같은 파일 :76).
 % TODO(사람): "가장 나쁜 CD seed가 기준 모델의 중간 seed보다 낫다"(RECORD:279)는
-% 기록의 문장입니다. seed별 CSV(STAGE2_SEED_RESULTS.csv)가 atlas에 없어 중간값을
-% 원 파일에서 대조하지 못했습니다. 확인해 주세요.
+% seed별 CSV(STAGE2_SEED_RESULTS.csv)가 atlas에 없어 원 파일에서 대조하지 못해
+% 본문에서 뺐다(answers 4번, 07:10 4번). 원자료를 주시면 다시 계산해 넣겠습니다.
 
-Not every seed improved. Depending on the combination, between 20 and
-30 of the 30 seeds had a lower loss after distillation than before.
-Seeds that had been better than the consensus of their teachers moved
-toward it and gave up part of their advantage, so the best baseline
-seed was sometimes better than every student. On ADS-24, for instance,
-two LSTM baseline seeds scored below the FIT prior baseline and none of
-the LSTM students did. Among these 30 seeds, CD gave a level close to
+Not every seed improved. Seeds that had been better than the consensus
+of their teachers moved toward it and gave up part of their advantage,
+so the best baseline seed was sometimes better than every student. On
+ADS-24, for instance, two LSTM baseline seeds scored below the FIT
+prior baseline and none of the LSTM students did, so those two seeds
+were worse after distillation; the best REL\_GLOBAL-ADS seed of
+Chapter~\ref{ch:ads24} was likewise better than every CD seed.
+% TODO(사람): 조합별로 개선된 seed 수(기록 RECORD:297의 "30개 중 20~30개")는 seed별
+% 원자료를 atlas에서 찾지 못해 쓰지 않았다. 원자료를 주시면 부록에 조합별 쌍 차이
+% 분포(방법 리뷰 P3-1)와 함께 넣겠습니다. Among these 30 seeds, CD gave a level close to
 that of the teacher average rather than the best level any seed
 reached; whether another draw of seeds would spread as little was not
 tested. A practitioner who could identify the good seeds in advance
@@ -150,41 +157,44 @@ and~\ref{ch:ads24} showed that the seen conditions do not identify
 them.
 % 근거: RECORD:297, 424; ARCH_GENERALITY_STAGE2_REPORT.md "교사 수준, 단순 기준선,
 % 민감도" (ADS DEEPLOG_LSTM 다수 기준보다 나은 seed 기준 2/30, KD 0/30; 학생−교사
-% NLL 0.009~0.050). 20~30개의 조합별 값은 기록에만 있고 원 파일에서 찾지 못했다.
+% NLL 0.009~0.050). 기준선 아래의 기준 seed 2개는 같은 seed의 학생이 모두 기준선
+% 위이므로 증류 후 나빠졌다(쌍 비교로 따라 나온다).
 
 On ADS-24, lower spread did not mean a useful absolute level. Only the
 Transformer students beat the FIT prior baseline of 1.830 defined in
 Chapter~\ref{ch:ads24}, 27 of 30 seeds with a mean 0.034 below it. The
 LSTM and plain-GRU students, like REL\_GLOBAL-ADS in
 Chapter~\ref{ch:ads24}, remained above it with every seed, by 0.250 and
-0.300 on average. In the in-house lab every student of every encoder
-was below the corresponding in-house reference of 1.412. CD narrows
-the spread of the seeds; it does not remove the loss that comes with
-the move to an unseen environment.
+0.300 on average. For two of the three encoders, then, the distilled
+seeds agree closely on a level that a frequency table already beats.
+% 자체 실험실 다수 기준 1.411751과의 비교는 산출 모집단·평가층이 정의되지 않아
+% 뺐다(방법 리뷰 P1-5, P2-6; answers 07:10 4번).
 % 근거: RECORD:298, 423; ARCH_GENERALITY_STAGE2_REPORT.md:5, "교사 수준, 단순 기준선,
 % 민감도" (기준 1.829580; KD 0/30, 27/30, 0/30; 평균 NLL−다수 기준 KD 0.249872,
 % −0.034009, 0.300071; PROPHET 기준 1.411751, KD 30/30 세 구조 모두).
 % PROPHET 다수 기준(1.411751)의 정의는 원 파일에서 확인하지 못했다.
-% TODO(사람): 자체 실험실 다수 클래스 기준선 1.412가 무엇으로 정해졌는지(FIT 다수
-% 행동, 어느 평가층) 확인해 주세요. 확인되지 않으면 이 문장을 지우겠습니다.
+% TODO(사람): 자체 실험실 다수 클래스 기준선 1.412가 무엇으로 정해졌는지(산출식, FIT
+% 모집단, 평가층, 가중법) 알려 주시면 비교 문장을 되살리겠습니다.
 
 Two in-house details qualify the result for the plain GRU. Its
 preservation interval on \texttt{ORIGINAL\_18} had an upper end of
 $+0.0198$, just below the limit of $+0.020$, and its seed-mean accuracy
-on that condition fell from 84.5\% to 84.0\%; preservation passed, but
-with almost no margin. The self-distillation control, in which each seed
+on that condition fell from 84.5\% to 84.0\%; the interval lay below
+the limit, but with almost no margin. The self-distillation control, in which each seed
 is distilled from its own frozen baseline with the same KL term, scored
 1.112 with a seed standard deviation of 0.558 on \texttt{A+C FLAT},
 essentially the baseline values of 1.139 and 0.579. This is the second
 dataset, after ADS-24, on which distillation without a consensus left
-the instability in place. For context, we also ran our own adaptations
+the instability in place.
+
+For context, we also ran our own adaptations
 of ORTHRUS~\cite{jiang2025orthrus}, BiTA~\cite{nayeri2026bita}, and
 CL-AP$^{2}$~\cite{liu2024clap2}, which are not the original pipelines,
 with three seeds each on the same new inputs. In these runs the ORTHRUS
 and BiTA adaptations reached an A+C NLL of 0.13 to 0.16, close to
 REL\_GLOBAL, and the CL-AP$^{2}$ adaptation about 0.97. Three seeds are
 too few to measure their spread, so these figures say nothing about
-stability. Two attempts to extend CD,
+stability. Separately, two attempts to extend CD,
 a confidence-conditioned target and a projection onto a representation
 shared by the seeds, failed their preliminary checks and were not
 carried forward (Appendix~\ref{app:rejected}).
@@ -208,8 +218,8 @@ self-distillation control, it scores eight groups. The in-house runs are again n
 a sealed contract in the same lab design; the ADS-24 runs are the
 inspected environment-evaluation runs, so that half is a development
 comparison. The contract fixed the contrasts and intervals but no
-pass-or-fail rule (Table~\ref{tab:rounds}, note~c). Weight averaging
-(SWA) averages the weights of the baseline's own training trajectory
+pass-or-fail rule (Table~\ref{tab:rounds}, note~c). Stochastic weight
+averaging (SWA) averages the weights of the baseline's own training trajectory
 at updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
 Pseudo-labeling adds a cross-entropy term toward the hard predictions
 of the same seed's frozen baseline on the unlabeled environment
@@ -224,7 +234,13 @@ the 1,346 updates, the coefficient of 0.25 on the added term, a
 temperature of 1, and 32 added rows per update, and the 30 seeds started
 from the same initial weights. The study trained 300 new models; the
 baseline, CD, and self-distillation groups were reused from
-Section~\ref{sec:gen-arch}.
+Section~\ref{sec:gen-arch}. The five comparison methods were thus
+trained in a later run than the checkpoints they are compared with,
+and no cross-entropy control was retrained alongside them, so in-house,
+where retraining the plain GRU on CPU is not deterministic, a contrast
+can include rerun variation as well as the effect of the method. We
+read the comparison as a development comparison under one common,
+untuned protocol and draw no conclusion about the methods beyond it.
 % 근거: RECORD:338, 452; ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md:3
 % (ADS-24 ON35 = 이미 열람한 실행의 사후 방법 비교, PROPHET = 같은 실험실 설계의
 % 새 실행); METHOD_BASELINES_CONTRACT_SEALED.md:7 (다섯 기준선, 300 fit), :15
@@ -234,8 +250,8 @@ Section~\ref{sec:gen-arch}.
 % 원 파일 이름 대응: SWA = weight averaging, PSEUDO = pseudo-labeling,
 % ENTROPY = entropy minimization, FIT_KD = FIT-input distillation,
 % GEO_KD = geometric-pool distillation, KD_ENV = CD student.
-% TODO(사람): Lee(pseudo-label), Grandvalet·Bengio(entropy minimization)는 2장과 같은
-% 임시 key(tmp_lee, tmp_grandvalet)로 인용했습니다. 기하평균 교사의 출처로 개요가
+% Lee(pseudo-label)는 2장과 같은 임시 key(tmp_lee)로 인용하고 정확한 제목으로 다시
+% 요청했다. Grandvalet·Bengio는 이제 ref.bib의 grandvalet2004semi다. 기하평균 교사의 출처로 개요가
 % 지목한 Ilichev 등(RANLP 2021)은 정확한 제목을 확신할 수 없어 인용을 빼고
 % 2.7절의 로그 의견 풀(Heskes)로 연결했습니다.
 % TODO(사람): 기하평균 교사 증류의 선행 문헌 서지를 알려 주시면 이 자리에 인용하겠습니다.
@@ -247,7 +263,7 @@ inputs reduced the spread (Table~\ref{tab:gen-methods}). On
 and the geometric-pool student 0.020, while the baseline model and the
 other five groups stayed between 0.324 and 1.215. On ADS-24 the pattern
 was the same, with 0.026 and 0.030 against 0.174 to 0.490. Table~\ref{tab:gen-methods-contrast} gives the paired contrasts.
-In the in-house lab CD had a lower mean NLL than weight averaging,
+In the in-house lab CD had a lower mean NLL than SWA,
 pseudo-labeling, entropy minimization, and FIT-input distillation, with
 every interval above zero. Against geometric-pool distillation the
 direction was not resolved: the mean difference was $-0.011$
@@ -284,7 +300,7 @@ Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
 Baseline                      & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
 CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
 Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
-Weight averaging (SWA)        & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
+SWA                           & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
 FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
 Self-distillation             & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
 Pseudo-labeling               & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
@@ -315,13 +331,13 @@ $+0.043$ on ADS-24).}
 Data & Method & \multicolumn{2}{c}{Seed SD difference}
  & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
 \midrule
-In-house & Weight averaging       & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
+In-house & SWA                    & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
 In-house & Pseudo-labeling        & 1.194 & $[1.103, 1.329]$ & 1.789 & $[1.602, 1.973]$ & no \\
 In-house & Entropy minimization   & 0.291 & $[0.207, 0.444]$ & 2.374 & $[1.703, 3.408]$ & no \\
 In-house & FIT-input distillation & 0.802 & $[0.730, 0.883]$ & 1.065 & $[0.921, 1.206]$ & yes \\
 In-house & Geometric-pool distillation & 0.003 & $[-0.003, 0.018]$ & $-0.011$ & $[-0.067, 0.027]$ & yes \\
 \midrule
-ADS-24 & Weight averaging       & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
+ADS-24 & SWA                    & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
 ADS-24 & Pseudo-labeling        & 0.412 & $[0.345, 0.482]$ & 1.225 & $[1.004, 1.437]$ & no \\
 ADS-24 & Entropy minimization   & 0.463 & $[0.394, 0.541]$ & 4.743 & $[4.088, 5.347]$ & no \\
 ADS-24 & FIT-input distillation & 0.166 & $[0.131, 0.200]$ & 0.097 & $[0.075, 0.120]$ & yes \\
@@ -372,12 +388,11 @@ retried nor replaced. The \texttt{A+C} intervals therefore rest on six
 complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
 configurations. The comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
-weight averaging did not use the cyclical or constant learning-rate
-schedule of the original SWA. In-house, the weight-averaging contrast may
-also include rerun variation, because the plain GRU on CPU is not
-deterministic. The cross-entropy run from which the weights were
-averaged ended with weights identical, bit for bit, to the stored
-baseline for 30 of 30 seeds on ADS-24 and for none in-house.
+SWA did not use the cyclical or constant learning-rate
+schedule of the original method. The size of the rerun variation is
+visible for SWA: the cross-entropy run from which its
+weights were averaged ended with weights identical, bit for bit, to the
+stored baseline for 30 of 30 seeds on ADS-24 and for none in-house.
 Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.
 On the same new runs the A+C score of REL\_GLOBAL was 0.086, against
 0.226 for the plain-GRU student.
@@ -397,7 +412,8 @@ family above. A probability ensemble of the five selected teachers or
 of all 30 baseline seeds is a different predictor, with five or 30
 forward passes at inference, and we report it as a reference upper
 bound rather than as a competitor of the same cost.
-Table~\ref{tab:gen-reference} gives both for the four encoders. For the
+Table~\ref{tab:gen-reference} gives both for the three encoders and
+REL\_GLOBAL. For the
 plain GRU, temperature scaling minus CD was $+0.993$
 $[+0.886, +1.101]$ in mean NLL and $+0.667$ $[+0.593, +0.752]$ in seed
 standard deviation in-house, and $+0.033$ $[+0.017, +0.049]$ and

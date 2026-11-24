@@ -8,44 +8,41 @@
 
 PROPHET forecasts the next of 18 attacker actions from the Windows
 execution and audit records received before a cutoff. The thesis
-followed one line of argument through four steps. It first measured
-that seeds of REL\_GLOBAL trained on the same 603 FIT runs disagree
-widely once the benign worker~C appears, and that their scores on the
-training conditions do not say which seed will hold up. It then
-localized much of the in-house error to a single file decision, whether
-to COPY or to keep searching, which the seeds resolve from the observed
-result for the current target in different ways. From there it moved
-to a remedy that leaves the deployed model unchanged: a student of the
-same architecture follows the averaged probabilities of five selected
-teachers on unlabeled inputs from the new workload. Finally, the remedy
-was tested against criteria sealed before training. In the v3 round,
-with 30 new seeds and 157 new runs, mean NLL on \texttt{A+C FLAT} fell
-from 0.0731 to 0.0276 and all three primary criteria were met. On
-ADS-24, sealed only after its evaluation runs had been inspected, the
-seed standard deviation fell from 0.163 to 0.025. The three encoder
-adaptations met the same criteria on new in-house runs and showed the
-same direction on ADS-24 in a development comparison.
+first measured that seeds of REL\_GLOBAL trained on the same 603 FIT
+runs disagree widely once the benign worker~C appears, and that the
+final FIT minibatch loss did not rank them by how they would hold up.
+It observed that, on unlabeled inputs from the new workload, the seeds
+disagree on the rows where their loss concentrates; a separate
+diagnosis traced many in-house errors to one file decision, COPY or
+keep searching, although the head built on it was not adopted. From
+the disagreement it moved to a remedy that leaves the deployed model
+unchanged: a student of the same architecture follows the averaged
+probabilities of five selected teachers on unlabeled inputs from the
+new workload. In the v3 round, the one test of CD under criteria sealed
+before training and collection, with 30 new seeds and 157 new runs,
+mean NLL on \texttt{A+C FLAT} fell from 0.0731 to 0.0276 and all three
+primary criteria were met. On ADS-24, in a development comparison on
+inspected runs, the seed standard deviation fell from 0.163 to 0.025,
+and the three encoder adaptations moved the same way in development
+comparisons on both datasets.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
 % 166, 170 (v3), 219 (ADS-24 SD), 294 (세 인코더). 숫자는 개요대로 세 개만 다시 썼다.
 % ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
-% (8, 9장에서 밝힘). 여기서는 판정 이름만 쓰고 지위를 다시 설명하지 않았다.
+% (8, 9장에서 밝힘). 구조 일반성의 자체 실험실 쪽도 개발 비교로 낮췄다(answers 07:10).
 
-These results have firm edges. CD narrows the spread across the seeds
-we trained; it does not undo the cost of moving to an unseen
-environment, and it relies on unlabeled inputs from that environment.
-On ADS-24 most distilled models still scored worse than the FIT prior
-baseline at an NLL of 1.830, and only the Transformer students cleared
-it. Nor does every seed gain: in each architecture--dataset combination
-between 20 and 30 of the 30 seeds improved, and seeds that had been
-lucky were pulled down to the level of the consensus. The diagnosis
-holds for one model in one lab, and the agreement ranking used to pick
-teachers did not carry over to ADS-24. Among the 30 seeds of each group, the
-CD students differed less from one another than the baseline models
-did, at the price of training 30 baselines before the student; the
-intervals do not extend this to other seeds. A CD student is not a
-forecaster that has learned more about the new environment.
+The results are bounded in several ways. Among these 30 checkpoints per
+group, the CD students differed less from one another than the baseline
+models did, at the price of training 30 baselines before the student;
+the intervals do not extend this to other seeds. CD relies on unlabeled
+inputs from the new environment and does not undo the cost of moving
+there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
+and plain-GRU encoders still scored worse than the FIT prior baseline
+at an NLL of 1.830; only the Transformer students cleared it. Not every
+seed gained either: seeds that had scored better than the consensus
+moved toward it. The diagnosis holds for one model in one lab, and the
+agreement ranking used to pick teachers did not carry over to ADS-24.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
-% 297 (20~30/30, 운 좋은 seed 하락), 405 (합의도 seed 선택 ADS-24 미재현),
+% 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
 
 \section{Future Work}
@@ -63,7 +60,7 @@ term needs. The third repeats the comparison with other single-model
 methods on a Transformer encoder, so that the comparison does not rest
 on one architecture. The remaining checks reuse frozen models. They run
 inference on the 119 ADS-24 runs that no earlier stage has used, which
-would give the first ADS-24 result on runs no one has looked at, and on
+would give an ADS-24 result on runs no one has looked at, and on
 a fresh in-house collection that completes the method comparison
 stopped at 110 runs. They also recompute the intervals with seeds
 resampled along with runs, so that a verdict no longer speaks only for

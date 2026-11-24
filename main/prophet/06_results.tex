@@ -71,9 +71,9 @@ Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL
 All three criteria passed (Table~\ref{tab:results-v3-criteria}). On
 both A+C layouts the interval for the difference in seed standard
 deviation lies below zero. On \texttt{A+C FLAT} the standard deviation
-fell from about 0.056 to 0.010 and the worst seed from about 0.23 to
-0.07; on \texttt{A+C NESTED} the corresponding values were 0.056 to
-0.006 and 0.20 to 0.05. On \texttt{ORIGINAL\_18} the interval for the NLL
+fell from 0.056 to 0.010 and the worst seed from 0.226 to 0.066; on
+\texttt{A+C NESTED} the corresponding values were 0.056 to 0.006 and
+0.203 to 0.046. On \texttt{ORIGINAL\_18} the interval for the NLL
 difference, $[-0.131, -0.0041]$, lies below the preservation limit of
 $+0.020$ and also below zero, which the contract counts as
 improvement. Its upper end is given to four decimals because at three
@@ -177,13 +177,16 @@ inputs from the seen procedure keeps the background gain and preserves
 The v3 checkpoints were also applied, with no new fit, to the 156
 eligible runs and 1,600 rows collected for the first stage of the
 generality study (Chapter~\ref{ch:generality}). This re-inference was
-registered in advance as a check separate from the generality
-criteria, with the 98.3333\% intervals of the v3 family.
-Table~\ref{tab:results-pag1} gives the condition means. The reduction
-in spread was confirmed again: for KD\_ALL the difference in A+C seed
+registered, with the 98.3333\% intervals of the v3 family, before any
+REL\_GLOBAL or KD\_ALL output on these runs was read, but after the
+runs had been collected and scored for the general encoders. It is
+therefore a development comparison (Table~\ref{tab:rounds}, note~a),
+not a second confirmation. Table~\ref{tab:results-pag1} gives the
+condition means. The reduction in spread appeared again: for KD\_ALL the difference in A+C seed
 standard deviation, with the two layouts weighted equally, was $-0.052$
 $[-0.074, -0.035]$, and for KD\_ENV\_TOP5 it was $-0.058$
-$[-0.082, -0.038]$. Preservation on \texttt{ORIGINAL\_18} was not. For
+$[-0.082, -0.038]$. Preservation on \texttt{ORIGINAL\_18} was not
+shown. For
 KD\_ALL the NLL difference was $-0.050$ with interval
 $[-0.141, +0.021]$, whose upper end lies just above the limit, and for
 KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$. An interval that
@@ -201,7 +204,7 @@ their cells are never subtracted from each other.
 \begin{table}[htbp]
 \centering
 \caption{Mean NLL of the frozen v3 checkpoints on the new runs of the
-PAG1 re-inference (sealed criterion; no new fits). Values are 30-seed
+PAG1 re-inference (development comparison; no new fits). Values are 30-seed
 means as in Table~\ref{tab:results-v3-nll}. The runs differ from those
 of the v3 round, and the two tables are not compared cell by cell.}
 \label{tab:results-pag1}
@@ -226,14 +229,14 @@ Three limits apply to every result in this chapter. The first is that
 CD narrows the spread of the 30 seeds without improving every seed. The
 tables report seed means and seed standard deviations, and a smaller
 spread can come partly from seeds that had been better than the
-consensus being pulled back toward it. In the generality rounds,
-where per-seed counts were reported, 20 to 30 of the 30 seeds improved
-depending on the encoder and dataset
-(Chapter~\ref{ch:generality}). The second is that the new runs repeat
+consensus being pulled back toward it. The tables do not show how many
+seeds improved, and Chapter~\ref{ch:generality} gives cases in which
+some did not. The second is that the new runs repeat
 the same lab, the same benign workers, and the same configuration
 design as the runs used for development
-(Section~\ref{sec:eval-rounds}). The v3 and PAG1 results show that the
-effect survives new seeds and new executions within that design; they
+(Section~\ref{sec:eval-rounds}). The v3 result shows that the effect
+survives new seeds and new executions within that design, and the PAG1
+re-inference points the same way; they
 say nothing about another organization's hosts or attack policies. The
 third is that the intervals hold the 30 seeds fixed, so they describe
 these checkpoints and not the seeds that another retraining would

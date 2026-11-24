@@ -29,8 +29,8 @@ it~\cite{hutchins2011killchain}. At a single host decision, however,
 several operations fall under the same phase, and knowing that an actor
 is in discovery does not say which resource it will examine next. Attack
 Flow goes further and represents the order of and dependencies between
-adversary actions, so a flow can document a known incident or a
-hypothetical scenario~\cite{mitreattackflow}. Both are descriptions
+adversary actions, linking actions, conditions, and relationships into
+an account of how an attack unfolds~\cite{mitreattackflow}. Both are descriptions
 written with the whole sequence in view. A forecaster has only the prefix
 received before the next action, and it must commit to a distribution
 over that action before it is observed.
@@ -88,7 +88,11 @@ interpretation~\cite{zhu2024nip}. BiTA combines bidirectional GRU
 aggregation with a Transformer in a temporal graph network to predict
 future network alerts~\cite{nayeri2026bita}. Their outputs are a
 technique, an interaction graph, or an alert, whereas ours is a single
-normalized distribution over 18 action categories.
+normalized distribution over 18 action categories. Closer to our
+evidence, Niloy et al.\ release multi-source logs with ATT\&CK labels and evaluate small language models on
+them~\cite{niloy2026multi}; that task labels events already observed,
+whereas ours predicts the next action from the prefix received before
+it.
 
 Provenance-based detectors share the host-level evidence but not the
 forecasting goal. KAIROS detects intrusions in whole-system provenance
@@ -134,16 +138,19 @@ differently under deployment conditions, and the pipeline does not
 choose among them~\cite{damour2020underspecification}. Their work
 establishes and documents the phenomenon across domains. We measure it
 on next attacker action prediction and then try to reduce it. Baek et
-al.\ observe that, across models, agreement on in-distribution data and
-agreement on shifted data are linearly related in the same way as
-accuracy, which allows performance under shift to be estimated from
-unlabeled data~\cite{baek2022agreement}. That line of work uses agreement to
-estimate performance; we use agreement as a training signal, letting a
-student follow the consensus of several models on unlabeled environment
-inputs. A link between agreement and the performance of individual
-seeds should not be assumed in our setting either, as
-Chapter~\ref{ch:ads24} shows.
-% 근거: RECORD:405, 467--468.
+al.\ observe that, when in-distribution and shifted accuracy are
+linearly related across models, agreement between pairs of models on
+in-distribution and shifted data follows a closely matching line, which
+allows accuracy under shift to be estimated from unlabeled
+data~\cite{baek2022agreement}. CD uses agreement in two ways, and only
+one of them differs from that work. To choose teachers it ranks the
+seeds by their agreement on unlabeled environment inputs, which treats
+agreement as a proxy for performance much as Baek et al.\ do; this use
+held in the in-house lab and did not hold on ADS-24
+(Chapter~\ref{ch:ads24}). To train, it does not use agreement at all:
+the student follows the mean probability of the selected teachers on
+those inputs.
+% 근거: RECORD:405, 467--468. 참신성 리뷰 P2-2, 인용 리뷰 P2-1(적용 조건 명시).
 
 \section{Distillation, ensembles, and unlabeled adaptation}
 \label{sec:related-distillation}
@@ -176,10 +183,11 @@ trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits
 one parameter fitted on held-out data~\cite{guo2017calibration}. In security, Kan
 et al.\ study adapting malware detectors to drift without labels,
 where self-training on pseudo-labels can reinforce the model's own
-errors~\cite{kan2021investigating}. In this thesis the seed standard deviation of a
-distilled single model under unseen conditions is sealed as a primary
-criterion, alongside the mean and the preservation of seen-condition
-performance (Chapter~\ref{ch:evaluation}).
+errors~\cite{kan2021investigating}. Distillation on unlabeled inputs is
+itself not new either, since the transfer set of Hinton et al.\ needs
+no labels~\cite{hinton2015distilling}. What differs here is where the
+transfer set comes from, unlabeled runs of the target environment, and
+what is judged, the seed standard deviation of the distilled model.
 % 근거: RECORD:470--475. 온도 보정·확률 앙상블은 9.2절에서 보고한다.
 
 \section{Decomposition of ensemble log loss}
@@ -187,18 +195,26 @@ performance (Chapter~\ref{ch:evaluation}).
 
 For the logarithmic loss, the natural way to combine probabilistic
 predictors is the logarithmic opinion pool, the normalized geometric
-mean of their distributions. Heskes showed that the log loss of such a
-pool equals the average loss of its members minus an ambiguity term, the
-average Kullback--Leibler divergence from the pool to the
-members~\cite{heskes1997selecting}, and Gruber and Buettner place the same term
-as the variance component in a bias--variance decomposition for proper
-scores~\cite{gruber2022uncertainty}. Chapter~\ref{ch:decomposition} applies this
-identity to the seeds of one configuration: mean seed loss splits
-exactly into the loss of the log-pooled consensus and a disagreement
-term $V$ that needs no labels. The identity is theirs; our use of it as
-an unlabeled measure of instability in the deployment environment is a
-post hoc analysis, introduced after the primary experiments.
-% 근거: RECORD:308--316, 334, 469.
+mean of their distributions. Heskes analyzed such pools and decomposed
+their log loss into the average loss of the members and an ambiguity
+term built from Kullback--Leibler divergences between the pool and the
+members~\cite{heskes1997selecting}. Gruber and Buettner derive a
+bias--variance decomposition for proper scores whose variance term,
+the Bregman Information, contains the classification log-likelihood as
+a special case, and they propose that term as an uncertainty estimate
+for predictions under domain drift~\cite{gruber2022uncertainty}.
+Chapter~\ref{ch:decomposition} uses the logarithmic-opinion-pool form:
+mean seed loss splits exactly into the loss of the log-pooled consensus
+and a disagreement term $V$ that needs no labels. Using such a variance
+term as a label-free uncertainty measure under drift is already part
+of Gruber and Buettner's proposal. Our part is narrower: we compute it
+for the 30 seeds of one configuration on the environment inputs of this
+task and read which of the two terms CD reduced, as a post hoc analysis
+introduced after the primary experiments.
+% 근거: RECORD:308--316, 334, 469. 인용 리뷰 P2-2, P2-3, 참신성 리뷰 P2-3.
+% TODO(사람): Heskes(1997)와 Gruber·Buettner(2022) 원문의 식 번호를 대조해 KL 방향과
+% 정규화 조건이 10장의 식과 같은지 확인해 주세요. 확인되면 식 번호를 붙이겠습니다.
+% 10장의 등식 자체는 정의에서 바로 유도된다(V = -log Z).
 
 \section{Summary}
 \label{sec:related-summary}

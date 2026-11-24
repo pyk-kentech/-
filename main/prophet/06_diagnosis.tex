@@ -53,7 +53,8 @@ inferential.
 per-seed NLL, execution-weighted within each seed. Bottom: Spearman
 correlation between the ranking of the seeds by a quantity and their
 ranking by NLL on A+C; CE is cross-entropy. S1--S3 are the selection scores of
-Section~\ref{sec:diag-size}, fixed before any score was read.}
+Section~\ref{sec:diag-size}, fixed before the A+C losses of these seeds
+were read.}
 \label{tab:seed-population}
 \small
 \begin{tabular}{@{}lrrrr@{}}
@@ -85,9 +86,9 @@ S3: last FIT minibatch CE    & & & 0.160 & 0.033 \\
 % Spearman ρ"라고만 적습니다. 캡션은 "선택 순위와 손실 순위의 상관(양수 = 손실 낮은
 % seed를 앞에 고름)"으로 읽었습니다.
 
-Nor could the good seeds be picked out from information that a
-practitioner would normally consult. Three selection scores were fixed
-before any score was read: S1, a seed's top-1 agreement with the 30-model
+None of the three selection scores we checked picked out the good
+seeds. The scores were fixed before the A+C losses of these 30 seeds
+were read: S1, a seed's top-1 agreement with the 30-model
 majority on the unlabeled A+C inputs (Section~\ref{sec:diag-agreement});
 S2, its NLL on \texttt{C\_ONLY}; and S3, its cross-entropy on the last
 FIT minibatch of training. The rank correlation with A+C loss was 0.115

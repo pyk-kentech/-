@@ -16,8 +16,11 @@ thing consistently: how far the seeds of one configuration disagree on
 inputs from an unseen environment. The seed standard deviation fell in
 every round in which it was adjudicated, and in the post hoc
 decomposition of Chapter~\ref{ch:decomposition} the disagreement term
-$V$ fell in 27 of the 28 conditions. What CD did not change is the cost
-of the move to the unseen environment. On ADS-24 every CD seed of
+$V$ fell in 27 of the 28 conditions. Only the v3 round reached this
+under a sealed criterion; the other rounds are development comparisons.
+
+What CD did not change is the cost of the move to the unseen
+environment. On ADS-24 every CD seed of
 REL\_GLOBAL-ADS stayed worse than the FIT prior baseline, and among the
 general encoders only the Transformer students beat it. The
 decomposition suggests a reason, although as a post hoc reading it is
@@ -86,10 +89,12 @@ The lookup of Chapter~\ref{ch:diagnosis}, which ties the COPY decision
 to the observed result for the current target, was identified for
 REL\_GLOBAL on the 135-run development set, and the head that receives
 the lookup was confirmed only on new runs from the same lab; its
-generic form did not keep the gain. Whether the general encoders and
-the ADS-24 models diverge for a comparable reason is unknown. CD passed
-its criteria on ADS-24 without any such diagnosis there, so the link
-from diagnosis to intervention is shown only in-house. The agreement
+generic form did not keep the gain, and the head was not adopted. CD
+does not use this lookup. It rests on the separate observation that the
+seeds disagree on unlabeled inputs where their loss concentrates, and
+it reduced the spread on ADS-24 without any matching diagnosis there.
+Whether the general encoders and the ADS-24 models diverge for a
+comparable reason is unknown. The agreement
 observation behind teacher selection is narrower still. Agreement
 ranked the REL\_GLOBAL seeds by loss in the lab but not on ADS-24
 ($\rho=+0.127$), where the average of all 30 seeds was a better target
@@ -170,8 +175,9 @@ unseen condition contains no unseen attack scenario. Whether an alert
 timestamp is the time at which the defender received the alert was not
 confirmed. The 132 runs of the contract were not checked to be the same
 set as the 134 runs described with the dataset. Because the ADS-24
-evaluation runs had been inspected in earlier stages, the generality
-and method-comparison results on ADS-24 are development comparisons
+evaluation runs had been inspected in earlier stages, every ADS-24
+result on CD is a development comparison, and so are the in-house
+generality results, whose runs had selected the combinations
 (Section~\ref{sec:eval-rounds}). In-house, every new run comes from the
 same lab, the same benign workers, and the same configuration design.
 The sealed in-house results show that the effect repeats within that
@@ -187,15 +193,27 @@ Every interval in the thesis resamples run configurations while the 30
 seeds stay fixed. The seeds are fixed lists of integers in each
 contract, not draws from a stated distribution, so the intervals
 express uncertainty about the runs for these seeds and say nothing
-about how another set of 30 seeds would have scored. The correlations
+about how another set of 30 seeds would have scored. The conclusions on
+seed spread are therefore conclusions about these 30 checkpoints per
+group; a hierarchical resampling of seeds and runs together would be
+needed to speak about retraining in general. The correlations
 between seed rankings, such as those of agreement with loss, are
-descriptive statistics without intervals. The three general encoder adaptations differ from REL\_GLOBAL in
+descriptive statistics without intervals. The preservation limits of
+$+0.020$ and 3\% were not derived from an operational need, and two
+outcomes sit close enough to $+0.020$ to depend on it: $+0.0198$ for
+the in-house plain GRU of the generality study, which lay below it, and
+$+0.0207$ for KD\_ALL in the PAG1 re-inference, which did not. A limit
+of $+0.015$ would have reversed the first and a limit of $+0.025$ the
+second. KD\_ENV\_TOP5, with upper ends of $+0.0392$ in PAG1 and
+$+0.0535$ in the v2 recheck, fails any limit up to about $+0.039$, and
+the v3 upper end of $-0.0041$ meets any non-negative limit. The three general encoder adaptations differ from REL\_GLOBAL in
 training recipe and size at once, so the study cannot attribute the
 differences between them to any one component. The adaptations of
 ORTHRUS, BiTA, and CL-AP$^{2}$ were trained with three seeds each and
 only in-house, too few to estimate their spread. The method comparison
 used one encoder and did not tune any method on its own, so it ranks
-the methods only under that common protocol, and its in-house
+the methods only under that common protocol; its in-house contrasts may
+include rerun variation between the reused and the new fits, and its in-house
 collection stopped at 110 eligible runs (Section~\ref{sec:gen-methods}).
 % 근거: RECORD:446--452 (seed 모집단 불확실성 미포함, 인코더 적용판, 학습식·크기
 % 동시 차이, 보안 선행 적용판 3 seed·자체 실험실만, 방법 비교 한 구조·미조정,
@@ -231,27 +249,30 @@ boundary.
 % 사람이 쓴 문단에 옛 "When target membership helps" 절의 trigger 두 문장을 붙였다.
 % 문장은 바꾸지 않았다.
 
-\section{Novelty boundary}
+\section{Relation to existing techniques}
 \label{sec:disc-novelty}
 
-None of the computational parts is new. The distillation loss combines
-distillation toward an ensemble
-average~\cite{hinton2015distilling, lakshminarayanan2016simple, malinin2019ensemble} with the regularizers already in REL\_GLOBAL, and
-the decomposition of Chapter~\ref{ch:decomposition} is the identity
-Heskes published in 1997~\cite{heskes1997selecting}, and the
-expectation that a consensus varies less than its members under shift
-follows work on ensembling~\cite{rathmanakidis2022reduction}. The two extensions
-that failed also have close precedents: distillation that handles
+None of the computational parts is new. The distillation loss is
+distillation toward an ensemble average~\cite{hinton2015distilling}
+added to the regularizers already in REL\_GLOBAL. Ranking teachers by
+unlabeled agreement uses agreement as a performance proxy, as Baek et
+al.\ do~\cite{baek2022agreement}. The decomposition of
+Chapter~\ref{ch:decomposition} is the logarithmic-opinion-pool
+decomposition analyzed by Heskes~\cite{heskes1997selecting}, and its
+variance term has been proposed as a label-free uncertainty measure
+under drift~\cite{gruber2022uncertainty}. The expectation that a
+consensus varies less than its members under shift follows work on
+ensembling~\cite{rathmanakidis2022reduction}. The two extensions that
+failed also have close precedents: distillation that handles
 disagreement among teachers instead of averaging it
 away~\cite{tmp_du}, and comparison of networks through the subspace
-their representations share~\cite{raghu2017svcca}. What the thesis adds is
-the chain that connects these parts on one security task, from a
-measured instability through an in-house localization of the errors to
-an intervention that keeps the architecture. Only the in-house
-intervention was tested under criteria sealed before its runs were
-collected; the ADS-24 study was sealed after its evaluation runs had
-been inspected, and the ADS-24 encoder and method comparisons are
-development comparisons.
+their representations share~\cite{raghu2017svcca}. What the thesis
+adds is evidence on one security task: a measured instability, the
+observation that the seeds disagree on unlabeled inputs where their
+loss concentrates, and an intervention that reduces that disagreement
+while keeping the architecture, evaluated under sealed contracts with
+every result labeled by its status. Only the in-house v3 round tested
+CD under criteria sealed before its runs were collected.
 % 근거: RECORD:28, 455--459; idea.md "기여" 셋째 항. 확장 후보 A(신뢰 조건부 합의
 % 목표)와 B(seed 공통 표현 투영)의 선행: RECORD 관련 연구 표 (Du 등, Yang 등 DEED;
 % Raghu 등 SVCCA).

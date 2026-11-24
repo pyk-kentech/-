@@ -33,7 +33,15 @@ the gradient of the loss with respect to the input representation,
 which discourages predictions that change sharply with small changes
 to individual events. Our variant, $\mathcal{R}_{\mathrm{GLOBAL}}$,
 applies the penalty to events drawn at random from the whole prefix.
-The model has 59,882 parameters.
+The model has 59,882 parameters. This description stays at the level
+recorded in the round contracts. They do not document the field layout
+of the 48-dimensional event vector, the treatment of UNKNOWN records,
+the exact computation of the relational residual and of the output
+head, or how $\mathcal{R}_{\mathrm{GLOBAL}}$ selects its events, so the
+thesis does not by itself give enough detail to reimplement REL\_GLOBAL
+(Appendix~\ref{app:repro}).
+% TODO(사람): 위 다섯 항목과 GRU 폭 64(자체 모델)를 확인할 코드·계약 파일의 위치를
+% 알려 주세요. 확인되면 식으로 넣고 위 문장을 지웁니다.
 % 근거: RECORD:46 (48차원, 사건별 GRU, 대상 key 관계 잔차, LogitNorm τ=0.1,
 % 규제 .1, 59,882). GRU 폭 64: RECORD:157의 ADS-24 적용판 "그대로 둔 것"
 % (GRU 64). 자체 실험실 모델의 폭도 64인지는 질문 A3에서 확인 요청 중이다.
@@ -143,10 +151,11 @@ membership of these rows enters the loss. The distillation temperature
 is unrelated to the LogitNorm temperature $\tau$: the student still
 trains with LogitNorm at $\tau=0.1$, and the teacher target is taken at
 temperature~1 without further rescaling. As
-Section~\ref{sec:related-distillation} notes, the computation combines
-knowledge distillation~\cite{hinton2015distilling} with a teacher target
-formed from several models~\cite{malinin2019ensemble}; the target here is
-the plain mean and carries no model of the spread among teachers.
+Section~\ref{sec:related-distillation} notes, the computation is
+knowledge distillation toward the average of several
+models~\cite{hinton2015distilling}. Unlike ensemble distribution
+distillation~\cite{malinin2019ensemble}, the target is the plain mean
+and carries no model of the spread among teachers.
 % 근거: RECORD:130--139, 153; PAPER_DEFINITIONS.md §2 (q_J 식, KL 방향 교사‖학생,
 % 구현 F.kl_div(log_softmax(student), teacher_prob).sum(-1).mean(), 계수 .25,
 % update당 무라벨 32행, "LogitNorm 0.1은 증류 온도 1과 별개").
@@ -161,8 +170,10 @@ serves as the reference; each model's own vote is included. A model's
 \emph{top-1 agreement} is the fraction of rows on which its top-1
 action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
-form $J$, and these five teachers are used in every in-house round. The
-rule uses no labels, but it was fixed while we were studying development
+form $J$, and these five teachers are used in every in-house round.
+Ranking seeds by unlabeled agreement treats agreement as a proxy for
+performance, the use studied by Baek et al.~\cite{baek2022agreement}.
+The rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
 blind. No round compared it with five teachers chosen at random, with
 fewer teachers, or with all 30 as teachers of a student. The results
@@ -243,8 +254,9 @@ models of the same encoder and data (Section~\ref{sec:method-transfer}).
 \label{sec:method-transfer}
 
 The method was moved to two further settings with as few changes as
-possible (Table~\ref{tab:transfer}). On ADS-24 the input encoder reads
-Wazuh alert fields, the head predicts nine tactic classes, and the
+possible (Table~\ref{tab:transfer}). On ADS-24, a public dataset of
+attack episodes whose host alerts come from the Wazuh security monitor
+(Chapter~\ref{ch:ads24}), the input encoder reads Wazuh alert fields, the head predicts nine tactic classes, and the
 relational residual is removed; the resulting model has 31,685
 parameters. We call it REL\_GLOBAL-ADS to keep it apart from the
 in-house REL\_GLOBAL. The three general encoders replace the event encoder with

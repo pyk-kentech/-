@@ -24,12 +24,16 @@ geometric mean. Then
 The mean loss of the seeds is exactly the loss of their consensus plus a
 disagreement term $V$, and $V$ depends on the predictions alone, so it
 can be computed in the target environment without labels. The
-identity is Heskes's result for logarithmic opinion
-pools~\cite{heskes1997selecting}, and Gruber and Buettner treat the same
-term as the variance component of a bias--variance decomposition for
-proper scores~\cite{gruber2022uncertainty}. What we add is only its use
-as an unlabeled measure of seed instability under environment shift,
-and a reading of which term CD reduces. Like NLL, $V$ is averaged over
+identity follows directly from the definitions: if $Z(x)$ is the
+normalizer of $\tilde p$, then $V(x)=-\log Z(x)$ and
+$-\log\tilde p(y\mid x)=\frac{1}{S}\sum_s[-\log p_s(y\mid x)]+\log Z(x)$.
+It is the logarithmic-opinion-pool decomposition analyzed by
+Heskes~\cite{heskes1997selecting}, and Gruber and Buettner already
+propose a proper-score variance term of this kind as a label-free
+uncertainty estimate under domain drift~\cite{gruber2022uncertainty}.
+What we add is narrower: the computation for the 30 seeds of one
+configuration on this task's environment inputs, and a reading of which
+term CD reduced. Like NLL, $V$ is averaged over
 the natural boundaries of a run and then over runs with equal weight.
 Recomputed from the saved probabilities, the two sides of
 Equation~\ref{eq:decomposition} differed by at most about $10^{-15}$.
@@ -115,11 +119,13 @@ somewhat lower values for the three general encoders (0.317, 0.455, and
 After distillation, $V$ fell in 27 of the 28 conditions, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
-to 0.031 for the LSTM encoder. CD therefore acts mainly on the
-disagreement term, which is how it lowers the seed standard deviation.
-The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}, where $V$ rose
-from 0.068 to 0.077 between the v3 baseline seeds and the paired CD
-student distilled on the A+C inputs alone, and the seed standard
+to 0.031 for the LSTM encoder. This is consistent with CD acting
+mainly on the disagreement term. The decomposition is an identity and
+the change in $V$ is an observation after the fact, so the analysis
+does not show that the drop in $V$ produced the drop in seed standard
+deviation. The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}, where
+$V$ rose from 0.068 to 0.077 between the v3 baseline seeds and the
+paired KD\_ENV\_TOP5 student, distilled on the background inputs alone, and the seed standard
 deviation rose with it. Preservation on this condition is also the
 least settled in-house result (Section~\ref{sec:disc-mechanism}). The
 reduction of unseen-condition spread does not carry over to every
@@ -163,8 +169,9 @@ teacher probabilities, not the 30 individual distributions, had been
 saved; we did not reconstruct them by re-running the checkpoints.
 Related work studies a geometric-mean-based decomposition of
 variance-related error under distribution shift with evaluation
-labels~\cite{rathmanakidis2022reduction} and uses proper-score
-uncertainty for out-of-distribution detection~\cite{gruber2022uncertainty}.
+labels~\cite{rathmanakidis2022reduction} and proposes proper-score
+variance as an uncertainty estimate under domain
+drift~\cite{gruber2022uncertainty}.
 Nothing in our data shows that $V$ measured before deployment predicts
 later seed instability.
 % 근거: RECORD:333, 404, 406, 506; VARIANCE_DECOMPOSITION_REPORT.md "Arithmetic versus
