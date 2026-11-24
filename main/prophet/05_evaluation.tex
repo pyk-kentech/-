@@ -91,7 +91,9 @@ excluded runs (three and four background runs) were not part of the
 archive available to us, so a reader cannot audit that those
 exclusions were independent of the scores; the v3 verdict is reported
 as stored and has not been audited independently
-(Appendix~\ref{app:repro}). A round also stops early under a
+(Appendix~\ref{app:repro}).
+
+A round also stops early under a
 \emph{safety stop}, a rule written into its contract that reads only
 the state of the collection: three consecutive source failures, a
 source completion rate below a set fraction after a set number of
@@ -112,8 +114,9 @@ reasons for the exclusions and stops that the reports record.
 \label{sec:eval-criteria}
 
 We use \emph{contrast} for any pre-specified comparison and reserve
-\emph{criterion} for a contrast that is a sealed criterion in the sense
-of Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
+\emph{criterion} for a contrast fixed in a contract before the round's
+models were trained and read once on new executions
+(Section~\ref{sec:eval-rounds}). Every contrast is a one-sided reading
 of a two-sided adjusted interval on a paired difference, student minus
 base model. Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
@@ -131,7 +134,9 @@ The families differ by round. In the v3 round the family has three
 contrasts, the seed standard deviation on \texttt{A+C FLAT} and on
 \texttt{A+C NESTED} and preservation on \texttt{ORIGINAL\_18}; an upper
 end below zero on the last also counts as improvement there. These
-three are the only sealed criteria on CD in the thesis. On ADS-24 and
+three are the only sealed criteria on CD that all passed; the v2
+contracts that preceded them are listed with their outcomes in
+Table~\ref{tab:rounds}. On ADS-24 and
 in the generality rounds the pre-specified contrasts are stability,
 mean improvement, and preservation, read in the same way; because those
 rounds are development comparisons (Section~\ref{sec:eval-rounds}),
@@ -190,7 +195,8 @@ rounded estimates and intervals of the main chapters.
 \section{Rounds and the status of evidence}
 \label{sec:eval-rounds}
 
-Every result in the following chapters carries one of three labels. A
+Every result in the following chapters carries one of three labels,
+and one intermediate check is named at the end of this section. A
 \emph{sealed criterion} is a contrast whose form, limit, and interval
 level were fixed in a contract before the round's models were trained
 and its executions collected, and which was then read once on those
@@ -242,7 +248,7 @@ collections for the same reason and are never placed on one scale.
 \caption{Ledger of the rounds that tested consensus distillation.
 Evaluation runs and rows are those scored in the round, not the
 unlabeled adaptation inputs. Status uses the three labels defined
-above.}
+above; the criteria of a sealed contract that ended in a safety stop were never read.}
 \label{tab:rounds}
 \small
 \begin{tabularx}{\textwidth}{@{}lrXlX@{}}
@@ -254,11 +260,11 @@ Round & New fits & Evaluation runs / rows & Status & Outcome \\
 \quad target-count variants & 0 & 32 / 256 (3 targets), 32 / 448 (5 targets)
   & development comparison & no interval upper end below zero \\
 v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
-  & sealed criterion & safety stop; not adjudicated \\
+  & sealed contract, not adjudicated & safety stop \\
 v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
   & sealed criterion & stability passed; preservation not shown; not adopted \\
 v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
-  & sealed criterion & all three criteria passed \\
+  & sealed criterion & all three criteria passed, as stored; exclusions not audited \\
 PAG1 re-inference & 0 & 156 / 1,600
   & development comparison$^{a}$ & stability favorable; preservation not shown \\
 ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982

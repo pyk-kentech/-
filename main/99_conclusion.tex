@@ -14,29 +14,26 @@ final FIT minibatch loss did not rank them by how they would hold up.
 It observed that, on unlabeled inputs from the new workload, the seeds
 disagree on the rows where their loss concentrates; a separate
 diagnosis traced many in-house errors to one file decision, COPY or
-keep searching, although the head built on it was not adopted. From
+DISCOVERY, although the head built on it was not adopted. From
 the disagreement it moved to a remedy that keeps the deployed
 architecture and its single-model inference cost: a student of the same
 architecture follows the averaged
 probabilities of five selected teachers on unlabeled inputs from the
 new workload. In the v3 round, the one test of CD under criteria sealed
-before training and collection, with 30 new seeds and 157 new runs,
-all three sealed criteria were met according to the stored round
-report: the seed standard deviation narrowed on both A+C layouts, and
-\texttt{ORIGINAL\_18} was preserved. As a secondary point estimate
-outside those criteria, mean NLL on \texttt{A+C FLAT} fell from 0.073
-to 0.028. On ADS-24, in a development comparison on
-inspected runs, the seed standard deviation fell from 0.163 to 0.025,
-and the three encoder adaptations moved the same way in development
-comparisons on both datasets.
+before training and collection, the stored round report records that
+all three criteria were met: the seed standard deviation narrowed on
+both A+C layouts, and \texttt{ORIGINAL\_18} was preserved. Because the
+reasons for three exclusions were not available, the verdict stands as
+stored rather than as independently audited. The exploratory check on
+ADS-24 and the three encoder adaptations, all development comparisons
+on inspected runs, moved in the same direction.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
 % 166, 170 (v3), 219 (ADS-24 SD), 294 (세 인코더). 숫자는 개요대로 세 개만 다시 썼다.
 % ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
 % (8, 9장에서 밝힘). 구조 일반성의 자체 실험실 쪽도 개발 비교로 낮췄다(answers 07:10).
 
 The results are bounded in several ways. Among these 30 checkpoints per
-group, the CD students differed less from one another than the baseline
-models did, at the price of training 30 baselines before the student;
+group, CD narrowed the variation relative to the baseline models, at the price of training 30 baselines before the student;
 the intervals do not extend this to other seeds. CD relies on unlabeled
 inputs from the new environment and does not undo the cost of moving
 there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
@@ -44,7 +41,8 @@ and plain-GRU encoders still had higher NLL than the FIT prior
 (1.830); only the Transformer students cleared it. Not every
 seed gained either: seeds that had scored better than the consensus
 moved toward it. The diagnosis holds for one model in one lab, and the
-agreement ranking used to pick teachers did not carry over to ADS-24.
+agreement ranking used to pick teachers did not carry over to ADS-24, whose derived labels and oracle boundaries we could not
+verify.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
 % 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
@@ -53,22 +51,20 @@ agreement ranking used to pick teachers did not carry over to ADS-24.
 \label{sec:future}
 
 One bundle of closing checks was planned before this thesis was written
-and is not reported here; whatever it shows will be added to the
-limitations rather than covered by new experiments. Some of the checks
-require training. Varying the teacher set, with five teachers chosen at
+and is not reported here. Some of the checks require training. Varying the teacher set, with five teachers chosen at
 random, two teachers, and the full set of 30, would show whether
 training 30 baselines and ranking them by agreement is worth its cost.
 Students trained on 25\% and 50\% of the unlabeled environment inputs
 would estimate how much new-environment data the KL term needs, and
 repeating the comparison with other single-model methods on a
 Transformer encoder would keep that comparison from resting on one
-architecture. The other checks reuse frozen models. They run
-inference on the 119 ADS-24 runs that no earlier stage has used, which
-would give an ADS-24 result on runs no one has looked at, and on
-a fresh in-house collection that completes the method comparison
-stopped at 110 runs. They also recompute the intervals with seeds
-resampled along with runs, so that a verdict no longer speaks only for
-these 30 seeds. Two single-model and ensemble references belong to the
+architecture. The other checks reuse frozen models. They would run
+inference on the 119 usable ADS-24 runs outside the 132 of the
+contract (Appendix~\ref{app:ads24-data}), which no earlier stage has
+used, and on a fresh in-house collection that completes the method
+comparison stopped at 110 runs. They would also recompute the
+intervals with seeds resampled along with runs, so that a verdict no
+longer speaks only for these 30 seeds. Two single-model and ensemble references belong to the
 same bundle and are planned, not reported: temperature
 scaling~\cite{guo2017calibration} of each base model, and probability
 ensembles of the five teachers and of all 30 baseline seeds as an upper
@@ -125,9 +121,10 @@ source.
 % 15. +0.020과 3% 보존 한도의 근거 [05_evaluation].
 % 16. ADS-24 2단계 정확도가 실행 동등인지 [05_evaluation].
 % 17. PAG1 재추론을 개발 비교로 분류한 것이 맞는지 [05_evaluation].
-% 18. 부록 C: "ρ0 초기화", "해상도 계산", "18-way margin 10.3"이 가리키는 대상; 근거 없는
-%     다섯 가설 행(hint 표식, FIT 위치, 마지막 DISCOVERY, parser key, 일반형 원래 과제)의
-%     근거 파일; 옛 후보 1--15행에 한 줄 정의를 붙일지 [c_rejected].
+% 18. 부록 C: "ρ0 초기화", "해상도 계산", "18-way margin 10.3"이 가리키는 대상; 근거가
+%     없어 5회차에 표에서 뺀 다섯 가설 행(hint 표식, FIT 위치, 마지막 DISCOVERY, parser key,
+%     일반형 원래 과제)의 근거 파일(없으면 뺀 채로 둔다); 옛 후보 1--15행에 한 줄 정의를
+%     붙일지 [c_rejected].
 %
 % 진단(6장)·분해(10장)
 % 19. 표 tab:seed-population의 C_ONLY·B+C·ORIGINAL_18 seed SD와 범위를 SEED_TABLE.csv에서
@@ -162,4 +159,16 @@ source.
 % 35. Heskes(1997)·Gruber·Buettner(2022) 원문의 식 번호와 KL 방향 대조 [02_related_work].
 % 36. 부록 B: 두 135실행이 실행 ID까지 같은 집합인지; 확률 평균·재학습 모델의 fold와 FIT
 %     실행 수 [b_supplemental_results].
+%
+% 5회차에 더한 항목
+% 37. ADS-24 장(8장)의 위치. 방법 리뷰 P1-3은 정렬 규칙을 확보하지 못하면 ADS-24를 부록의
+%     탐색적 분석으로 옮기라고 제안했다. 이번에는 장을 그대로 두고 지위만 "탐색적 확인,
+%     교차 자료 근거 아님"으로 낮췄다(Q3, 초록, 서론, 결론, 8장, 부록 D). 장을 부록으로
+%     옮길지 정해 주세요. 옮기면 9장 ADS-24 절반과 10장 ADS-24 행의 참조도 바뀐다 [08, d].
+% 38. 교사 선정의 다수결 동률 규칙 "낮은 행동 열 index"가 부록 A의 행동 번호 순서와
+%     같은지 [04_method].
+% 39. ADS-24 1단계 진단의 Spearman이 합의도 값과 NLL 값의 직접 상관인지(그래서 기대
+%     방향이 음수인지). 8장은 그렇게 읽고 6장의 순위 대 순위 규약과 구분했다 [08_ads24].
+% 40. 새 제목 후보를 정할 때 ADS-24를 "교차 자료 평가"로 부르지 않도록 주의(37번과 연결)
+%     [kentech.tex].
 % ====================================================================

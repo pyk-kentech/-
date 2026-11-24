@@ -18,7 +18,12 @@ state which two timestamps the binding compares or the rule that
 attaches a stage to an alert time, so we could not verify the binding
 independently, and no sample of bindings was checked by hand. The
 ADS-24 results use the stored derived task, and a different binding
-could move segment boundaries and next-tactic labels. The contract population
+could move segment boundaries and next-tactic labels. For this reason
+Chapter~\ref{ch:ads24} treats ADS-24 as an exploratory check on an
+unverified derived task, not as cross-dataset evidence for the in-house
+result.
+% 5회차 방법 리뷰 P1-3: 정렬 알고리즘·timezone 처리·제외 manifest·수작업 감사가 없어
+% ADS-24의 지위를 탐색적 확인으로 낮췄다. TODO(사람): 저자 확인 목록 26번, 37번. The contract population
 then excludes runs flagged with \texttt{malicious\_users} or
 \texttt{block\_blinds\_blue} and runs whose defender is unknown. Every
 ADS-24 result in this thesis concerns the resulting derived set of 132
@@ -41,7 +46,9 @@ Section~\ref{sec:ads24-task} because of how often a stage repeats its
 predecessor: if stages are not
 merged, about 62.7\% of consecutive boundaries carry the same tactic as
 the stage before them, and a model could score well by copying the last
-label. The alert window of 512 and the 1,346 updates were chosen by an
+label. Because the boundaries are placed at segment transitions of the
+labels, they are oracle boundaries: the task asks for the next tactic
+at a moment that the labels, not the alerts, determine. The alert window of 512 and the 1,346 updates were chosen by an
 inner validation inside FIT, with seeds outside the contract, before
 stage~1.
 % 근거: RECORD:238--252, 254. 수치는 기록의 값을 그대로 옮기고, 기준선 NLL은 본문 규칙대로

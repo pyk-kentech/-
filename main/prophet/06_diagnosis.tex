@@ -2,8 +2,9 @@
 \label{ch:diagnosis}
 
 The 30 REL\_GLOBAL seeds from which the teachers of
-Section~\ref{sec:method-teachers} are drawn behave alike on the seen
-procedure and come apart on the unseen conditions. We measure how far
+Section~\ref{sec:method-teachers} are drawn do not rank the same way on
+the seen procedure and on the unseen conditions, and relative to their
+mean loss they spread far more on the unseen ones. We measure how far
 they diverge and locate where in the prediction they do so; the
 analysis localizes the errors and does not isolate a cause of the
 instability.
@@ -49,6 +50,28 @@ the level of seeds. These correlations, like the others in this chapter,
 describe the 30 seeds on one set of runs; we computed no interval for
 them, and the rows they share make them descriptive rather than
 inferential.
+
+The seeds are not alike on the seen procedure either. This development
+set gives no seed standard deviation for \texttt{ORIGINAL\_18}, but in
+the v3 round of Chapter~\ref{ch:results} it was 0.070 there against
+0.056 on \texttt{A+C FLAT}, so in absolute terms the seen procedure
+spread the seeds more widely. Relative to the mean loss, 0.704 against
+0.073, the spread was far larger under the benign workers. The
+disagreement term of Chapter~\ref{ch:decomposition} points the same
+way: for REL\_GLOBAL it barely changed between the seen and the unseen
+conditions (0.067 and 0.075), unlike for the three general encoders.
+% 5회차 참신성 리뷰 P2-1: "behave alike on the seen procedure"를 측정한 내용으로 바꿨다.
+% 0.070/0.056, 0.704/0.073: 06_results.tex (v3 FINAL_REPORT_KO.md); 0.067/0.075:
+% 10_decomposition.tex tab:decomposition (PAG1 실행).
+
+The table also lists three selection scores, each fixed before the A+C
+losses of these 30 seeds were read: S1, a seed's top-1 agreement with
+the 30-model majority on the unlabeled A+C inputs, its own vote
+included; S2, its NLL on \texttt{C\_ONLY}; and S3, its cross-entropy on
+the last FIT minibatch of training. Each correlation compares the order
+in which a score ranks the seeds with their order by A+C loss, lowest
+loss first, so a positive value means that the seeds the score puts
+first tend to have the lower loss.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:35 (FLAT 평균 .141949, SD .086001,
 % 범위 .036339--.419831; NESTED 평균 .125527, SD .087071, 범위 .022585--.404273;
 % FLAT--NESTED ρ=.8861; FLAT--ORIGINAL_18 ρ=-.1310). RECORD:62--64, 100.
@@ -58,9 +81,9 @@ inferential.
 \caption{The 30 REL\_GLOBAL seeds on the 135-run development set. Top:
 per-seed NLL, execution-weighted within each seed. Bottom: Spearman
 correlation between the ranking of the seeds by a quantity and their
-ranking by NLL on A+C; CE is cross-entropy. S1--S3 are the selection scores of
-Section~\ref{sec:diag-size}, fixed before the A+C losses of these seeds
-were read.}
+ranking by NLL on A+C, so that a positive value means the seeds ranked
+first have lower A+C loss; CE is cross-entropy. S1--S3 are the
+selection scores defined before the table.}
 \label{tab:seed-population}
 \small
 \begin{tabular}{@{}lrrrr@{}}
@@ -92,30 +115,27 @@ S3: last FIT minibatch CE    & & & 0.160 & 0.033 \\
 % Spearman ρ"라고만 적습니다. 캡션은 "선택 순위와 손실 순위의 상관(양수 = 손실 낮은
 % seed를 앞에 고름)"으로 읽었습니다.
 
-Of the three selection scores we checked, only S1 tracked A+C loss in
-this lab; S2 and the final FIT minibatch cross-entropy did not. The
-scores were fixed before the A+C losses of these 30 seeds were read:
-S1, a seed's top-1 agreement with the 30-model majority on the
-unlabeled A+C inputs, its own vote included; S2, its NLL on
-\texttt{C\_ONLY}; and S3, its cross-entropy on the last FIT minibatch
-of training. The rank correlation with A+C loss was 0.877 on FLAT and
-0.915 on NESTED for S1, 0.115 and 0.151 for S2, and 0.160 and 0.033 for
-S3.
+Of the three scores, only S1 tracked A+C loss in this lab, at 0.877 on
+FLAT and 0.915 on NESTED; neither S2 nor S3 exceeded 0.160 in either
+layout (Table~\ref{tab:seed-population}).
 % 출처: ORIGINAL_TEXT/outputs/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:39
-% (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331). S1 is still not a rule for choosing one seed: the seed it ranked
-first failed preservation (Section~\ref{sec:method-teachers}), and the
+% (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331).
+S1 is still not a rule for choosing one seed: the seed it ranked first
+failed preservation (Section~\ref{sec:method-teachers}), and the
 association did not reproduce on ADS-24 (Chapter~\ref{ch:ads24}).
-Section~\ref{sec:diag-agreement} returns to it. S3 is
-the loss on the final training batch, not an NLL on held-out FIT runs;
-the values show that the end-of-training loss carries almost no
+Section~\ref{sec:diag-agreement} returns to it.
+
+S3 is the loss on the final training batch, not an NLL on held-out FIT
+runs; the values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
 fail. S2 uses labels from another unseen condition and still ranks the
-seeds poorly. The pattern matches what D'Amour et al.\ call
-underspecification~\cite{damour2020underspecification}: the training
-data fix how the seeds behave on the conditions they cover and leave
-their behavior on these background conditions to the seed, and
-neither the final training loss nor labels from another unseen
-condition recover it.
+seeds poorly. These results agree with the underspecification described
+by D'Amour et al.~\cite{damour2020underspecification} in the part that
+concerns selection: neither the final training loss, nor labels from
+another unseen condition, nor the loss on the seen procedure recovered
+how the seeds would rank on these background conditions. They do not
+show the other part of that description, a set of seeds that are
+equally good where the training data reach.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
 % NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
 % S4(고정 무작위 순열)는 무작위 대조라 표와 본문에서 뺐다.
@@ -131,18 +151,19 @@ every one of these unanimous answers was correct. The rows on which the
 seeds split carried between 84.2\% and 91.2\% of the NLL of the
 30-model average, depending on the condition, which is what the use of
 ensemble disagreement as an uncertainty signal would lead one to
-expect~\cite{lakshminarayanan2016simple}. Unanimity is not a guarantee of
+expect~\cite{lakshminarayanan2016simple}.
+
+Unanimity is not a guarantee of
 correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
 wrong, and on the background, subsets of five seeds were sometimes
 unanimous and wrong. Agreement also tracks the quality of a seed, in
 line with the model-level relation reported by Baek et
 al.~\cite{baek2022agreement}: S1 ranked the seeds much as their A+C
-losses did (Section~\ref{sec:diag-size}). On the 82,008 FIT views the 30 models gave the same top-1 action
-for 90.3\% (74,074), so where the training data constrain them the
-seeds compute nearly the same function. Disagreement on unlabeled
-environment inputs therefore marks, without labels, the places where
-the seeds' computations part. These are measurements for 30 seeds on
-this task, not a new phenomenon. The distillation of
+losses did (Section~\ref{sec:diag-size}). On the 82,008 FIT views the
+30 models gave the same top-1 action for 90.3\% (74,074), so on FIT
+inputs the seeds mostly agree, though not on the remaining 9.7\%.
+Disagreement on unlabeled environment inputs therefore marks, without
+labels, the places where the seeds' computations part. The distillation of
 Chapter~\ref{ch:method} is designed to remove that disagreement, and
 Chapter~\ref{ch:results} tests it under a sealed contract.
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
@@ -200,6 +221,7 @@ batch (age) lowered the NLL to 0.338. On the original procedure the
 hint-branch table, which knows nothing about targets, thus did better
 than the mean of the trained seeds (0.554 against 0.631), which leaves
 little for a change of encoder to gain there.
+
 The same table does not transfer to the background. Benign START
 records lengthen and reorder the hint sequences, to as many as 22 in
 A+C against at most 15 in FIT, and for none of the 660 A+C rows does
@@ -223,7 +245,8 @@ other than knowledge of the branches.
 The background executions also follow a fixed order of file actions,
 which we read off the row features of the development set. An
 execution opens with four
-payload searches (DISCOVERY). Each target is then visited with a marker search, and COPY
+payload searches (DISCOVERY). Each target is then visited with a
+marker search (both terms are defined in Section~\ref{sec:recorded-case}), and COPY
 follows if that target's payload search succeeded, that is, ended with
 exit status zero; the source copies exactly when its observed result
 for the current target is a success. The losses of REL\_GLOBAL
@@ -273,8 +296,8 @@ background condition.
 \label{sec:diag-intervention}
 
 Inside the model, the lookup is not computed the same way across seeds.
-This post hoc reading of the development set uses the logits of each checkpoint before normalization as the sum of
-a base part and the relational residual. In the five seeds with the
+This post hoc reading of the development set splits the pre-softmax
+logits of each checkpoint into a base part and the relational residual. In the five seeds with the
 highest A+C loss in each layout, 107 of the 148 errors on COPY rows
 already had a residual that favored DISCOVERY, and in the other 41 the
 base part overturned a residual that pointed the right way. The five
@@ -313,8 +336,9 @@ general replacement.
 A generic version, again a development comparison on the 135 runs, \texttt{GENERIC\_HEAD}, which
 describes the most recent target key and its received results without
 the lab's marker and payload commands, did not keep the gain and did not
-beat its own capacity-matched shuffled control. Supplying the
-lab-specific lookup to the head thus helps, which identifies a
+beat its own capacity-matched shuffled control.
+
+Supplying the lab-specific lookup to the head thus helps, which identifies a
 procedure-specific predictive bottleneck for this lab. It does not show
 that the lookup causes the seed instability, because the features
 encode the source policy directly, the generic form failed, and the

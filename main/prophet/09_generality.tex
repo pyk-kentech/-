@@ -2,12 +2,11 @@
 \label{ch:generality}
 
 The results so far concern one predictor, REL\_GLOBAL, and its ADS-24
-adaptation, REL\_GLOBAL-ADS. This chapter asks two further questions. The first is
-whether encoders commonly used for log sequences are unstable under
-unseen conditions in the same way, and whether CD, frozen as it is,
-reduces that instability for them as well
-(Section~\ref{sec:gen-arch}). The second is whether simpler
-single-model methods achieve the same reduction
+adaptation, REL\_GLOBAL-ADS. This chapter asks whether encoders
+commonly used for log sequences are unstable under unseen conditions in
+the same way, and whether CD, frozen as it is, reduces that
+instability for them as well (Section~\ref{sec:gen-arch}). It then asks
+whether simpler single-model methods achieve the same reduction
 (Section~\ref{sec:gen-methods}). Both studies cover the in-house lab
 and ADS-24, and the status of the evidence differs between the two
 datasets; each section opens by stating it.
@@ -22,7 +21,9 @@ PAG1 round under a sealed contract, in the laboratory, benign workers,
 and configuration design of the earlier rounds. Stage~1 scored the
 baseline seeds on them, and only combinations whose baseline seed
 standard deviation reached 0.020 went on to stage~2, so the stage-2
-contrasts were read on the same runs that selected them. Because the
+contrasts were read on the same runs that selected them. Here the
+\emph{base model} of each encoder is the encoder trained with
+cross-entropy alone. Because the
 selection favored combinations with a large baseline spread, part of
 the later reduction could be regression toward the mean, which this
 design cannot rule out. The ADS-24 results reuse the 35
@@ -31,11 +32,11 @@ environment-evaluation runs scored in Chapter~\ref{ch:ads24}.
 The three encoders are the
 LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
-adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 baseline seeds of
+adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 base-model seeds of
 each encoder on each dataset (180 fits). In stage~2, with the
 computation sealed in stage~1, we trained a CD student for every seed
 of the six encoder--dataset combinations, using five teachers chosen
-from the same encoder's baselines by unlabeled agreement, and a
+from the same encoder's base models by unlabeled agreement, and a
 self-distillation control for the in-house plain GRU (210 fits).
 % 근거: RECORD:279--281; ORIG:ARCH_GENERALITY_STAGE2_20261122/
 % ARCH_GENERALITY_STAGE2_REPORT.md:3 (ADS-24 ON35 = 이미 열람한 평가 실행의 개발 비교,
@@ -56,8 +57,12 @@ from 51.0\% to 87.7\%. We had expected that encoders without LogitNorm,
 which keeps logits at a fixed norm, would spread less. The opposite
 happened. The Transformer figure is driven partly by one seed whose
 \texttt{A+C FLAT} loss was 4.690. Without it, the remaining 29 seeds
-still had a standard deviation of 0.466 on the A+C score, against 0.040
-for their CD students. On ADS-24 the spread was smaller in absolute
+still had a standard deviation of 0.466 on the \emph{A+C score}, the
+1:1 mean of the \texttt{A+C FLAT} and \texttt{A+C NESTED} losses that
+the in-house contrasts of this chapter use, against 0.040 for their CD
+students. That score is not the \texttt{A+C FLAT} value of
+Table~\ref{tab:gen-arch}, where the 30 Transformer students also
+happen to have a standard deviation of 0.040. On ADS-24 the spread was smaller in absolute
 terms, but the environment evaluation again separated the seeds far
 more than the preservation runs did.
 % 근거: RECORD:287, 415 (예상 철회); ARCH_GENERALITY_STAGE2_REPORT.md "전체 성능과
@@ -120,9 +125,9 @@ ADS-24 & REL\_GLOBAL-ADS (reference)
 % 정확도는 원 파일 값을 소수 첫째 자리 %로 줄였다. 기록 표의 정수 % 범위와 같은 값이다.
 % ADS-24 REL_GLOBAL의 seed 정확도 범위는 기록에 없어 비웠다.
 
-CD lowered both the spread and the mean in all six combinations. The
-contract groups each contrast, stability, mean improvement, and
-preservation, into one family of six encoder--dataset contrasts with
+CD lowered both the spread and the mean in all six combinations. For
+each kind of contrast (stability, mean improvement, preservation), the
+contract forms one family of the six encoder--dataset contrasts, with
 99.1667\% intervals (Section~\ref{sec:eval-criteria}). Every one of the
 18 intervals fell on the favorable side of its threshold. Since every
 run had been inspected, these intervals describe the uncertainty of a
@@ -197,7 +202,9 @@ with three seeds each on the same new inputs. In these runs the ORTHRUS
 and BiTA adaptations reached an A+C NLL of 0.13 to 0.16, close to
 REL\_GLOBAL, and the CL-AP$^{2}$ adaptation about 0.97. Three seeds are
 too few to measure their spread, so these figures say nothing about
-stability. Separately, two attempts to extend CD,
+stability.
+
+Two attempts to extend CD,
 a confidence-conditioned target and a projection onto a representation
 shared by the seeds, failed their preliminary checks and were not
 carried forward (Appendix~\ref{app:rejected}).
@@ -364,13 +371,13 @@ ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.08
 % 정확도 SD 차이와 최저 seed 정확도 차이는 분량 때문에 표에서 뺐다.
 % 개요 질문 A1: 이 판정 구간은 원 파일에 있으므로 본문에 썼다.
 
-Within this protocol the controls separate three parts of the method.
-Following one's own frozen copy, softly in self-distillation or by hard
-labels in the hard-label control, either changed nothing or made the loss
-worse, so the consensus of several models mattered. Following the same
+Within this protocol the controls take the method apart. Following
+one's own frozen copy, softly in self-distillation or by hard labels in
+the hard-label control, either changed nothing or made the loss worse,
+so the consensus of several models mattered. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
 level, so the environment inputs mattered; why the FIT inputs did not
-help was not established (Section~\ref{sec:disc-rejected}). And SWA,
+help was not established (Section~\ref{sec:disc-rejected}). SWA,
 which averages along a single training trajectory, stayed at the base
 model's spread on both datasets. These are statements about the methods as run
 here, with one coefficient, one exposure, and one schedule shared by

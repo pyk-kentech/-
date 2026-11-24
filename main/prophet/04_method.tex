@@ -39,7 +39,9 @@ of the 48-dimensional event vector, the treatment of UNKNOWN records,
 the exact computation of the relational residual and of the output
 head, or how $\mathcal{R}_{\mathrm{GLOBAL}}$ selects its events, so the
 thesis does not by itself give enough detail to reimplement REL\_GLOBAL
-(Appendix~\ref{app:repro}).
+(Appendix~\ref{app:repro}). The in-house results of later chapters are
+accordingly restatements of the stored round reports, not experiments
+that a reader can repeat from this text.
 % TODO(사람): 위 다섯 항목과 GRU 폭 64(자체 모델)를 확인할 코드·계약 파일의 위치를
 % 알려 주세요. 확인되면 식으로 넣고 위 문장을 지웁니다.
 % 근거: RECORD:46 (48차원, 사건별 GRU, 대상 key 관계 잔차, LogitNorm τ=0.1,
@@ -67,7 +69,7 @@ trained for 1,346 updates of 32 occurrences with AdamW~\cite{loshchilov2017decou
 (weight decay 0.01, gradient clipping at 2), and the learning rate
 follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
 kept; no checkpoint is selected by a validation score. All 30 seeds of
-a configuration share this procedure and differ only in the seed as
+a group share this procedure and differ only in the seed as
 defined in Chapter~\ref{ch:introduction}. The seeds of each round are a
 fixed list of integer identifiers written into its contract, not draws
 from a stated distribution; Appendix~\ref{app:repro} lists the
@@ -170,8 +172,11 @@ serves as the reference; each model's own vote is included. A model's
 \emph{top-1 agreement} is the fraction of rows on which its top-1
 action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
-form $J$; they are the teachers of KD\_ENV\_TOP5 and KD\_ALL in the v2
-and v3 rounds (Table~\ref{tab:variants}). Section~\ref{sec:related-underspec}
+form $J$. A tie in the majority vote goes to the action with the lower
+index in Appendix~\ref{app:actions}, and a tie in agreement to the
+lower seed identifier; Section~\ref{sec:repro-training} lists the five
+seeds selected. They are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
+the v2 and v3 rounds (Tables~\ref{tab:variants} and~\ref{tab:rounds}). Section~\ref{sec:related-underspec}
 explains how this ranking relates to the agreement estimator of Baek
 et al.~\cite{baek2022agreement}.
 The rule uses no labels, but it was fixed while we were studying development
@@ -183,6 +188,8 @@ not that ranking by agreement is needed or better than another choice.
 % 근거: PAPER_DEFINITIONS.md §2 "고정 상위 5개 교사 선정". 상위 5 seed는
 % 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
 % 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
+% 5회차 방법 리뷰 P3: 동률 규칙을 본문에 옮기고 부록 E의 seed 목록을 가리켰다.
+% TODO(사람): "낮은 행동 열 index"가 부록 A의 행동 번호 순서와 같은지 확인해 주세요.
 
 Agreement is used to choose teachers, not to choose a deployed model.
 The single seed ranked first by agreement failed preservation on
@@ -239,6 +246,10 @@ KD\_ALL & mean of the top five & background inputs and 48 original-procedure
 \end{tabularx}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
+KD\_SELF is the in-house \emph{self-distillation control}; the same
+control appears under that name in Chapters~\ref{ch:ads24}
+and~\ref{ch:generality}. The round names in the last column are
+defined in Table~\ref{tab:rounds}.
 Throughout the thesis, a \emph{CD student} is a student trained with
 Equation~\ref{eq:cd-loss} toward the mean of five teachers chosen by
 the rule of Section~\ref{sec:method-teachers}. In-house its final form

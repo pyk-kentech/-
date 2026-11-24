@@ -12,8 +12,9 @@ records. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
-records received before its cutoff (Chapter~\ref{ch:task}). The task,
-which we call PROPHET, is \textbf{next attacker action prediction} from
+records received before its cutoff (Chapter~\ref{ch:task}).
+
+The task, which we call PROPHET, is \textbf{next attacker action prediction} from
 Windows execution and audit records: at each prediction boundary the
 model outputs a distribution over 18 semantic categories of the next
 attacker action, and one execution yields several such prediction rows
@@ -27,32 +28,39 @@ Training the same architecture on the same data does not produce the
 same model. Here a \emph{seed} fixes the initial weights together with
 the random draws of training traces and regularization noise, and
 changing it alone can change the predictor substantially. In our
-in-house lab, every benign workload of type~C is held out of all 603
+in-house lab, the benign worker~C is held out of all 603
 labeled training (FIT) runs, so any condition containing it is
-\emph{unseen} in the sense that no labeled run shows it. Models that
-behave consistently on the seen conditions come apart on the unseen
-ones. We measure loss as negative log-likelihood (NLL), the mean of
-$-\log$ of the probability given to the observed action. Across 30
-seeds of the baseline predictor, REL\_GLOBAL, the per-seed NLL on runs
+\emph{unseen} in the sense that no labeled run shows it. We measure
+loss as negative log-likelihood (NLL), the mean of $-\log$ of the
+probability given to the observed action.
+
+Across 30 seeds of the baseline predictor, REL\_GLOBAL, the per-seed NLL on runs
 we had already inspected ranged from 0.036 to 0.420 on the unseen
 condition in which benign workers A and C run beside the attack
 procedure (A+C, in its FLAT layout of file targets). A plain GRU trained on identical data reached anywhere
 between 51.0\% and 87.7\% accuracy on the same condition, depending on the
-seed. The training-time score we checked did not rank the seeds: the
+seed. The training-side score we checked did not rank the seeds: the
 rank correlation between a seed's cross-entropy on its final FIT
 minibatch and its loss on A+C was 0.160 on the FLAT layout and 0.033 on
-the NESTED layout. Whoever deploys such a model therefore cannot tell
-from that score which of these models they are getting.
+the NESTED layout. The seen procedure did not rank them either; between
+a seed's loss there and on A+C FLAT the correlation was $-0.131$.
+Whoever deploys such a model therefore cannot tell from these scores
+which of the models they are getting.
 % 근거: RECORD:23, 44, 63--64. 범위 0.036--0.420은 A+C FLAT, 이미 열람한
 % 135실행 개발 집합(ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/
 % FINAL_REPORT_KO.md, FLAT .036339--.419831). ρ .1604/.0331은 S3 규칙
 % (마지막 FIT 학습 minibatch CE)이며 FIT 보류 NLL이 아니다.
 % 단순 GRU 51--88%: RECORD:287 (PAG1 수집, A+C FLAT).
 
-This behavior is an instance of \emph{underspecification}~\cite{damour2020underspecification}:
-a training pipeline admits many predictors that are equally good on the
-data it sees but differ on data it does not, and the pipeline itself
-does not decide among them. For attack prediction the unseen data are
+This behavior is consistent with the \emph{underspecification}
+described by D'Amour et al.~\cite{damour2020underspecification}: a
+training pipeline admits many predictors with equivalent held-out
+performance in the training domain that behave differently under
+deployment conditions, and the pipeline itself does not decide among
+them. We show only part of that picture. Our seeds are not equally good
+on the seen procedure (Chapter~\ref{ch:diagnosis}); what we show is
+that the scores available before deployment did not identify the seeds
+that hold up under the new workload. For attack prediction the unseen data are
 not exotic. A new benign job on a monitored host is enough to move the
 evidence away from what the model saw in training. We therefore ask
 three questions.
@@ -63,8 +71,9 @@ three questions.
   \item[(Q2)] Can it be reduced without changing the architecture or the
     inference cost, when unlabeled inputs from the new workload are
     available during training?
-  \item[(Q3)] Does the answer hold on another dataset, with other
-    encoders, and against other single-model methods?
+  \item[(Q3)] Does the same direction appear with other encoders, in
+    an exploratory check on a public dataset, and against other
+    single-model methods?
 \end{description}
 
 Our approach, \emph{consensus distillation} (CD), starts
@@ -74,46 +83,57 @@ where accuracy under shift tracks in-distribution accuracy across
 models, their agreement on unlabeled shifted data can be used to
 estimate that accuracy~\cite{baek2022agreement}. Consistent with
 these results, the baseline models in our in-house lab disagree on
-unlabeled inputs where their loss concentrates, and a seed's agreement
-ranks it by loss (Chapter~\ref{ch:diagnosis}); we report this as a
-measurement on our task, not as a new phenomenon. On ADS-24 that
-ranking did not hold (Chapter~\ref{ch:ads24}). We train 30 seeds of
+unlabeled inputs where their loss concentrates
+(Chapter~\ref{ch:diagnosis}); we report this as a measurement on our
+task, not as a new phenomenon. CD turns that observation into a
+training target. We train 30 seeds of
 REL\_GLOBAL, select five of them as teachers by their top-1 agreement on
 unlabeled inputs from the environment, and train a student that follows
 the arithmetic mean of the teachers' probabilities on those inputs
 through a KL term, while keeping the usual cross-entropy on the FIT
-data. These unlabeled inputs come from runs of the unseen workloads that
-are separate from the evaluation runs, so CD is a form of unlabeled
-adaptation to a known target environment; it is not tested on a
-workload that was never observed in any form. The construction is knowledge distillation toward an ensemble
+data. The construction is knowledge distillation toward an ensemble
 average~\cite{hinton2015distilling}, motivated by the improved
 predictive performance of averaged independent
 models~\cite{lakshminarayanan2016simple}. The CD student has the same
 architecture as REL\_GLOBAL and no additional parameters, so at
-inference it is still a single model. The price is paid during
-training, where 30 baseline models must be fitted before the student.
+inference it is still a single model.
+
+The method has a defined scope and a cost. Its unlabeled inputs come
+from runs of the unseen workloads that are separate from the evaluation
+runs, so CD is a form of unlabeled adaptation to a known target
+environment; it is not tested on a workload that was never observed in
+any form. The price is paid during training, where 30 baseline models
+must be fitted before the student. The teacher rule also rests on an
+in-house observation: a seed's agreement ranked it by loss in the lab
+(Chapter~\ref{ch:diagnosis}) but not on ADS-24
+(Chapter~\ref{ch:ads24}).
 % 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
-In a sealed in-house evaluation with 30 new seeds, 157 new eligible
-runs, and 1,611 prediction rows, the CD student met all three
-criteria sealed before training and collection. The seed
-standard deviation fell on both A+C layouts, on FLAT from about 0.056
-to 0.010, and on ORIGINAL\_18, the seen procedure without benign
-workers, the mean NLL moved from 0.704 to 0.643 (difference interval
-$[-0.131, -0.0041]$). As a secondary point estimate, the mean NLL on
-A+C FLAT was 0.028 against 0.073 for REL\_GLOBAL. These intervals
-resample runs for 30 fixed checkpoints and do not cover other seeds.
-Applied unchanged to the public ADS-24 dataset, CD reduced the seed
-standard deviation from 0.163 to 0.025 and the mean NLL from 2.276 to
-2.060, in a development comparison on evaluation runs that had already
-been scored. Three general encoders (an LSTM encoder in the style of
+In the sealed in-house v3 round, with 30 new seeds, 157 new eligible
+runs, and 1,611 prediction rows, the stored round report records that
+the CD student met all three criteria sealed before training and
+collection. The seed standard deviation fell on both A+C layouts, on
+FLAT from about 0.056 to 0.010. On ORIGINAL\_18, the seen procedure
+without benign workers, the mean NLL moved from 0.704 to 0.643
+(difference interval $[-0.131, -0.0041]$). The intervals resample runs
+for 30 fixed checkpoints and do not cover other seeds. The reasons for
+excluding three of the 160 attempted runs were not in the archive
+available to us, so the verdict has not been audited independently
+(Section~\ref{sec:eval-contract}).
+
+The remaining evidence is weaker. On the public ADS-24 dataset, whose
+task we derived through a time alignment and a boundary rule that we
+could not verify, CD reduced the seed standard deviation from 0.163 to
+0.025 and the mean NLL from 2.276 to 2.060; this is an exploratory
+development comparison on evaluation runs that had already been
+scored. Three general encoders (an LSTM encoder in the style of
 DeepLog, a Transformer encoder in the style of LogBERT, and a plain
 GRU) showed the same direction in all six encoder--dataset
 combinations, again in development comparisons. On ADS-24 every CD
 student of our own model remained worse than the \emph{FIT prior},
 which predicts the FIT tactic frequencies (NLL 1.830), and CD did not
-improve every seed (Chapter~\ref{ch:generality}).
+improve every seed (Chapters~\ref{ch:ads24} and~\ref{ch:generality}).
 % 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294 (세 인코더).
 % ADS-24의 환경 평가 35실행은 1단계에서, PAG1 156실행은 구조 일반성 1단계에서
 % 이미 채점했으므로 두 2단계는 개발 비교다(answers 2026-11-24 07:10, 4번).
@@ -122,19 +142,22 @@ improve every seed (Chapter~\ref{ch:generality}).
 % 결과 절에 쓴다.
 
 The thesis makes three contributions. (a) It measures seed instability
-with 30 seeds per configuration, across four encoder configurations, on
-the in-house task and on ADS-24. (b) It observes that, on unlabeled
-inputs from the unseen workload, the seeds disagree on the rows where
-their loss concentrates, and it applies an existing consensus-distillation
-objective to reduce that disagreement while keeping the architecture.
+with 30 seeds per model setting, for REL\_GLOBAL and three general
+encoders, on the in-house task and on ADS-24. (b) It observes that, on
+unlabeled inputs from the unseen workload, the seeds disagree on the
+rows where their loss concentrates, and it turns that observation into
+a consensus target that reduces the disagreement while keeping the
+architecture and single-model inference.
 A separate in-house diagnosis locates many errors in one file decision;
 the head we built on that diagnosis was not adopted
 (Section~\ref{sec:diag-intervention}). (c) Following the security-ML
 guidance of Arp et al.~\cite{arp2020dos}, it evaluates the method under
 contracts sealed before training and collection, and it labels every
 result as a sealed criterion, a development comparison, or a post hoc
-analysis. Only the in-house v3 round passed all of its sealed criteria;
-the v2 recheck passed stability but did not show preservation. The
+analysis. Only the in-house v3 round passed all of its sealed
+criteria; the v2 recheck, an earlier sealed round
+(Table~\ref{tab:rounds}), passed stability but did not show
+preservation. The
 ADS-24 study, the encoder study, and the method comparison are
 development comparisons, and the decomposition is post hoc.
 The distillation computation itself is a combination of existing

@@ -6,7 +6,7 @@ experiments of Chapters~\ref{ch:results} to~\ref{ch:generality} had
 been scored, and none of its results entered any criterion
 (Section~\ref{sec:eval-rounds}). It uses only class probabilities that
 had already been saved; no model was trained and no execution was
-collected for it. For the $S=30$ seeds of one configuration and an input
+collected for it. For the $S=30$ seeds of one group and an input
 $x$ with true action $y$, let $p_s$ be the predictive distribution of
 seed $s$ and $\tilde p$ their logarithmic opinion pool, the normalized
 geometric mean. Then
@@ -43,9 +43,10 @@ Equation~\ref{eq:decomposition} differed by at most about $10^{-15}$.
 % 같은 보고서 Status: ADS-24 ON35는 이미 열람, PAG1은 구조 실험의 새 실행이지만
 % 분해는 점수를 본 뒤에 정했다.
 
-Table~\ref{tab:decomposition} applies the identity to the baselines of
-Chapter~\ref{ch:generality}: the three general encoders and REL\_GLOBAL
-on the new PAG1 runs of the in-house lab and on ADS-24. On conditions
+We applied the identity to the baselines of
+Chapter~\ref{ch:generality}, the three general encoders and REL\_GLOBAL,
+on the new PAG1 runs of the in-house lab and on ADS-24
+(Table~\ref{tab:decomposition}). On conditions
 absent from FIT, $V$ was three to seven times its value on the seen
 condition for every general encoder on both datasets. REL\_GLOBAL-ADS
 behaved the same way on ADS-24 (5.3 times), whereas the $V$ of the

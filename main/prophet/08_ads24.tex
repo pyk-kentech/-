@@ -1,16 +1,15 @@
-\chapter{Cross-Dataset Evaluation on ADS-24}
+\chapter{Exploratory Cross-Dataset Check on ADS-24}
 \label{ch:ads24}
 
 Because the in-house results of Chapter~\ref{ch:results} come from one
 laboratory, we repeated the study on data collected elsewhere. We
 did not find a public dataset that could reproduce the PROPHET task as
-defined in Chapter~\ref{ch:task}, and three of its requirements were
-relaxed. Alerts are ordered by the time at which they occurred rather
-than by the receipt boundary of Section~\ref{sec:receipt}. The labels
-are the attack-stage labels that come with the dataset rather than
-source-designated attacker actions. And the unseen environment is a
-held-out condition with simulated users rather than a held-out benign
-worker. Under these relaxations we used ADS-24, a dataset of attack
+defined in Chapter~\ref{ch:task}, so we relaxed it: alerts ordered by
+their occurrence time stand in for the receipt boundary of
+Section~\ref{sec:receipt}, the dataset's attack-stage labels for
+source-designated attacker actions, and a held-out condition with
+simulated users for a held-out benign worker. Under these relaxations
+we used ADS-24, a dataset of attack
 episodes in a cyber range defended by automated response agents, collected with
 simulated users switched on or off~\cite{nyberg2026cyber}. With the
 task, the time axis, the labels, and the environment all changed, this
@@ -20,7 +19,12 @@ whole: the 132 runs that we built from the downloaded files and
 examined, whose correspondence to the episodes described with the
 dataset we did not check, with stage labels bound to alert times by a
 stored rule that we could not validate. The results are therefore
-exploratory development results on derived labels.
+exploratory development results on derived labels. We report them as a
+check on whether the in-house direction appears at all on data
+collected elsewhere, not as evidence that the in-house result holds
+on another dataset.
+% 5회차 방법 리뷰 P1-3: Lore–Wazuh 정렬을 확인할 수 없어 ADS-24를 Q3의 교차 자료 근거가
+% 아니라 탐색적 확인으로 낮췄다. 장을 부록으로 옮기는 구성 변경은 저자 확인 목록 37번.
 Appendix~\ref{app:ads24-data} describes how the task was built from the
 data and why six other candidates were not used.
 % 근거: RECORD:212, 236, 265--275 (선정 경위, 후보 7행 표는 부록 D).
@@ -45,6 +49,12 @@ tactic, and every segment after the first starts a boundary. We fixed
 this merging rule before any model was scored, because without it most
 boundaries would simply repeat the previous tactic
 (Appendix~\ref{app:ads24-data}). Each boundary is one prediction row.
+These are oracle boundaries. They are placed where the labeled tactic
+sequence changes, so the evaluation takes from the labels both the next
+tactic and the moment at which to predict it, and every result in this
+chapter is conditional next-tactic classification at those transitions.
+It is not a forecast that a deployed system could issue, and it does
+not reproduce the operational setting of the in-house task.
 The contract assigns the 132 runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
 15 further runs without users (2,982 boundaries) check preservation;
 the condition without users is therefore the seen one. The 34 runs
@@ -192,9 +202,12 @@ its own vote included, ranked the seeds much as their losses did
 tested a leave-one-out version as a separate diagnostic, using each
 seed's top-1 agreement with the majority of the other 29 models on the
 environment-evaluation inputs. The two definitions differ, and the stored reports give no
-ADS-24 value under the in-house one. The expected direction was
-negative, with the condition set at $\rho \le -0.50$ and a permutation
-$p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
+ADS-24 value under the in-house one. The sign conventions differ too.
+The in-house correlations compare rankings, so a positive value there
+means that the seeds ranked first by agreement had the lower loss. The
+ADS-24 diagnostic correlates a seed's agreement directly with its NLL,
+so the expected direction was negative, with the condition set at
+$\rho \le -0.50$ and a permutation $p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
 permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
 more with the rest did not have lower loss. The leave-one-out
 agreement diagnostic thus did not reproduce the in-house association,
@@ -220,7 +233,7 @@ description.
 On the environment evaluation its NLL is 1.830, and all 30 CD seeds
 were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
-baseline. Not every seed gained either. The best REL\_GLOBAL-ADS seed
+FIT prior. Not every seed gained either. The best REL\_GLOBAL-ADS seed
 scored 1.953, lower than every CD seed, whose best was 2.020; consensus
 distillation pulled that seed back toward the group. The loss that
 accompanies the move to the condition with simulated users, and with it

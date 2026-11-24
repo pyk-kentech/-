@@ -13,7 +13,8 @@ ledger is an extract. It keeps only the entries that bear directly on
 the line of work from REL\_GLOBAL to CD reported in this thesis, and it
 is not a complete record of every experiment in the PROPHET project.
 Table~\ref{tab:rej-hypotheses} lists the hypotheses of the diagnostic
-phase (Chapter~\ref{ch:diagnosis}),
+phase (Chapter~\ref{ch:diagnosis}) whose outcome can be traced to a
+stored report or to a figure in this thesis,
 Table~\ref{tab:rej-candidates} the method candidates and their stored
 verdicts, and Table~\ref{tab:rej-withdrawn} the claims that we withdrew
 during the analysis. Names in typewriter type are the identifiers under
@@ -48,24 +49,16 @@ not yet been received
 A fixed conditional auxiliary loss, with the full 18-action
 cross-entropy kept
   & Not adopted; no gain in a 10-fit comparison \\
-The hint-bearing actions mark the attack
-  & Rejected; does not hold on A+C \\
 The seeds take the benign \texttt{ipconfig} records for reconnaissance
   & Rejected; every A+C error chose between COPY and DISCOVERY
     (Section~\ref{sec:diag-errors}) \\
-The errors come from particular positions in the FIT runs
-  & Rejected \\
 The hint-branch table alone predicts the action
   & Rejected; on A+C, FIT supports the key of 0 of 660 rows
     (Section~\ref{sec:diag-errors}) \\
-The last DISCOVERY announces the COPY
-  & Rejected \\
 A global ledger of successful payload searches minus received COPY
 STARTs explains the file-action branch
   & Rejected; held-out FIT NLL 0.579, worse than 0.311 for a control
     that uses only the boundary index \\
-A correction of the parser key
-  & Rejected \\
 A target indicator
   & Rejected; the loss is not concentrated on the rows where the
     selected target disagrees \\
@@ -75,8 +68,6 @@ A target indicator
 % 집합별 비율이다(THREE_TARGET 160/256, A+C FLAT 216/330, A+C NESTED 246/352;
 % ORIG:PROPHET_OBSERVED_HEAD_STAGE2_3TARGET_20261119/SHUFFLE_FEATURE_MATCH_REPORT_KO.md).
 % 개요 B′표에 따라 숫자를 뺐다. 3대상 대비의 NLL 차와 구간이 확인되면 넣겠다.
-The generic form repairs the degradation on the original task
-  & Rejected \\
 FIT inputs leave nothing to distill because the teachers agree there
   & Rejected; the top-1 actions differ on 9.7\% of FIT views
     (Section~\ref{sec:diag-agreement}) \\
@@ -89,10 +80,14 @@ The partial v2 collection contaminated the original-task data
 % 20261118/FINAL_REPORT_KO.md:3, 43), 장부 0.5785 / 경계 순번 0.3111 (ORIG:PROPHET_
 % PAYLOAD_LEDGER_20261119/REPORT_KO.md:5, 19; 장부 = 전역 "ZERO 검색 수 − COPY START 수",
 % FIT 실행 단위 보류의 조건부 NLL), 9.7% = 1 − 74,074/82,008 (개요 B표).
-% TODO(사람): "hint 행동이 공격 표식", "FIT의 특정 위치", "마지막 DISCOVERY",
-% "parser key 수정", "일반형이 원래 과제 악화를 고친다"의 근거 파일과 한 줄 설명이
-% 기록에 없다. 근거 수치가 있으면 알려 주세요. 특히 "parser key 수정"이 어떤 가설을
-% 시험한 것인지(무엇이 고쳐질 것으로 기대했는지) 확인이 필요하다.
+% 5회차 방법 리뷰 P1-4: 근거 보고서를 atlas에서 찾지 못한 다섯 행을 표에서 뺐다.
+% 뺀 행(RECORD:366--381의 기록 표): "The hint-bearing actions mark the attack: Rejected;
+% does not hold on A+C", "The errors come from particular positions in the FIT runs:
+% Rejected", "The last DISCOVERY announces the COPY: Rejected", "A correction of the
+% parser key: Rejected", "The generic form repairs the degradation on the original
+% task: Rejected".
+% TODO(사람): 다섯 행의 근거 보고서가 있으면 경로를 알려 주세요. 확인되면 근거 수치와
+% 함께 표에 되살립니다. 없으면 이대로 둡니다(저자 확인 목록 18번).
 
 \section{Method candidates and their stored verdicts}
 \label{sec:rej-candidates}
@@ -201,7 +196,7 @@ archive supplied with this thesis.}
      candidate~B)
   & With $k=4$, unseen-condition seed standard deviation $0.163 \to 0.040$, but
     seen-condition NLL $1.449 \to 1.882$; dropped \\
-18 & Geometric-mean teacher in place of the arithmetic mean
+18 & Geometric-pool teacher (logarithmic opinion pool) in place of the arithmetic mean
   & Lower teacher NLL in 24 of 56 comparisons; student comparison
     undecided; arithmetic mean kept \\
 19 & Seed selection by agreement on ADS-24

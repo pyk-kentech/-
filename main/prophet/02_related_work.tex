@@ -133,26 +133,30 @@ supervised task rather than reproductions of either system
 \label{sec:related-underspec}
 
 D'Amour et al.\ describe underspecification: a training pipeline can
-return many predictors with equivalent held-in performance that behave
-differently under deployment conditions, and the pipeline does not
-choose among them~\cite{damour2020underspecification}. Their work
-establishes and documents the phenomenon across domains. We measure it
-on next attacker action prediction and then try to reduce it. Baek et
+return many predictors with equivalent held-out performance in the
+training domain that behave differently under deployment conditions,
+and the pipeline does not choose among them~\cite{damour2020underspecification}.
+Their work establishes and documents the phenomenon across domains. Our
+measurements on next attacker action prediction are consistent with
+one part of it: the scores we computed on the training side did not
+rank the seeds by their loss on the unseen conditions. They do not show
+that the seeds are equally good on the seen condition
+(Chapter~\ref{ch:diagnosis}), and the thesis then tries to reduce the
+spread it measures. Baek et
 al.\ observe that, when in-distribution and shifted accuracy are
 linearly related across models, agreement between pairs of models on
 in-distribution and shifted data follows a closely matching line, which
 allows accuracy under shift to be estimated from unlabeled
-data~\cite{baek2022agreement}. CD uses agreement in two ways. To
-choose teachers it ranks the seeds by their mean top-1 agreement with
-the majority on unlabeled environment inputs. This rule is motivated by
+data~\cite{baek2022agreement}. CD uses agreement only to choose
+teachers: it ranks the seeds by their mean top-1 agreement with the
+majority on unlabeled environment inputs. This rule is motivated by
 the use of unlabeled model agreement in Baek et al., but it is not
 their Agreement-on-the-Line estimator, which fits a linear relation
 between in-distribution and shifted agreement using labeled
 in-distribution data; our ranking uses no labels and no fitted line.
 The ranking tracked loss in the in-house lab and did not on ADS-24
-(Chapter~\ref{ch:ads24}). To train, it does not use agreement at all:
-the student follows the mean probability of the selected teachers on
-those inputs.
+(Chapter~\ref{ch:ads24}). The training target itself is the mean
+probability of the selected teachers on those inputs.
 % 근거: RECORD:405, 467--468. 참신성 리뷰 P2-2, 인용 리뷰 P2-1(적용 조건 명시).
 
 \section{Distillation, ensembles, and unlabeled adaptation}
@@ -220,7 +224,7 @@ mean seed loss splits exactly into the loss of the log-pooled consensus
 and a disagreement term $V$ that needs no labels. Using such a variance
 term as a label-free uncertainty measure under drift is already part
 of Gruber and Buettner's proposal. Our part is narrower: we compute it
-for the 30 seeds of one configuration on the environment inputs of this
+for the 30 seeds of one model setting on the environment inputs of this
 task and read which of the two terms CD reduced, as a post hoc analysis
 introduced after the primary experiments.
 % 근거: RECORD:308--316, 334, 469. 인용 리뷰 P2-2, P2-3, 참신성 리뷰 P2-3.

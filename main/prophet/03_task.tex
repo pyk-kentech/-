@@ -232,7 +232,12 @@ cause of any seed's success or failure.
 \section{A recorded file-processing decision}
 \label{sec:recorded-case}
 
-Table~\ref{tab:recorded-case} shows part of the received prefix for
+Two terms of the synthetic procedure are needed here. A \emph{payload
+search} is the synthetic file search (DISCOVERY) that looks for a
+target's payload file, and its exit status records whether it found
+one. A \emph{marker search} is a later search on the same target that
+marks it as the current one; its own exit status is not the payload
+result. Table~\ref{tab:recorded-case} shows part of the received prefix for
 execution \texttt{THME0064}, which comes from an earlier three-target
 collection of this project (Appendix~\ref{app:secondary-results}) and
 not from the C-fold data, before its first file-processing decision

@@ -12,19 +12,23 @@
 \label{sec:disc-does}
 
 Across Chapters~\ref{ch:results}--\ref{ch:generality}, CD changed one
-thing consistently: how far the seeds of one configuration disagree on
+thing consistently: how far the seeds of one group disagree on
 inputs from an unseen environment. On the unseen conditions the seed
 standard deviation fell in every round in which it was compared, and in
 the post hoc decomposition of Chapter~\ref{ch:decomposition} the
 disagreement term $V$ fell in 27 of the 28 conditions; the exception was
-the seen condition \texttt{ORIGINAL\_18}. Of these rounds only v3 is a
-sealed test (Section~\ref{sec:eval-rounds}).
+the seen condition \texttt{ORIGINAL\_18}. Every group of 30 CD students
+we trained varied less there than its 30 baseline models. Of these rounds only v3 is a sealed test
+(Section~\ref{sec:eval-rounds}), and the intervals hold the seeds
+fixed, so whether another draw of seeds would show the same narrowing
+was not tested.
 
 What CD did not change is the cost of the move to the unseen
 environment. On ADS-24 every CD seed of
 REL\_GLOBAL-ADS stayed worse than the FIT prior, and among the
-general encoders only the Transformer students beat it. The
-decomposition suggests a reason, although as a post hoc reading it is
+general encoders only the Transformer students beat it.
+
+The decomposition suggests a reason, although as a post hoc reading it is
 an interpretation and not a test. Mean seed loss is the loss of the
 seeds' consensus plus $V$, and the KL term of
 Equation~\ref{eq:cd-loss} pulls the student toward a consensus computed
@@ -35,11 +39,7 @@ simulated users, and the student inherits it. For the same reason, where
 the consensus is wrong the student is wrong in a stable way. A small
 $V$ means that the seeds agree, not that they are right, as entropy
 minimization and the plain GRU on ADS-24 show
-(Chapter~\ref{ch:decomposition}). On the unseen conditions, the 30 CD
-students of every group we trained varied less than the 30 baseline
-models. The intervals hold
-those seeds fixed, so whether another draw of seeds would show the same
-narrowing was not tested. Either way, the student is not a model that
+(Chapter~\ref{ch:decomposition}). The student is not a model that
 knows more about the environment.
 % 근거: RECORD:419--422 (환경 이동 미해결, 합의가 틀리면 안정적으로 틀림),
 % 331--332 (V 27/28 감소, 엔트로피 최소화 V≈0·합의 2.7), 423 (ADS-24 기준선).
@@ -56,7 +56,7 @@ knows more about the environment.
 The student also falls short of its teachers. In the v3 round the
 probability average of the five teachers scored 0.023 on
 \texttt{A+C FLAT} against 0.028 for KD\_ALL, and in the six
-architecture--dataset combinations of Chapter~\ref{ch:generality} the
+encoder--dataset combinations of Chapter~\ref{ch:generality} the
 student's NLL on the unseen condition exceeded that of its teachers by
 0.009 to 0.050. If loss were all that mattered, the ensemble would be
 the better choice. It is not free at inference, however: a probability
@@ -65,8 +65,9 @@ full average, whereas the CD student is one model with the
 architecture and parameter count of REL\_GLOBAL. On ADS-24 the gap
 widens with the size of the ensemble, since in a post hoc computation
 the average of all 30 seeds scored 1.945, against 2.038 for the five
-teachers and 2.060 for the student. Training is expensive on either
-path. CD as tested trains 30 baselines, ranks them by agreement to keep
+teachers and 2.060 for the student.
+
+Training is expensive on either path. CD as tested trains 30 baselines, ranks them by agreement to keep
 five, and only then trains the student, so it costs more to train than
 the five-teacher ensemble it imitates. Whether fewer teachers, or five
 chosen at random, would serve as well was not tested, and the amount of
@@ -94,12 +95,14 @@ does not use this lookup. It rests on the separate observation that the
 seeds disagree on unlabeled inputs where their loss concentrates, and
 it reduced the spread on ADS-24 without any matching diagnosis there.
 Whether the general encoders and the ADS-24 models diverge for a
-comparable reason is unknown. The agreement
-observation behind teacher selection is narrower still. Agreement
+comparable reason is unknown.
+
+The agreement observation behind teacher selection is narrower still. Agreement
 ranked the REL\_GLOBAL seeds by loss in the lab but not on ADS-24
 ($\rho=+0.127$), where the average of all 30 seeds was a better target
-than the five most agreeing ones. Preservation of the seen procedure is
-the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
+than the five most agreeing ones.
+
+Preservation of the seen procedure is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
 the v2 recheck, passed in v3, and was not shown in the PAG1
 re-inference, and this condition was the single one in which $V$ rose
 after distillation. The v3 gain there was in probabilities, with
@@ -118,22 +121,26 @@ property of the method.
 \label{sec:disc-rejected}
 
 Several explanations that a reader might propose were tested and
-rejected during the study, and three bear directly on the argument. The
-first is that the seeds take the benign \texttt{ipconfig} records of
-worker~C for reconnaissance and predict IP configuration enumeration.
-Every A+C error of the 30 seeds chose between COPY and DISCOVERY
-(Section~\ref{sec:diag-errors}), so the seeds misjudge one file
-decision, not the kind of activity under way. The second is that FIT
-inputs leave a distillation nothing to transfer because the models
-already agree there. The 30 REL\_GLOBAL seeds gave different top-1
-actions on 9.7\% of the FIT views, so FIT inputs are not free of
-disagreement; the FIT-input distillation of
-Section~\ref{sec:gen-methods} still left the spread where it was, and
-why it did was not established. The third is that the model predicts
-one step late, repeating an action whose START has not yet been
-received. The verdict recorded in the project's report on that test
-rejects it, but the row counts behind that verdict could not be checked
-against the source files, so we give the verdict without a figure
+rejected during the study. A natural suspicion is that the seeds take
+the benign \texttt{ipconfig} records of worker~C for reconnaissance and
+predict IP configuration enumeration. Every A+C error of the 30 seeds
+chose between COPY and DISCOVERY instead (Section~\ref{sec:diag-errors}),
+so the seeds misjudge one file decision, not the kind of activity under
+way.
+
+It might also seem that FIT inputs leave a distillation nothing to
+transfer because the models already agree there. For REL\_GLOBAL the
+30 seeds mostly agreed on FIT views but gave different top-1 actions on
+9.7\% of them (Section~\ref{sec:diag-agreement}). The FIT-input
+distillation of Section~\ref{sec:gen-methods} was run on the plain
+GRU, whose FIT agreement we did not measure, and it left the spread
+where it was; why it did was not established.
+
+A model that predicts one step late, repeating an action whose START
+has not yet been received, would also produce some of the errors we
+saw. The verdict recorded in the project's report on that test rejects
+this account, but the row counts behind it could not be checked against
+the source files, so we give the verdict without a figure
 (Appendix~\ref{app:rejected}).
 % 근거: RECORD:366--381 (원인 탐색 가설 표: ipconfig 오인 기각, FIT 교사 동일 기각
 % "FIT view 9.7%가 불일치", 한 발 늦은 예측 기각). 9.7% = 1 − 74,074/82,008
@@ -180,9 +187,14 @@ binding we verified. The 132 runs of the contract were not checked
 against the 134 episodes on which the dataset paper bases its
 results~\cite{nyberg2026cyber}, and whether an episode and a run are
 the same unit was not confirmed, so the ADS-24 results describe the
-derived 132-run set we examined. Because its evaluation runs had been
-inspected in earlier stages, every ADS-24 result on CD is a development
-comparison.
+derived 132-run set we examined. Its prediction boundaries are also
+oracle boundaries: a boundary is placed wherever the labeled tactic
+sequence starts a new segment, so the evaluation takes from the labels
+both the next tactic and the moment at which to predict it. The ADS-24
+results are therefore conditional next-tactic classification at those
+boundaries, not a forecast that a deployed system could issue. Because
+its evaluation runs had been inspected in earlier stages, every ADS-24
+result on CD is an exploratory development comparison.
 
 \textbf{Scope of the in-house runs.}
 The in-house generality results are development comparisons as well,
@@ -207,14 +219,16 @@ seed spread are therefore conclusions about these 30 checkpoints per
 group; a hierarchical resampling of seeds and runs together would be
 needed to speak about retraining in general. The correlations
 between seed rankings, such as those of agreement with loss, are
-descriptive statistics without intervals. The preservation limits of
+descriptive statistics without intervals.
+
+The preservation limits of
 $+0.020$ and 3\% were not derived from an operational need, and two
 outcomes sit close enough to $+0.020$ to depend on it: $+0.0198$ for
 the in-house plain GRU of the generality study, which lay below it, and
 $+0.0207$ for KD\_ALL in the PAG1 re-inference, which did not. A limit
 of $+0.015$ would have reversed the first and a limit of $+0.025$ the
-second. KD\_ENV\_TOP5, with upper ends of $+0.0392$ in PAG1 and
-$+0.0535$ in the v2 recheck, fails any limit up to about $+0.039$, and
+second. KD\_ENV\_TOP5, with upper ends of $+0.039$ in PAG1 and
+$+0.054$ in the v2 recheck, fails any limit up to about $+0.039$, and
 the v3 upper end of $-0.0041$ meets any non-negative limit.
 
 \textbf{Encoders and methods.}
