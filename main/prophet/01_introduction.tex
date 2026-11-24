@@ -1,66 +1,137 @@
 \chapter{Introduction}
 \label{ch:introduction}
+% TODO(사람): 6, 8, 9, 10, 12장의 label 이름(ch:diagnosis, ch:ads24,
+% ch:generality, ch:decomposition, ch:conclusion)은 이 장에서 먼저 정했다.
+% 해당 장을 쓸 때 같은 이름을 쓰는지 확인해 주세요.
 
-During a multi-stage incident, an analyst may need to decide which
-activity to investigate before the next attacker action is visible. A
-forecast can prioritize this investigation by assigning probabilities
-to plausible follow-up actions, but only if it reflects the evidence
-that could actually have reached the analyst or detector. Audit records
-carry an occurrence time, whereas their availability to a predictor
-depends on when the collector receives them.
+During a multi-stage incident, an analyst often has to decide which
+activity to investigate before the attacker's next action is visible.
+Forecasting systems such as Tiresias~\cite{shen2018tiresias} and
+EFI~\cite{zhu2024efi} support this decision by assigning probabilities to
+plausible follow-up actions. Such a forecast is only useful if it rests
+on evidence the defender actually held at the time: an audit record has
+an occurrence time, but it can inform a prediction only after the
+collector has received it, so every forecast in this thesis uses only
+records received before its cutoff (Chapter~\ref{ch:task}). The task,
+which we call PROPHET, is \textbf{next attacker action prediction} from
+Windows execution and audit records. At a prediction boundary, the label
+is the semantic category of the first attacker action whose process
+starts after the boundary, and the model outputs a distribution over 18
+such categories. One execution yields several prediction rows, each with
+its own evidence prefix. The boundaries are known in our controlled
+environment; locating them in an operational deployment is a separate
+problem that we do not address.
+% 근거: RECORD:32. 기존 문단 1, 3을 압축. 두 대상 예시(기존 문단 2)는
+% 3장의 수신 경계 절에서 한 번만 설명한다.
 
-Consider a sequence of file-related activities involving two targets.
-A termination record for one process may arrive after another process
-starts, and benign activity on the host may add further start and
-termination records in between. A model that treats the most recent exit
-code as the result relevant to every subsequent decision can confuse the
-two targets. A model that reconstructs a past prefix from all audit
-records ordered by occurrence time can instead give the predictor
-information that the collector had not yet received.
+Training the same architecture on the same data does not produce the
+same model. Here a \emph{seed} fixes the initial weights together with
+the random draws of training traces and regularization noise, and
+changing it alone can change the predictor substantially. In our
+in-house lab, every benign workload of type~C is held out of all 603
+training (FIT) runs, so any condition containing it is \emph{unseen}
+during training. Models that behave consistently on the seen conditions
+come apart on the unseen ones. Across 30 seeds of the baseline
+predictor, REL\_GLOBAL, the mean NLL on the unseen condition A+C FLAT
+ranged from 0.036 to 0.420 on the development runs. A plain GRU
+trained on identical data reached anywhere between 51\% and 88\%
+accuracy on the same condition, depending on the seed. Scores available
+at training time do not reveal which seed will do well: the rank
+correlation between a seed's final FIT minibatch cross-entropy and its
+loss on A+C was 0.160 on the FLAT layout and 0.033 on the NESTED layout.
+Whoever deploys such a model therefore cannot tell in advance which of
+these models they are getting.
+% 근거: RECORD:23, 44, 63--64. 범위 0.036--0.420은 A+C FLAT, 이미 열람한
+% 135실행 개발 집합(ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/
+% FINAL_REPORT_KO.md, FLAT .036339--.419831). ρ .1604/.0331은 S3 규칙
+% (마지막 FIT 학습 minibatch CE)이며 FIT 보류 NLL이 아니다.
+% 단순 GRU 51--88%: RECORD:287 (PAG1 수집, A+C FLAT).
 
-This thesis studies \textbf{next attacker action prediction} from
-Windows audit logs. The \emph{next attacker action} at a prediction
-boundary $t$ is the first source-designated attacker action whose
-process starts after $t$; its semantic category is the label, and the
-output is a distribution over 18 action categories. An execution can
-provide several prediction rows, each with its own evidence prefix and
-label. The task is evaluated at known decision boundaries in a
-controlled environment; inferring those boundaries in an operational
-deployment is a separate problem.
+This behavior is an instance of \emph{underspecification}~\cite{damour2020underspecification}:
+a training pipeline admits many predictors that are equally good on the
+data it sees but differ on data it does not, and the pipeline itself
+does not decide among them. For attack prediction the unseen data are
+not exotic. A new benign job on a monitored host is enough to move the
+evidence away from what the model saw in training. We therefore ask
+three questions.
+\begin{description}
+  \item[(Q1)] How large is the seed-to-seed variation under unseen
+    benign workloads, and where does it come from in the in-house lab?
+  \item[(Q2)] Can it be reduced without changing the architecture or the
+    inference cost?
+  \item[(Q3)] Does the answer hold on another dataset and with other
+    encoders?
+\end{description}
 
-PROPHET represents the evidence at each boundary in two complementary
-forms. A gated recurrent unit summarizes the events in receipt order,
-and a target adapter connects observed events through process identity
-and observed target membership. These links allow the predictor to use
-the result of an operation on the relevant target even when unrelated
-events intervene. When the observed prefix supplies no usable target
-relation, a target-free path still produces a prediction.
+Our approach, \emph{environment-consensus distillation} (CD), starts
+from an in-house observation: the baseline models tend to disagree
+where they are wrong, and disagreement can be measured without labels
+(Chapter~\ref{ch:diagnosis}). We train 30 seeds of
+REL\_GLOBAL, select five of them as teachers by their top-1 agreement on
+unlabeled inputs from the environment, and train a student that follows
+the arithmetic mean of the teachers' probabilities on those inputs
+through a KL term, while keeping the usual cross-entropy on the FIT
+data. The construction draws on knowledge distillation~\cite{hinton2015distilling} and
+on the observation that averaging independently trained models gives
+better-behaved predictions~\cite{lakshminarayanan2016simple}. The CD student has the same
+architecture as REL\_GLOBAL and no additional parameters, so at
+inference it is still a single model. The price is paid during
+training, where 30 baseline models must be fitted before the student.
+% 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
+% 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
-The main question is whether linking events to the correct target
-improves the forecast. On 64 new runs of previously evaluated
-configurations, relation attention reduced execution-weighted negative
-log likelihood (NLL) from 0.2171 to 0.0458 compared with a receipt-order
-GRU baseline (EVENT GRU). In a separate membership exchange control,
-the target history model received the same events and the same group
-sizes, but events were exchanged between targets. On a reused set of
-127 executions, this exchange increased NLL from 0.0584 to 0.0869. The
-first result measures the gain of the target-aware predictor as a
-whole; the second tests whether correct membership contributes to that
-gain in the target history model.
+In a sealed in-house evaluation with 30 new seeds, 157 new eligible
+runs, and 1,611 prediction rows, the CD student passed all three
+primary criteria fixed before collection. On A+C FLAT its mean NLL was
+0.0276 against 0.0731 for REL\_GLOBAL, and the seed standard deviation
+on A+C fell from about 0.056 to 0.010. On ORIGINAL\_18, the seen
+procedure without benign workers, the mean NLL moved from 0.7036 to
+0.6428 (difference interval $[-0.1309, -0.0041]$). Applied unchanged to
+the public ADS-24 dataset, CD reduced the seed standard deviation from
+0.163 to 0.025 and the mean NLL from 2.276 to 2.060. With three general
+encoders (an LSTM encoder in the style of DeepLog, a Transformer encoder
+in the style of LogBERT, and a plain GRU), all six encoder--dataset
+combinations passed the same three criteria. Two limits accompany these
+results. First, on ADS-24 every CD student of our own model remained
+worse than the majority-class baseline (NLL 1.830), and among the
+general encoders only the Transformer students exceeded it, in 27 of
+30 seeds. Second, CD does not improve every seed: depending on the
+combination, 20 to 30 of the 30 seeds improved, and seeds that had been
+lucky were pulled back to the consensus level. What CD buys is
+predictable performance, not a better best case.
+% 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294, 297--298 (세 인코더).
+% ADS-24의 환경 평가 35실행은 1단계에서 이미 열람했고, ADS-24의 구조
+% 일반성 결과는 개발 비교다(RECORD:256--260, 442). 지위는 8, 9장에서 밝힌다.
+% 합의도에 따른 seed 선택이 ADS-24에서 재현되지 않은 점(ρ=+0.127)은 8장
+% 결과 절에 쓴다.
 
-The thesis makes three contributions. First, it defines an evaluation
-in which every forecast uses only the records already received at its
-decision boundary. Second, it tests observed target membership against
-sequence and grouping controls, including new executions with
-unfamiliar target names. Third, it tests how recurrent history should
-be presented to the readout when benign activity is interleaved.
+The thesis makes three contributions. (a) It measures seed instability
+with 30 seeds per configuration, across four encoder configurations, on
+the in-house task and on ADS-24. (b) It links a diagnosis of where the
+instability arises in the in-house lab to an architecture-preserving
+intervention built on unlabeled model consensus. (c) It presents the
+evidence from diagnosis to intervention as one chain, evaluated under
+procedures that were preregistered and sealed before training and
+collection. The distillation computation itself is a combination of
+existing techniques; we claim the chain of evidence and the evaluation
+behind it, not a new training objective.
+% 근거: idea.md "기여" 3항, RECORD:28.
 
-Chapter~\ref{ch:related} places these comparisons in the context of
-ATT\&CK, attack graphs, and prior forecasting systems.
-Chapter~\ref{ch:task} defines the task and follows a recorded
-prediction to show what the target links carry. Chapter~\ref{ch:method}
-defines the models, and Chapters~\ref{ch:evaluation}
-and~\ref{ch:results} describe the evaluation and report the
-comparisons and the conditions under which the gains hold.
-Chapter~\ref{ch:discussion} discusses these conditions and the threats
-to validity.
+Chapter~\ref{ch:related} reviews ATT\&CK, attack graphs, prior
+forecasting systems, and work on underspecification and distillation.
+Chapter~\ref{ch:task} defines the task, the receipt boundary, and the
+seen and unseen conditions, and Chapter~\ref{ch:method} describes
+REL\_GLOBAL and CD. Chapter~\ref{ch:evaluation} sets out the metrics,
+the sealing procedure, and the three kinds of evidence used in the rest
+of the thesis: sealed criteria, development comparisons, and post hoc
+analyses. Chapter~\ref{ch:diagnosis} measures the instability and traces
+its in-house source (Q1). Chapter~\ref{ch:results} reports the sealed
+in-house confirmation of CD (Q2), and Chapters~\ref{ch:ads24}
+and~\ref{ch:generality} turn to ADS-24, the general encoders, and a
+comparison with other single-model methods (Q3).
+Chapter~\ref{ch:decomposition} is a post hoc analysis introduced after
+the primary experiments; it splits mean seed loss into a consensus term
+and an unlabeled disagreement term, and none of its results were used
+in any criterion. Chapter~\ref{ch:discussion} interprets the findings
+and their threats to validity, and Chapter~\ref{ch:conclusion}
+concludes with planned follow-up work.
