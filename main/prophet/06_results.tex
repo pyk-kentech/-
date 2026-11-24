@@ -1,6 +1,258 @@
-\chapter{Results}
+\chapter{In-House Confirmation of Consensus Distillation}
 \label{ch:results}
+% 파일 이름(06_results.tex)과 label(ch:results)은 그대로 두었다. 이 장의 옛 세 절
+% (관계 모델, event-wise history, 확률 평균·빈도 기준선)은 개요에 따라 부록 B로
+% 옮긴다. 이 파일만 고치라는 지시에 따라 옛 본문은 파일 끝의 \iffalse 블록에 원문
+% 그대로 보존했다.
+% TODO(사람): 부록 B(b_supplemental_results.tex)를 쓸 때 파일 끝 블록의 내용과
+% tab:relations, tab:local을 B.1--B.4로 옮기고 이 블록을 지워 주세요.
 
+This chapter reports the sealed test of consensus distillation in the
+in-house lab. Chapter~\ref{ch:diagnosis} found, on runs that had
+already been inspected, that the REL\_GLOBAL seeds disagree where they
+fail; the question here is whether a single CD student trained toward
+the consensus of five teachers reduces that seed-to-seed spread on new
+runs without giving up the seen procedure. The v3 round is the main
+evidence. It trained 30 new seeds in each of three groups,
+REL\_GLOBAL, KD\_ENV\_TOP5, and KD\_ALL (Table~\ref{tab:variants}),
+for 90 new fits. Within a seed the three groups share the initial
+tensors and the FIT occurrence trace, so they differ only in the KL
+term of Equation~\ref{eq:cd-loss}. The five teachers are the fixed
+models of Section~\ref{sec:method-teachers} and are not among the 30
+new seeds. Of 160 planned and attempted runs, 157 were eligible, with
+1,611 rows; none was replaced. The contract, its three criteria, and
+the 98.3333\% Bonferroni level were fixed before training and
+collection (Section~\ref{sec:eval-criteria}), so every criterion below
+is a sealed criterion in the sense of Section~\ref{sec:eval-rounds}.
+Contrasts outside that family are marked as secondary.
+% 근거: RECORD:166; CONTRACT_V3.md (군·초기 tensor·FIT trace 공유, 계획 160,
+% 보충 금지); v3 FINAL_REPORT_KO.md "수집과 계보" (계획 160, 시도 160, 적격 157,
+% 행 1611, 보충 0; 제외 배경 3, 원래 0).
+
+\section{The v3 round}
+\label{sec:results-v3}
+
+Table~\ref{tab:results-v3-nll} gives the mean NLL of each group on
+the five conditions. KD\_ALL scored below REL\_GLOBAL on all five: on
+\texttt{A+C FLAT} its mean NLL was 0.0276 against 0.0731, and on
+\texttt{ORIGINAL\_18} it was 0.6428 against 0.7036. On the four
+background conditions KD\_ENV\_TOP5, which adapts on the background
+inputs alone, came within 0.002 of KD\_ALL, and on \texttt{C\_ONLY} and
+\texttt{B+C} it was slightly lower. The two students separate only on
+\texttt{ORIGINAL\_18}, the condition whose unlabeled inputs KD\_ALL adds.
+\texttt{OBSERVED\_HEAD}, the frozen head variant of
+Section~\ref{sec:diag-intervention}, is included as a reference; it
+was not retrained in this round and is not part of any criterion. The
+table is written to four decimals because at three decimals the two
+students would tie on \texttt{C\_ONLY}.
+% 근거: RECORD:168--174; v3 FINAL_REPORT_KO.md "같은 새 입력의 전체 NLL"
+% (여섯 자리 원값은 부록 B.6). OBSERVED_HEAD는 계약상 "기존 OBSERVED_HEAD 참고"
+% (CONTRACT_V3.md "함께 보고").
+
+\begin{table}[htbp]
+\centering
+\caption{Mean NLL on the new runs of the v3 round (sealed criterion).
+Each value is the mean over the 30 seeds of the execution-weighted NLL
+over all natural boundaries; only the top-five teacher column averages
+probabilities, those of five fixed models. \texttt{OBSERVED\_HEAD} is a
+frozen reference from Chapter~\ref{ch:diagnosis}.}
+\label{tab:results-v3-nll}
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL
+  & Top-five teachers & \texttt{OBSERVED\_HEAD} \\
+\midrule
+\texttt{A+C FLAT}     & 31 / 341 & 0.0731 & 0.0291 & 0.0276 & 0.0228 & 0.0313 \\
+\texttt{A+C NESTED}   & 32 / 352 & 0.0786 & 0.0297 & 0.0289 & 0.0244 & 0.0295 \\
+\texttt{C\_ONLY}      & 31 / 341 & 0.0542 & 0.0286 & 0.0294 & 0.0237 & 0.0424 \\
+\texttt{B+C}          & 31 / 341 & 0.0658 & 0.0339 & 0.0358 & 0.0287 & 0.0341 \\
+\texttt{ORIGINAL\_18} & 32 / 236 & 0.7036 & 0.6965 & 0.6428 & 0.5777 & 0.7043 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All three criteria passed (Table~\ref{tab:results-v3-criteria}). On
+both A+C layouts the interval for the difference in seed standard
+deviation lies below zero. On \texttt{A+C FLAT} the standard deviation
+fell from about 0.056 to 0.010 and the worst seed from about 0.23 to
+0.07; on \texttt{A+C NESTED} the corresponding values were 0.056 to
+0.006 and 0.20 to 0.05. On \texttt{ORIGINAL\_18} the interval for the NLL
+difference, $[-0.131, -0.0041]$, lies below the preservation limit of
+$+0.020$ and also below zero, which the contract counts as
+improvement. Its upper end is given to four decimals because at three
+it would round to $-0.004$ and hide how close it comes to zero. The
+seed standard deviation on \texttt{ORIGINAL\_18}, which was not a
+criterion, fell from 0.070 to 0.039. These figures describe the spread
+of 30 fixed checkpoints on resampled runs; they say nothing about seeds
+outside those 30 (Section~\ref{sec:eval-criteria}).
+% 근거: RECORD:176--183; v3 FINAL_REPORT_KO.md "사전 주 가족" (점추정 −0.045624,
+% −0.050396, −0.060741) 및 "결과 해석의 경계" (SD FLAT .055591→.009508, NESTED
+% .056335→.005939; 최악 seed FLAT .226493→.066464, NESTED .203222→.045990).
+% FLAT은 개요·기록의 근사값("약 .056→.010, .23→.07")이고, NESTED는 원 파일 값을
+% 셋째·둘째 자리로 줄였다.
+
+\begin{table}[htbp]
+\centering
+\caption{The three primary criteria of the v3 round, KD\_ALL minus
+REL\_GLOBAL, with two-sided Bonferroni-adjusted 98.3333\% intervals from
+100,000 configuration resamples (sealed criterion). Point estimates use
+every eligible run.}
+\label{tab:results-v3-criteria}
+\small
+\begin{tabular}{@{}llrll@{}}
+\toprule
+Condition & Contrast & Estimate & Interval & Outcome \\
+\midrule
+\texttt{A+C FLAT}     & seed SD difference & $-0.046$ & $[-0.071, -0.026]$
+  & passed \\
+\texttt{A+C NESTED}   & seed SD difference & $-0.050$ & $[-0.071, -0.032]$
+  & passed \\
+\texttt{ORIGINAL\_18} & NLL difference     & $-0.061$ & $[-0.131, -0.0041]$
+  & passed; improved \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 구간 끝 −0.0041만 넷째 자리 예외(answers 5). 여섯 자리 원값은 부록 B.6.
+
+The gain on \texttt{ORIGINAL\_18} is in the probabilities, not in the
+chosen actions. Row accuracy moved from 79.9\% to 80.1\%, so KD\_ALL
+selected nearly the same top-1 actions as REL\_GLOBAL and placed more
+probability on the observed ones. The other two unseen conditions were
+checked against the same $+0.020$ limit as secondary contrasts with
+individual 95\% intervals. KD\_ALL minus REL\_GLOBAL was $-0.025$
+$[-0.036, -0.015]$ on \texttt{C\_ONLY} and $-0.030$ $[-0.044, -0.015]$
+on \texttt{B+C}, so preservation held on both.
+% 근거: RECORD:184 (79.87%→80.14%); v3 FINAL_REPORT_KO.md "C_ONLY와 B_PLUS_C의
+% KD_ALL−REL_GLOBAL 보존" (−0.024796 [−0.035986, −0.014786]; −0.029994
+% [−0.044449, −0.014710]).
+
+Two further comparisons qualify what the round shows. First, the
+benefit of adding the original-procedure inputs was not isolated. On
+\texttt{ORIGINAL\_18}, KD\_ALL minus KD\_ENV\_TOP5 was $-0.054$, but
+its 95\% interval, $[-0.121, +0.006]$, contains zero. The round
+confirms KD\_ALL against REL\_GLOBAL; it does not show that the 48
+original-procedure runs account for the part of the gain that
+KD\_ENV\_TOP5 lacks. Second, the student did not reach its teachers.
+On every condition the probability average of the five teachers scored
+lower than KD\_ALL, for example 0.0228 against 0.0276 on
+\texttt{A+C FLAT}. The teachers are five models at inference and the
+student is one. Chapter~\ref{ch:discussion} takes up what this gap
+means for the method.
+% 근거: RECORD:185; v3 FINAL_REPORT_KO.md "보조 비교" (−0.053708 [−0.120492,
+% 0.006306]; KD_ALL−TOP5 교사 A+C FLAT +0.004788 등).
+% TODO(사람): 교사·학생 격차의 해석은 11.2절에 둔다. 11.2절의 label이 정해지면
+% Chapter~\ref{ch:discussion}을 Section~\ref{...}로 바꿔 주세요.
+
+\section{Rounds that did not pass}
+\label{sec:results-failed}
+
+The v3 contract was the third that tested the method, and the two
+earlier ones are reported with their outcomes unchanged
+(Table~\ref{tab:rounds}). The 10-seed development round scored KD\_ENV
+against REL\_GLOBAL, KD\_FIT, and KD\_SELF on 157 runs that had already
+been inspected. All six A+C contrasts of mean NLL had intervals that
+contained zero under a 12-contrast Bonferroni family, so the gate for
+extending the round to 30 seeds failed and the extension was not run.
+In hindsight the gate tested the wrong quantity: the effect the method
+was meant to have is a smaller spread across seeds, not a lower mean.
+We kept the failure on record and wrote a new contract with the seed
+standard deviation as the primary measure, rather than reading the old
+gate differently. The v2 recheck applied the frozen checkpoints of the
+v2 round to 159 eligible runs with 1,633 rows. All four A+C intervals
+for the difference in seed standard deviation passed. On
+\texttt{ORIGINAL\_18}, however, KD\_ENV\_TOP5 minus REL\_GLOBAL was
+$+0.0203$, and its interval crossed the $+0.020$ limit. Preservation was
+therefore not shown, and the method was not adopted as a candidate on
+the strength of that round. The v3 question, whether adding unlabeled
+inputs from the seen procedure keeps the background gain and preserves
+\texttt{ORIGINAL\_18}, comes directly from this result.
+% 근거: RECORD:77--79, 189--196, 414; PAPER_DEFINITIONS.md §3 (10-seed 157/1,611,
+% 이미 열람한 1단계 실행; 12대비 가족, 99.5833%: PROPHET_ENV_CONSENSUS_KD_20261119/
+% FINAL_REPORT_KO.md:13; PEKD3 159/1,633, +.020252); CONTRACT_V3.md 첫 문단의 질문.
+% +0.0203은 셋째 자리에서 한도와 구분되지 않아 넷째 자리로 썼다(answers 5).
+% v2 최초(PEKD2)는 안전 중지로 판정하지 않았고 표 tab:rounds에 이미 있어 본문에서
+% 되풀이하지 않았다.
+% TODO(사람): v2 재확인의 ORIGINAL_18 구간 값(+.020252의 보정 구간)이 기록에
+% 없습니다. 원 파일(PROPHET_ENV_KD_V2_DIAG_RECHECK_20261120/FINAL_REPORT_KO.md)에서
+% 확인되면 이 문단에 넣겠습니다.
+
+\section{Re-inference on the PAG1 runs}
+\label{sec:results-pag1}
+
+The v3 checkpoints were also applied, with no new fit, to the 156
+eligible runs and 1,600 rows collected for the first stage of the
+generality study (Chapter~\ref{ch:generality}). This re-inference was
+registered in advance as a check separate from the generality
+criteria, with the 98.3333\% intervals of the v3 family.
+Table~\ref{tab:results-pag1} gives the condition means. The reduction
+in spread was confirmed again: for KD\_ALL the difference in A+C seed
+standard deviation, with the two layouts weighted equally, was $-0.052$
+$[-0.074, -0.035]$, and for KD\_ENV\_TOP5 it was $-0.058$
+$[-0.082, -0.038]$. Preservation on \texttt{ORIGINAL\_18} was not. For
+KD\_ALL the NLL difference was $-0.050$ with interval
+$[-0.141, +0.021]$, whose upper end lies just above the limit, and for
+KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$. An interval that
+crosses the limit leaves preservation undecided; it does not show that
+the student is worse. The \texttt{ORIGINAL\_18} loss of REL\_GLOBAL was
+0.467 here and 0.704 in v3. Loss levels on this condition differ that
+much between collections, so the two tables are read separately and
+their cells are never subtracted from each other.
+% 근거: RECORD:196, 198--208; ORIG:ARCH_GENERALITY_STAGE2_20261122/
+% V3_REINFERENCE_TABLE.md ("구조 일반성 주 판정 밖에 사전 등록한 별도 확인",
+% 신규 fit 0, 98.3333%, "보존 미확인은 동등성 또는 실패 확정이 아니다");
+% 사전 등록: ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md:10. 차수별 ORIGINAL_18 수준:
+% RECORD:208. 이 표는 셋째 자리 규칙을 따른다(개요).
+
+\begin{table}[htbp]
+\centering
+\caption{Mean NLL of the frozen v3 checkpoints on the new runs of the
+PAG1 re-inference (sealed criterion; no new fits). Values are 30-seed
+means as in Table~\ref{tab:results-v3-nll}. The runs differ from those
+of the v3 round, and the two tables are not compared cell by cell.}
+\label{tab:results-pag1}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL \\
+\midrule
+\texttt{A+C FLAT}     & 31 / 341 & 0.134 & 0.074 & 0.078 \\
+\texttt{A+C NESTED}   & 30 / 330 & 0.116 & 0.063 & 0.066 \\
+\texttt{C\_ONLY}      & 31 / 341 & 0.074 & 0.055 & 0.057 \\
+\texttt{B+C}          & 32 / 352 & 0.121 & 0.061 & 0.066 \\
+\texttt{ORIGINAL\_18} & 32 / 236 & 0.467 & 0.476 & 0.418 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Scope of the in-house confirmation}
+\label{sec:results-scope}
+
+Two limits apply to every result in this chapter. The first is that
+CD narrows the seed distribution without improving every seed. The
+tables report seed means and seed standard deviations, and a smaller
+spread can come partly from seeds that had been better than the
+consensus being pulled back toward it. In the generality rounds,
+where per-seed counts were reported, 20 to 30 of the 30 seeds improved
+depending on the encoder and dataset
+(Chapter~\ref{ch:generality}). The second is that the new runs repeat
+the same lab, the same benign workers, and the same configuration
+design as the runs used for development
+(Section~\ref{sec:eval-rounds}). The v3 and PAG1 results show that the
+effect survives new seeds and new executions within that design; they
+say nothing about another organization's hosts or attack policies.
+Chapter~\ref{ch:ads24} moves the method, frozen, to a public dataset
+collected elsewhere.
+% 근거: RECORD:297, 424 (모든 seed가 좋아지지는 않음), 443 (같은 lab 반복);
+% v3 FINAL_REPORT_KO.md "한계와 선행".
+% TODO(사람): v3와 PAG1에서 KD_ALL이 같은 seed의 REL_GLOBAL보다 나아진 seed 수
+% (30개 중 몇 개인지)가 기록에 없습니다. seed별 CSV(SCORED_RESULTS.json)에서
+% 확인되면 이 문단에 "v3에서는 30개 중 n개" 한 구절을 넣겠습니다.
+
+% ---------------------------------------------------------------------------
+% 옛 본문(부록 B로 옮길 내용). 원문 그대로이며 컴파일되지 않는다.
+% ---------------------------------------------------------------------------
+\iffalse
 \section{Observed target relations}
 \label{sec:membership}
 
@@ -108,3 +360,4 @@ table improved on the training prior in the original-action cohort,
 but in the two A+C layouts all 660 rows had unseen exact keys, so the
 table returned the training prior throughout. Appendix~\ref{app:secondary-results}
 reports the full comparisons and intervals.
+\fi
