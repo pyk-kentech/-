@@ -20,7 +20,8 @@ new seeds. Of 160 planned and attempted runs, 157 were eligible, with
 the 98.3333\% Bonferroni level were fixed before training and
 collection (Section~\ref{sec:eval-criteria}), so every criterion below
 is a sealed criterion in the sense of Section~\ref{sec:eval-rounds}.
-Contrasts outside that family are marked as secondary.
+Contrasts outside that family, including the differences in mean NLL
+on the background conditions, are marked as secondary.
 % 근거: RECORD:166; CONTRACT_V3.md (군·초기 tensor·FIT trace 공유, 계획 160,
 % 보충 금지); v3 FINAL_REPORT_KO.md "수집과 계보" (계획 160, 시도 160, 적격 157,
 % 행 1611, 보충 0; 제외 배경 3, 원래 0).
@@ -29,7 +30,11 @@ Contrasts outside that family are marked as secondary.
 \label{sec:results-v3}
 
 Table~\ref{tab:results-v3-nll} gives the mean NLL of each group on
-the five conditions. KD\_ALL scored below REL\_GLOBAL on all five: on
+the five conditions. Except on \texttt{ORIGINAL\_18}, these means are
+secondary point estimates: the contract did not make mean NLL on the
+background conditions a criterion, and we computed no interval for
+those differences, so they are not shown to be statistically
+established. KD\_ALL scored below REL\_GLOBAL on all five: on
 \texttt{A+C FLAT} its mean NLL was 0.0276 against 0.0731, and on
 \texttt{ORIGINAL\_18} it was 0.6428 against 0.7036. On the four
 background conditions KD\_ENV\_TOP5, which adapts on the background
@@ -47,8 +52,9 @@ students would tie on \texttt{C\_ONLY}.
 
 \begin{table}[htbp]
 \centering
-\caption{Mean NLL on the new runs of the v3 round (sealed criterion).
-Each value is the mean over the 30 seeds of the execution-weighted NLL
+\caption{Mean NLL on the new runs of the v3 round; secondary point
+estimates, with the sealed criteria in
+Table~\ref{tab:results-v3-criteria}. Each value is the mean over the 30 seeds of the execution-weighted NLL
 over all natural boundaries; only the top-five teacher column averages
 probabilities, those of five fixed models. \texttt{OBSERVED\_HEAD} is a
 frozen reference from Chapter~\ref{ch:diagnosis}.}
@@ -188,7 +194,7 @@ $[-0.074, -0.035]$, and for KD\_ENV\_TOP5 it was $-0.058$
 $[-0.082, -0.038]$. Preservation on \texttt{ORIGINAL\_18} was not
 shown. For
 KD\_ALL the NLL difference was $-0.050$ with interval
-$[-0.141, +0.021]$, whose upper end lies just above the limit, and for
+$[-0.141, +0.0207]$, whose upper end lies just above the limit, and for
 KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$. An interval that
 crosses the limit leaves preservation undecided; it does not show that
 the student is worse. The \texttt{ORIGINAL\_18} loss of REL\_GLOBAL was

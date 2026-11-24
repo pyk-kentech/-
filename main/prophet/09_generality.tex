@@ -129,8 +129,8 @@ claim that all 18 hold together at a 5\% familywise level. The closest
 stability result was the ADS-24 Transformer encoder, with a seed
 standard deviation difference of $-0.099$ $[-0.127, -0.075]$; the
 closest mean result was the ADS-24 plain GRU, at $-0.092$
-$[-0.113, -0.071]$. Every interval for preservation also lay below its
-limit, although one only narrowly, as discussed below.
+$[-0.113, -0.071]$. One preservation interval cleared its limit only
+narrowly, as discussed below.
 % 근거: RECORD:279, 294; ARCH_GENERALITY_STAGE2_REPORT.md "주 판정" (99.1667% 구간:
 % ADS LOGBERT SD −0.099170 [−0.127209, −0.075001]; ADS PLAIN_GRU 평균 −0.091707
 % [−0.112726, −0.071334]; 여섯 조합 모두 Y·Y·Y). PROPHET 대비는 A+C FLAT/NESTED 1:1
@@ -142,13 +142,14 @@ limit, although one only narrowly, as discussed below.
 Not every seed improved. Seeds that had been better than the consensus
 of their teachers moved toward it and gave up part of their advantage,
 so the best baseline seed was sometimes better than every student. On
-ADS-24, for instance, two LSTM baseline seeds scored below the FIT
+ADS-24, for instance, two LSTM baseline models scored below the FIT
 prior baseline and none of the LSTM students did, so those two seeds
 were worse after distillation; the best REL\_GLOBAL-ADS seed of
 Chapter~\ref{ch:ads24} was likewise better than every CD seed.
 % TODO(사람): 조합별로 개선된 seed 수(기록 RECORD:297의 "30개 중 20~30개")는 seed별
 % 원자료를 atlas에서 찾지 못해 쓰지 않았다. 원자료를 주시면 부록에 조합별 쌍 차이
-% 분포(방법 리뷰 P3-1)와 함께 넣겠습니다. Among these 30 seeds, CD gave a level close to
+% 분포(방법 리뷰 P3-1)와 함께 넣겠습니다.
+Among these 30 seeds, CD gave a level close to
 that of the teacher average rather than the best level any seed
 reached; whether another draw of seeds would spread as little was not
 tested. A practitioner who could identify the good seeds in advance
@@ -179,8 +180,7 @@ seeds agree closely on a level that a frequency table already beats.
 Two in-house details qualify the result for the plain GRU. Its
 preservation interval on \texttt{ORIGINAL\_18} had an upper end of
 $+0.0198$, just below the limit of $+0.020$, and its seed-mean accuracy
-on that condition fell from 84.5\% to 84.0\%; the interval lay below
-the limit, but with almost no margin. The self-distillation control, in which each seed
+on that condition fell from 84.5\% to 84.0\%. The self-distillation control, in which each seed
 is distilled from its own frozen baseline with the same KL term, scored
 1.112 with a seed standard deviation of 0.558 on \texttt{A+C FLAT},
 essentially the baseline values of 1.139 and 0.579. This is the second
@@ -223,13 +223,15 @@ averaging (SWA) averages the weights of the baseline's own training trajectory
 at updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
 Pseudo-labeling adds a cross-entropy term toward the hard predictions
 of the same seed's frozen baseline on the unlabeled environment
-inputs~\cite{tmp_lee}. Entropy minimization adds the entropy of the
+inputs. Entropy minimization adds the entropy of the
 student's own predictions on those inputs~\cite{grandvalet2004semi}.
 FIT-input distillation follows the same five-teacher average as CD but
 on FIT inputs instead of environment inputs. Geometric-pool distillation
 follows the normalized geometric mean of the five teachers on
 environment inputs, the logarithmic opinion pool of
-Section~\ref{sec:related-decomposition}. Every method kept the FIT loss,
+Section~\ref{sec:related-decomposition}.
+
+Every method kept the FIT loss,
 the 1,346 updates, the coefficient of 0.25 on the added term, a
 temperature of 1, and 32 added rows per update, and the 30 seeds started
 from the same initial weights. The study trained 300 new models; the
@@ -250,19 +252,24 @@ untuned protocol and draw no conclusion about the methods beyond it.
 % 원 파일 이름 대응: SWA = weight averaging, PSEUDO = pseudo-labeling,
 % ENTROPY = entropy minimization, FIT_KD = FIT-input distillation,
 % GEO_KD = geometric-pool distillation, KD_ENV = CD student.
-% Lee(pseudo-label)는 2장과 같은 임시 key(tmp_lee)로 인용하고 정확한 제목으로 다시
-% 요청했다. Grandvalet·Bengio는 이제 ref.bib의 grandvalet2004semi다. 기하평균 교사의 출처로 개요가
+% Lee(pseudo-label)의 임시 key(tmp_lee)는 엔진에서 확인되지 않아 지웠다(2장 TODO와 같다).
+% TODO(사람): Lee의 서지를 ref.bib에 넣어 주시면 "environment inputs" 뒤에 인용합니다. Grandvalet·Bengio는 이제 ref.bib의 grandvalet2004semi다. 기하평균 교사의 출처로 개요가
 % 지목한 Ilichev 등(RANLP 2021)은 정확한 제목을 확신할 수 없어 인용을 빼고
 % 2.7절의 로그 의견 풀(Heskes)로 연결했습니다.
 % TODO(사람): 기하평균 교사 증류의 선행 문헌 서지를 알려 주시면 이 자리에 인용하겠습니다.
 
 Under this common protocol, which tuned no method on its own, only the
 two groups that follow a consensus of several models on environment
-inputs reduced the spread (Table~\ref{tab:gen-methods}). On
-\texttt{A+C FLAT} the CD student had a seed standard deviation of 0.013
-and the geometric-pool student 0.020, while the baseline model and the
-other five groups stayed between 0.324 and 1.215. On ADS-24 the pattern
-was the same, with 0.026 and 0.030 against 0.174 to 0.490. Table~\ref{tab:gen-methods-contrast} gives the paired contrasts.
+inputs produced a very small seed standard deviation on both datasets
+(Table~\ref{tab:gen-methods}). On \texttt{A+C FLAT} the CD student had
+a seed standard deviation of 0.013 and the geometric-pool student
+0.020, while the baseline model and the other five groups stayed
+between 0.324 and 1.215. On ADS-24 the two consensus groups had 0.026
+and 0.030, against 0.174 to 0.490 for the others. Some of the other
+groups were also below the baseline model as point estimates: entropy
+minimization at 0.324 against 0.693 in-house, and SWA at 0.681 and
+0.174 against 0.693 and 0.180. We do not test those differences from
+the baseline model here, and the table gives no interval for them. Table~\ref{tab:gen-methods-contrast} gives the paired contrasts.
 In the in-house lab CD had a lower mean NLL than SWA,
 pseudo-labeling, entropy minimization, and FIT-input distillation, with
 every interval above zero. Against geometric-pool distillation the

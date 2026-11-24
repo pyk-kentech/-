@@ -53,7 +53,7 @@ Repeated runs in held target configurations (Section~\ref{sec:app-relations})$^{
 Four targets with unseen names (Section~\ref{sec:app-four}) & 64 & 704 \\
 New runs for the event-wise history comparison (Section~\ref{sec:app-local}) & 111 & 1,163 \\
 New runs for the fixed probability average (Section~\ref{sec:app-mix})$^{*}$ & 135 & 1,427 \\
-Original action task for the receipt-history lookup (Section~\ref{sec:app-mix})$^{*}$ & 64 & 472 \\
+Original action task for the hint-branch table (Section~\ref{sec:app-mix})$^{*}$ & 64 & 472 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -360,7 +360,8 @@ Baseline + BiTA-inspired aggregator & 0.124414 & 0.129035 \\
 \end{tabularx}
 \end{table}
 
-The frequency baseline is a non-neural lookup. Its key is the received
+The hint-branch table of Section~\ref{sec:diag-errors} is a non-neural
+count table. Its key is the received
 START order of records with an observed action hint, derived from the
 observed commands, together with whether the latest such START has a
 uniquely linked received END. Each training execution casts one vote per

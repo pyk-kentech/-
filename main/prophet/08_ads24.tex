@@ -181,18 +181,20 @@ Section~\ref{sec:diag-size}.
 % −0.39는 기록의 사후 계산이다. ADS24_STAGE1_REPORT.md의 30 seed 표에서 환경
 % NLL과 보존 OFF NLL의 Spearman을 다시 계산해 −0.3878을 확인했다.
 
-One in-house observation did not replicate. In the lab, a seed's
-agreement with the other seeds on unlabeled environment inputs ranked
-the seeds much as their losses did (Section~\ref{sec:diag-agreement}).
-On ADS-24 the stage-1 contract tested this as a separate diagnostic,
-using each seed's top-1 agreement with the majority of the other 29
-models on the environment-evaluation inputs. The expected direction was
+One in-house observation was not reproduced. In the lab, a seed's
+agreement with the 30-model majority on unlabeled environment inputs,
+its own vote included, ranked the seeds much as their losses did
+(Section~\ref{sec:diag-agreement}). On ADS-24 the stage-1 contract
+tested a leave-one-out version as a separate diagnostic, using each
+seed's top-1 agreement with the majority of the other 29 models on the
+environment-evaluation inputs. The two definitions differ, and the stored reports give no
+ADS-24 value under the in-house one. The expected direction was
 negative, with the condition set at $\rho \le -0.50$ and a permutation
 $p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
 permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
-more with the rest did not have lower loss. The rank correlation
-between agreement and loss thus held only in the in-house lab, and even
-there the top-ranked seed failed preservation
+more with the rest did not have lower loss. The leave-one-out
+agreement diagnostic thus did not reproduce the in-house association,
+and even in the lab the top-ranked seed failed preservation
 (Section~\ref{sec:method-teachers}). The same weakness reaches the
 teacher rule, which ranks seeds by agreement. On ADS-24 the CD student
 still reduced the spread with teachers chosen this way, but the data
@@ -206,9 +208,11 @@ prior baseline}, which predicts at every boundary the tactic
 frequencies of the FIT runs, weighting each run equally, and whose
 top-1 choice is therefore the majority tactic of FIT. It is estimated
 from the 48 FIT runs alone and scored, like the models, on the 35
-environment-evaluation runs; the stored reports do not say whether the
-frequencies were smoothed. On the environment evaluation its NLL is
-1.830, and all 30 CD seeds were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
+environment-evaluation runs. The stored reports do not say whether the
+frequencies were smoothed, or with what coefficient, so we report the
+value as stored and do not claim it can be recomputed from this
+description. On the environment evaluation its NLL is 1.830, and all 30
+CD seeds were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
 baseline. Not every seed gained either. The best REL\_GLOBAL-ADS seed
 scored 1.953, lower than every CD seed, whose best was 2.020; consensus
@@ -232,6 +236,7 @@ against 2.323, and the CD student lowered both, to 1.790 and 2.103. The
 loss of REL\_GLOBAL-ADS was 2.446 on the runs in the lower half of user
 activity and 2.096 on the upper half, and it depended on the defender
 agent, ranging from 1.770 with NOPAgent to 2.544 with WhackAMoleAgent.
+
 One further quantity
 was computed only after the primary results, and we report it as a
 post hoc analysis. The probability average of the five teachers scored

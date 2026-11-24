@@ -20,8 +20,10 @@ unchanged: a student of the same architecture follows the averaged
 probabilities of five selected teachers on unlabeled inputs from the
 new workload. In the v3 round, the one test of CD under criteria sealed
 before training and collection, with 30 new seeds and 157 new runs,
-mean NLL on \texttt{A+C FLAT} fell from 0.0731 to 0.0276 and all three
-primary criteria were met. On ADS-24, in a development comparison on
+all three primary criteria were met: the seed standard deviation
+narrowed on both A+C layouts, and \texttt{ORIGINAL\_18} was preserved.
+As a secondary point estimate outside those criteria, mean NLL on
+\texttt{A+C FLAT} fell from 0.0731 to 0.0276. On ADS-24, in a development comparison on
 inspected runs, the seed standard deviation fell from 0.163 to 0.025,
 and the three encoder adaptations moved the same way in development
 comparisons on both datasets.
@@ -50,15 +52,15 @@ agreement ranking used to pick teachers did not carry over to ADS-24.
 
 One bundle of closing checks was planned before this thesis was written
 and is not reported here; whatever it shows will be added to the
-limitations rather than covered by new experiments. Three of the checks
-require training. The first varies the teacher set, using five teachers
-chosen at random, two teachers, and the full set of 30, to learn whether
+limitations rather than covered by new experiments. Some of the checks
+require training. Varying the teacher set, with five teachers chosen at
+random, two teachers, and the full set of 30, would show whether
 training 30 baselines and ranking them by agreement is worth its cost.
-The second trains students on 25\% and 50\% of the unlabeled
-environment inputs to estimate how much new-environment data the KL
-term needs. The third repeats the comparison with other single-model
-methods on a Transformer encoder, so that the comparison does not rest
-on one architecture. The remaining checks reuse frozen models. They run
+Students trained on 25\% and 50\% of the unlabeled environment inputs
+would estimate how much new-environment data the KL term needs, and
+repeating the comparison with other single-model methods on a
+Transformer encoder would keep that comparison from resting on one
+architecture. The other checks reuse frozen models. They run
 inference on the 119 ADS-24 runs that no earlier stage has used, which
 would give an ADS-24 result on runs no one has looked at, and on
 a fresh in-house collection that completes the method comparison
@@ -71,8 +73,8 @@ these 30 seeds.
 
 A separate line of work concerns the mechanism. The account of where the
 seeds diverge was built for REL\_GLOBAL in the in-house lab, and CD
-passed on ADS-24 and on the general encoders without a matching
-diagnosis there. Whether those models also split on one decision, and
+reduced the spread on ADS-24 and for the general encoders, in
+development comparisons, without a matching diagnosis there. Whether those models also split on one decision, and
 whether their disagreement sits where the in-house lookup sits, is
 open. Extending the diagnosis to ADS-24 and to the general encoders
 would show whether the step from diagnosis to remedy holds outside the

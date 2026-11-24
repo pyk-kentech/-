@@ -13,7 +13,11 @@ Lore in the dataset, that lists the attacker's stages with their
 tactics; 255 runs have one. A run became usable for the task only after
 its stages were bound to the time axis of its Wazuh alerts, and this
 binding dropped 288 stages that fell outside the extraction window and
-one run whose Wazuh JSON could not be parsed. The contract population
+one run whose Wazuh JSON could not be parsed. The stored records do not
+state which two timestamps the binding compares or the rule that
+attaches a stage to an alert time, so we could not verify the binding
+independently. The ADS-24 results use the stored derived task, and a
+different binding could move segment boundaries and next-tactic labels. The contract population
 then excludes runs flagged with \texttt{malicious\_users} or
 \texttt{block\_blinds\_blue} and runs whose defender is unknown. Two
 label baselines, computed on the 132 runs with five folds, show how much
@@ -67,8 +71,11 @@ Runs usable after time binding & 251 (288 stages outside the extraction
 Parsed Wazuh alerts & 2,067,288 \\
 Time offset & UTC+02:00 confirmed in 254 runs; the whole collection
   period lies within daylight saving time \\
-Time anchor & SMB traces in 68 episodes; lag median 11.47\,s, 95th
-  percentile 27.93\,s, range 0.52--50.53\,s \\
+Time anchor & binding rule and reference timestamps not documented in
+  the stored records; not verified independently \\
+% TODO(사람): 기록의 시각 앵커(SMB 흔적 68 에피소드, 시차 중앙값 11.47초, 95분위 27.93초,
+% 범위 0.52--50.53초)는 시차가 어느 두 시각의 차이인지 확인될 때까지 표에서 뺐다
+% (answers: Lore--Wazuh 시간 기준은 지어내지 않는다; 3회차 방법 리뷰 P1-4).
 Contract population & 132 runs (flags \texttt{malicious\_users},
   \texttt{block\_blinds\_blue}, and unknown defender excluded); identity
   with the 134 runs described with the dataset not checked \\

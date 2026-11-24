@@ -86,13 +86,18 @@ S3: last FIT minibatch CE    & & & 0.160 & 0.033 \\
 % Spearman ρ"라고만 적습니다. 캡션은 "선택 순위와 손실 순위의 상관(양수 = 손실 낮은
 % seed를 앞에 고름)"으로 읽었습니다.
 
-None of the three selection scores we checked picked out the good
-seeds. The scores were fixed before the A+C losses of these 30 seeds
-were read: S1, a seed's top-1 agreement with the 30-model
-majority on the unlabeled A+C inputs (Section~\ref{sec:diag-agreement});
-S2, its NLL on \texttt{C\_ONLY}; and S3, its cross-entropy on the last
-FIT minibatch of training. The rank correlation with A+C loss was 0.115
-on FLAT and 0.151 on NESTED for S2, and 0.160 and 0.033 for S3. S3 is
+Of the three selection scores we checked, only S1 tracked A+C loss in
+this lab; S2 and the final FIT minibatch cross-entropy did not. The
+scores were fixed before the A+C losses of these 30 seeds were read:
+S1, a seed's top-1 agreement with the 30-model majority on the
+unlabeled A+C inputs, its own vote included; S2, its NLL on
+\texttt{C\_ONLY}; and S3, its cross-entropy on the last FIT minibatch
+of training. The rank correlation with A+C loss was 0.877 on FLAT and
+0.915 on NESTED for S1, 0.115 and 0.151 for S2, and 0.160 and 0.033 for
+S3. S1 is still not a rule for choosing one seed: the seed it ranked
+first failed preservation (Section~\ref{sec:method-teachers}), and the
+association did not reproduce on ADS-24 (Chapter~\ref{ch:ads24}).
+Section~\ref{sec:diag-agreement} returns to it. S3 is
 the loss on the final training batch, not an NLL on held-out FIT runs;
 the values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
@@ -100,17 +105,54 @@ fail. S2 uses labels from another unseen condition and still ranks the
 seeds poorly. The pattern matches what D'Amour et al.\ call
 underspecification~\cite{damour2020underspecification}: the training
 data fix how the seeds behave on the conditions they cover and leave
-their behavior on these background conditions to the seed.
+their behavior on these background conditions to the seed, and
+neither the final training loss nor labels from another unseen
+condition recover it.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
 % NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
 % S4(고정 무작위 순열)는 무작위 대조라 표와 본문에서 뺐다.
 % TODO(사람): FIT 보류 NLL과 A+C 손실의 seed 상관이 따로 계산된 적이 있는지
 % 알려 주세요. 있으면 "not that every score ... would fail" 문장을 바꿉니다.
 
+\section{Where the seeds disagree}
+\label{sec:diag-agreement}
+
+The places where the seeds part can be found without labels. On 1,029 of the
+1,309 background rows all 30 seeds gave the same top-1 action, and
+every one of these unanimous answers was correct. The rows on which the
+seeds split carried between 84.2\% and 91.2\% of the NLL of the
+30-model average, depending on the condition, which is what the use of
+ensemble disagreement as an uncertainty signal would lead one to
+expect~\cite{lakshminarayanan2016simple}. Unanimity is not a guarantee of
+correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
+wrong, and on the background, subsets of five seeds were sometimes
+unanimous and wrong. Agreement also tracks the quality of a seed, in
+line with the model-level relation reported by Baek et
+al.~\cite{baek2022agreement}: S1 ranked the seeds much as their A+C
+losses did (Section~\ref{sec:diag-size}). On the 82,008 FIT views the 30 models gave the same top-1 action
+for 90.3\% (74,074), so where the training data constrain them the
+seeds compute nearly the same function. Disagreement on unlabeled
+environment inputs therefore marks, without labels, the places where
+the seeds' computations part. These are measurements for 30 seeds on
+this task, not a new phenomenon. The distillation of
+Chapter~\ref{ch:method} is designed to remove that disagreement, and
+Chapter~\ref{ch:results} tests it under a sealed contract.
+% 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
+% REPORT_KO.md:5 (배경 1,029행 만장일치 모두 정답, 무작위 5개 만장일치는 오류 있음,
+% ORIGINAL_18 89행 중 8행 오답), :9--15 (만장일치 247+240+243+299=1,029; 배경 1,309행),
+% :25 (갈린 행의 30확률 평균 NLL 기여 FLAT 91.2%, NESTED 89.1%, C_ONLY 89.0%,
+% B+C 84.2%), :33--37 (크기 5 조합). RECORD:101--102.
+% S1 ρ .8768/.9150: SEED_POPULATION FINAL_REPORT_KO.md:37.
+% FIT view 90.3% = 74,074/82,008 (개요 B표 일치). 82,008 = 4,824 자연 경계 +
+% 77,184 전달 view (GENERIC_HEAD_CAPACITY_MATCHED FINAL_REPORT_KO.md:9, 11).
+% TODO(사람): "FIT view"는 5장 natural row/delayed view 정의([직접 기입])에 기대고
+% 있습니다. 정의가 들어가면 이 문장의 용어를 맞춰 주세요.
+
 \section{What the errors look like}
 \label{sec:diag-errors}
 
-Every label of the 660 A+C rows is COPY or DISCOVERY, and every top-1
+This section and the two that follow are a separate diagnosis of the
+in-house errors; CD does not depend on them. Every label of the 660 A+C rows is COPY or DISCOVERY, and every top-1
 error of the 30 seeds on these rows, in both layouts, chose the other
 of the two. For such a row the NLL splits exactly as
 $-\log(p_{\mathrm{C}}+p_{\mathrm{D}})
@@ -133,11 +175,12 @@ was not established.
 % ("A+C FLAT/NESTED의 파일 행동 행 660개"), 341+319=660.
 % 개요의 B′표에 따라 seed 181(이전 5-seed 집합)의 예는 쓰지 않았다.
 
-The seen condition has a different problem. On \texttt{ORIGINAL\_18}
-the seeds averaged 0.631, far above their A+C losses, and most of this
-residual reflects uncertainty about which branch the procedure takes
-next rather than a weakness of the encoder. We built a table from the
-603 FIT runs whose key is the receipt order of the hint-bearing START
+On the seen condition, however, the problem is a different one. On
+\texttt{ORIGINAL\_18} the seeds averaged 0.631, far above their A+C
+losses, and most of this remaining loss reflects uncertainty about
+which branch the procedure takes next rather than a weakness of the
+encoder. We built a count table, the \emph{hint-branch table}, from
+the 603 FIT runs. Its key is the receipt order of the hint-bearing START
 records before the cutoff, together with whether the last of them has a
 received END, and which predicts the smoothed action frequencies seen
 under that key. Used alone, the table scored 0.554 on the 118
@@ -145,8 +188,8 @@ under that key. Used alone, the table scored 0.554 on the 118
 inspected set of 64 original-procedure runs and 472 rows. With each FIT
 run held out in turn, it reached 82.5\% accuracy and an NLL of 0.376,
 and splitting each key into two bins of the time since the last received
-batch (age) lowered the NLL to 0.338. A count table that knows nothing
-about targets thus comes close to the trained seeds on the original
+batch (age) lowered the NLL to 0.338. The hint-branch table, which
+knows nothing about targets, thus comes close to the trained seeds on the original
 procedure, which leaves little for a change of encoder to gain there.
 The same table does not transfer to the background. Benign START
 records lengthen and reorder the hint sequences, to as many as 22 in
@@ -169,8 +212,8 @@ other than knowledge of the branches.
 \section{A lookup rule without parameters}
 \label{sec:diag-rule}
 
-The background executions follow a fixed frame, which we read off the
-row features of the development set. An execution opens with four
+The background executions also follow a fixed frame, which we read off the row features of the development set.
+An execution opens with four
 payload searches (DISCOVERY). Each target is then visited with a marker search, and COPY
 follows if that target's payload search succeeded, that is, ended with
 exit status zero; the source copies exactly when its observed result
@@ -189,8 +232,8 @@ so it describes one decision of the procedure and is not an 18-way
 predictor. Each of the 19 background errors predicted COPY again right
 after an actual COPY whose START had not yet been received.
 
-The next step is a post hoc analysis on the same development set. We
-turned the rule into probabilities. Each rule category
+Against that frame, and as a post hoc analysis on the same
+development set, we turned the rule into probabilities. Each rule category
 received a COPY probability estimated from FIT runs, which replaced the
 seed's split between COPY and DISCOVERY; the seed's total for the two
 actions and its other 16 probabilities were kept. The mean single-seed
@@ -241,9 +284,11 @@ Table~\ref{tab:diag-rule} gives the results. On the development set,
 \texttt{OBSERVED\_HEAD} lowered the A+C loss below both REL\_GLOBAL and
 \texttt{SHUFFLED\_HEAD}.
 
-The check on new runs was a sealed criterion. On 157 runs collected for
-it in the same lab, with the 30 seeds frozen and the check sealed
-before collection, all four A+C contrasts against the two other models
+The check on new runs was a pre-specified new-run check of frozen
+models. The 30 checkpoints had been trained before the check was
+written, so it does not meet the definition of a sealed criterion in
+Section~\ref{sec:eval-rounds}; it was sealed before its runs were
+collected. On 157 runs collected for it in the same lab, all four A+C contrasts against the two other models
 had Bonferroni-adjusted 98.75\% intervals below zero, and the seed
 standard deviation and the worst seed improved as well. These are the
 157 runs that the 10-seed round of Chapter~\ref{ch:results} later
@@ -337,41 +382,6 @@ Set & Runs / rows & REL\_GLOBAL & + lookup & Shuffled & Observed
 % TODO(사람): 개발 집합 ORIGINAL_18에서 OBSERVED_HEAD·GENERIC_HEAD 값이 있으면
 % 알려 주세요. GENERIC 보고서에는 ORIGINAL_18 행이 따로 있습니다
 % (ORIGINAL_18_LIMITATION_FOR_PAPER_KO.md, 아직 대조하지 않음).
-
-\section{Where the seeds disagree}
-\label{sec:diag-agreement}
-
-The last observation concerns disagreement. On 1,029 of the 1,309
-background rows all 30 seeds gave the same top-1 action, and every one
-of these unanimous answers was correct. The rows on which the seeds
-split carried between 84.2\% and 91.2\% of the NLL of the 30-model
-average, depending on the condition. Unanimity is not a guarantee of
-correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
-wrong, and on the background, subsets of five seeds were sometimes
-unanimous and wrong. Agreement also tracks the quality of a seed. The
-S1 score, a seed's top-1 agreement with the 30-model majority on the
-unlabeled A+C inputs, ranked the seeds much as their A+C losses did, with
-correlations of 0.877 on FLAT and 0.915 on NESTED, where S2 and S3 did
-not. On the 82,008 FIT views the 30 models gave the same top-1 action
-for 90.3\% (74,074), so where the training data constrain them the
-seeds compute nearly the same function. Disagreement on unlabeled
-environment inputs therefore marks, without labels, the places where
-the seeds' computations part. The distillation of
-Chapter~\ref{ch:method} is designed to remove it, and
-Chapter~\ref{ch:results} tests it under a sealed contract. Agreement
-did not serve as a rule for choosing one seed: the top-ranked seed
-failed preservation (Section~\ref{sec:method-teachers}), and the
-relation did not hold on ADS-24 (Chapter~\ref{ch:ads24}).
-% 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
-% REPORT_KO.md:5 (배경 1,029행 만장일치 모두 정답, 무작위 5개 만장일치는 오류 있음,
-% ORIGINAL_18 89행 중 8행 오답), :9--15 (만장일치 247+240+243+299=1,029; 배경 1,309행),
-% :25 (갈린 행의 30확률 평균 NLL 기여 FLAT 91.2%, NESTED 89.1%, C_ONLY 89.0%,
-% B+C 84.2%), :33--37 (크기 5 조합). RECORD:101--102.
-% S1 ρ .8768/.9150: SEED_POPULATION FINAL_REPORT_KO.md:37.
-% FIT view 90.3% = 74,074/82,008 (개요 B표 일치). 82,008 = 4,824 자연 경계 +
-% 77,184 전달 view (GENERIC_HEAD_CAPACITY_MATCHED FINAL_REPORT_KO.md:9, 11).
-% TODO(사람): "FIT view"는 5장 natural row/delayed view 정의([직접 기입])에 기대고
-% 있습니다. 정의가 들어가면 이 문장의 용어를 맞춰 주세요.
 
 % ---------------------------------------------------------------
 % 사람에게 물을 것 (6장)

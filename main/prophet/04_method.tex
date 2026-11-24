@@ -171,8 +171,10 @@ serves as the reference; each model's own vote is included. A model's
 action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
 form $J$, and these five teachers are used in every in-house round.
-Ranking seeds by unlabeled agreement treats agreement as a proxy for
-performance, the use studied by Baek et al.~\cite{baek2022agreement}.
+Ranking seeds by unlabeled agreement is motivated by the use of model
+agreement on unlabeled data in Baek et al.~\cite{baek2022agreement},
+but it is not their Agreement-on-the-Line estimator: it fits no line
+and uses no labeled in-distribution data.
 The rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
 blind. No round compared it with five teachers chosen at random, with

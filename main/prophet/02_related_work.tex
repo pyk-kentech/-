@@ -142,11 +142,14 @@ al.\ observe that, when in-distribution and shifted accuracy are
 linearly related across models, agreement between pairs of models on
 in-distribution and shifted data follows a closely matching line, which
 allows accuracy under shift to be estimated from unlabeled
-data~\cite{baek2022agreement}. CD uses agreement in two ways, and only
-one of them differs from that work. To choose teachers it ranks the
-seeds by their agreement on unlabeled environment inputs, which treats
-agreement as a proxy for performance much as Baek et al.\ do; this use
-held in the in-house lab and did not hold on ADS-24
+data~\cite{baek2022agreement}. CD uses agreement in two ways. To
+choose teachers it ranks the seeds by their mean top-1 agreement with
+the majority on unlabeled environment inputs. This rule is motivated by
+the use of unlabeled model agreement in Baek et al., but it is not
+their Agreement-on-the-Line estimator, which fits a linear relation
+between in-distribution and shifted agreement using labeled
+in-distribution data; our ranking uses no labels and no fitted line.
+The ranking tracked loss in the in-house lab and did not on ADS-24
 (Chapter~\ref{ch:ads24}). To train, it does not use agreement at all:
 the student follows the mean probability of the selected teachers on
 those inputs.
@@ -176,7 +179,7 @@ criteria on the seed standard deviation.
 The comparison methods in Chapter~\ref{ch:generality} come from work
 on stabilizing a single model or adapting it without labels.
 Pseudo-labeling trains on the model's own most confident predictions
-for unlabeled data~\cite{tmp_lee}, and entropy minimization penalizes
+for unlabeled data, and entropy minimization penalizes
 uncertain predictions on unlabeled inputs~\cite{grandvalet2004semi}.
 Stochastic weight averaging (SWA) averages weights along one training
 trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits with
@@ -185,10 +188,15 @@ et al.\ study adapting malware detectors to drift without labels,
 where self-training on pseudo-labels can reinforce the model's own
 errors~\cite{kan2021investigating}. Distillation on unlabeled inputs is
 itself not new either, since the transfer set of Hinton et al.\ needs
-no labels~\cite{hinton2015distilling}. What differs here is where the
-transfer set comes from, unlabeled runs of the target environment, and
-what is judged, the seed standard deviation of the distilled model.
+no labels~\cite{hinton2015distilling}. As in labelless drift
+adaptation~\cite{kan2021investigating}, our transfer set comes from
+unlabeled data of the target environment. What we examine is whether a
+student distilled from a seed ensemble on that set narrows the seed
+standard deviation.
 % 근거: RECORD:470--475. 온도 보정·확률 앙상블은 9.2절에서 보고한다.
+% TODO(사람): pseudo-labeling의 출처 "Pseudo-Label: The Simple and Efficient
+% Semi-Supervised Learning Method for Deep Neural Networks"(Lee)가 엔진에서 확인되지 않아
+% 임시 key(tmp_lee)를 지웠다. ref.bib에 넣어 주시면 "for unlabeled data" 뒤에 인용합니다.
 
 \section{Decomposition of ensemble log loss}
 \label{sec:related-decomposition}

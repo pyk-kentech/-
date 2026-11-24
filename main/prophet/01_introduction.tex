@@ -34,7 +34,7 @@ seeds of the baseline predictor, REL\_GLOBAL, the per-seed NLL on runs
 we had already inspected ranged from 0.036 to 0.420 on the unseen
 condition in which benign workers A and C run beside the attack
 procedure (A+C, in its FLAT layout of file targets). A plain GRU trained on identical data reached anywhere
-between 51\% and 88\% accuracy on the same condition, depending on the
+between 51.0\% and 87.7\% accuracy on the same condition, depending on the
 seed. The training-time score we checked did not rank the seeds: the
 rank correlation between a seed's cross-entropy on its final FIT
 minibatch and its loss on A+C was 0.160 on the FLAT layout and 0.033 on
@@ -69,11 +69,12 @@ from two known uses of independently trained models. Their disagreement
 indicates predictive uncertainty~\cite{lakshminarayanan2016simple}, and
 where accuracy under shift tracks in-distribution accuracy across
 models, their agreement on unlabeled shifted data can be used to
-estimate that accuracy~\cite{baek2022agreement}. Neither result says
-that disagreement marks the errors of a given seed in a given
-environment. In the in-house lab we checked that the baseline models
-disagree where they are wrong (Chapter~\ref{ch:diagnosis}); on ADS-24
-the corresponding seed ranking did not hold (Chapter~\ref{ch:ads24}). We train 30 seeds of
+estimate that accuracy~\cite{baek2022agreement}. Consistent with
+these results, the baseline models in our in-house lab disagree on
+unlabeled inputs where their loss concentrates, and a seed's agreement
+ranks it by loss (Chapter~\ref{ch:diagnosis}); we report this as a
+measurement on our task, not as a new phenomenon. On ADS-24 that
+ranking did not hold (Chapter~\ref{ch:ads24}). We train 30 seeds of
 REL\_GLOBAL, select five of them as teachers by their top-1 agreement on
 unlabeled inputs from the environment, and train a student that follows
 the arithmetic mean of the teachers' probabilities on those inputs
@@ -93,11 +94,12 @@ training, where 30 baseline models must be fitted before the student.
 
 In a sealed in-house evaluation with 30 new seeds, 157 new eligible
 runs, and 1,611 prediction rows, the CD student met all three
-primary criteria fixed before collection. On A+C FLAT its mean NLL was
-0.0276 against 0.0731 for REL\_GLOBAL, and the seed standard deviation
-on A+C fell from about 0.056 to 0.010. On ORIGINAL\_18, the seen
-procedure without benign workers, the mean NLL moved from 0.7036 to
-0.6428 (difference interval $[-0.131, -0.0041]$). These intervals
+primary criteria fixed before training and collection. The seed
+standard deviation fell on both A+C layouts, on FLAT from about 0.056
+to 0.010, and on ORIGINAL\_18, the seen procedure without benign
+workers, the mean NLL moved from 0.7036 to 0.6428 (difference interval
+$[-0.131, -0.0041]$). As a secondary point estimate, the mean NLL on
+A+C FLAT was 0.0276 against 0.0731 for REL\_GLOBAL. These intervals
 resample runs for 30 fixed checkpoints and do not cover other seeds.
 Applied unchanged to the public ADS-24 dataset, CD reduced the seed
 standard deviation from 0.163 to 0.025 and the mean NLL from 2.276 to
@@ -127,8 +129,9 @@ the head we built on that diagnosis was not adopted
 (Section~\ref{sec:diag-intervention}). (c) It evaluates the method
 under contracts sealed before training and collection, and it labels
 every result as a sealed criterion, a development comparison, or a post
-hoc analysis. Only the in-house v3 round meets the first label for CD;
-the ADS-24 study, the encoder study, and the method comparison on
+hoc analysis. Only the in-house v3 round passed all of its sealed
+criteria; the v2 recheck passed stability but did not show
+preservation, and the ADS-24 study, the encoder study, and the method comparison on
 ADS-24 are development comparisons, and the decomposition is post hoc.
 The distillation computation itself is a combination of existing
 techniques; we claim the evidence and the evaluation behind it, not a

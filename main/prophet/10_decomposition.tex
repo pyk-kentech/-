@@ -50,8 +50,8 @@ Chapter~\ref{ch:generality}: the three general encoders and REL\_GLOBAL
 on the new PAG1 runs of the in-house lab and on ADS-24. On conditions
 absent from FIT, $V$ was three to seven times its value on the seen
 condition for every general encoder on both datasets. REL\_GLOBAL-ADS
-behaved the same way (5.3 times), but in the in-house lab its
-$V$ barely moved (1.1 times). In the in-house lab, disagreement was
+behaved the same way on ADS-24 (5.3 times), whereas the $V$ of the
+in-house REL\_GLOBAL barely moved (1.1 times). In the in-house lab, disagreement was
 about half of the unseen-condition loss for the LSTM and Transformer
 encoders and for REL\_GLOBAL, and 70\% for the plain GRU, against 15\%
 to 28\% on \texttt{ORIGINAL\_18}. On ADS-24 the share was 7\% to 14\%.
@@ -167,11 +167,6 @@ Third, the adaptation-input $V$ of the 30 REL\_GLOBAL seeds of the
 in-house lab could not be computed, because only their aggregated
 teacher probabilities, not the 30 individual distributions, had been
 saved; we did not reconstruct them by re-running the checkpoints.
-Related work studies a geometric-mean-based decomposition of
-variance-related error under distribution shift with evaluation
-labels~\cite{rathmanakidis2022reduction} and proposes proper-score
-variance as an uncertainty estimate under domain
-drift~\cite{gruber2022uncertainty}.
 Nothing in our data shows that $V$ measured before deployment predicts
 later seed instability.
 % 근거: RECORD:333, 404, 406, 506; VARIANCE_DECOMPOSITION_REPORT.md "Arithmetic versus
