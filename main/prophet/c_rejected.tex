@@ -1,0 +1,260 @@
+\chapter{Rejected Hypotheses and Method-Candidate Ledger}
+\label{app:rejected}
+% 개요 14장(부록 C). label app:rejected는 07_discussion.tex, 09_generality.tex의 참조에
+% 맞췄다. 근거: RECORD:360--415. 반올림은 본문 규칙(셋째 자리)을 따랐다.
+
+This appendix records what was tried and did not hold. Together with
+the criteria sealed before scoring, it is part of the evidence on which
+the main results rest: a reader can check which alternatives were tested
+and closed before the method was settled, and with what stored
+verdict. The
+ledger is an extract. It keeps only the entries that bear directly on
+the line of work from REL\_GLOBAL to CD reported in this thesis, and it
+is not a complete record of every experiment in the PROPHET project.
+Table~\ref{tab:rej-hypotheses} lists the hypotheses of the diagnostic
+phase (Chapter~\ref{ch:diagnosis}),
+Table~\ref{tab:rej-candidates} the method candidates and their stored
+verdicts, and Table~\ref{tab:rej-withdrawn} the claims that we withdrew
+during the analysis. Names in typewriter type are the identifiers under
+which the runs were stored. The three rejections that matter most to the
+argument are discussed in Section~\ref{sec:disc-rejected} and are not
+discussed again here.
+% 근거: RECORD:362 (사전 봉인과 함께 신뢰 근거, 계보 발췌·총원장 아님, 세 묶음).
+% PAPER_DEFINITIONS.md §4 끝 문장 ("PROPHET 전 기간의 모든 실험을 재분류한 총원장은
+% 아니다").
+
+\section{Hypotheses of the diagnostic phase}
+\label{sec:rej-hypotheses}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Hypotheses and attempts of the diagnostic phase on the in-house
+lab, with their outcomes.}
+\label{tab:rej-hypotheses}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Hypothesis or attempt & Outcome \\
+\midrule
+The model predicts one step late, repeating an action whose START has
+not yet been received
+  & Rejected; few of the errors shared across seeds take this form \\
+% TODO(사람): 기록(RECORD:94, 368)의 "과거 4/29행, 현재 2/13행"은 원 파일에서 확인되지
+% 않았다(개요 B′표). 13행 집합은 있으나 "2"는 찾지 못했고, 원 파일의 "4행"은 다른
+% 뜻이다(ORIG:PROPHET_ERROR_SUPPORT_AUDIT_20261118/REPORT_KO.md:7,39,43). 확인되면 행
+% 수를 넣겠다.
+A fixed conditional auxiliary loss, with the full 18-action
+cross-entropy kept
+  & Not adopted; no gain in a 10-fit comparison \\
+The hint-bearing actions mark the attack
+  & Rejected; does not hold on A+C \\
+The seeds take the benign \texttt{ipconfig} records for reconnaissance
+  & Rejected; every A+C error chose between COPY and DISCOVERY
+    (Section~\ref{sec:diag-errors}) \\
+The errors come from particular positions in the FIT runs
+  & Rejected \\
+The hint-branch table alone predicts the action
+  & Rejected; on A+C, FIT supports the key of 0 of 660 rows
+    (Section~\ref{sec:diag-errors}) \\
+The last DISCOVERY announces the COPY
+  & Rejected \\
+A global ledger of successful payload searches minus received COPY
+STARTs explains the file-action branch
+  & Rejected; held-out FIT NLL 0.579, worse than 0.311 for a control
+    that uses only the boundary index \\
+A correction of the parser key
+  & Rejected \\
+A target indicator
+  & Rejected; the loss is not concentrated on the rows where the
+    selected target disagrees \\
+\texttt{OBSERVED\_HEAD} beats its shuffled control with three targets
+  & Not confirmed (Section~\ref{sec:diag-intervention}) \\
+% TODO(사람): 기록(RECORD:118, 378)의 "62.5% 대 65.5/69.9%"는 섞기 대조의 정확도가 아니라
+% 집합별 비율이다(THREE_TARGET 160/256, A+C FLAT 216/330, A+C NESTED 246/352;
+% ORIG:PROPHET_OBSERVED_HEAD_STAGE2_3TARGET_20261119/SHUFFLE_FEATURE_MATCH_REPORT_KO.md).
+% 개요 B′표에 따라 숫자를 뺐다. 3대상 대비의 NLL 차와 구간이 확인되면 넣겠다.
+The generic form repairs the degradation on the original task
+  & Rejected \\
+FIT inputs leave nothing to distill because the teachers agree there
+  & Rejected; the top-1 actions differ on 9.7\% of FIT views
+    (Section~\ref{sec:diag-agreement}) \\
+The partial v2 collection contaminated the original-task data
+  & No evidence; not found in the diagnosis \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 근거: RECORD:366--381 (14행). 확인된 칸: 0/660 (ORIG:PROPHET_AC_HINT_BRANCH_COMPARE_V2_
+% 20261118/FINAL_REPORT_KO.md:3, 43), 장부 0.5785 / 경계 순번 0.3111 (ORIG:PROPHET_
+% PAYLOAD_LEDGER_20261119/REPORT_KO.md:5, 19; 장부 = 전역 "ZERO 검색 수 − COPY START 수",
+% FIT 실행 단위 보류의 조건부 NLL), 9.7% = 1 − 74,074/82,008 (개요 B표).
+% TODO(사람): "hint 행동이 공격 표식", "FIT의 특정 위치", "마지막 DISCOVERY",
+% "parser key 수정", "일반형이 원래 과제 악화를 고친다"의 근거 파일과 한 줄 설명이
+% 기록에 없다. 근거 수치가 있으면 알려 주세요. 특히 "parser key 수정"이 어떤 가설을
+% 시험한 것인지(무엇이 고쳐질 것으로 기대했는지) 확인이 필요하다.
+
+\section{Method candidates and their stored verdicts}
+\label{sec:rej-candidates}
+
+The first fifteen rows of Table~\ref{tab:rej-candidates} are the
+stored verdicts of the method candidates that led to CD, and each was
+judged against its own control under a criterion written before
+scoring. The earlier candidates appear only under their stored
+identifiers; their definitions are in the stored reports and are not
+needed to read the outcomes. The last five rows have a
+different status. They are post hoc development analyses on runs whose
+scores had already been seen, and no new model was trained for the two
+extension candidates. Candidate~A replaces the teacher mean by a target
+that falls back toward the FIT action prior when few teachers agree.
+Candidate~B keeps only the directions of the hidden state that the 30
+seeds share on FIT inputs. Both have close precedents in distillation
+that handles teacher disagreement~\cite{tmp_du,malinin2019ensemble} and
+in comparing networks through a shared representation
+subspace~\cite{tmp_raghu}. Candidate~A scored better than the teacher mean on ADS-24
+but worse in-house. Candidate~B narrowed the spread on the unseen
+condition of ADS-24 but raised the seen-condition loss from 1.449 to
+1.882. Neither was carried forward to a fit.
+% 근거: RECORD:385--406. 1--15행: ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/
+% PAPER_DEFINITIONS.md §4 (각 행의 근거 보고서 경로가 그 표에 있다).
+% 16--17행: ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/METHOD_EXTENSION_PREFLIGHT.md
+% ("사후 개발 분석. 신경망 fit 0건, 실행 수집 0건"; A: q = g(v) p̄ + (1−g(v)) π,
+% ADS-24 30개 ON 1.945412 / q 1.779099 / π 1.818385, PROPHET 30개 A+C FLAT .041823 /
+% q .141532; B: MAXVAR 다중집합 CCA, k=4 ON SD .162925→.039852, OFF 1.449388→1.881800;
+% 선행 Du 등, Malinin 등, Yang 등 DEED, Raghu 등 SVCCA).
+% 18, 20행: ORIG:METHOD_EXTENSION_DECOMPOSITION_20261123/VARIANCE_DECOMPOSITION_REPORT.md
+% :137 (24/56), :153--156 (ADS ρ=−0.800 n=4, PROPHET ρ=+0.500 n=3).
+% 19행: ADS24_STAGE1_REPORT.md:15 (ρ .127475, 순열 p .503125), 8장.
+% TODO(사람): Yang 등 DEED(CVPR Findings 2026)는 서지를 확인하지 못해 요청하지 않았다.
+% 11.6절과 같이 ref.bib에 넣어 주시면 \cite{tmp_du} 옆에 붙이겠다.
+% TODO(사람): 1--15행의 옛 후보(HISTORY_MARGINAL, ROLE_WEIGHTED, OBS_TARGET, UNIT_TARGET
+% 등)에 한 줄 정의를 붙일지 정해 주세요. 원 보고서를 읽지 않고 정의를 쓰지 않았다.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Method candidates and their stored verdicts. Rows 1--15 were
+judged under criteria written before scoring; rows 16--20 are post hoc
+development analyses on runs whose scores had already been seen. The
+preservation limit is $+0.020$ in NLL on the original procedure.}
+\label{tab:rej-candidates}
+\begin{tabularx}{\textwidth}{@{}r>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+& Candidate & Stored verdict \\
+\midrule
+1 & \texttt{HISTORY\_MARGINAL}
+  & Additional A+C gain over \texttt{STATE\_MEAN} not shown;
+    preservation failed; closed \\
+2 & \texttt{REL\_ADV} as a full replacement training scheme
+  & Exceeded the $+0.020$ limit on \texttt{C\_ONLY}; \texttt{A+C NESTED}
+    interval contained zero; not kept \\
+3 & \texttt{ROLE\_WEIGHTED}
+  & Added value over \texttt{ROLE\_AUX} not shown; preservation failed on
+    \texttt{C\_ONLY} and \texttt{B+C} \\
+4 & \texttt{OBS\_TARGET}
+  & Intervals against cross-entropy and an equal-entropy control all
+    contained zero \\
+5 & \texttt{UNIT\_TARGET}
+  & A+C gain over \texttt{FROZEN\_TARGET} not shown \\
+6 & Further training on a fixed mixture (\texttt{TRAIN\_MIX\_NLL})
+  & Both A+C intervals against the existing fixed mixture contained
+    zero; not adopted \\
+7 & Input-sensitivity regularization on worker events only
+  & No evidence of an advantage over random regularization of all
+    events with the same count (\texttt{GLOBAL\_COUNT\_MATCH}) \\
+8 & \texttt{ENSEMBLE\_KD}: distillation of 5 seeds on FIT inputs
+  & Failed the criteria against cross-entropy and \texttt{SINGLE\_KD};
+    preservation failed on \texttt{C\_ONLY} \\
+9 & Discrete prefix memory mixture without targets
+  & Intervals against global and temperature controls contained zero;
+    not adopted \\
+10 & Indicator from generic target-key selection
+  & Loss differences not concentrated on the mismatched rows; structure
+    not adopted \\
+11 & \texttt{GENERIC\_HEAD}, v3
+  & Did not keep the performance of \texttt{OBSERVED\_HEAD}; no gain over
+    a shuffled control of the same capacity \\
+12 & \texttt{OBSERVED\_HEAD} as a general replacement
+  & Original-task preservation interval crossed the $+0.020$ limit; not
+    adopted \\
+13 & Extension of the 10-seed environment distillation to 30 seeds
+  & Extension gate failed; not run \\
+14 & KD\_ENV\_TOP5 of v2 as a full method candidate
+  & A+C stabilization confirmed; preservation on
+    \texttt{ORIGINAL\_18} undecided; not adopted \\
+15 & Separate effect of the original-procedure inputs in KD\_ALL (v3)
+  & KD\_ALL $-$ KD\_ENV\_TOP5 interval $[-0.120, +0.006]$ contained zero;
+    not shown \\
+\midrule
+16 & Confidence-conditioned consensus target (extension candidate~A)
+  & ADS-24: 1.779, below the teacher mean 1.945 and the prior 1.818;
+    in-house \texttt{A+C FLAT}: 0.142, worse than the teacher mean
+    0.042; dropped as a general candidate \\
+17 & Projection onto a representation shared by the seeds (extension
+     candidate~B)
+  & With $k=4$, unseen-condition seed standard deviation $0.163 \to 0.040$, but
+    seen-condition NLL $1.449 \to 1.882$; dropped \\
+18 & Geometric-mean teacher in place of the arithmetic mean
+  & Lower teacher NLL in 24 of 56 comparisons; student comparison
+    undecided; arithmetic mean kept \\
+19 & Seed selection by agreement on ADS-24
+  & $\rho = +0.127$, $p = 0.503$; not reproduced
+    (Chapter~\ref{ch:ads24}) \\
+20 & Predicting each encoder's seed standard deviation from $V$ on the adaptation inputs
+  & ADS-24 $\rho = -0.8$ ($n = 4$), in-house $\rho = +0.5$ ($n = 3$);
+    not confirmed (Chapter~\ref{ch:decomposition}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 15행 구간의 여섯 자리 원값 [−.120492, +.006306]은 부록 B.6에 있다.
+% 16행 수치는 30개 교사의 값이다. 상위 5개 교사도 같은 방향이다(ADS-24 2.037885 →
+% 1.784083; A+C FLAT .022769 → .120531).
+
+\section{Claims withdrawn during the analysis}
+\label{sec:rej-withdrawn}
+
+The withdrawn claims in Table~\ref{tab:rej-withdrawn} were not
+rejected by a test. They were errors of reading, arithmetic, or design
+that we found and corrected. The last two are discussed in Section~\ref{sec:disc-rejected};
+the 10-seed gate is also why every later contract made the seed standard
+deviation the primary measure (Section~\ref{sec:results-failed}).
+% 근거: RECORD:410--415.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Claims withdrawn during the analysis.}
+\label{tab:rej-withdrawn}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Withdrawn claim & What replaced it \\
+\midrule
+The baseline's output read as the distribution of the action that
+follows the last received action
+  & Withdrawn \\
+A resolution calculation that omitted the mean over seeds
+  & Withdrawn \\
+An 18-way margin of 10.3
+  & The actual upper bound is 14.14 \\
+The $\rho_0$ initialization described as a guarantee of preservation
+  & Withdrawn; preservation is tested per round \\
+A 10-seed contract whose main gate used the mean NLL
+  & From v2 on, the seed standard deviation is the primary measure \\
+The general encoders, lacking LogitNorm, would vary less across seeds
+  & They varied more (Section~\ref{sec:gen-arch}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% TODO(사람): "ρ0 초기화"(RECORD:413)의 정의가 기록에 없다. 본문(4장)에 해당 기호가
+% 없으므로 무엇의 초기값인지 한 줄로 알려 주시면 표의 표현을 고치겠다.
+% "preservation is tested per round"는 5장의 차수별 보존 판정(tab:rounds)을 가리킨다.
+% TODO(사람): "seed 평균을 빠뜨린 해상도 계산"과 "18-way margin"이 무엇의 해상도·
+% margin인지 기록에 설명이 없다. 확인되면 표의 왼쪽 칸을 구체적으로 고치겠다.
+
+% ---------------------------------------------------------------
+% 사람에게 물을 것 (부록 C)
+% 1. C.1 "한 발 늦은 예측"의 행 수, 3대상 대비의 수치(개요 B′표에서 미확인).
+% 2. C.1의 근거 없는 다섯 행(hint 표식, FIT 위치, 마지막 DISCOVERY, parser key,
+%    일반형 원래 과제)의 근거 파일과 가설 내용.
+% 3. C.2 옛 후보 1--10행에 한 줄 정의를 붙일지.
+% 4. C.3 "ρ0 초기화", "해상도 계산", "18-way margin 10.3"이 가리키는 대상.
+% 5. Yang 등 DEED의 서지.
+% ---------------------------------------------------------------
