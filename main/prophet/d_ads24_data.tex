@@ -1,0 +1,135 @@
+\chapter{ADS-24 Data Construction}
+\label{app:ads24-data}
+% 개요 15장(부록 D). label app:ads24-data는 08_ads24.tex의 참조에 맞췄다.
+% 근거: RECORD:236--254 (자료와 과제 구성의 세부), RECORD:265--275 (외부 자료 선정 경위).
+% 완화한 세 조건(발생 시각 순서, 자료의 단계 라벨, 사용자 조건 보류)은 08장 첫 문단에
+% 있으므로 여기서 되풀이하지 않았다.
+
+Table~\ref{tab:ads24-construction} traces the ADS-24
+data~\cite{nyberg2026cyber} from the episodes in the official summary to the
+132 runs of the contract. Each episode ships with an attack log, called
+Lore in the dataset, that lists the attacker's stages with their
+tactics; 255 runs have one. A run became usable for the task only after
+its stages were bound to the time axis of its Wazuh alerts, and this
+binding dropped 288 stages that fell outside the extraction window and
+one run whose Wazuh JSON could not be parsed. The contract population
+then excludes runs flagged with \texttt{malicious\_users} or
+\texttt{block\_blinds\_blue} and runs whose defender is unknown. Two
+label baselines, computed on the 132 runs with five folds, show how much
+the labels alone reveal. They are not the FIT-only majority-class
+baseline against which Chapter~\ref{ch:ads24} compares the models
+(Table~\ref{tab:ads24-groups}). The input keeps only alert identity,
+severity, host role, and timing. Every field that names the answer or
+the run was removed, most importantly the \texttt{rule.mitre.*} fields,
+which tag an alert with an ATT\&CK technique and tactic and are present
+on 1,252,951 alerts~\cite{tmp_wazuh}. The segment rule of
+Section~\ref{sec:ads24-task} was fixed before any model was scored
+because of how often a stage repeats its predecessor: if stages are not
+merged, about 62.7\% of consecutive boundaries carry the same tactic as
+the stage before them, and a model could score well by copying the last
+label. The alert window of 512 and the 1,346 updates were chosen by an
+inner validation inside FIT, with seeds outside the contract, before
+stage~1.
+% 근거: RECORD:238--252, 254. 수치는 기록의 값을 그대로 옮기고, 기준선 NLL은 본문 규칙대로
+% 셋째 자리로 줄였다(1.8547→1.855, 1.4965→1.497).
+% TODO(사람): 시각 앵커의 "시차"가 무엇과 무엇 사이의 차이인지(예: Lore 단계 시각과
+% 대응 Wazuh 경보 시각) 기록에 적혀 있지 않아 표에서 "lag"로만 썼습니다. 확인해 주세요.
+% TODO(사람): 132실행이 자료 논문의 134실행과 같은 집합인지는 미확인이다(RECORD:246, 507).
+% 07장 위협 절에도 같은 내용이 있어 여기서는 표 주석으로만 남겼다.
+% TODO(사람): "episode"와 "run"이 자료에서 같은 단위인지 확인해 주세요. 기록은 summary에
+% 대해서만 "에피소드"라 쓰고 나머지는 "실행"이라 써서 그대로 따랐습니다.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Construction of the ADS-24 task, from the official episode
+summary to the inputs of the contract. Run and boundary counts per role
+are those of Section~\ref{sec:ads24-task}. Label baselines are computed
+on the 132 contract runs with five folds and differ from the FIT-only
+baseline of Table~\ref{tab:ads24-groups}.}
+\label{tab:ads24-construction}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Item & Value \\
+\midrule
+Episodes in the official summary & 300 \\
+Runs with an attack log (Lore) & 255, of which 254 have at least two
+  tactic stages \\
+Runs usable after time binding & 251 (288 stages outside the extraction
+  window and one run with unparsable Wazuh JSON excluded) \\
+Parsed Wazuh alerts & 2,067,288 \\
+Time offset & UTC+02:00 confirmed in 254 runs; the whole collection
+  period lies within daylight saving time \\
+Time anchor & SMB traces in 68 episodes; lag median 11.47\,s, 95th
+  percentile 27.93\,s, range 0.52--50.53\,s \\
+Contract population & 132 runs (flags \texttt{malicious\_users},
+  \texttt{block\_blinds\_blue}, and unknown defender excluded); identity
+  with the 134 runs described with the dataset not checked \\
+Runs / boundaries by role & FIT, no users: 48 / 8,461; preservation, no
+  users: 15 / 2,982; unlabeled adaptation, with users: 34 / 5,811;
+  environment evaluation, with users: 35 / 5,639 \\
+Label baselines (NLL / accuracy) & majority class 1.855 / 32.0\%;
+  previous-tactic bigram 1.497 / 42.2\% \\
+Boundaries with no new alert & 14.7\% (over the 251 usable runs) \\
+Removed from the input & \texttt{rule.mitre.*} fields (present on
+  1,252,951 alerts); 227 alerts from the flightlogs agent; free text;
+  run, scenario, defender, and user identifiers; \texttt{rule.groups}
+  (empty allow list, so all zero) \\
+Input fields & \texttt{rule.id} (FIT vocabulary), \texttt{rule.level},
+  host role, interval between alerts, age at the cutoff, alert-presence
+  indicator \\
+Inner selection & FIT 40/8 inner validation over 9 candidate pairs,
+  seeds outside the contract: window 512, 1,346 updates \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 근거: RECORD:240--252. 역할별 수는 08장과 같은 값이다(ADS24_STAGE2_REPORT.md "계보").
+
+We looked for public data on which the PROPHET task could be posed as
+it stands and found none, so the search admitted datasets under the three relaxations stated at the
+start of Chapter~\ref{ch:ads24}. Table~\ref{tab:ads24-candidates} lists
+the seven candidates that were examined. The deciding requirements were
+practical ones: independent runs with stage-level labels and times,
+benign user activity during the attack, a licence and download path we
+could confirm, and a held-out condition that does not leave most test
+labels unseen in training. CAM-LDS illustrates the last point. It is a
+Linux collection of 34 runs without benign user activity during the
+attacks, and when a scenario is held out, 295 of its 849 boundaries have
+a label that never occurs in training. ADS-24 met every requirement:
+254 runs can be labelled, the simulated users can be switched on and
+off, and we downloaded the data ourselves.
+% 근거: RECORD:265--275. 판정과 이유는 기록의 표를 그대로 옮겼다.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Public datasets considered for the external replication.}
+\label{tab:ads24-candidates}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+Candidate & Decision & Reason \\
+\midrule
+ADS-24/Crate~\cite{nyberg2026cyber} & adopted & 254 labellable runs; simulated
+  users on and off; downloaded \\
+CAM-LDS (Zenodo 18861762)~\cite{tmp_camlds} & not used & Linux; no benign
+  user activity during attacks; 34 runs; with a scenario held out, 295 of
+  849 boundaries have a label absent from training \\
+Windows multi-source ATT\&CK-labelled data~\cite{niloy2026multi} & not used
+  & public location and licence of the 870-session raw data not
+  confirmed; no action start times \\
+APTGen~\cite{tmp_aptgen} & not used & distribution site behind
+  authentication; no benign background logs \\
+DARPA OpTC & not used & one campaign spanning three connected days with
+  narrative ground truth; cannot be split into independent runs with
+  stage labels \\
+ATLASv2~\cite{tmp_atlasv2} & not used & ten scenarios; no per-stage
+  occurrence times in the ground truth \\
+PWNJUTSU & not used & stages recovered for only one of 22 participants
+  (18 stages) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 근거: RECORD:267--275.
+% TODO(사람): DARPA OpTC와 PWNJUTSU는 정확한 서지(자료 공개 문서 또는 논문 제목)를
+% 확신할 수 없어 인용을 달지 않았습니다. 인용할 문헌을 알려 주시면 넣겠습니다.
+% TODO(사람): tmp_ads24, tmp_wazuh는 08장과 같은 임시 key다.
