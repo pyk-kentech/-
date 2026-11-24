@@ -1,0 +1,372 @@
+\chapter{Seed Instability and Its Source in the In-House Lab}
+\label{ch:diagnosis}
+
+This chapter measures how far the 30 REL\_GLOBAL seeds from which the
+teachers of Section~\ref{sec:method-teachers} are drawn diverge on the
+unseen conditions, and it locates where in the prediction they diverge.
+Unless a sentence says otherwise, every number comes from one
+development set of 135 executions and 1,427 natural rows that had been
+scored many times before this analysis: \texttt{A+C FLAT} 31 runs and
+341 rows, \texttt{A+C NESTED} 29 and 319, \texttt{C\_ONLY} 27 and 297,
+\texttt{B+C} 32 and 352, and \texttt{ORIGINAL\_18} 16 and 118. In the
+terms of Section~\ref{sec:eval-rounds}, the chapter reports development
+comparisons and post hoc analyses. The exceptions are computations
+inside the FIT set, in which each FIT run is held out in turn, and the
+checks on newly collected runs in Section~\ref{sec:diag-intervention};
+both are marked where they occur. The conclusions concern REL\_GLOBAL
+in the in-house lab. We did not study the mechanism separately on
+ADS-24 or for the encoders of Chapter~\ref{ch:generality}. Two of the
+18 actions matter most below: the synthetic file search, written
+DISCOVERY, and the synthetic file copy, written COPY (actions 15 and 16
+in Appendix~\ref{app:actions}).
+% 근거: RECORD:126 (적용 범위); ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/
+% FINAL_REPORT_KO.md:15 (135실행·1,427행, 집합별 실행·행). 이 30 seed가 4.4절 교사
+% 후보와 같은 모집단이다(상위5 seed 50572, 91513, 71556, 68498, 37406, 같은 파일:33).
+
+\section{How far the seeds diverge}
+\label{sec:diag-size}
+
+Table~\ref{tab:seed-population} summarizes the population. On
+\texttt{A+C FLAT} the per-seed NLL had a mean of 0.142 and a seed
+standard deviation of 0.086, and it ranged from 0.036 to 0.420; on
+\texttt{A+C NESTED} it ranged from 0.023 to 0.404. The ordering of the
+seeds is stable. A seed that did well on one layout tended to do well
+on the other, with a Spearman rank correlation of 0.886 between the
+FLAT and NESTED losses. Between \texttt{A+C FLAT} and
+\texttt{ORIGINAL\_18} the correlation was $-0.131$. If seeds traded
+adaptation to the background against preservation of the original
+procedure, the seeds that did well on A+C would be the ones that did
+poorly on \texttt{ORIGINAL\_18}, and the correlation would be clearly
+negative. A value this close to zero does not support such a trade at
+the level of seeds.
+% 근거: SEED_POPULATION FINAL_REPORT_KO.md:35 (FLAT 평균 .141949, SD .086001,
+% 범위 .036339--.419831; NESTED 평균 .125527, SD .087071, 범위 .022585--.404273;
+% FLAT--NESTED ρ=.8861; FLAT--ORIGINAL_18 ρ=-.1310). RECORD:62--64, 100.
+
+\begin{table}[htbp]
+\centering
+\caption{The 30 REL\_GLOBAL seeds on the 135-run development set. Top:
+per-seed NLL, execution-weighted within each seed. Bottom: Spearman
+correlation between the ranking of the seeds by a quantity and their
+ranking by NLL on A+C; CE is cross-entropy. S1--S3 are the selection scores of
+Section~\ref{sec:diag-size}, fixed before any score was read.}
+\label{tab:seed-population}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Condition & Runs / rows & Mean NLL & Seed SD & Range over seeds \\
+\midrule
+\texttt{A+C FLAT}     & 31 / 341 & 0.142 & 0.086 & 0.036--0.420 \\
+\texttt{A+C NESTED}   & 29 / 319 & 0.126 & 0.087 & 0.023--0.404 \\
+\texttt{C\_ONLY}      & 27 / 297 & 0.103 & ---   & --- \\
+\texttt{B+C}          & 32 / 352 & 0.059 & ---   & --- \\
+\texttt{ORIGINAL\_18} & 16 / 118 & 0.631 & ---   & --- \\
+\midrule
+Ranked by & & & with FLAT & with NESTED \\
+\midrule
+NLL on \texttt{A+C NESTED}   & & & 0.886    & --- \\
+NLL on \texttt{ORIGINAL\_18} & & & $-0.131$ & --- \\
+S1: agreement, unlabeled A+C & & & 0.877 & 0.915 \\
+S2: NLL on \texttt{C\_ONLY}  & & & 0.115 & 0.151 \\
+S3: last FIT minibatch CE    & & & 0.160 & 0.033 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: SEED_POPULATION FINAL_REPORT_KO.md:15, 35, 37, 43 (B+C 평균 .059181,
+% ORIGINAL_18 평균 .630865); C_ONLY 평균 .103086은
+% ORIG:PROPHET_MARKER_TARGET_RULE_20261119/FOLLOWUP_REPORT_KO.md:22 (같은 30 seed, 같은 집합).
+% TODO(사람): C_ONLY·B+C·ORIGINAL_18의 seed SD와 범위는 보고서 본문에 없고
+% SEED_TABLE.csv를 다시 집계해야 합니다. 집계해서 넣을지 알려 주세요("---" 칸).
+% TODO(사람): S1--S3 상관의 부호 규약 확인. 원 파일은 "선택 점수와 A+C NLL 순위
+% Spearman ρ"라고만 적습니다. 캡션은 "선택 순위와 손실 순위의 상관(양수 = 손실 낮은
+% seed를 앞에 고름)"으로 읽었습니다.
+
+Nor could the good seeds be picked out from information that a
+practitioner would normally consult. Three selection scores were fixed
+before any score was read: S1, a seed's top-1 agreement with the 30-model
+majority on the unlabeled A+C inputs (Section~\ref{sec:diag-agreement});
+S2, its NLL on \texttt{C\_ONLY}; and S3, its cross-entropy on the last
+FIT minibatch of training. The rank correlation with A+C loss was 0.115
+on FLAT and 0.151 on NESTED for S2, and 0.160 and 0.033 for S3. S3 is
+the loss on the final training batch, not an NLL on held-out FIT runs;
+the values show that the end-of-training loss carries almost no
+information about A+C, not that every score computed on FIT data would
+fail. S2 uses labels from another unseen condition and still ranks the
+seeds poorly. The pattern matches what D'Amour et al.\ call
+underspecification~\cite{damour2020underspecification}: the training
+data fix how the seeds behave on the conditions they cover and leave
+their behavior on these background conditions to the seed.
+% 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
+% NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
+% S4(고정 무작위 순열)는 무작위 대조라 표와 본문에서 뺐다.
+% TODO(사람): FIT 보류 NLL과 A+C 손실의 seed 상관이 따로 계산된 적이 있는지
+% 알려 주세요. 있으면 "not that every score ... would fail" 문장을 바꿉니다.
+
+\section{What the errors look like}
+\label{sec:diag-errors}
+
+Every label of the 660 A+C rows is COPY or DISCOVERY, and every top-1
+error of the 30 seeds on these rows, in both layouts, chose the other
+of the two. For such a row the NLL splits exactly as
+$-\log(p_{\mathrm{C}}+p_{\mathrm{D}})
+ -\log\bigl(p_y/(p_{\mathrm{C}}+p_{\mathrm{D}})\bigr)$, where
+$p_{\mathrm{C}}$ and $p_{\mathrm{D}}$ are the probabilities of COPY and
+DISCOVERY and $y$ is the label. The first term, the probability missing
+from the two file actions together, was small for every seed: at most
+0.005 in either layout, and 0.002--0.005 on FLAT. What separates good
+seeds from poor ones is the second term, the way a seed divides its
+probability between COPY and DISCOVERY. This rules out the most direct
+reading of the IP-hint inversion of Section~\ref{sec:conditions}, that a
+seed takes the benign \texttt{ipconfig} records of worker~C for attacker
+reconnaissance and predicts IP configuration enumeration. Whether the
+benign IP hints shift the ratio between the two file actions indirectly
+was not established.
+% 근거: SEED_POPULATION FINAL_REPORT_KO.md:5 (분해 방식, ipconfig 직접 오인 설명
+% 기각, 간접 효과 미확인), :37 ("30개 새 seed의 A+C 오답도 모두 파일 두 행동 사이",
+% 총확률 부족 FLAT .0016--.0049, NESTED .0015--.0041).
+% 660행 전부가 파일 행동: ORIG:PROPHET_MARKER_TARGET_RULE_20261119/REPORT_KO.md:7
+% ("A+C FLAT/NESTED의 파일 행동 행 660개"), 341+319=660.
+% 개요의 B′표에 따라 seed 181(이전 5-seed 집합)의 예는 쓰지 않았다.
+
+The seen condition has a different problem. On \texttt{ORIGINAL\_18}
+the seeds averaged 0.631, far above their A+C losses, and most of this
+residual reflects uncertainty about which branch the procedure takes
+next rather than a weakness of the encoder. We built a table from the
+603 FIT runs whose key is the receipt order of the hint-bearing START
+records before the cutoff, together with whether the last of them has a
+received END, and which predicts the smoothed action frequencies seen
+under that key. Used alone, the table scored 0.554 on the 118
+\texttt{ORIGINAL\_18} rows and 0.496 on a separate, previously
+inspected set of 64 original-procedure runs and 472 rows. With each FIT
+run held out in turn, it reached 82.5\% accuracy and an NLL of 0.376,
+and splitting each key into two bins of the time since the last received
+batch (age) lowered the NLL to 0.338. A count table that knows nothing
+about targets thus comes close to the trained seeds on the original
+procedure, which leaves little for a change of encoder to gain there.
+The same table does not transfer to the background. Benign START
+records lengthen and reorder the hint sequences, to as many as 22 in
+A+C against at most 15 in FIT, and for none of the 660 A+C rows does
+the key occur in FIT; every A+C row falls back to the global action
+frequency. The A+C losses must therefore be explained by something
+other than knowledge of the branches.
+% 근거: ORIG:PROPHET_HINT_BRANCH_TABLE_CORRECTED_20261118/REPORT_KO.md:7--11
+% (키 정의, q_k 평활, 155개 FIT 키, 분기표 단독 0.553888 / 0.495788),
+% :30--37 (FIT 실행 보류 NLL .375809 → 키+age 2구간 .337742, 정확도 .825180;
+% age_s = 마지막 수신 batch 이후 cutoff까지 시간).
+% ORIG:PROPHET_AC_HINT_BRANCH_COMPARE_V2_20261118/FINAL_REPORT_KO.md:3, 43
+% (660 자연 경계 모두 FIT 키 지원 0 → 전역 빈도 π; FIT 최대 길이 15, A+C 22).
+% RECORD:92--96. 472행 집합은 135실행 밖의 원래 과제 평가 차수다(장 첫 문단의 예외).
+% 0.631은 같은 118행의 30 seed 평균(SEED_POPULATION FINAL_REPORT_KO.md:43).
+% "공통 오답 13행" 판독은 개요 B′표에 따라 숫자 없이도 쓰지 않았다.
+% TODO(사람): "한 발 늦은 예측" 가설 기각(RECORD:94)을 본문에 넣을지 알려 주세요.
+% 넣는다면 원 파일에 있는 13행 집합만 쓰고 "2/13"은 쓰지 않습니다.
+
+\section{A lookup rule without parameters}
+\label{sec:diag-rule}
+
+The background executions follow a fixed frame, which we read off the
+row features of the development set. An execution opens with four
+payload searches (DISCOVERY). Each target is then visited with a marker search, and COPY
+follows if that target's payload search succeeded, that is, ended with
+exit status zero; the source copies exactly when its observed result
+for the current target is a success. The losses of REL\_GLOBAL
+concentrate on the COPY decisions at the sixth and eighth natural
+boundaries and on the boundary just after a COPY, whose START has
+occurred but not yet been received. The frame suggests a rule with no
+parameters. Let $T$ be the folder of the last received marker START.
+Predict COPY if the last received payload END in $T$ has exit status
+zero and no COPY START has been received since that marker; otherwise
+predict DISCOVERY. On the boundaries where the next action depends on
+the current target's result, the rule was correct on 620 of 620 FIT rows
+and 476 of 476 background rows. Over all file-action boundaries it was
+correct on 1,974 of 2,171 FIT rows and 1,290 of 1,309 background rows,
+so it describes one decision of the procedure and is not an 18-way
+predictor. Each of the 19 background errors predicted COPY again right
+after an actual COPY whose START had not yet been received. As a post
+hoc analysis, we turned the rule into probabilities. Each rule category
+received a COPY probability estimated from FIT runs, which replaced the
+seed's split between COPY and DISCOVERY; the seed's total for the two
+actions and its other 16 probabilities were kept. The mean single-seed
+NLL fell from 0.142 to 0.091 on \texttt{A+C FLAT} and from 0.126 to
+0.054 on \texttt{A+C NESTED}. It improved 19 of the 30 seeds on FLAT
+and 26 on NESTED, and the mean number of wrong rows per seed fell from
+17.4 to 7.4 and from 14.7 to 2.8. The same probabilities raised the loss
+on \texttt{C\_ONLY} from 0.103 to 0.162, and on \texttt{B+C} from 0.059
+to 0.062. Much of the A+C instability thus sits in this one lookup, but
+a probability calibrated on FIT runs does not carry over to every
+background condition.
+% 근거: RECORD:104--110. 절차 틀(처음 4개 DISCOVERY, marker 뒤 END ZERO면 COPY,
+% source 정책 observed[target]==SUCCESS): RECORD:104--107.
+% 경계 6·8: RECORD:108과 FOLLOWUP_REPORT_KO.md:27 ("두 조건 경계 6·8의 COPY").
+% TODO(사람): 기록의 "경계 10"(RECORD:108)은 135실행 손실 집중으로는 원 파일에서
+% 찾지 못했습니다(개요 B′). 확인되면 "sixth and eighth"에 "tenth"를 더해 주세요.
+% 규칙·620/620·476/476·1,974/2,171·1,290/1,309·배경 오답 19행(경계 7·9·11, native
+% COPY START는 cutoff 전 발생, 미수신): ORIG:PROPHET_MARKER_TARGET_RULE_20261119/
+% REPORT_KO.md:5, 13--23, 29--31.
+% 확률화: FOLLOWUP_REPORT_KO.md:7--27 (범주별 q, 실행 보류, NO_MARKER는 seed 분할
+% 보존, 파일 두 행동 총질량 m 유지; FLAT .141949→.091222, NESTED .125527→.054287,
+% C_ONLY .103086→.162220, B+C .059181→.062372; 개선 seed 19/30, 26/30;
+% 평균 오답 17.43→7.43, 14.70→2.83). ORIGINAL_18은 marker 0행이라 출력이 그대로다.
+% TODO(사람): 기록의 "seed 범위 .036~.420 → .080~.140"(RECORD:69, 110)은 원 파일에서
+% 찾지 못했습니다. 확인되면 이 문단 끝에 범위를 넣어 주세요.
+
+\section{Giving the model the lookup}
+\label{sec:diag-intervention}
+
+Inside the model, the lookup is not computed the same way across seeds.
+We read the logits of each checkpoint before normalization as the sum of
+a base part and the relational residual. In the five seeds with the
+highest A+C loss in each layout, 107 of the 148 errors on COPY rows
+already had a residual that favored DISCOVERY, and in the other 41 the
+base part overturned a residual that pointed the right way. The five
+best seeds of each layout made 21 such errors. We then gave the
+lookup's result to the model directly. \texttt{OBSERVED\_HEAD} feeds
+five indicators for the current target (payload END zero, payload END
+nonzero, END not yet received, no marker, COPY START received after the
+marker) through a 64-dimensional linear projection into the first
+hidden layer of the output head, 320 parameters more than REL\_GLOBAL.
+Its control, \texttt{SHUFFLED\_HEAD}, has the same width but takes the
+indicators from another run with the same number of natural boundaries,
+so the comparison separates the information from the extra input.
+Table~\ref{tab:diag-rule} gives the results. On the development set,
+\texttt{OBSERVED\_HEAD} lowered the A+C loss below both REL\_GLOBAL and
+\texttt{SHUFFLED\_HEAD}. On 157 newly collected runs in the same lab,
+with the 30 seeds frozen and a check sealed before collection, all four
+A+C contrasts against the two other models had Bonferroni-adjusted
+98.75\% intervals below zero, and the seed standard deviation and the
+worst seed improved as well. The gain held against both on a
+five-target FLAT variant. With three targets, the contrast against
+\texttt{SHUFFLED\_HEAD} was not confirmed: its interval included zero.
+Preservation of the original task was not established. On 32 new
+\texttt{ORIGINAL\_18} runs \texttt{OBSERVED\_HEAD} was 0.015 worse than
+REL\_GLOBAL, inside the $+0.020$ limit, but the 95\% interval
+$[-0.017, +0.048]$ crossed it, so the model was not adopted as a
+general replacement. A generic version, \texttt{GENERIC\_HEAD}, which
+describes the most recent target key and its received results without
+the lab's marker and payload commands, did not keep the gain and did not
+beat its own capacity-matched shuffled control. The mechanism is
+therefore identified for this lab's procedure, but we did not find an
+architectural change built on it that is general and leaves the
+original task intact.
+% 근거: RECORD:112--124.
+% logit 분해(사후, 135실행): FOLLOWUP_REPORT_KO.md:31--44 (하위 5 seed COPY 오류
+% 77+71=148 중 관계 부호 오류 56+51=107, 기본 경로 역전 21+20=41; 상위 5 seed 10+11=21).
+% OBSERVED_HEAD 5특징·64차원·+320: RECORD:112; 개요 B표 일치.
+% SHUFFLED_HEAD: 실행 간 derangement, 같은 자연 경계 수끼리 대응
+% (ORIG:PROPHET_OBSERVED_HEAD_STAGE1_CONFIRM_20261119/FINAL_REPORT_KO.md:13).
+% 1단계 새 실행: 같은 파일:3, 11, 19--37 (157실행·1,611행, 네 대비 Bonferroni 98.75%
+% 상단 < 0, SD 차이 구간 < 0, 최악 seed FLAT .049529 대 REL .272791; ORIGINAL_18
+% +0.015076, 95% [-0.017449, +0.047688]).
+% 5대상: ORIG:PROPHET_OBSERVED_HEAD_STAGE2_FIVE_TARGET_FEASIBILITY_20261119/
+% FINAL_REPORT_KO.md:3--15 (32실행·448행, 두 대비 보정 구간 상단 < 0).
+% 3대상: 같은 파일:15 ("3대상에서 섞기 대비 구간이 0을 포함").
+% TODO(사람): 3대상의 대비 값과 구간. 개요 B′표에 따라 62.5%/65.5%/69.9%는 섞기
+% 대조의 정확도가 아니므로 쓰지 않았습니다. 3대상 보고서의 NLL 차이와 구간을 알려
+% 주시면 표에 한 행으로 넣겠습니다.
+% GENERIC_HEAD(135실행 개발 비교): ORIG:PROPHET_GENERIC_HEAD_CAPACITY_MATCHED_20261119/
+% FINAL_REPORT_KO.md:3 (일반형−특화형 +0.053672/+0.049088, 98.75% 구간
+% [+0.024236,+0.090602]/[+0.015770,+0.097816]; 일반형 섞기 대비 구간 0 포함;
+% 201열 입력, 72,746 파라미터 대 특화형 60,202).
+% TODO(사람): 1단계 157실행·1,611행이 5장 원장의 "10-seed development" 행
+% (157/1,611, 대상 수 변형 32/256·32/448)과 같은 실행인지 확인해 주세요. 분모가
+% 같습니다. 같다면 본문 "157 newly collected runs"에 그 차수 이름을 붙이겠습니다.
+
+\begin{table}[htbp]
+\centering
+\caption{Mean single-seed NLL of the lookup and of the head variants
+over the same 30 seeds. Development: the 135-run set, development
+comparison; the lookup column is the post hoc probabilistic rule of
+Section~\ref{sec:diag-rule} applied to REL\_GLOBAL. New runs: the
+stage-1 check collected in the same lab with frozen checkpoints, and
+its five-target FLAT variant. ``---'': not computed for that set.}
+\label{tab:diag-rule}
+\small
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+& & & REL\_GLOBAL & \multicolumn{2}{c}{Head with lookup features}
+  & \multicolumn{2}{c}{Generic features} \\
+\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Set & Runs / rows & REL\_GLOBAL & + lookup & Shuffled & Observed
+  & Shuffled & Generic \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{Development set}} \\
+\texttt{A+C FLAT}   & 31 / 341 & 0.142 & 0.091 & 0.106 & 0.065 & 0.106 & 0.119 \\
+\texttt{A+C NESTED} & 29 / 319 & 0.126 & 0.054 & 0.091 & 0.059 & 0.093 & 0.108 \\
+\texttt{C\_ONLY}    & 27 / 297 & 0.103 & 0.162 & 0.083 & 0.063 & 0.071 & 0.071 \\
+\texttt{B+C}        & 32 / 352 & 0.059 & 0.062 & 0.041 & 0.024 & 0.050 & 0.037 \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{New runs, four targets}} \\
+\texttt{A+C FLAT}     & 30 / 330 & 0.056 & --- & 0.054 & 0.016 & --- & --- \\
+\texttt{A+C NESTED}   & 32 / 352 & 0.059 & --- & 0.044 & 0.019 & --- & --- \\
+\texttt{C\_ONLY}      & 32 / 352 & 0.082 & --- & 0.064 & 0.045 & --- & --- \\
+\texttt{B+C}          & 31 / 341 & 0.045 & --- & 0.036 & 0.024 & --- & --- \\
+\texttt{ORIGINAL\_18} & 32 / 236 & 0.424 & --- & 0.433 & 0.439 & --- & --- \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{New runs, five targets}} \\
+\texttt{A+C FLAT}     & 32 / 448 & 0.060 & --- & 0.041 & 0.019 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: 개발 집합 REL_GLOBAL·섞기·OBSERVED·일반형 섞기·GENERIC:
+% GENERIC_HEAD_CAPACITY_MATCHED FINAL_REPORT_KO.md:17--22 (.141949/.106273/.065357/
+% .105593/.119028; .125527/.091312/.058858/.092673/.107946; .103086/.082897/.063363/
+% .071399/.071087; .059181/.040843/.023705/.049861/.037245).
+% + lookup 열: FOLLOWUP_REPORT_KO.md:17--22 (단일 seed 평균, 고정 q 적용).
+% 새 실행 4대상: OBSERVED_HEAD_STAGE1_CONFIRM FINAL_REPORT_KO.md:19--25.
+% 새 실행 5대상: OBSERVED_HEAD_STAGE2_FIVE_TARGET FINAL_REPORT_KO.md:5--9.
+% 개발 집합과 새 실행은 다른 평가 실행이므로 칸끼리 빼거나 합치지 않는다.
+% 3대상 행은 값이 확인될 때까지 넣지 않았다(위 TODO).
+% TODO(사람): 개발 집합 ORIGINAL_18에서 OBSERVED_HEAD·GENERIC_HEAD 값이 있으면
+% 알려 주세요. GENERIC 보고서에는 ORIGINAL_18 행이 따로 있습니다
+% (ORIGINAL_18_LIMITATION_FOR_PAPER_KO.md, 아직 대조하지 않음).
+
+\section{Where the seeds disagree}
+\label{sec:diag-agreement}
+
+The last observation concerns disagreement. On 1,029 of the 1,309
+background rows all 30 seeds gave the same top-1 action, and every one
+of these unanimous answers was correct. The rows on which the seeds
+split carried between 84.2\% and 91.2\% of the NLL of the 30-model
+average, depending on the condition. Unanimity is not a guarantee of
+correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
+wrong, and on the background, subsets of five seeds were sometimes
+unanimous and wrong. Agreement also tracks the quality of a seed. The
+S1 score, a seed's top-1 agreement with the 30-model majority on the
+unlabeled A+C inputs, ranked the seeds much as their A+C losses did, with
+correlations of 0.877 on FLAT and 0.915 on NESTED, where S2 and S3 did
+not. On the 82,008 FIT views the 30 models gave the same top-1 action
+for 90.3\% (74,074), so where the training data constrain them the
+seeds compute nearly the same function. Disagreement on unlabeled
+environment inputs therefore marks, without labels, the places where
+the seeds' computations part. The distillation of
+Chapter~\ref{ch:method} is designed to remove it, and
+Chapter~\ref{ch:results} tests it under a sealed contract. Agreement
+did not serve as a rule for choosing one seed: the top-ranked seed
+failed preservation (Section~\ref{sec:method-teachers}), and on ADS-24
+agreement did not rank the seeds by loss (Chapter~\ref{ch:ads24}).
+% 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
+% REPORT_KO.md:5 (배경 1,029행 만장일치 모두 정답, 무작위 5개 만장일치는 오류 있음,
+% ORIGINAL_18 89행 중 8행 오답), :9--15 (만장일치 247+240+243+299=1,029; 배경 1,309행),
+% :25 (갈린 행의 30확률 평균 NLL 기여 FLAT 91.2%, NESTED 89.1%, C_ONLY 89.0%,
+% B+C 84.2%), :33--37 (크기 5 조합). RECORD:101--102.
+% S1 ρ .8768/.9150: SEED_POPULATION FINAL_REPORT_KO.md:37.
+% FIT view 90.3% = 74,074/82,008 (개요 B표 일치). 82,008 = 4,824 자연 경계 +
+% 77,184 전달 view (GENERIC_HEAD_CAPACITY_MATCHED FINAL_REPORT_KO.md:9, 11).
+% TODO(사람): "FIT view"는 5장 natural row/delayed view 정의([직접 기입])에 기대고
+% 있습니다. 정의가 들어가면 이 문장의 용어를 맞춰 주세요.
+
+% ---------------------------------------------------------------
+% 사람에게 물을 것 (6장)
+% 1. 표 tab:seed-population의 C_ONLY·B+C·ORIGINAL_18 seed SD와 범위를
+%    SEED_TABLE.csv에서 다시 집계해 넣을지.
+% 2. S1--S3 상관의 부호 규약(선택 순위 대 손실 순위인지).
+% 3. FIT 보류 NLL과 A+C 손실의 seed 상관이 계산된 적이 있는지.
+% 4. 조회 규칙 사후 적용 뒤의 seed 범위 .080--.140(RECORD:69, 110)의 원 파일 위치.
+% 5. 손실 집중 경계 "10"(RECORD:108)의 원 파일 근거.
+% 6. 3대상 OBSERVED_HEAD 대 SHUFFLED_HEAD의 NLL 차이와 구간.
+% 7. OBSERVED_HEAD 1단계 157실행·1,611행이 5장 원장의 10-seed development
+%    행과 같은 실행인지.
+% 8. 표 tab:diag-rule의 수치 중 새 실행(4대상·5대상)과 GENERIC_HEAD 값은 기록(RECORD)에
+%    없고 원 파일에서 직접 옮겼다. 개요 B표의 대조 목록에는 없으므로 써도 되는지.
+% 9. "한 발 늦은 예측" 가설 기각을 본문에 넣을지.
+% ---------------------------------------------------------------
