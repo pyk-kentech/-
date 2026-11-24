@@ -15,13 +15,34 @@ $t$, which also serves as the prediction cutoff. The task is to predict,
 at each boundary, which of 18 semantic attacker actions comes next,
 using only the Windows execution and audit events that the collector
 received before $t$. The corresponding prediction row consists of that
-evidence and the label of the next attacker action defined in
-Chapter~\ref{ch:introduction}. The label is checked against the
+evidence and its label, the semantic category of the first attacker
+action whose process starts after the boundary. The label is checked against the
 action's own process creation record, and its termination record
 supports verification when labels are constructed after the run.
 Because one execution yields several boundaries, the number of rows
-differs from the number of independent runs.
-% 근거: RECORD:32. 라벨 정의 문장은 기존 원고 그대로 유지.
+differs from the number of independent executions.
+% 근거: RECORD:32. 라벨 정의는 서론에서 이 절로 옮겼다(문장은 기존 원고 그대로).
+
+Several units recur in later chapters. We use \emph{run} as a synonym
+for execution. A \emph{configuration} fixes the evaluation condition
+and the target layout of a planned execution, and a configuration is
+collected in several \emph{repetitions}, executions that share it;
+interval estimates resample configurations and keep their repetitions
+together (Section~\ref{sec:eval-criteria}). A \emph{view} is a
+prediction row read under one delivery schedule of the received
+records. The \emph{natural} view uses the receipt order recorded during
+collection, and a delayed view replays the same boundary under a
+permitted alternative delivery schedule and keeps its label; scores in
+this thesis use natural views only. A training \emph{occurrence} is one
+FIT execution under one delivery schedule, with all of its boundaries,
+and each update of training reads 32 of them. Finally, a
+\emph{development} set is a set of executions whose scores had already
+been inspected when a later analysis was defined on them
+(Section~\ref{sec:eval-rounds}).
+% 근거: METHOD_BASELINES_CONTRACT_SEALED.md ("PROPHET의 한 occurrence는 한 실행의
+% 특정 전달 view이며 전체 자연 경계를 포함한다"); 구성·반복: 각 수집 계약의
+% "16구성×2반복"; 지연 view: 부록 B 옛 정의. 82,008 FIT view = 4,824 자연 + 77,184 전달.
+% TODO(사람): natural 전달 일정의 정확한 정의. [직접 기입]
 
 The 18-action vocabulary covers host, directory-service and network
 enumeration, registry queries, and operations on synthetic files.
@@ -170,10 +191,17 @@ Identifier & C-fold FIT & Definition \\
 
 All new experiments in this thesis train on the C-fold, the outer fold
 in which every variant of worker~C is withheld from the training runs.
-We call these 603 runs the \emph{FIT set}. A condition is \emph{seen}
-if its benign work occurs in the FIT set and \emph{unseen} otherwise;
-under the C-fold, every condition that contains worker~C is unseen, and
-\texttt{ORIGINAL\_18} is the seen reference. The B-fold withholds
+We call these 603 labeled runs the \emph{FIT set}. A condition is
+\emph{seen} if its benign work occurs in the FIT set and \emph{unseen}
+otherwise; under the C-fold, every condition that contains worker~C is
+unseen, and \texttt{ORIGINAL\_18} is the seen reference. ``Unseen''
+refers to the labeled training data only. The baseline models never
+receive any record of worker~C, but the CD student of
+Chapter~\ref{ch:method} does read unlabeled inputs from other runs of
+the unseen conditions during training. Its results therefore concern
+adaptation to a target environment from which unlabeled inputs are
+available, not generalization to a benign workload never observed in
+any form. The B-fold withholds
 worker~B instead. It appears only in the older comparisons of
 Appendix~\ref{app:secondary-results} and is not used for any result in
 the main chapters.
@@ -187,7 +215,7 @@ represents such records as an IP hint. Of the 4,824 boundaries in the
 FIT set, 2,425 had received at least one IP hint. These hints came from
 658 distinct native records in 329 runs, and all 658 belong to the
 process lineage of the attack procedure. In the 60 \texttt{A+C}
-development runs (660 rows), all 353 native records carrying an IP hint
+runs (660 rows) of the development set of Chapter~\ref{ch:diagnosis}, all 353 native records carrying an IP hint
 belong instead to the lineage of benign worker~C. The same kind of
 evidence is thus produced by the attacker during training and by benign
 work at evaluation. Lineage was determined from audit information that
@@ -205,8 +233,10 @@ cause of any seed's success or failure.
 \label{sec:recorded-case}
 
 Table~\ref{tab:recorded-case} shows part of the received prefix for
-execution \texttt{THME0064}, from the three-target development set,
-before its first file-processing decision (\texttt{SEQ\_5}). The path
+execution \texttt{THME0064}, which comes from an earlier three-target
+collection of this project (Appendix~\ref{app:secondary-results}) and
+not from the C-fold data, before its first file-processing decision
+(\texttt{SEQ\_5}). The path
 names distinguish three synthetic targets. The marker concerns
 \texttt{alpha}, whose earlier payload search returned a nonzero exit
 status, while the marker's own zero exit status belongs to a different
@@ -214,9 +244,8 @@ process. Within the \texttt{alpha} group, the latest received result is
 therefore a success, and the search result comes from an earlier record.
 Grouping the records by target lets a model read the two processes
 together while keeping their results apart. The next recorded action
-was a synthetic file search. The example previews the mechanism examined
-in Chapter~\ref{ch:diagnosis}, where the in-house seed instability is
-traced to the lookup of the current target's earlier result.
+was a synthetic file search. The example illustrates the kind of
+target-result lookup examined in Chapter~\ref{ch:diagnosis}.
 
 \begin{table}[htbp]
 \centering

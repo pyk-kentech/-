@@ -16,9 +16,9 @@ thing consistently: how far the seeds of one configuration disagree on
 inputs from an unseen environment. The seed standard deviation fell in
 every round in which it was adjudicated, and in the post hoc
 decomposition of Chapter~\ref{ch:decomposition} the disagreement term
-$V$ fell in 27 of the 28 layers. What CD did not change is the cost of
-the move to the unseen environment. On ADS-24 every CD seed of
-REL\_GLOBAL stayed worse than the majority-class baseline, and among the
+$V$ fell in 27 of the 28 conditions. What CD did not change is the cost
+of the move to the unseen environment. On ADS-24 every CD seed of
+REL\_GLOBAL-ADS stayed worse than the FIT prior baseline, and among the
 general encoders only the Transformer students beat it. The
 decomposition suggests a reason, although as a post hoc reading it is
 an interpretation and not a test. Mean seed loss is the loss of the
@@ -29,11 +29,12 @@ environment that the teachers lacked. Teachers fitted only on FIT runs
 share whatever they collectively miss about a new benign worker or
 simulated users, and the student inherits it. For the same reason, where
 the consensus is wrong the student is wrong in a stable way. A small
-$V$ means that the seeds agree, not that they are right: entropy
-minimization drove $V$ almost to zero while the consensus loss rose to
-2.702, and for the plain GRU on ADS-24 the consensus loss rose from
-2.073 to 2.104 after CD even as $V$ fell. A CD student is a model whose
-behavior is more predictable across retraining. It is not a model that
+$V$ means that the seeds agree, not that they are right, as entropy
+minimization and the plain GRU on ADS-24 show
+(Chapter~\ref{ch:decomposition}). In every group we trained, the 30 CD
+students varied less than the 30 baseline models. The intervals hold
+those seeds fixed, so whether another draw of seeds would show the same
+narrowing was not tested. Either way, the student is not a model that
 knows more about the environment.
 % 근거: RECORD:419--422 (환경 이동 미해결, 합의가 틀리면 안정적으로 틀림),
 % 331--332 (V 27/28 감소, 엔트로피 최소화 V≈0·합의 2.7), 423 (ADS-24 기준선).
@@ -59,7 +60,10 @@ full average, whereas the CD student is one model with the
 architecture and parameter count of REL\_GLOBAL. On ADS-24 the gap
 widens with the size of the ensemble, since in a post hoc computation
 the average of all 30 seeds scored 1.945, against 2.038 for the five
-teachers and 2.060 for the student. Training is expensive on either
+teachers and 2.060 for the student, and the same order held for every
+encoder on ADS-24 (Table~\ref{tab:gen-reference}). Temperature scaling,
+the cheapest single-model correction, did not narrow the spread of the
+plain-GRU seeds. Training is expensive on either
 path. CD as tested trains 30 baselines, ranks them by agreement to keep
 five, and only then trains the student, so it costs more to train than
 the five-teacher ensemble it imitates. Whether fewer teachers, or five
@@ -67,24 +71,17 @@ chosen at random, would serve as well was not tested, and the amount of
 unlabeled environment input that the KL term needs was not measured.
 CD is thus a way to keep single-model inference while recovering part
 of what the ensemble gains, not a cheaper route to the ensemble's loss.
-% TODO(사람): 확률 앙상블·온도 보정과의 비교 요약(개요 질문 A1). 답이 없어 본문에
-% 쓰지 않았다. 원 파일 값(METHOD_BASELINES_REPORT.md "앙상블·온도 보정 참고")은
-% 09_generality.tex 끝의 TODO 주석에 있다. 본문에 써도 되면 이 문단 끝에 "단순 GRU의
-% 자체 A+C에서 상위 5개 앙상블 0.214, 30개 0.445, CD 학생 0.226" 식의 한 문장과
-% 온도 보정 대비를 넣겠다.
 % 근거: RECORD:185 주변 v3 보조 비교 (TOP5 교사 0.0228 대 KD_ALL 0.0276; 7장 표);
 % RECORD:425 (학생−교사 격차 0.009~0.050, 여섯 조합); RECORD:470, 484 (추론 5~30배);
 % RECORD:262--263 (ADS-24 교사 평균 2.038 / 30개 1.945, 사후 계산); RECORD:218
 % (ADS-24 CD 2.060); RECORD:426--428 (학습 비용, 무작위·적은 교사 미시험, 무라벨
 % 자료량 미측정). 교사 구성·자료량 확인은 마무리 확인 묶음 계획이므로 결론의 Future
 % Work에서만 다룬다.
-% TODO(사람): 06_results.tex의 TODO가 이 절의 label을 기다린다. label은
-% sec:disc-ensemble이다.
 
 \section{Mechanism and scope}
 \label{sec:disc-mechanism}
 
-The account of why the seeds diverge rests on one lab and one model.
+The account of where the seeds diverge rests on one lab and one model.
 The lookup of Chapter~\ref{ch:diagnosis}, which ties the COPY decision
 to the observed result for the current target, was identified for
 REL\_GLOBAL on the 135-run development set, and the head that receives
@@ -99,7 +96,7 @@ ranked the REL\_GLOBAL seeds by loss in the lab but not on ADS-24
 than the five most agreeing ones. Preservation of the seen procedure is
 the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
 the v2 recheck, passed in v3, and was not shown in the PAG1
-re-inference, and this condition was the single layer in which $V$ rose
+re-inference, and this condition was the single one in which $V$ rose
 after distillation. The v3 gain there was in probabilities, with
 accuracy almost unchanged, and the contribution of the
 original-procedure inputs of KD\_ALL was not isolated. We read the
@@ -138,10 +135,7 @@ form, and the hypothesis was rejected.
 % TODO(사람): "한 발 늦은 예측" 기각의 근거 수치. 원 파일
 % (PROPHET_ERROR_SUPPORT_AUDIT_20261118/REPORT_KO.md)에는 13행 집합만 있고 "2"는
 % 찾지 못했다. 확인되면 "Only a few"를 개수로 바꾸겠다.
-% TODO(사람): 09_generality.tex 9.2절의 "because on FIT the teachers largely agree and
-% the student has little to learn from them" 구절은 여기서 기각한 가설과 거의 같은
-% 주장이다. 9장 구절을 빼거나 "why it did not help was not established"로 바꿀지
-% 정해 주세요. 또 9.7%는 REL_GLOBAL 30 seed의 값이고 plain GRU 교사의 값이 아니다.
+% 9장의 충돌 구절(because on FIT the teachers largely agree)은 지웠다.
 
 Two claims were withdrawn in the course of the analysis rather than
 tested to rejection. The 10-seed development round gated its extension
@@ -190,20 +184,32 @@ and arbitrary benign work remains an empirical question.
 
 \textbf{Intervals and comparisons.}
 Every interval in the thesis resamples run configurations while the 30
-seeds stay fixed. It expresses uncertainty about the runs for these
-seeds and says nothing about how another draw of 30 seeds would have
-scored. The three general encoders are encoder adaptations, not
-reproductions of DeepLog or LogBERT, and they differ from REL\_GLOBAL in
+seeds stay fixed. The seeds are fixed lists of integers in each
+contract, not draws from a stated distribution, so the intervals
+express uncertainty about the runs for these seeds and say nothing
+about how another set of 30 seeds would have scored. The correlations
+between seed rankings, such as those of agreement with loss, are
+descriptive statistics without intervals. The three general encoder adaptations differ from REL\_GLOBAL in
 training recipe and size at once, so the study cannot attribute the
 differences between them to any one component. The adaptations of
 ORTHRUS, BiTA, and CL-AP$^{2}$ were trained with three seeds each and
 only in-house, too few to estimate their spread. The method comparison
-used one encoder and did not tune any method on its own, and its
-in-house collection stopped at 110 eligible runs
-(Section~\ref{sec:gen-methods}).
+used one encoder and did not tune any method on its own, so it ranks
+the methods only under that common protocol, and its in-house
+collection stopped at 110 eligible runs (Section~\ref{sec:gen-methods}).
 % 근거: RECORD:446--452 (seed 모집단 불확실성 미포함, 인코더 적용판, 학습식·크기
 % 동시 차이, 보안 선행 적용판 3 seed·자체 실험실만, 방법 비교 한 구조·미조정,
 % 110실행), RECORD:507. seed까지 재표집한 구간은 결론의 Future Work 계획이다.
+
+\textbf{Adaptation inputs.}
+The unseen conditions are absent from the labeled FIT runs, but the CD
+student reads unlabeled inputs from other runs of those conditions
+during training: 119 background and 48 original-procedure runs in-house
+and 34 runs with simulated users on ADS-24. The results therefore
+support CD as unlabeled adaptation to a target environment from which
+such inputs are available. They do not show robustness to a benign
+workload or user population that the training process never observed,
+and how much unlabeled input is needed was not measured.
 
 \textbf{Evidence availability.}
 Command-line visibility and reliable process-event linkage depend
@@ -233,16 +239,20 @@ distillation toward an ensemble
 average~\cite{hinton2015distilling, lakshminarayanan2016simple,
 malinin2019ensemble} with the regularizers already in REL\_GLOBAL, and
 the decomposition of Chapter~\ref{ch:decomposition} is the identity
-Heskes published in 1997~\cite{heskes1997selecting}. The two extensions
+Heskes published in 1997~\cite{heskes1997selecting}, and the
+expectation that a consensus varies less than its members under shift
+follows work on ensembling~\cite{rathmanakidis2022reduction}. The two extensions
 that failed also have close precedents: distillation that handles
 disagreement among teachers instead of averaging it
 away~\cite{tmp_du}, and comparison of networks through the subspace
 their representations share~\cite{tmp_raghu}. What the thesis adds is
 the chain that connects these parts on one security task, from a
-measured instability through an in-house diagnosis to an intervention
-that keeps the architecture, tested under sealed criteria on new runs
-and, with the qualification of Chapter~\ref{ch:ads24}, on a second
-dataset.
+measured instability through an in-house localization of the errors to
+an intervention that keeps the architecture. Only the in-house
+intervention was tested under criteria sealed before its runs were
+collected; the ADS-24 study was sealed after its evaluation runs had
+been inspected, and the ADS-24 encoder and method comparisons are
+development comparisons.
 % 근거: RECORD:28, 455--459; idea.md "기여" 셋째 항. 확장 후보 A(신뢰 조건부 합의
 % 목표)와 B(seed 공통 표현 투영)의 선행: RECORD 관련 연구 표 (Du 등, Yang 등 DEED;
 % Raghu 등 SVCCA).
@@ -252,9 +262,8 @@ dataset.
 
 % ---------------------------------------------------------------
 % 사람에게 물을 것 (11장)
-% 1. 11.2절: 확률 앙상블·온도 보정 요약을 본문에 써도 되는지(개요 질문 A1).
+% 1. 11.2절: 확률 앙상블·온도 보정 요약을 9.2절 값으로 넣었다. 유지해도 되는지.
 % 2. 11.4절: "한 발 늦은 예측" 기각의 근거 행 수(원 파일에서 "2/13"의 2를 찾지 못함).
-% 3. 11.4절과 9.2절의 충돌: 9장의 "on FIT the teachers largely agree" 구절을 고칠지.
 % 4. 11.6절: Yang 등 DEED의 서지(제목·학회·연도).
 % 5. 부록 C의 label(app:rejected로 가정).
 % 6. 분량: 개요는 9--10문단, 이 장은 사람 문단 둘을 포함해 10문단이다.

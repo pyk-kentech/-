@@ -36,18 +36,24 @@ Table~\ref{tab:cohorts} lists the evaluation cohorts reported below.
 \begin{table}[htbp]
 \centering
 \caption{Evaluation cohorts of the earlier stage. Repeated evaluations on
-the same saved executions are grouped in one row. None of these cohorts
-is used in the main chapters.}
+the same saved executions are grouped in one row. Cohorts marked
+$^{*}$ are reused in the main chapters (Sections~\ref{sec:method-relation-evidence},
+\ref{sec:diag-errors}, and~\ref{sec:diag-size}); the scores of the
+earlier models below are not comparable with those of
+Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition}.}
 \label{tab:cohorts}
+% 135/1,427 = 6장 개발 집합(SEED_POPULATION FINAL_REPORT_KO.md:15의 집합별 실행·행이
+% tab:mix와 같다; BASE_FULL_MIX_NEW_CONFIRM "전체 적격은 135실행·1,427행").
+% TODO(사람): 두 135실행이 실행 ID까지 같은 집합인지 확인해 주세요.
 \begin{tabularx}{\textwidth}{@{}Xrr@{}}
 \toprule
 Condition and use & Executions & Rows \\
 \midrule
-Repeated runs in held target configurations (Section~\ref{sec:app-relations}) & 64 & 512 \\
+Repeated runs in held target configurations (Section~\ref{sec:app-relations})$^{*}$ & 64 & 512 \\
 Four targets with unseen names (Section~\ref{sec:app-four}) & 64 & 704 \\
 New runs for the event-wise history comparison (Section~\ref{sec:app-local}) & 111 & 1,163 \\
-New runs for the fixed probability average (Section~\ref{sec:app-mix}) & 135 & 1,427 \\
-Original action task for the receipt-history lookup (Section~\ref{sec:app-mix}) & 64 & 472 \\
+New runs for the fixed probability average (Section~\ref{sec:app-mix})$^{*}$ & 135 & 1,427 \\
+Original action task for the receipt-history lookup (Section~\ref{sec:app-mix})$^{*}$ & 64 & 472 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -246,8 +252,8 @@ for BiTA minus Local History was $[-0.247739,-0.073143]$.
 At a prediction boundary, a process record, its target, and its semantic
 action answer different questions: what Windows audited, which object
 may recur across processes, and which unit the forecast is scored on.
-The recorded case of Section~\ref{sec:recorded-case} shows both
-distinctions, since one target is associated with several processes and
+The recorded case of Section~\ref{sec:recorded-case} shows two of
+these distinctions, since one target is associated with several processes and
 an exit status means different things on different processes. The
 earlier stage compared the target-aware models with two simpler
 references. A prior estimated from training labels puts the same

@@ -52,17 +52,23 @@ known configuration. PROPHET asks a different one: given the part of an
 execution that has become visible, how probable is each concrete next
 action? A feasible path is informative for the first question even if
 it never occurs, while the second requires probabilities that can be
-scored against what the actor actually did; several feasible responses
+scored against what the actor actually did. Several feasible responses
 to the same preceding action carry no information about which one this
-actor will take. B\u{a}b\u{a}lau et al.\ move attack graphs toward the second
-question by building them from intrusion-detection alerts and using
-them to forecast attacker actions~\cite{babalau2024forecasting}.
+actor will take.
 
 \section{Forecasting attacker actions and security events}
 \label{sec:related-forecasting}
 
 Learned forecasters work from observed event streams rather than from a
-configuration model. Tiresias trains a recurrent model on histories of
+configuration model. The closest task to ours is that of
+B\u{a}b\u{a}lau et al., who build attack graphs from intrusion-detection
+alerts and use them to predict the next likely attacker action given a
+sequence of alerts~\cite{babalau2024forecasting}. Their evidence is the
+alert stream of a network detector; ours is the host audit stream
+before the receipt boundary, and our output is a distribution over 18
+action categories of a controlled procedure, evaluated across seeds and
+under benign workloads that the labeled training runs do not contain.
+Tiresias trains a recurrent model on histories of
 security events from intrusion-prevention telemetry and predicts the
 next event~\cite{shen2018tiresias}. DeepCASE builds a context for each
 security event from the events preceding it and uses attention over
@@ -78,7 +84,7 @@ behavior by tactic, and estimates a trajectory from which it derives the
 adversary's next technique~\cite{liu2024clap2}. EFI extracts attack-scene
 graphs from threat intelligence reports, matches them against endpoint
 provenance, and forecasts the next interactions with a technique-level
-interpretation~\cite{zhu2024efi}. BiTA combines bidirectional GRU
+interpretation~\cite{zhu2024nip}. BiTA combines bidirectional GRU
 aggregation with a Transformer in a temporal graph network to predict
 future network alerts~\cite{nayeri2026bita}. Their outputs are a
 technique, an interaction graph, or an alert, whereas ours is a single
@@ -91,13 +97,10 @@ investigation~\cite{cheng2024kairos}, and ORTHRUS detects and attributes
 attacks at the level of provenance nodes~\cite{jiang2025orthrus}. Their
 outputs concern behavior that has already been observed. Chapter~\ref{ch:generality}
 runs adaptations of ORTHRUS, BiTA, and CL-AP$^{2}$ on our inputs as a
-reference point only; EFI is not adapted. In the versions of the
-systems in this section that we consulted, we did not find results
-reported across random seeds or under benign workloads absent from
-training. This statement is limited to those versions and is not a
-claim that such evaluations do not exist elsewhere.
-% 근거: RECORD:477, 480. 각 원문 판본에서 seed 변동 보고 여부를 사람이
-% 다시 확인해 주세요(표 tab:related-tasks 마지막 열과 같은 범위).
+reference point only; EFI is not adapted. We did not check the full
+texts of these works for results across random seeds, and we make no
+claim about whether they report them.
+% RECORD:477, 480의 "seed 변동 미보고" 판단은 초록 수준이라 본문 주장에서 뺐다.
 
 \section{Sequence models for logs}
 \label{sec:related-sequence}
@@ -116,15 +119,11 @@ objectives on log sequences~\cite{guo2021logbert}. The gated recurrent unit
 predictor uses at the event level (Chapter~\ref{ch:method}).
 
 Chapter~\ref{ch:generality} uses three encoders drawn from this
-family: an LSTM encoder (DeepLog-style), a Transformer encoder
-(LogBERT-style), and a plain GRU. These are adaptations of the encoders
-to our supervised next-action task, not reproductions of DeepLog or
-LogBERT. They do not use the anomaly-detection objectives or
-pretraining of the original systems; LogitNorm, input-gradient
-regularization, and the relational residual of our baseline are
-removed; and their settings were chosen by validation inside the FIT
-set only.
-% 근거: RECORD:281, 478.
+family, an LSTM encoder (DeepLog-style), a Transformer encoder
+(LogBERT-style), and a plain GRU, as encoder adaptations to our
+supervised task rather than reproductions of either system
+(Section~\ref{sec:method-transfer}).
+% 근거: RECORD:281, 478. 적용판의 정의는 4.6절에 한 번만 둔다.
 
 \section{Underspecification and model agreement}
 \label{sec:related-underspec}
@@ -141,10 +140,9 @@ accuracy, which allows performance under shift to be estimated from
 unlabeled data~\cite{baek2022agreement}. That line of work uses agreement to
 estimate performance; we use agreement as a training signal, letting a
 student follow the consensus of several models on unlabeled environment
-inputs. A link between agreement and performance should not be assumed
-in our setting either: selecting seeds by agreement did not reproduce on
-ADS-24, where the correlation was $+0.127$ ($p=0.503$;
-Chapter~\ref{ch:ads24}).
+inputs. A link between agreement and the performance of individual
+seeds should not be assumed in our setting either, as
+Chapter~\ref{ch:ads24} shows.
 % 근거: RECORD:405, 467--468.
 
 \section{Distillation, ensembles, and unlabeled adaptation}
@@ -161,6 +159,12 @@ prediction but also the spread among members~\cite{malinin2019ensemble}. The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities
 as the target, and a student with the teachers' architecture.
+Rath-Manakidis et al.\ show that ensembling reduces variance-related
+error under distribution shift~\cite{rathmanakidis2022reduction}. That
+observation is the reason to expect a consensus to vary less than its
+members. What we test is whether a single student trained on unlabeled
+inputs from the shifted condition keeps that reduction, judged by sealed
+criteria on the seed standard deviation.
 
 The comparison methods in Chapter~\ref{ch:generality} come from work
 on stabilizing a single model or adapting it without labels.
@@ -172,15 +176,11 @@ trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits
 one parameter fitted on held-out data~\cite{guo2017calibration}. In security, Kan
 et al.\ study adapting malware detectors to drift without labels,
 where self-training on pseudo-labels can reinforce the model's own
-errors~\cite{tmp_kan}. The distillation and adaptation work cited here
-reports its gains as average performance on the target data. We seal
-the seed standard deviation under unseen conditions as a primary
+errors~\cite{tmp_kan}. In this thesis the seed standard deviation of a
+distilled single model under unseen conditions is sealed as a primary
 criterion, alongside the mean and the preservation of seen-condition
 performance (Chapter~\ref{ch:evaluation}).
-% 근거: RECORD:470--475.
-% TODO(사람): 온도 보정과 확률 앙상블의 결과를 9.2절에 쓸지는 개요 질문 A1의
-% 답에 따른다. 쓰지 않으면 이 문단의 temperature scaling 문장은 9.2절 기준선의
-% 출처가 아니라 배경 설명으로만 남는다.
+% 근거: RECORD:470--475. 온도 보정·확률 앙상블은 9.2절에서 보고한다.
 
 \section{Decomposition of ensemble log loss}
 \label{sec:related-decomposition}
@@ -203,76 +203,63 @@ post hoc analysis, introduced after the primary experiments.
 \section{Summary}
 \label{sec:related-summary}
 
-Table~\ref{tab:related-tasks} lists the evidence and output of each
-work discussed above and whether variation across random seeds is
-reported in the version we consulted.
+Table~\ref{tab:related-tasks} lists the evidence and output of the
+security and log-modeling works discussed above. It compares tasks
+only. Variation across seeds is studied directly in the machine-learning
+work of Sections~\ref{sec:related-underspec}
+and~\ref{sec:related-distillation}; we did not assess whether the
+security works report it.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Evidence, outputs, and reported seed variation in related work.
-The last column covers only the versions of the papers consulted for this
-thesis.}
+\caption{Evidence and outputs of the security and log-modeling work
+discussed in this chapter.}
 \label{tab:related-tasks}
-\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}XXp{0.20\textwidth}@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.22\textwidth}XX@{}}
 \toprule
-Work & Evidence & Original output & Seed variation reported \\
+Work & Evidence & Original output \\
 \midrule
 Sheyner et al.~\cite{sheyner2002graphs}
  & System model of hosts, vulnerabilities, and attacker
- & Attack graph of possible paths
- & Not applicable (no trained model) \\
+ & Attack graph of possible paths \\
 MulVAL~\cite{ou2005mulval}
  & Configuration facts and logic rules
- & Derived security consequences
- & Not applicable (no trained model) \\
+ & Derived security consequences \\
 B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting}
  & Intrusion-detection alerts, as alert-driven attack graphs
- & Forecast of attacker actions
- & Not stated in the version consulted \\
+ & Next likely attacker action given a sequence of alerts \\
 Tiresias~\cite{shen2018tiresias}
  & Security event histories from intrusion-prevention telemetry
- & Next security event
- & Not stated in the version consulted \\
+ & Next security event \\
 DeepCASE~\cite{vanede2022deepcase}
  & Sequences of security events
- & Event contexts grouped for analyst triage
- & Not stated in the version consulted \\
+ & Event contexts grouped for analyst triage \\
 CL-AP$^{2}$~\cite{liu2024clap2}
  & Time-aware attack knowledge graph, tactic-level portrait
- & Next attack technique
- & Not stated in the version consulted \\
-EFI~\cite{zhu2024efi}
+ & Next attack technique \\
+EFI~\cite{zhu2024nip}
  & Threat intelligence reports and endpoint provenance
- & Forecast interaction graph with technique-level interpretation
- & Not stated in the version consulted \\
+ & Forecast interaction graph with technique-level interpretation \\
 BiTA~\cite{nayeri2026bita}
  & Temporal graph of network alerts
- & Future alerts
- & Not stated in the version consulted \\
+ & Future alerts \\
 KAIROS~\cite{cheng2024kairos}
  & Whole-system provenance graph
- & Intrusion detection and attack reconstruction
- & Not stated in the version consulted \\
+ & Intrusion detection and attack reconstruction \\
 ORTHRUS~\cite{jiang2025orthrus}
  & Whole-system provenance graph
- & Node-level detection and attribution
- & Not stated in the version consulted \\
+ & Node-level detection and attribution \\
 DeepLog~\cite{du2017deeplog}
  & Sequences of system log keys
- & Anomaly flag from next-key prediction
- & Not stated in the version consulted \\
+ & Anomaly flag from next-key prediction \\
 LogBERT~\cite{guo2021logbert}
  & Sequences of system log keys
- & Anomaly score from self-supervised training
- & Not stated in the version consulted \\
+ & Anomaly score from self-supervised training \\
 PROPHET (this thesis)
  & Windows audit records received before a known boundary
- & Distribution over 18 next attacker actions
- & 30 seeds per configuration; seed standard deviation is a sealed criterion \\
+ & Distribution over 18 next attacker actions \\
 \bottomrule
 \end{tabularx}
 \end{table}
-% TODO(사람): 마지막 열은 연구 기록(RECORD:477, 480)과 각 문헌의 초록 수준에서
-% 정리했다. 원문 판본에서 seed 반복 보고 여부를 확인해 주세요. 보고가 있으면
-% 해당 칸을 원문 표현으로 바꿔야 한다.
+% seed 변동 열은 원문 전체를 확인하지 않은 판단이라 뺐다(인용·참신성 리뷰).

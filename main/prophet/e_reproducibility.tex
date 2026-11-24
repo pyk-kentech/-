@@ -1,0 +1,201 @@
+\chapter{Reproducibility Details}
+\label{app:repro}
+% 새 부록(방법 리뷰 P1-5, P1-6, P3-2). 근거는 각 절의 주석.
+
+This appendix collects the settings, selection grids, eligibility
+outcomes, and resampling details that the main chapters refer to. It
+records what the stored contracts and reports state; where a detail is
+not documented there, the gap is marked.
+
+\section{Training settings and seeds}
+\label{sec:repro-training}
+
+The in-house REL\_GLOBAL and every in-house student are trained on the
+603 runs of the C-fold FIT set with execution-weighted 18-way
+cross-entropy, the input-gradient penalty $\mathcal{R}_{\mathrm{GLOBAL}}$
+with coefficient 0.1, and LogitNorm with $\tau=0.1$. Each fit runs
+1,346 updates of 32 FIT occurrences with AdamW (weight decay 0.01,
+gradient clipping at 2) and a cosine learning rate from 0.002 to
+0.0002, and the last checkpoint is kept. Within a seed, all groups of a
+round share the initial tensors and the FIT occurrence and delivery
+trace. The five in-house teachers are the REL\_GLOBAL seeds 50572,
+91513, 71556, 68498, and 37406; the five ADS-24 teachers are the
+REL\_GLOBAL-ADS seeds 301030, 301026, 301025, 301003, and 301022. The
+generality study and the method comparison use the seeds 4500001 to
+4500030 for every group. In the FIT-input distillation group of the
+method comparison, the one row per occurrence that receives the KL term
+is drawn in advance with PCG64 seeded by 2026112305 plus the training
+seed. Weight averaging averages the weights at updates 1,010, 1,122,
+1,234, and 1,346 of the cross-entropy trajectory.
+% 근거: PAPER_DEFINITIONS.md §2 (C-fold 603 FIT, 404-only 전처리, 1,346×32, 같은 초기
+% tensor·FIT trace, AdamW .002→.0002 cosine, wd .01, clip 2, 마지막 checkpoint; 상위 5
+% seed); ADS24_STAGE2_REPORT.md "계보" (ADS 교사); ARCH_GENERALITY_CONTRACT_SEALED.md
+% (4500001–4500030); METHOD_BASELINES_CONTRACT_SEALED.md (FIT_KD PCG64 2026112305+seed,
+% SWA update 1010·1122·1234·1346).
+% TODO(사람): 다음은 원 계약·보고서에 없어 쓰지 못했습니다. 코드 문서를 알려 주시면
+% 이 절에 식으로 넣겠습니다. (1) 48차원 사건 표현의 필드별 구성과 어휘·UNKNOWN 처리,
+% (2) 대상 key 관계 잔차의 정확한 계산식, (3) 출력 head 구조, (4) R_GLOBAL의 사건 선택
+% 방식("동일 선택 수"의 기준), (5) FIT occurrence 표집 방식, (6) "404-only 전처리"의 뜻,
+% (7) v2·v3 차수의 30 seed 목록.
+
+\section{General encoders}
+\label{sec:repro-encoders}
+
+The three general encoders read the same receipt-bounded prefix as
+REL\_GLOBAL, with the 48-dimensional event representation and the age
+and receipt features, and map an empty prefix to a learned common
+state. The LSTM encoder is one unidirectional layer whose last state
+feeds a softmax head. The Transformer encoder has two layers and four
+attention heads and reads a classification token. The plain GRU is one
+unidirectional layer whose last state feeds the head. All three train
+with execution-weighted cross-entropy, AdamW with weight decay 0.01, a
+cosine schedule down to 10\% of the initial learning rate, gradient
+clipping at 2, 1,346 updates of 32 occurrences, and the last
+checkpoint. On ADS-24 the alert window is 512.
+
+Width and learning rate were chosen once per encoder and dataset from
+four candidates, width $\{64, 128\}$ crossed with two learning rates,
+$\{0.001, 0.002\}$ for the LSTM and GRU and $\{0.0005, 0.001\}$ for the
+Transformer, each trained for 1,346 updates with a pilot seed outside
+the contract. The selection score was the execution-weighted NLL on a
+holdout inside FIT: 40 training and 8 held-out runs stratified by
+scenario on ADS-24, and 483 and 120 runs split by a hash of the run
+identifier family in-house. Ties would have gone to the smaller width
+and then the lower learning rate. Table~\ref{tab:repro-encoders} lists
+the selected settings; the method comparison reuses those of the plain
+GRU.
+
+\begin{table}[htbp]
+\centering
+\caption{Settings selected for the general encoders by FIT-internal
+validation (pilot seed outside the contract).}
+\label{tab:repro-encoders}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Data & Encoder & Width & Learning rate & Holdout NLL & Parameters \\
+\midrule
+ADS-24   & LSTM (DeepLog-style)        & 64  & 0.002 & 1.541 & 46,213 \\
+ADS-24   & Transformer (LogBERT-style) & 128 & 0.001 & 1.497 & 417,029 \\
+ADS-24   & plain GRU                   & 128 & 0.001 & 1.498 & 119,301 \\
+In-house & LSTM (DeepLog-style)        & 128 & 0.002 & 0.099 & 155,834 \\
+In-house & Transformer (LogBERT-style) & 64  & 0.001 & 0.140 & 116,538 \\
+In-house & plain GRU                   & 128 & 0.002 & 0.112 & 122,810 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: ARCH_GENERALITY_CONTRACT_SEALED.md "세 적용판", "FIT 전용 선택 및 1단계"
+% (후보 격자, ADS 40/8 시나리오 층화, PROPHET 483/120 실행 ID 계열 해시 보류,
+% 내부 보류 실행 동등 NLL 최소, 동률 규칙, pilot seed 3300001, 선택 표의 내부 NLL
+% 1.540549/1.497478/1.497624/0.099077/0.139591/0.112230과 활성 파라미터 수);
+% METHOD_BASELINES_CONTRACT_SEALED.md (방법 비교의 PLAIN_GRU 폭·학습률).
+
+\section{Eligibility, exclusions, and safety stops}
+\label{sec:repro-eligibility}
+
+Table~\ref{tab:repro-eligibility} gives, for each in-house collection
+that the main chapters score, the planned and attempted executions, the
+eligible set, and the recorded reasons for the rest. Preparation runs
+were separate identifiers in every round and never entered an
+evaluation. The safety-stop rules of the contracts read only the state
+of the collection. The v2 contract stopped on 256~MiB of free disk,
+8~GiB of child memory, 420~s per attempt, an uncertain cleanup, or three
+consecutive source failures. The PAG1 contract kept these and added an
+18-hour limit and a source completion rate below 0.85 after 20
+attempts, and the method comparison applied the rule of three
+consecutive source failures.
+
+\begin{table}[htbp]
+\centering
+\caption{Eligibility and stopping per in-house collection. Each planned
+identifier was attempted at most once, and nothing was replaced.}
+\label{tab:repro-eligibility}
+\small
+\begin{tabularx}{\textwidth}{@{}lrrrX@{}}
+\toprule
+Collection & Planned & Attempted & Eligible runs / rows & Not eligible or not attempted \\
+\midrule
+\texttt{OBSERVED\_HEAD} check (later the 10-seed round) & 160 & 160 & 157 / 1,611
+  & three background runs whose COPY START, DISCOVERY START, or DISCOVERY
+    STOP record could not be bound to its source request \\
+v2 round, first & 160 & 117 & 116 / 1,187
+  & stopped as an uncertain cleanup after a network fixture listener was
+    reported as exited; 43 identifiers not attempted \\
+v2 round, recheck & 160 & 160 & 159 / 1,633
+  & one background run whose source START at the last boundary could not
+    be bound \\
+v3 round & 160 & 160 & 157 / 1,611
+  & three background runs; reasons in the sealed eligibility file \\
+PAG1 & 160 & 160 & 156 / 1,600
+  & four background runs; reasons in the sealed eligibility file \\
+Method comparison & 160 & 119 & 110 / 1,119
+  & five source failures; four runs with an unbound source START or STOP;
+    stopped after three consecutive source failures (agent or forwarder
+    not ready); 41 identifiers not attempted \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 근거: OBSERVED_HEAD_STAGE1_CONFIRM FINAL_REPORT_KO.md:11 (POHCB0005 COPY START,
+% POHCB0014 DISCOVERY START, POHCB0079 DISCOVERY STOP 미결속); PAPER_DEFINITIONS.md §3 및
+% PROPHET_ENV_CONSENSUS_KD_V2_20261119 (PEKD2O0011 NETWORK_FIXTURE_LISTENER_EXITED 후
+% TIMEOUT_OR_CLEANUP_UNCERTAIN 중지, 43 미시도); V2_DIAG_RECHECK FINAL_REPORT_KO.md:5
+% (PEKD3B0089); v3 FINAL_REPORT_KO.md:13 (배경 3 제외, 사유는 ELIGIBILITY_SEAL.json);
+% ARCH_GENERALITY_STAGE1_REPORT.md (배경 124/128 적격); METHOD_BASELINES_REPORT.md
+% "실행과 재현" (SOURCE_FAILED 5, SOURCE_ACTION_START_NOT_FOUND 3, STOP_NOT_FOUND 1,
+% NOT_ATTEMPTED 41) 및 TECHNICAL_LEDGER.md (AGENT_OR_FORWARDER_NOT_READY 세 번 연속).
+% 안전 중지 규칙: CONTRACT_V2.md:15; ARCH_GENERALITY_CONTRACT_SEALED.md "새 PROPHET 수집".
+% TODO(사람): v3 배경 3실행과 PAG1 배경 4실행의 제외 사유는 ELIGIBILITY_SEAL.json에만
+% 있고 atlas 문서에는 없습니다. 사유를 알려 주시면 표에 넣겠습니다.
+
+\section{Resampling}
+\label{sec:repro-resampling}
+
+Every interval comes from 100,000 resamples drawn with PCG64. In-house,
+a resample draws complete configurations and moves their repetitions
+together, and the two A+C layouts are resampled separately and then
+averaged 1:1 where the score combines them; on ADS-24, a resample draws
+executions within scenarios. The fixed seeds of the generators are
+2026112203, 2026112204, and 2026112205 for the first stage of the
+generality study (ADS-24, in-house, and the combined A+C score),
+2026112206, 2026112207, and 2026112208 for its second stage and the
+PAG1 re-inference, and 2026112303 and 2026112304 for the method
+comparison on ADS-24 and in-house.
+% 근거: ARCH_GENERALITY_CONTRACT_SEALED.md "blind 채점과 2단계 관문";
+% ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md; METHOD_BASELINES_CONTRACT_SEALED.md "주 평가와 결정".
+% TODO(사람): v3와 ADS-24 2단계의 bootstrap RNG 값(08장 주석의 2026112003 포함)을
+% 계약 원문에서 확인해 주시면 넣겠습니다.
+
+\section{Point estimates on complete configurations}
+\label{sec:repro-complete}
+
+In-house point estimates use every eligible run, whereas intervals use
+the configurations whose repetitions are all eligible.
+Table~\ref{tab:repro-complete} gives both point estimates for the A+C
+layouts of the generality study. The two differ by at most 0.011, and
+the direction of every contrast is the same under either.
+
+\begin{table}[htbp]
+\centering
+\caption{Mean NLL over 30 seeds on the PAG1 runs: all eligible runs
+against complete configurations only (\texttt{A+C FLAT}: 15
+configurations, 30 runs; \texttt{A+C NESTED}: 14 configurations, 28
+runs).}
+\label{tab:repro-complete}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+& & \multicolumn{2}{c}{Baseline model} & \multicolumn{2}{c}{CD student} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-6}
+Encoder & Layout & All eligible & Complete & All eligible & Complete \\
+\midrule
+LSTM (DeepLog-style)        & FLAT   & 0.651 & 0.654 & 0.486 & 0.490 \\
+LSTM (DeepLog-style)        & NESTED & 0.638 & 0.640 & 0.465 & 0.463 \\
+Transformer (LogBERT-style) & FLAT   & 1.050 & 1.058 & 0.548 & 0.558 \\
+Transformer (LogBERT-style) & NESTED & 1.041 & 1.034 & 0.520 & 0.514 \\
+plain GRU                   & FLAT   & 1.139 & 1.143 & 0.258 & 0.261 \\
+plain GRU                   & NESTED & 1.122 & 1.127 & 0.249 & 0.247 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 근거: ARCH_GENERALITY_STAGE2_REPORT.md "PROPHET 전체 적격 실행과 완전 구성 점추정"
+% (최대 차이 Transformer FLAT KD 0.547842 대 0.558368, 0.0105).

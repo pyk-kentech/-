@@ -11,35 +11,38 @@ execution and audit records received before a cutoff. The thesis
 followed one line of argument through four steps. It first measured
 that seeds of REL\_GLOBAL trained on the same 603 FIT runs disagree
 widely once the benign worker~C appears, and that their scores on the
-training conditions do not say which seed will hold up. It then traced
-much of the in-house disagreement to a single file decision, whether to
-COPY or to keep searching, which the seeds resolve from the observed
-result for the current target in different ways. From that diagnosis
-it moved to a remedy that leaves the deployed model unchanged: a
-student of the same architecture follows the averaged probabilities of
-five selected teachers on unlabeled environment inputs. Finally, the
-remedy was tested against criteria sealed before training. In the v3
-round, with 30 new seeds and 157 new runs, mean NLL on
-\texttt{A+C FLAT} fell from 0.0731 to 0.0276 and all three primary
-criteria passed. On ADS-24 the seed standard deviation fell from 0.163
-to 0.025, and the three encoder adaptations passed their criteria on
-both datasets.
+training conditions do not say which seed will hold up. It then
+localized much of the in-house error to a single file decision, whether
+to COPY or to keep searching, which the seeds resolve from the observed
+result for the current target in different ways. From there it moved
+to a remedy that leaves the deployed model unchanged: a student of the
+same architecture follows the averaged probabilities of five selected
+teachers on unlabeled inputs from the new workload. Finally, the remedy
+was tested against criteria sealed before training. In the v3 round,
+with 30 new seeds and 157 new runs, mean NLL on \texttt{A+C FLAT} fell
+from 0.0731 to 0.0276 and all three primary criteria were met. On
+ADS-24, sealed only after its evaluation runs had been inspected, the
+seed standard deviation fell from 0.163 to 0.025. The three encoder
+adaptations met the same criteria on new in-house runs and showed the
+same direction on ADS-24 in a development comparison.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
 % 166, 170 (v3), 219 (ADS-24 SD), 294 (세 인코더). 숫자는 개요대로 세 개만 다시 썼다.
 % ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
 % (8, 9장에서 밝힘). 여기서는 판정 이름만 쓰고 지위를 다시 설명하지 않았다.
 
-These results have firm edges. CD narrows the spread across seeds; it
-does not undo the cost of moving to an unseen environment. On ADS-24
-most distilled models still scored worse than the majority-class
+These results have firm edges. CD narrows the spread across the seeds
+we trained; it does not undo the cost of moving to an unseen
+environment, and it relies on unlabeled inputs from that environment.
+On ADS-24 most distilled models still scored worse than the FIT prior
 baseline at an NLL of 1.830, and only the Transformer students cleared
 it. Nor does every seed gain: in each architecture--dataset combination
 between 20 and 30 of the 30 seeds improved, and seeds that had been
 lucky were pulled down to the level of the consensus. The diagnosis
 holds for one model in one lab, and the agreement ranking used to pick
-teachers did not carry over to ADS-24. What a defender gets from CD is
-a forecaster whose quality depends less on the draw of the seed, at the
-price of training 30 baselines before the student. It is not a
+teachers did not carry over to ADS-24. Among the 30 seeds of each group, the
+CD students differed less from one another than the baseline models
+did, at the price of training 30 baselines before the student; the
+intervals do not extend this to other seeds. A CD student is not a
 forecaster that has learned more about the new environment.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
 % 297 (20~30/30, 운 좋은 seed 하락), 405 (합의도 seed 선택 ADS-24 미재현),
@@ -64,15 +67,12 @@ would give the first ADS-24 result on runs no one has looked at, and on
 a fresh in-house collection that completes the method comparison
 stopped at 110 runs. They also recompute the intervals with seeds
 resampled along with runs, so that a verdict no longer speaks only for
-these 30 seeds, and summarize temperature scaling and probability
-ensembles as the strongest simple competitors.
+these 30 seeds.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
-% TODO(사람): 개요 질문 A1에서 온도 보정·확률 앙상블 요약을 본문(11장 또는 9장)에
-% 넣기로 하면 이 문단의 마지막 항목("and summarize temperature scaling ...")을 뺀다.
-% 지금은 A1의 답이 없어 남겨 두었다.
+% 온도 보정·확률 앙상블은 9.2절에 원 보고서 값으로 넣었으므로 이 목록에서 뺐다.
 
-A separate line of work concerns the mechanism. The account of why the
+A separate line of work concerns the mechanism. The account of where the
 seeds diverge was built for REL\_GLOBAL in the in-house lab, and CD
 passed on ADS-24 and on the general encoders without a matching
 diagnosis there. Whether those models also split on one decision, and
@@ -85,8 +85,7 @@ setting in which it was found.
 
 % ---------------------------------------------------------------
 % 사람에게 물을 것 (12장)
-% 1. 개요 질문 A1: 온도 보정·확률 앙상블 요약을 본문에 넣는지. 넣으면 Future Work
-%    첫 문단의 마지막 항목을 지운다.
+% 1. 온도 보정·확률 앙상블 요약을 9.2절에 넣었다. 유지해도 되는지.
 % 2. 옛 결론의 문장(대상 소속, 소속 교환 16/127실행, benign interleaving 조건)을
 %    부록 B 첫머리 요약으로 옮길지, 그냥 버릴지.
 % 3. 장 제목을 "Conclusion and Future Work"로 바꿨다. 양식상 "Conclusion"만 써야

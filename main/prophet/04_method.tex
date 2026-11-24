@@ -60,7 +60,10 @@ trained for 1,346 updates of 32 occurrences with AdamW~\cite{loshchilov2017decou
 follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
 kept; no checkpoint is selected by a validation score. All 30 seeds of
 a configuration share this procedure and differ only in the seed as
-defined in Chapter~\ref{ch:introduction}.
+defined in Chapter~\ref{ch:introduction}. The seeds of each round are a
+fixed list of integer identifiers written into its contract, not draws
+from a stated distribution; Appendix~\ref{app:repro} lists the
+remaining training settings.
 % 근거: RECORD:151; PAPER_DEFINITIONS.md §2 (실행 동등 18-way CE, 계수 .1의
 % GLOBAL_COUNT_MATCH, weight decay .01, clip 2, 마지막 checkpoint).
 % 원 파일은 "404-only 전처리"도 적는다. 정의가 본문에 없어 쓰지 않았다.
@@ -111,7 +114,7 @@ parameters, so at inference it is the same single model. What changes
 is the training loss. Let $J$ be a fixed set of \emph{teachers},
 trained REL\_GLOBAL models whose weights are frozen, and let $p_j$ be
 the predicted distribution of teacher $j$ at temperature~1. On an
-unlabeled input $x$ from the deployment environment, the target is the
+unlabeled input $x$ from the target environment, the target is the
 arithmetic mean of the teachers' probabilities, and the student
 $p_\theta$ is pulled toward it by a Kullback--Leibler term:
 \begin{equation}
@@ -161,7 +164,10 @@ over runs with equal weight. The five models with the highest agreement
 form $J$, and these five teachers are used in every in-house round. The
 rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
-blind.
+blind. No round compared it with five teachers chosen at random, with
+fewer teachers, or with all 30 as teachers of a student. The results
+of later chapters therefore show that CD worked with this teacher rule,
+not that ranking by agreement is needed or better than another choice.
 % 근거: PAPER_DEFINITIONS.md §2 "고정 상위 5개 교사 선정". 상위 5 seed는
 % 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
 % 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
@@ -169,14 +175,13 @@ blind.
 Agreement is used to choose teachers, not to choose a deployed model.
 The single seed ranked first by agreement failed preservation on
 ORIGINAL\_18: on the development runs its NLL was 0.109 above the mean of
-the 30 seeds, against a limit of $+0.020$, while
+the 30 seeds, against the preservation limit of $+0.020$
+(Section~\ref{sec:eval-criteria}), while
 the average of the top five passed it at the cost of running five models
 at inference. Distillation is what returns that five-model target to a
 single model. The link between agreement and loss that motivates the
-rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}). On
-ADS-24 it did not hold for individual seeds (Chapter~\ref{ch:ads24}), so
-there the selection step rests on weaker grounds than in the in-house
-setting.
+rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}) and
+not on ADS-24 (Chapter~\ref{ch:ads24}).
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:3,43,47
 % (S1 단일 seed 50572의 ORIGINAL_18 NLL .739376, 한도 .650865(모집단 평균
 % .630865 + .020), 초과 +.108511; 상위5 결합 .548374로 통과. 135실행 개발 집합).
@@ -222,10 +227,12 @@ KD\_ALL & mean of the top five & background inputs and 48 original-procedure
 \end{tabularx}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-The ``CD student'' of Chapter~\ref{ch:generality} repeats this computation
-with teachers drawn from each encoder's own 30 baseline models
-(Section~\ref{sec:method-transfer}); the original report calls that
-group \texttt{KD\_ENV}.
+Throughout the thesis, a \emph{CD student} is a student trained with
+Equation~\ref{eq:cd-loss} toward the mean of five teachers chosen by
+the rule of Section~\ref{sec:method-teachers}. In-house its final form
+is KD\_ALL; on ADS-24 and for the general encoders of
+Chapter~\ref{ch:generality} the teachers are drawn from the 30 baseline
+models of the same encoder and data (Section~\ref{sec:method-transfer}).
 \end{minipage}
 \end{table}
 % KD_ENV_ALL30은 v2에서 KD_ENV 계산을 새 seed로 재현한 것(PAPER_DEFINITIONS.md §2).
@@ -239,14 +246,16 @@ The method was moved to two further settings with as few changes as
 possible (Table~\ref{tab:transfer}). On ADS-24 the input encoder reads
 Wazuh alert fields, the head predicts nine tactic classes, and the
 relational residual is removed; the resulting model has 31,685
-parameters. The three general encoders replace the event encoder with
+parameters. We call it REL\_GLOBAL-ADS to keep it apart from the
+in-house REL\_GLOBAL. The three general encoders replace the event encoder with
 an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 a Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert},
 or a plain GRU. They are encoder adaptations to our supervised task, not
 reproductions of DeepLog or LogBERT. LogitNorm, input-gradient
 regularization, and the relational residual are all removed, and the
 width and learning rate of each encoder were chosen by validation inside
-the FIT set.
+the FIT set. Appendix~\ref{app:repro} gives the architectures, the
+candidate grid, the validation split, and the selected settings.
 % 근거: RECORD:155--160, 281. ADS-24 9-way, 경보 창 512, 31,685 파라미터.
 % TODO(사람): 기록은 ADS-24 적용판에서 관계 잔차를 뺀 사실만 적고 이유는 적지
 % 않습니다. 이유(예: 대상 key에 해당하는 필드가 없음)를 한 구절 넣을지 알려 주세요.
@@ -261,7 +270,7 @@ ADS-24 and to the three general encoders.}
 \toprule
 Application & Changed & Kept \\
 \midrule
-ADS-24, own model
+ADS-24, REL\_GLOBAL-ADS
   & input encoder over Wazuh alert fields; 9-way head; relational residual
     removed; alert window 512; 31,685 parameters
   & 64-dimensional GRU; LogitNorm ($\tau=0.1$); input-gradient

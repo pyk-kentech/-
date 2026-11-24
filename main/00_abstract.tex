@@ -1,47 +1,48 @@
 \begin{abstract}
 PROPHET predicts which of 18 attacker actions comes next from the
-Windows execution and audit records received before a prediction cutoff.
-Under benign workloads absent from training, models that share data and
-architecture diverge sharply across random seeds, and scores on the
-training conditions do not identify a good seed. To reduce this
-underspecification, we distill model consensus: on unlabeled environment
-inputs, a student follows the averaged probabilities of selected baseline
-models, keeping the architecture and inference cost unchanged. In a
-sealed in-house evaluation with 30 new seeds, mean negative
-log-likelihood (NLL) under unseen workloads fell from 0.0731 to 0.0276.
-On the public ADS-24 dataset, the seed standard deviation of NLL fell
-from 0.163 to 0.025, yet most models stayed worse than the majority-class
-baseline (NLL 1.830). Three general encoders passed all six
-architecture--dataset checks, though only 20 to 30 of 30 seeds improved
-in each. Performance becomes more predictable, but the degradation
-under environment shift remains.
+Windows audit records received before a prediction cutoff. Under benign
+workloads that no labeled training run contains, models sharing data
+and architecture diverge across seeds, and training scores do not
+identify a good seed. Consensus distillation (CD) reduces this
+spread: on unlabeled inputs from the new workload, a student follows
+the averaged probabilities of five baseline models and is deployed
+alone. In a sealed in-house evaluation on new runs, mean
+negative log-likelihood (NLL) fell from 0.0731 to 0.0276. On the public
+ADS-24 dataset, whose evaluation runs had been inspected before the
+criteria were sealed, the seed standard deviation fell from 0.163 to
+0.025, but most models stayed worse than a training-prior baseline (NLL
+1.830). Three general encoders met the same criteria on new in-house
+runs and moved the same way on ADS-24, yet only 20 to 30 of 30 seeds
+improved. CD narrows the spread among our seeds; it does not remove the loss
+under environment shift.
 % 근거: RECORD:166, 170 (v3, A+C FLAT); RECORD:218--219, 221, 234 (ADS-24);
-% RECORD:294, 297 (three encoders). ADS-24 encoder results are development
-% comparisons on already inspected runs; this is stated in the results chapter.
+% RECORD:294, 297 (세 인코더). 세 인코더의 ADS-24 쪽은 개발 비교이며 9장에서
+% 밝힌다. "training-prior baseline" = FIT 실행 동등 전술 빈도 예측기(8장 정의).
 \end{abstract}
 
 \begin{Engkeyword}
 Next attacker action prediction, Underspecification, Seed instability,
-Consensus distillation, Unlabeled environment inputs, Windows audit logs
+Consensus distillation, Unlabeled adaptation, Windows audit logs
 \end{Engkeyword}
 
 \begin{korabstract}
-본 연구는 예측 시점 전에 수신된 윈도우 실행·감사 로그만으로 공격자가 다음에
-수행할 행동을 18개 범주 중에서 예측한다. 같은 자료와 같은 구조로 학습한
-모델도 학습 때 보지 못한 정상 작업 조건에서는 시드마다 성능이 크게 갈리며,
-학습 때 본 조건의 성적으로는 좋은 시드를 고를 수 없다. 배포하는 쪽은 어떤
-모델을 받게 될지 미리 알 수 없는 셈이다. 이 과소명세 문제를 줄이기 위해,
-정답이 없는 환경 입력에서 기준 모델들이 합의한 확률을 학생 모델이 따라
-배우도록 증류한다. 학생은 기준 모델과 구조가 같으므로 추론 비용도 그대로다.
-새 시드 30개로 사전에 봉인한 자체 실험실 평가에서, 보지 못한 정상 작업
-조건의 평균 음의 로그우도는 0.0731에서 0.0276으로 낮아졌다. 공개 자료
-ADS-24에서는 시드 간 표준편차가 0.163에서 0.025로 줄었고, 세 가지 일반
-인코더에서도 같은 판정을 통과했다. 다만 모든 시드가 좋아지지는 않았고,
-ADS-24에서는 증류 후에도 대부분의 모델이 다수 클래스 기준선(1.830)보다
-손실이 높았다. 이 방법은 시드 간 흔들림을 줄이지만, 환경 이동에 따른 성능
-저하 자체를 없애지는 못한다.
+본 연구는 예측 시점 전에 수신된 윈도우 감사 로그만으로 공격자가 다음에
+수행할 행동을 18개 범주 중에서 예측한다. 정답이 붙은 학습 실행에 없던 정상
+작업 조건에서는 같은 자료와 구조로 학습한 모델도 시드마다 성능이 크게
+갈리며, 학습 때의 성적으로는 좋은 시드를 고를 수 없다. 배포하는 쪽은 어떤 모델을
+받게 될지 미리 알 수 없는 셈이다. 이 흔들림을 줄이기
+위해, 새 작업 조건의 정답 없는 입력에서 기준 모델 다섯 개가 합의한 확률을
+학생 모델이 따라 배우도록 증류한다. 학생은 기준 모델과 구조가 같아 추론
+때도 단일 모델이다. 사전에 봉인한 자체 실험실 평가의 새 실행에서 평균 음의
+로그우도는 0.0731에서 0.0276으로 낮아졌다. 평가 실행을 이미 열람한 공개
+자료 ADS-24에서는 시드 간 표준편차가 0.163에서 0.025로 줄었다. 세 가지 일반
+인코더도 자체 실험실의 새 실행에서 같은 판정을 통과했고, ADS-24에서는 같은
+방향을 보였다. 다만 모든 시드가 좋아지지는 않았고, ADS-24에서는
+대부분의 모델이 학습 자료의 전술 빈도만 쓰는 기준선(1.830)보다 손실이
+높았다. 이 방법은 학습한 시드들 사이의 흔들림을 줄이지만, 환경 이동에 따른
+성능 저하 자체를 없애지는 못한다.
 \end{korabstract}
 
 \begin{Korkeyword}
-공격 행동 예측, 과소명세, 시드 불안정성, 합의 증류, 무라벨 환경 입력, 윈도우 감사 로그
+공격 행동 예측, 과소명세, 시드 불안정성, 합의 증류, 무라벨 적응, 윈도우 감사 로그
 \end{Korkeyword}

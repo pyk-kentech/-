@@ -1,24 +1,20 @@
 \chapter{Introduction}
 \label{ch:introduction}
-% TODO(사람): 6, 8, 9, 10, 12장의 label 이름(ch:diagnosis, ch:ads24,
-% ch:generality, ch:decomposition, ch:conclusion)은 이 장에서 먼저 정했다.
-% 해당 장을 쓸 때 같은 이름을 쓰는지 확인해 주세요.
 
 During a multi-stage incident, an analyst often has to decide which
 activity to investigate before the attacker's next action is visible.
 Forecasting systems such as Tiresias~\cite{shen2018tiresias} and
-EFI~\cite{zhu2024efi} support this decision by assigning probabilities to
-plausible follow-up actions. Such a forecast is only useful if it rests
+EFI~\cite{zhu2024nip} support this decision by forecasting likely
+follow-up activity. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
 records received before its cutoff (Chapter~\ref{ch:task}). The task,
 which we call PROPHET, is \textbf{next attacker action prediction} from
-Windows execution and audit records. At a prediction boundary, the label
-is the semantic category of the first attacker action whose process
-starts after the boundary, and the model outputs a distribution over 18
-such categories. One execution yields several prediction rows, each with
-its own evidence prefix. The boundaries are known in our controlled
+Windows execution and audit records: at each prediction boundary the
+model outputs a distribution over 18 semantic categories of the next
+attacker action, and one execution yields several such prediction rows
+(Section~\ref{sec:task-rows}). The boundaries are known in our controlled
 environment; locating them in an operational deployment is a separate
 problem that we do not address.
 % 근거: RECORD:32. 기존 문단 1, 3을 압축. 두 대상 예시(기존 문단 2)는
@@ -29,9 +25,10 @@ same model. Here a \emph{seed} fixes the initial weights together with
 the random draws of training traces and regularization noise, and
 changing it alone can change the predictor substantially. In our
 in-house lab, every benign workload of type~C is held out of all 603
-training (FIT) runs, so any condition containing it is \emph{unseen}
-during training. Models that behave consistently on the seen conditions
-come apart on the unseen ones. Across 30 seeds of the baseline
+labeled training (FIT) runs, so any condition containing it is
+\emph{unseen} in the sense that no labeled run shows it. Models that
+behave consistently on the seen conditions come apart on the unseen
+ones. Across 30 seeds of the baseline
 predictor, REL\_GLOBAL, the mean NLL on the unseen condition A+C FLAT
 ranged from 0.036 to 0.420 on the development runs. A plain GRU
 trained on identical data reached anywhere between 51\% and 88\%
@@ -58,20 +55,26 @@ three questions.
   \item[(Q1)] How large is the seed-to-seed variation under unseen
     benign workloads, and where does it come from in the in-house lab?
   \item[(Q2)] Can it be reduced without changing the architecture or the
-    inference cost?
+    inference cost, when unlabeled inputs from the new workload are
+    available during training?
   \item[(Q3)] Does the answer hold on another dataset and with other
     encoders?
 \end{description}
 
-Our approach, \emph{environment-consensus distillation} (CD), starts
-from an in-house observation: the baseline models tend to disagree
-where they are wrong, and disagreement can be measured without labels
-(Chapter~\ref{ch:diagnosis}). We train 30 seeds of
+Our approach, \emph{environment-consensus distillation} (CD), builds
+on the known use of disagreement among independently trained models as
+a label-free signal of error and
+uncertainty~\cite{lakshminarayanan2016simple, baek2022agreement}. In
+the in-house lab we checked that the baseline models disagree where they
+are wrong (Chapter~\ref{ch:diagnosis}). We train 30 seeds of
 REL\_GLOBAL, select five of them as teachers by their top-1 agreement on
 unlabeled inputs from the environment, and train a student that follows
 the arithmetic mean of the teachers' probabilities on those inputs
 through a KL term, while keeping the usual cross-entropy on the FIT
-data. The construction draws on knowledge distillation~\cite{hinton2015distilling} and
+data. These unlabeled inputs come from runs of the unseen workloads that
+are separate from the evaluation runs, so CD is a form of unlabeled
+adaptation to a known target environment; it is not tested on a
+workload that was never observed in any form. The construction draws on knowledge distillation~\cite{hinton2015distilling} and
 on the observation that averaging independently trained models gives
 better-behaved predictions~\cite{lakshminarayanan2016simple}. The CD student has the same
 architecture as REL\_GLOBAL and no additional parameters, so at
@@ -81,24 +84,24 @@ training, where 30 baseline models must be fitted before the student.
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
 In a sealed in-house evaluation with 30 new seeds, 157 new eligible
-runs, and 1,611 prediction rows, the CD student passed all three
+runs, and 1,611 prediction rows, the CD student met all three
 primary criteria fixed before collection. On A+C FLAT its mean NLL was
 0.0276 against 0.0731 for REL\_GLOBAL, and the seed standard deviation
 on A+C fell from about 0.056 to 0.010. On ORIGINAL\_18, the seen
 procedure without benign workers, the mean NLL moved from 0.7036 to
-0.6428 (difference interval $[-0.1309, -0.0041]$). Applied unchanged to
+0.6428 (difference interval $[-0.131, -0.0041]$). Applied unchanged to
 the public ADS-24 dataset, CD reduced the seed standard deviation from
-0.163 to 0.025 and the mean NLL from 2.276 to 2.060. With three general
-encoders (an LSTM encoder in the style of DeepLog, a Transformer encoder
-in the style of LogBERT, and a plain GRU), all six encoder--dataset
-combinations passed the same three criteria. Two limits accompany these
-results. First, on ADS-24 every CD student of our own model remained
-worse than the majority-class baseline (NLL 1.830), and among the
-general encoders only the Transformer students exceeded it, in 27 of
-30 seeds. Second, CD does not improve every seed: depending on the
-combination, 20 to 30 of the 30 seeds improved, and seeds that had been
-lucky were pulled back to the consensus level. What CD buys is
-predictable performance, not a better best case.
+0.163 to 0.025 and the mean NLL from 2.276 to 2.060; there the criteria
+were sealed only after the evaluation runs had been inspected. With
+three general encoders (an LSTM encoder in the style of DeepLog, a
+Transformer encoder in the style of LogBERT, and a plain GRU), the three
+in-house combinations met the same three criteria on new runs, and the
+three ADS-24 combinations showed the same direction in a development
+comparison on the inspected runs. On ADS-24 every CD student of our own
+model remained worse than a baseline that predicts the FIT tactic
+frequencies (NLL 1.830), and CD did not improve every seed: 20 to 30 of
+the 30 seeds improved, depending on the combination
+(Chapter~\ref{ch:generality}).
 % 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294, 297--298 (세 인코더).
 % ADS-24의 환경 평가 35실행은 1단계에서 이미 열람했고, ADS-24의 구조
 % 일반성 결과는 개발 비교다(RECORD:256--260, 442). 지위는 8, 9장에서 밝힌다.
@@ -108,11 +111,15 @@ predictable performance, not a better best case.
 The thesis makes three contributions. (a) It measures seed instability
 with 30 seeds per configuration, across four encoder configurations, on
 the in-house task and on ADS-24. (b) It links a diagnosis of where the
-instability arises in the in-house lab to an architecture-preserving
-intervention built on unlabeled model consensus. (c) It presents the
-evidence from diagnosis to intervention as one chain, evaluated under
-procedures that were preregistered and sealed before training and
-collection. The distillation computation itself is a combination of
+in-house errors concentrate to an architecture-preserving intervention
+built on unlabeled model consensus. (c) It presents the evidence from
+diagnosis to intervention as one chain. The in-house intervention was
+confirmed on new runs under criteria sealed before training and
+collection; the diagnosis and the teacher rule come from inspected
+development runs, the ADS-24 criteria were sealed after its evaluation
+runs had been inspected, the encoder and method comparisons on ADS-24
+are development comparisons, and the decomposition is post hoc. The
+distillation computation itself is a combination of
 existing techniques; we claim the chain of evidence and the evaluation
 behind it, not a new training objective.
 % 근거: idea.md "기여" 3항, RECORD:28.
@@ -124,8 +131,8 @@ seen and unseen conditions, and Chapter~\ref{ch:method} describes
 REL\_GLOBAL and CD. Chapter~\ref{ch:evaluation} sets out the metrics,
 the sealing procedure, and the three kinds of evidence used in the rest
 of the thesis: sealed criteria, development comparisons, and post hoc
-analyses. Chapter~\ref{ch:diagnosis} measures the instability and traces
-its in-house source (Q1). Chapter~\ref{ch:results} reports the sealed
+analyses. Chapter~\ref{ch:diagnosis} measures the instability and locates
+where the in-house errors concentrate (Q1). Chapter~\ref{ch:results} reports the sealed
 in-house confirmation of CD (Q2), and Chapters~\ref{ch:ads24}
 and~\ref{ch:generality} turn to ADS-24, the general encoders, and a
 comparison with other single-model methods (Q3).

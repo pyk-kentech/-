@@ -1,9 +1,10 @@
-\chapter{Seed Instability and Its Source in the In-House Lab}
+\chapter{Seed Instability and Where It Concentrates in the In-House Lab}
 \label{ch:diagnosis}
 
 This chapter measures how far the 30 REL\_GLOBAL seeds from which the
 teachers of Section~\ref{sec:method-teachers} are drawn diverge on the
 unseen conditions, and it locates where in the prediction they diverge.
+It localizes the errors; it does not isolate a cause of the instability.
 Unless a sentence says otherwise, every number comes from one
 development set of 135 executions and 1,427 natural rows that had been
 scored many times before this analysis: \texttt{A+C FLAT} 31 runs and
@@ -38,7 +39,10 @@ adaptation to the background against preservation of the original
 procedure, the seeds that did well on A+C would be the ones that did
 poorly on \texttt{ORIGINAL\_18}, and the correlation would be clearly
 negative. A value this close to zero does not support such a trade at
-the level of seeds.
+the level of seeds. These correlations, like the others in this chapter,
+describe the 30 seeds on one set of runs; we computed no interval for
+them, and the rows they share make them descriptive rather than
+inferential.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:35 (FLAT 평균 .141949, SD .086001,
 % 범위 .036339--.419831; NESTED 평균 .125527, SD .087071, 범위 .022585--.404273;
 % FLAT--NESTED ρ=.8861; FLAT--ORIGINAL_18 ρ=-.1310). RECORD:62--64, 100.
@@ -182,8 +186,10 @@ and 476 of 476 background rows. Over all file-action boundaries it was
 correct on 1,974 of 2,171 FIT rows and 1,290 of 1,309 background rows,
 so it describes one decision of the procedure and is not an 18-way
 predictor. Each of the 19 background errors predicted COPY again right
-after an actual COPY whose START had not yet been received. As a post
-hoc analysis, we turned the rule into probabilities. Each rule category
+after an actual COPY whose START had not yet been received.
+
+The next step is a post hoc analysis on the same development set. We
+turned the rule into probabilities. Each rule category
 received a COPY probability estimated from FIT runs, which replaced the
 seed's split between COPY and DISCOVERY; the seed's total for the two
 actions and its other 16 probabilities were kept. The mean single-seed
@@ -192,8 +198,8 @@ NLL fell from 0.142 to 0.091 on \texttt{A+C FLAT} and from 0.126 to
 and 26 on NESTED, and the mean number of wrong rows per seed fell from
 17.4 to 7.4 and from 14.7 to 2.8. The same probabilities raised the loss
 on \texttt{C\_ONLY} from 0.103 to 0.162, and on \texttt{B+C} from 0.059
-to 0.062. Much of the A+C instability thus sits in this one lookup, but
-a probability calibrated on FIT runs does not carry over to every
+to 0.062. Much of the A+C error thus sits in this one lookup, but a
+probability calibrated on FIT runs does not carry over to every
 background condition.
 % 근거: RECORD:104--110. 절차 틀(처음 4개 DISCOVERY, marker 뒤 END ZERO면 COPY,
 % source 정책 observed[target]==SUCCESS): RECORD:104--107.
@@ -214,13 +220,15 @@ background condition.
 \label{sec:diag-intervention}
 
 Inside the model, the lookup is not computed the same way across seeds.
-We read the logits of each checkpoint before normalization as the sum of
+This post hoc reading of the development set uses the logits of each checkpoint before normalization as the sum of
 a base part and the relational residual. In the five seeds with the
 highest A+C loss in each layout, 107 of the 148 errors on COPY rows
 already had a residual that favored DISCOVERY, and in the other 41 the
 base part overturned a residual that pointed the right way. The five
-best seeds of each layout made 21 such errors. We then gave the
-lookup's result to the model directly. \texttt{OBSERVED\_HEAD} feeds
+best seeds of each layout made 21 such errors.
+
+We then gave the lookup's result to the model directly, first as a
+development comparison on the same 135 runs. \texttt{OBSERVED\_HEAD} feeds
 five indicators for the current target (payload END zero, payload END
 nonzero, END not yet received, no marker, COPY START received after the
 marker) through a 64-dimensional linear projection into the first
@@ -230,24 +238,34 @@ indicators from another run with the same number of natural boundaries,
 so the comparison separates the information from the extra input.
 Table~\ref{tab:diag-rule} gives the results. On the development set,
 \texttt{OBSERVED\_HEAD} lowered the A+C loss below both REL\_GLOBAL and
-\texttt{SHUFFLED\_HEAD}. On 157 newly collected runs in the same lab,
-with the 30 seeds frozen and a check sealed before collection, all four
-A+C contrasts against the two other models had Bonferroni-adjusted
-98.75\% intervals below zero, and the seed standard deviation and the
-worst seed improved as well. The gain held against both on a
-five-target FLAT variant. With three targets, the contrast against
-\texttt{SHUFFLED\_HEAD} was not confirmed: its interval included zero.
-Preservation of the original task was not established. On 32 new
+\texttt{SHUFFLED\_HEAD}.
+
+The check on new runs was a sealed criterion. On 157 runs collected for
+it in the same lab, with the 30 seeds frozen and the check sealed
+before collection, all four A+C contrasts against the two other models
+had Bonferroni-adjusted 98.75\% intervals below zero, and the seed
+standard deviation and the worst seed improved as well. These are the
+157 runs that the 10-seed round of Chapter~\ref{ch:results} later
+reused; by then they had been inspected. The gain held against both
+models on a five-target FLAT variant. With three targets, the contrast
+against \texttt{SHUFFLED\_HEAD} was not confirmed: its interval
+included zero. Preservation of the original task was not established. On 32 new
 \texttt{ORIGINAL\_18} runs \texttt{OBSERVED\_HEAD} was 0.015 worse than
 REL\_GLOBAL, inside the $+0.020$ limit, but the 95\% interval
 $[-0.017, +0.048]$ crossed it, so the model was not adopted as a
-general replacement. A generic version, \texttt{GENERIC\_HEAD}, which
+general replacement.
+
+A generic version, again a development comparison on the 135 runs, \texttt{GENERIC\_HEAD}, which
 describes the most recent target key and its received results without
 the lab's marker and payload commands, did not keep the gain and did not
-beat its own capacity-matched shuffled control. The mechanism is
-therefore identified for this lab's procedure, but we did not find an
-architectural change built on it that is general and leaves the
-original task intact.
+beat its own capacity-matched shuffled control. Supplying the
+lab-specific lookup to the head thus helps, which identifies a
+procedure-specific predictive bottleneck for this lab. It does not show
+that the lookup causes the seed instability, because the features
+encode the source policy directly, the generic form failed, and the
+shuffled control does not preserve every temporal and structural
+property of a run. We also did not find an architectural change built
+on the lookup that is general and leaves the original task intact.
 % 근거: RECORD:112--124.
 % logit 분해(사후, 135실행): FOLLOWUP_REPORT_KO.md:31--44 (하위 5 seed COPY 오류
 % 77+71=148 중 관계 부호 오류 56+51=107, 기본 경로 역전 21+20=41; 상위 5 seed 10+11=21).
@@ -267,9 +285,8 @@ original task intact.
 % FINAL_REPORT_KO.md:3 (일반형−특화형 +0.053672/+0.049088, 98.75% 구간
 % [+0.024236,+0.090602]/[+0.015770,+0.097816]; 일반형 섞기 대비 구간 0 포함;
 % 201열 입력, 72,746 파라미터 대 특화형 60,202).
-% TODO(사람): 1단계 157실행·1,611행이 5장 원장의 "10-seed development" 행
-% (157/1,611, 대상 수 변형 32/256·32/448)과 같은 실행인지 확인해 주세요. 분모가
-% 같습니다. 같다면 본문 "157 newly collected runs"에 그 차수 이름을 붙이겠습니다.
+% 1단계 157실행 = 10-seed 차수의 평가 실행(PROPHET_ENV_CONSENSUS_KD_20261119/
+% FINAL_REPORT_KO.md:12 "1단계 새 157실행은 이미 개봉한 개발 자료다").
 
 \begin{table}[htbp]
 \centering
@@ -342,8 +359,8 @@ the seeds' computations part. The distillation of
 Chapter~\ref{ch:method} is designed to remove it, and
 Chapter~\ref{ch:results} tests it under a sealed contract. Agreement
 did not serve as a rule for choosing one seed: the top-ranked seed
-failed preservation (Section~\ref{sec:method-teachers}), and on ADS-24
-agreement did not rank the seeds by loss (Chapter~\ref{ch:ads24}).
+failed preservation (Section~\ref{sec:method-teachers}), and the
+relation did not hold on ADS-24 (Chapter~\ref{ch:ads24}).
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
 % REPORT_KO.md:5 (배경 1,029행 만장일치 모두 정답, 무작위 5개 만장일치는 오류 있음,
 % ORIGINAL_18 89행 중 8행 오답), :9--15 (만장일치 247+240+243+299=1,029; 배경 1,309행),
@@ -364,8 +381,6 @@ agreement did not rank the seeds by loss (Chapter~\ref{ch:ads24}).
 % 4. 조회 규칙 사후 적용 뒤의 seed 범위 .080--.140(RECORD:69, 110)의 원 파일 위치.
 % 5. 손실 집중 경계 "10"(RECORD:108)의 원 파일 근거.
 % 6. 3대상 OBSERVED_HEAD 대 SHUFFLED_HEAD의 NLL 차이와 구간.
-% 7. OBSERVED_HEAD 1단계 157실행·1,611행이 5장 원장의 10-seed development
-%    행과 같은 실행인지.
 % 8. 표 tab:diag-rule의 수치 중 새 실행(4대상·5대상)과 GENERIC_HEAD 값은 기록(RECORD)에
 %    없고 원 파일에서 직접 옮겼다. 개요 B표의 대조 목록에는 없으므로 써도 되는지.
 % 9. "한 발 늦은 예측" 가설 기각을 본문에 넣을지.

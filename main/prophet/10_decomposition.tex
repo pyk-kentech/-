@@ -23,7 +23,7 @@ geometric mean. Then
 \end{equation}
 The mean loss of the seeds is exactly the loss of their consensus plus a
 disagreement term $V$, and $V$ depends on the predictions alone, so it
-can be computed in the deployment environment without labels. The
+can be computed in the target environment without labels. The
 identity is Heskes's result for logarithmic opinion
 pools~\cite{heskes1997selecting}, and Gruber and Buettner treat the same
 term as the variance component of a bias--variance decomposition for
@@ -45,16 +45,16 @@ Table~\ref{tab:decomposition} applies the identity to the baselines of
 Chapter~\ref{ch:generality}: the three general encoders and REL\_GLOBAL
 on the new PAG1 runs of the in-house lab and on ADS-24. On conditions
 absent from FIT, $V$ was three to seven times its value on the seen
-condition for every general encoder on both datasets. REL\_GLOBAL on
-ADS-24 behaved the same way (5.3 times), but in the in-house lab its
+condition for every general encoder on both datasets. REL\_GLOBAL-ADS
+behaved the same way (5.3 times), but in the in-house lab its
 $V$ barely moved (1.1 times). In the in-house lab, disagreement was
 about half of the unseen-condition loss for the LSTM and Transformer
 encoders and for REL\_GLOBAL, and 70\% for the plain GRU, against 15\%
 to 28\% on \texttt{ORIGINAL\_18}. On ADS-24 the share was 7\% to 14\%.
 The ADS-24 loss is therefore mostly a loss on which the seeds agree,
-which matches Chapter~\ref{ch:ads24}: there the models are close to or
-below the majority-class baseline, and lowering $V$ alone cannot move
-them far.
+which matches Chapter~\ref{ch:ads24}: there the models stay near or
+above the NLL of the FIT prior baseline, and lowering $V$ alone cannot
+move them far.
 
 \begin{table}[htbp]
 \centering
@@ -80,7 +80,7 @@ In-house & REL\_GLOBAL                 & 0.067 & 0.075 & 1.1 & 50\% \\
 ADS-24 & LSTM (DeepLog-style)          & 0.048 & 0.197 & 4.1 &  9\% \\
 ADS-24 & Transformer (LogBERT-style)   & 0.063 & 0.293 & 4.7 & 14\% \\
 ADS-24 & plain GRU                     & 0.032 & 0.149 & 4.7 &  7\% \\
-ADS-24 & REL\_GLOBAL                   & 0.043 & 0.230 & 5.3 & 10\% \\
+ADS-24 & REL\_GLOBAL-ADS               & 0.043 & 0.230 & 5.3 & 10\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -95,24 +95,24 @@ ADS-24 & REL\_GLOBAL                   & 0.043 & 0.230 & 5.3 & 10\% \\
 
 $V$ tracked the instability that the earlier chapters measured with the
 seed standard deviation of NLL. Over the 28 pairs of encoder and
-evaluation layer (four encoders on five in-house layers and on two
-ADS-24 layers), the Spearman correlation between $V$ and seed standard
+evaluation condition (four encoders on five in-house conditions and on
+two ADS-24 conditions), the Spearman correlation between $V$ and seed standard
 deviation was 0.929; it was 0.762 within ADS-24 ($n=8$) and 0.863 within
 the in-house lab ($n=20$). The points share seed populations and runs,
 so the correlation describes these baselines rather than 28 independent
-replications. The more useful property is that $V$ is available before
+replications, and we computed no interval for it. The more useful property is that $V$ is available before
 labels are. On ADS-24, $V$ measured on the 34 unlabeled adaptation runs
 was almost the same as $V$ on the 35 evaluation runs: 0.204 against
 0.197 for the LSTM encoder, 0.323 against 0.293 for the Transformer
 encoder, 0.148 against 0.149 for the plain GRU, and 0.231 against 0.230
-for REL\_GLOBAL. In the in-house lab the adaptation inputs gave
+for REL\_GLOBAL-ADS. In the in-house lab the adaptation inputs gave
 somewhat lower values for the three general encoders (0.317, 0.455, and
 0.700, against 0.339, 0.554, and 0.790).
 % 근거: RECORD:329--330; VARIANCE_DECOMPOSITION_REPORT.md "Shift of V and relationship
 % to seed SD" (pooled 0.929, ADS 0.762, PROPHET 0.863), "Can unlabeled adaptation V
 % anticipate evaluation instability?" (ADS 34실행/5,811행, 자체 167실행/1,663행).
 
-After distillation, $V$ fell in 27 of the 28 layers, often by an order
+After distillation, $V$ fell in 27 of the 28 conditions, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. CD therefore acts mainly on the
@@ -120,10 +120,10 @@ disagreement term, which is how it lowers the seed standard deviation.
 The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}, where $V$ rose
 from 0.068 to 0.077 between the v3 baseline seeds and the paired CD
 student distilled on the A+C inputs alone, and the seed standard
-deviation rose with it. This is the same condition on which
-preservation was undecided in v2, held in v3, and was unconfirmed in
-the PAG1 re-scoring (Chapter~\ref{ch:results}). The reduction of
-unseen-condition spread does not carry over to every layer.
+deviation rose with it. Preservation on this condition is also the
+least settled in-house result (Section~\ref{sec:disc-mechanism}). The
+reduction of unseen-condition spread does not carry over to every
+condition.
 % 근거: RECORD:331, 433; VARIANCE_DECOMPOSITION_REPORT.md "Student after KD: paired
 % V changes". 자체 REL_GLOBAL 쌍은 v3의 2M seed 기준 모델과 KD_ENV_TOP5 학생
 % (같은 PAG1 입력)이며, 표 tab:decomposition의 원래 30-seed 계보와 다른 모집단이라
@@ -160,12 +160,13 @@ of Section~\ref{sec:gen-methods} did not separate the two pools.
 Third, the adaptation-input $V$ of the 30 REL\_GLOBAL seeds of the
 in-house lab could not be computed, because only their aggregated
 teacher probabilities, not the 30 individual distributions, had been
-saved; we did not reconstruct them by re-running the checkpoints. Close
-precedents analyse the same variance term under distribution shift with
-evaluation labels~\cite{rathmanakidis2022reduction} or use proper-score uncertainty for
-out-of-distribution detection~\cite{gruber2022uncertainty}; none of
-them, and nothing in our data, shows that $V$ measured before
-deployment predicts later seed instability.
+saved; we did not reconstruct them by re-running the checkpoints.
+Related work studies a geometric-mean-based decomposition of
+variance-related error under distribution shift with evaluation
+labels~\cite{rathmanakidis2022reduction} and uses proper-score
+uncertainty for out-of-distribution detection~\cite{gruber2022uncertainty}.
+Nothing in our data shows that $V$ measured before deployment predicts
+later seed instability.
 % 근거: RECORD:333, 404, 406, 506; VARIANCE_DECOMPOSITION_REPORT.md "Arithmetic versus
 % geometric teachers" (24/56), "Can unlabeled adaptation V anticipate..." (ADS ρ=-0.800,
 % PROPHET ρ=0.500; REL_GLOBAL 50k 계보는 30개 적응 입력 개별 확률이 없음),
