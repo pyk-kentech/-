@@ -1,320 +1,278 @@
 \chapter{Background and Related Work}
 \label{ch:related}
+% 개요 2장. 옛 비교(EVENT GRU, 소속 교환, history placement) 설명과
+% 옛 2.4절 "Evidence granularity and forecasting baselines"(빈도 기준선)는
+% 부록 B(app:secondary-results)로 옮긴다. 옮기는 작업은 부록 B를 쓸 때 한다.
+% 옛 원고의 sec:recorded-case, sec:membership 참조는 이 장에서 뺐다.
 
-\section{MITRE ATT\&CK and the action vocabulary}
+\section{ATT\&CK, the kill chain, and Attack Flow}
+\label{sec:related-attack}
 
-MITRE ATT\&CK groups observed adversary behaviors by tactic,
-technique, and sub-technique. The Enterprise overview explains
-these categories~\cite{mitreintro}. The Windows matrix lists
-the techniques relevant to that platform~\cite{mitrewindows}.
-A tactic describes the objective of an activity, such as learning
-about the surrounding system. A technique describes a way to pursue
-that objective, such as querying the Windows Registry. A sub-technique,
-where defined, further specifies how the technique is carried out.
-This organization lets analysts discuss the same behavior across incidents
-even when the underlying executables or host configurations differ.
+MITRE ATT\&CK organizes observed adversary behavior into tactics, the
+objectives an activity serves, and techniques and sub-techniques, the
+ways an objective is pursued~\cite{mitreintro}; the Windows matrix lists
+the techniques that apply to that platform~\cite{mitrewindows}. We use
+this vocabulary to situate the behaviors in our data, but the 18
+prediction labels (Appendix~\ref{app:actions}) are finer than ATT\&CK
+techniques. They name operations at the level of the controlled
+procedures. A system information enumeration and a registry query are
+both discovery activity, and they relate to System Information Discovery
+and Query Registry respectively; merging them into one output would erase
+exactly the distinction the classifier is asked to make. Conversely,
+different command lines that implement the same operation share a label.
+The label is the operation designated by the procedure and verified
+against the actual process start, not an ATT\&CK identifier.
 
-The thesis uses ATT\&CK to situate the behaviors in its dataset.
-The 18 prediction labels in Appendix~\ref{app:actions} describe
-operations at the granularity of the controlled procedures. For
-example, the system information enumeration label is related to
-System Information Discovery, and the registry query label is
-related to Query Registry. Both can be discussed as discovery
-activity, but treating them as the same output would erase the
-distinction the classifier is asked to make. Conversely, multiple
-commands could implement the same semantic operation and receive
-the same experimental label. The label comes from the operation
-designated by the procedure and verified against the actual process
-start. The audit record gives evidence about the operation, and
-ATT\&CK supplies vocabulary for discussing the behavior.
-
-The intrusion kill chain of Hutchins et al. organizes intrusion
-activity into phases to help defenders reason about an adversary
-campaign and identify opportunities to interrupt it~\cite{hutchins2011killchain}.
-The phase is useful for summarizing progression across a campaign.
-At a single host decision, however, several operations can fall
-under the same broad phase. Even a fully identified discovery phase
-leaves open which resource will be examined next or whether the
-preceding check will trigger file processing. A forecast evaluated
-at this resolution therefore needs both a concrete label and a
-record of the available evidence when the prediction was made.
-
-An ATT\&CK matrix also leaves the order of actions within a particular
-incident to be specified. A tactic can contain many techniques, and
-two operations in the same tactic can play different roles in a
-procedure. For example, two file searches can occur in a single
-execution, yet a later decision can depend on the outcome of the
-search for just one target. Attack Flow addresses the
-representation of sequences and dependencies across adversary
-actions~\cite{mitreattackflow}. A flow can communicate an incident
-sequence or a hypothetical scenario. PROPHET's input instead consists
-of a prefix of received host observations; the output is a forecast
-for one decision boundary. The history of a target is recovered
-from available evidence, and the exact next action is checked after
-its execution. An authored flow can explain a known case, whereas
-the forecasting evaluation must decide what can be inferred before
-the next action arrives.
+The intrusion kill chain of Hutchins et al.\ groups a campaign into
+phases so that defenders can reason about where to interrupt
+it~\cite{hutchins2011killchain}. At a single host decision, however,
+several operations fall under the same phase, and knowing that an actor
+is in discovery does not say which resource it will examine next. Attack
+Flow goes further and represents the order of and dependencies between
+adversary actions, so a flow can document a known incident or a
+hypothetical scenario~\cite{mitreattackflow}. Both are descriptions
+written with the whole sequence in view. A forecaster has only the prefix
+received before the next action, and it must commit to a distribution
+over that action before it is observed.
 
 \section{Attack graphs and attack progression}
+\label{sec:related-graphs}
 
-Classical attack graphs represent how steps or conditions can combine
-to reach a security-relevant state. Sheyner et al.\ generate attack
-graphs from system models to expose potential sequences and support
-analysis of the steps on those sequences~\cite{sheyner2002graphs}.
-MulVAL uses logic rules to derive security consequences from facts
-about a network and its hosts~\cite{ou2005mulval}. In this family,
-an edge or derivation represents a relationship defined by the
-security model, so the analyst can inspect alternative routes and
-identify conditions on which several routes depend. Coverage
-therefore depends on the supplied configuration facts and on the
-conditions captured by the rules.
+Classical attack graphs model how conditions and exploits combine to
+reach a security-relevant state. Sheyner et al.\ generate such graphs
+automatically from a system model~\cite{sheyner2002graphs}, and MulVAL
+derives security consequences from configuration facts with logic
+rules~\cite{ou2005mulval}. An edge in these graphs is a relation
+defined by the security model, which lets an analyst compare alternative
+routes and find the conditions several routes depend on. What the graph
+covers is bounded by the supplied facts and rules.
 
-This perspective separates two defender questions. The first asks
-which paths are possible under the known configuration. The second
-asks which concrete action is likely to happen next, given the
-subset of an execution that has become visible. A feasible path is
-valuable for the former question even when it has never occurred.
-The latter question requires probabilities and a way to score them
-against observed behavior. There may be several feasible responses
-to the same preceding action, and knowledge of the possible responses
-alone gives no evidence about which one the current actor will take.
+These graphs answer the question of which paths are possible under a
+known configuration. PROPHET asks a different one: given the part of an
+execution that has become visible, how probable is each concrete next
+action? A feasible path is informative for the first question even if
+it never occurs, while the second requires probabilities that can be
+scored against what the actor actually did; several feasible responses
+to the same preceding action carry no information about which one this
+actor will take. B\u{a}b\u{a}lau et al.\ move attack graphs toward the second
+question by building them from intrusion-detection alerts and using
+them to forecast attacker actions~\cite{babalau2024forecasting}.
 
-The graph information used in PROPHET is narrower than a
-configuration-level attack graph. A link associates records with
-a common observed target or with a corresponding process start.
-These links describe evidence already present in the prefix.
-They carry no claim that one process caused another or that the
-host satisfies every precondition for a later operation. This
-narrower relation is useful when the operation is visible but its
-outcome could be confused with an outcome from another target.
-Membership is recovered independently at each decision boundary,
-so a relation requiring a later-received record cannot contribute
-to the earlier forecast. The membership exchange control in
-Section~\ref{sec:membership} tests whether the identity of those
-links matters beyond the number and size of the groups.
+\section{Forecasting attacker actions and security events}
+\label{sec:related-forecasting}
 
-\section{Windows audit evidence and observation time}
+Learned forecasters work from observed event streams rather than from a
+configuration model. Tiresias trains a recurrent model on histories of
+security events from intrusion-prevention telemetry and predicts the
+next event~\cite{shen2018tiresias}. DeepCASE builds a context for each
+security event from the events preceding it and uses attention over
+that context to group events for analyst triage~\cite{vanede2022deepcase}.
+In both, inputs and outputs are events at the granularity of the
+monitored stream. Our outputs are instead semantic attacker actions at a
+known boundary, and the records arriving before that action can include
+the termination of a previous operation and unrelated benign work.
 
-The Windows Security log records process creation and termination
-as events 4688 and 4689~\cite{ms4688,ms4689}; Chapter~\ref{ch:task}
-describes the fields used here. Command paths can help associate
-operations with a file target, and a linked termination supplies an
-outcome for its own process. A nonzero status is interpreted relative to the operation
-that produced it. The marker and search processes in
-Section~\ref{sec:recorded-case}, for example, have separate
-outcomes even when their commands refer to the same target.
-In an administrative setting, similar commands can appear during
-routine work. Their presence gives context for the forecast, not
-a standalone attribution of malicious intent.
+A second group forecasts at the level of techniques or graphs.
+CL-AP$^{2}$ builds a time-aware attack knowledge graph, portrays past
+behavior by tactic, and estimates a trajectory from which it derives the
+adversary's next technique~\cite{liu2024clap2}. EFI extracts attack-scene
+graphs from threat intelligence reports, matches them against endpoint
+provenance, and forecasts the next interactions with a technique-level
+interpretation~\cite{zhu2024efi}. BiTA combines bidirectional GRU
+aggregation with a Transformer in a temporal graph network to predict
+future network alerts~\cite{nayeri2026bita}. Their outputs are a
+technique, an interaction graph, or an alert, whereas ours is a single
+normalized distribution over 18 action categories.
 
-Collection separates the time an event occurs on the host from the
-time the predictor can access its record (Figure~\ref{fig:cutoff}).
-A reconstruction that sorts retrospectively by host event time can
-expose a result that the collector received only after the prediction
-request, whereas a replay based on receipt time withholds it. When
-comparing delivery schedules, the same execution can therefore yield
-several valid inputs for the same decision and label. Keeping these
-views together in an execution-level split avoids treating alternate
-views of one run as independent evidence about generalization.
+Provenance-based detectors share the host-level evidence but not the
+forecasting goal. KAIROS detects intrusions in whole-system provenance
+graphs and reconstructs the activity relevant to an
+investigation~\cite{cheng2024kairos}, and ORTHRUS detects and attributes
+attacks at the level of provenance nodes~\cite{jiang2025orthrus}. Their
+outputs concern behavior that has already been observed. Chapter~\ref{ch:generality}
+runs adaptations of ORTHRUS, BiTA, and CL-AP$^{2}$ on our inputs as a
+reference point only; EFI is not adapted. In the versions of the
+systems in this section that we consulted, we did not find results
+reported across random seeds or under benign workloads absent from
+training. This statement is limited to those versions and is not a
+claim that such evaluations do not exist elsewhere.
+% 근거: RECORD:477, 480. 각 원문 판본에서 seed 변동 보고 여부를 사람이
+% 다시 확인해 주세요(표 tab:related-tasks 마지막 열과 같은 범위).
 
-A boundary therefore carries two separate uncertainties: whether a
-previous outcome is already observable, since a received start without
-a received termination leaves the result unknown, and whether the
-outcome can be linked to the relevant target, since a received
-termination may lack a uniquely compatible start in the available
-prefix. Chapter~\ref{ch:task} specifies how the evidence and labels
-handle both cases.
+\section{Sequence models for logs}
+\label{sec:related-sequence}
 
-\section{Evidence granularity and forecasting baselines}
+Our inputs are Windows process creation and termination records, Security
+events 4688 and 4689~\cite{ms4688, ms4689}, read only as they become
+available at the receipt boundary defined in Chapter~\ref{ch:task}
+(Figure~\ref{fig:cutoff}). Sequence models for system logs are the
+closest general architectures for such input. DeepLog trains an LSTM
+\cite{hochreiter1997long} on sequences of normal log keys and flags an entry as
+anomalous when it falls outside the predicted next
+keys~\cite{du2017deeplog}. LogBERT replaces the recurrent model with a
+Transformer encoder~\cite{vaswani2017attention} trained by self-supervised
+objectives on log sequences~\cite{guo2021logbert}. The gated recurrent unit
+(GRU)~\cite{cho2014gru} is the simpler recurrent cell that our baseline
+predictor uses at the event level (Chapter~\ref{ch:method}).
 
-At each prediction boundary, a process record, its target, and its
-semantic action answer different questions. The record says what
-Windows audited. Its target identifies an object that may recur
-across different processes. The semantic action is the unit used
-to score the forecast. The same type of process creation record
-can accompany several action categories, and a single category
-can recur for several targets. The experiment in
-Section~\ref{sec:recorded-case} shows why both distinctions matter:
-the same target is associated with multiple processes, and an exit
-status on one process carries a different meaning from an exit
-status on another. The target identifier groups evidence, while
-the classifier still outputs an action category.
+Chapter~\ref{ch:generality} uses three encoders drawn from this
+family: an LSTM encoder (DeepLog-style), a Transformer encoder
+(LogBERT-style), and a plain GRU. These are adaptations of the encoders
+to our supervised next-action task, not reproductions of DeepLog or
+LogBERT. They do not use the anomaly-detection objectives or
+pretraining of the original systems; LogitNorm, input-gradient
+regularization, and the relational residual of our baseline are
+removed; and their settings were chosen by validation inside the FIT
+set only.
+% 근거: RECORD:281, 478.
 
-A prior estimated from training labels is a useful low-information
-reference: it places the same distribution at every boundary and can
-perform well when the labels are concentrated. A history lookup is a
-stronger reference when training and evaluation share repeated short
-patterns, for example the sequence of observed operation hints and
-whether the most recent operation has a received termination. Its
-reliability, however, depends on how many training executions support
-each key, and routine processes can produce a new key even when the
-relevant part of the source procedure is unchanged. The frequency
-baseline in Chapter~\ref{ch:method} tests this issue directly, with
-the training prior as its fallback.
+\section{Underspecification and model agreement}
+\label{sec:related-underspec}
 
-A recurrent predictor can learn soft matches between prefixes
-and can use which records arrived recently. In a procedure with
-several similar targets, recency may point to an outcome from an
-unrelated task. A target-aware predictor can use a relation that
-links an older outcome to a newly observed operation on the same
-object. It still depends on the evidence being present, and its
-performance must be tested when several objects and normal
-workloads are visible together. These cases motivate the new-run
-evaluation, the unseen-name evaluation, and the membership exchange
-control. Each comparison changes a different aspect of the
-inputs or model and has its own population of evaluated runs.
+D'Amour et al.\ describe underspecification: a training pipeline can
+return many predictors with equivalent held-in performance that behave
+differently under deployment conditions, and the pipeline does not
+choose among them~\cite{damour2020underspecification}. Their work
+establishes and documents the phenomenon across domains. We measure it
+on next attacker action prediction and then try to reduce it. Baek et
+al.\ observe that, across models, agreement on in-distribution data and
+agreement on shifted data are linearly related in the same way as
+accuracy, which allows performance under shift to be estimated from
+unlabeled data~\cite{baek2022agreement}. That line of work uses agreement to
+estimate performance; we use agreement as a training signal, letting a
+student follow the consensus of several models on unlabeled environment
+inputs. A link between agreement and performance should not be assumed
+in our setting either: selecting seeds by agreement did not reproduce on
+ADS-24, where the correlation was $+0.127$ ($p=0.503$;
+Chapter~\ref{ch:ads24}).
+% 근거: RECORD:405, 467--468.
 
-\section{Sequence models for logs and security events}
+\section{Distillation, ensembles, and unlabeled adaptation}
+\label{sec:related-distillation}
 
-DeepLog learns patterns in normal execution from sequences of log
-entries and treats deviations from expected next entries as evidence
-of an anomaly~\cite{du2017deeplog}. It illustrates how the next item
-in a log can serve as a learning signal for monitoring. Its log
-prediction target also highlights the gap between an entry and an
-action. One real operation may generate a start, termination, and
-other records. Meanwhile, unrelated work may generate the next
-record the collector sees. Correctly predicting that record does
-not imply that the model correctly anticipates the next action of
-interest.
+Knowledge distillation trains a student to match the softened output
+distribution of a teacher or of an ensemble~\cite{hinton2015distilling}.
+Deep ensembles average the predictions of independently trained
+networks and give better-calibrated predictive uncertainty than a single
+network~\cite{lakshminarayanan2016simple}, at a cost that grows with the
+number of members. Ensemble distribution distillation compresses an
+ensemble into a single model that represents not only the mean
+prediction but also the spread among members~\cite{malinin2019ensemble}. The
+method in Chapter~\ref{ch:method} uses the simplest of these
+ingredients: the arithmetic mean of selected teachers' probabilities
+as the target, and a student with the teachers' architecture.
 
-Tiresias applies a recurrent model to forecast security events from
-intrusion prevention observations~\cite{shen2018tiresias}. Tiresias
-is a closer comparison than DeepLog because its forecast is itself the
-security output rather than a monitoring signal. Its inputs and
-targets, however, are security events at the granularity of the
-observed stream. In PROPHET, observations are Windows process records,
-and the output is the semantic category of the next attacker action
-at a known request boundary. An end record for a previous operation
-and a new event from routine work may both arrive before the next
-attacker action starts. The EVENT GRU baseline in
-Chapter~\ref{ch:method} measures what a recurrent model can learn from
-those same records in receipt order.
+The comparison methods in Chapter~\ref{ch:generality} come from work
+on stabilizing a single model or adapting it without labels.
+Pseudo-labeling trains on the model's own most confident predictions
+for unlabeled data~\cite{tmp_lee}, and entropy minimization penalizes
+uncertain predictions on unlabeled inputs~\cite{tmp_grandvalet}.
+Stochastic weight averaging (SWA) averages weights along one training
+trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits with
+one parameter fitted on held-out data~\cite{guo2017calibration}. In security, Kan
+et al.\ study adapting malware detectors to drift without labels,
+where self-training on pseudo-labels can reinforce the model's own
+errors~\cite{tmp_kan}. The distillation and adaptation work cited here
+reports its gains as average performance on the target data. We seal
+the seed standard deviation under unseen conditions as a primary
+criterion, alongside the mean and the preservation of seen-condition
+performance (Chapter~\ref{ch:evaluation}).
+% 근거: RECORD:470--475.
+% TODO(사람): 온도 보정과 확률 앙상블의 결과를 9.2절에 쓸지는 개요 질문 A1의
+% 답에 따른다. 쓰지 않으면 이 문단의 temperature scaling 문장은 9.2절 기준선의
+% 출처가 아니라 배경 설명으로만 남는다.
 
-DeepCASE builds temporal context for the analysis of observed
-security events~\cite{vanede2022deepcase}. It encodes a sequence,
-then uses attention to identify parts of the sequence that inform
-predictions and downstream contextual analysis. This motivates a
-comparison in which the predictor can revisit individual events
-instead of compressing every decision into one recurrent state.
-In PROPHET, the flat history attention comparator attends over all
-received events as a single pool, whereas the target history model
-and relation attention organize the same events by their observed
-target relationships. Comparing these readouts shows whether a
-flexible sequence readout suffices on this task or whether target
-membership adds useful structure. The membership exchange control
-asks a narrower question: it exchanges the associations while
-preserving the group sizes.
+\section{Decomposition of ensemble log loss}
+\label{sec:related-decomposition}
 
-\section{Graph-based detection, attribution, and technique forecasting}
+For the logarithmic loss, the natural way to combine probabilistic
+predictors is the logarithmic opinion pool, the normalized geometric
+mean of their distributions. Heskes showed that the log loss of such a
+pool equals the average loss of its members minus an ambiguity term, the
+average Kullback--Leibler divergence from the pool to the
+members~\cite{heskes1997selecting}, and Gruber and Buettner place the same term
+as the variance component in a bias--variance decomposition for proper
+scores~\cite{gruber2022uncertainty}. Chapter~\ref{ch:decomposition} applies this
+identity to the seeds of one configuration: mean seed loss splits
+exactly into the loss of the log-pooled consensus and a disagreement
+term $V$ that needs no labels. The identity is theirs; our use of it as
+an unlabeled measure of instability in the deployment environment is a
+post hoc analysis, introduced after the primary experiments.
+% 근거: RECORD:308--316, 334, 469.
 
-Whole-system provenance represents relationships among processes,
-files, and other system objects. KAIROS uses provenance for
-intrusion detection and investigation, combining temporal graph
-modeling with reconstruction of the activity relevant to an
-investigation~\cite{cheng2024kairos}. ORTHRUS focuses on detection
-and attribution at the level of provenance nodes, using a graph
-encoder and learning from observed edge types~\cite{jiang2025orthrus}.
-These systems show that host events become easier to interpret
-when read together with their relationships, but their principal
-outputs identify or explain suspicious behavior that has already
-been observed. In PROPHET, the analyst-facing output is a
-distribution over a future, as-yet-unobserved action. The
-ORTHRUS-inspired comparator in Chapter~\ref{ch:results} applies an
-adapted encoder to the same Windows prefixes and action output as
-the other predictors, so its scores describe that adaptation rather
-than the original system.
+\section{Summary}
+\label{sec:related-summary}
 
-CL-AP$^{2}$ addresses the related task of predicting an adversary's
-next technique~\cite{liu2024clap2}. It builds a time-aware attack
-knowledge graph, uses a tactic-based portrayal of past behavior,
-and estimates a likely trajectory before deriving the next
-technique. Its attack portrait provides an abstraction across
-related observations. PROPHET works at a narrower decision scale:
-an observed file operation can carry information through its
-specific result and target, even when the past and next operations
-could share an ATT\&CK tactic. The evaluation adapts the prediction
-stage of CL-AP$^{2}$ to this task, and the adapted predictor uses the
-same inputs and labels as the other comparators.
-
-Endpoint Forecasting and Interpreting (EFI) brings forecasts and
-provenance together~\cite{zhu2024efi}. Its pipeline extracts
-attack-scene graphs from threat intelligence reports, relates
-available endpoint evidence to graph forecasting, and interprets
-the forecast at the technique level. It illustrates the value of
-connecting low-level observations to an analyst-facing forecast.
-Unlike PROPHET, it forecasts graph structure, so entities and their
-interactions can be part of the predicted output. The output in
-this thesis is a single normalized distribution over semantic
-action categories, and object links serve only as evidence for that
-prediction. EFI is not adapted as an experimental baseline; the
-graph baselines are the task adaptations described above.
-
-This difference also affects evaluation. Graph forecasts can
-be scored by whether the predicted entities and interactions
-match what is observed later. Action forecasts can be scored
-at the known decision even when the exact downstream object
-graph is outside scope. A top-ranked action measures whether the
-model made the right first choice. A probabilistic loss also
-reflects how much support the forecast gave to the action that
-occurred. The thesis reports both for the primary comparison
-and uses execution-weighted loss when comparing repeated rows
-from several decisions within the same run.
-
-BiTA uses recurrent aggregation and a Transformer in a temporal
-graph network for forecasting network alerts~\cite{nayeri2026bita}.
-It provides a closer structural comparison for the question of
-how to summarize histories within a group and combine signals
-across groups. The thesis adaptation operates on observed target
-histories in the received Windows prefix. Bidirectional
-computation inside a fully received prefix can use both directions
-without drawing on later receipts. Conversely, putting a record
-that arrived after the prediction boundary into the prefix would
-violate the receipt boundary regardless of the direction of the
-encoder. PROPHET's event-wise history experiment addresses a
-different design choice: whether the context attached to each
-event should be the recurrent state at that event or the final
-state of the received prefix.
-
-\section{Summary of comparison choices}
-
-Table~\ref{tab:related-tasks} distinguishes the questions behind the
-main families above. Because data sources, output granularity, and
-access to context differ across the original studies, their published
-scores address different tasks. Within this thesis, the controlled
-comparisons share the same labels and receipt boundary. The EVENT GRU
-and flat history attention baselines establish what can be learned
-from order and flexible readout. The membership exchange control
-holds the shape of the target memory fixed and tests the value of
-the observed memberships. The history-placement
-comparison tests how the target-aware system reads earlier context
-when normal work is interleaved. Together, these comparisons
-separate the contributions of the information given to the model
-and the way the model summarizes that information.
+Table~\ref{tab:related-tasks} lists the evidence and output of each
+work discussed above and whether variation across random seeds is
+reported in the version we consulted.
 
 \begin{table}[htbp]
 \centering
-\caption{Observations and outputs in related security tasks.}
+\small
+\caption{Evidence, outputs, and reported seed variation in related work.
+The last column covers only the versions of the papers consulted for this
+thesis.}
 \label{tab:related-tasks}
-\begin{tabularx}{\textwidth}{@{}p{0.24\textwidth}XX@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.20\textwidth}XXp{0.20\textwidth}@{}}
 \toprule
-Work & Evidence or representation & Original output \\
+Work & Evidence & Original output & Seed variation reported \\
 \midrule
-Sheyner et al.; MulVAL & System models or configuration facts and rules
- & Possible paths or derived security consequences \\
-DeepLog; Tiresias & System log histories or security event histories
- & Expected log entries for anomaly detection or future security events \\
-DeepCASE & Sequences of observed security events
- & Event context for security analysis \\
-KAIROS; ORTHRUS & Whole-system provenance graphs
- & Detection, reconstruction, or node-level attribution \\
-CL-AP$^{2}$ & Time-aware attack knowledge and a tactic-level portrait
- & Next attack technique \\
-EFI & Threat intelligence and observed endpoint provenance
- & Forecast interaction graph with technique-level interpretation \\
-BiTA & Temporal graph of network alert activity
- & Future alerts \\
-PROPHET & Windows audit records received by a known boundary
- & Distribution over the category of the next attacker action \\
+Sheyner et al.~\cite{sheyner2002graphs}
+ & System model of hosts, vulnerabilities, and attacker
+ & Attack graph of possible paths
+ & Not applicable (no trained model) \\
+MulVAL~\cite{ou2005mulval}
+ & Configuration facts and logic rules
+ & Derived security consequences
+ & Not applicable (no trained model) \\
+B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting}
+ & Intrusion-detection alerts, as alert-driven attack graphs
+ & Forecast of attacker actions
+ & Not stated in the version consulted \\
+Tiresias~\cite{shen2018tiresias}
+ & Security event histories from intrusion-prevention telemetry
+ & Next security event
+ & Not stated in the version consulted \\
+DeepCASE~\cite{vanede2022deepcase}
+ & Sequences of security events
+ & Event contexts grouped for analyst triage
+ & Not stated in the version consulted \\
+CL-AP$^{2}$~\cite{liu2024clap2}
+ & Time-aware attack knowledge graph, tactic-level portrait
+ & Next attack technique
+ & Not stated in the version consulted \\
+EFI~\cite{zhu2024efi}
+ & Threat intelligence reports and endpoint provenance
+ & Forecast interaction graph with technique-level interpretation
+ & Not stated in the version consulted \\
+BiTA~\cite{nayeri2026bita}
+ & Temporal graph of network alerts
+ & Future alerts
+ & Not stated in the version consulted \\
+KAIROS~\cite{cheng2024kairos}
+ & Whole-system provenance graph
+ & Intrusion detection and attack reconstruction
+ & Not stated in the version consulted \\
+ORTHRUS~\cite{jiang2025orthrus}
+ & Whole-system provenance graph
+ & Node-level detection and attribution
+ & Not stated in the version consulted \\
+DeepLog~\cite{du2017deeplog}
+ & Sequences of system log keys
+ & Anomaly flag from next-key prediction
+ & Not stated in the version consulted \\
+LogBERT~\cite{guo2021logbert}
+ & Sequences of system log keys
+ & Anomaly score from self-supervised training
+ & Not stated in the version consulted \\
+PROPHET (this thesis)
+ & Windows audit records received before a known boundary
+ & Distribution over 18 next attacker actions
+ & 30 seeds per configuration; seed standard deviation is a sealed criterion \\
 \bottomrule
 \end{tabularx}
 \end{table}
+% TODO(사람): 마지막 열은 연구 기록(RECORD:477, 480)과 각 문헌의 초록 수준에서
+% 정리했다. 원문 판본에서 seed 반복 보고 여부를 확인해 주세요. 보고가 있으면
+% 해당 칸을 원문 표현으로 바꿔야 한다.
