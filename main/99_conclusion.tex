@@ -1,24 +1,94 @@
-\chapter{Conclusion}
+\chapter{Conclusion and Future Work}
+\label{ch:conclusion}
+% 개요 12장에 따라 다시 썼다. 옛 원고의 결론(대상 소속 모델링, 16실행 개발 집합과
+% 127실행 재사용 집합의 소속 교환 대조, benign interleaving에서 event-wise history의
+% 조건)은 옛 관계 모델 줄기의 요약이다. 그 결과는 answers 1에 따라 부록 B
+% (B.3, B.4)로 옮기므로 이 장에서는 뺐다. 숫자와 인용은 바꾸지 않았고, 이 장에
+% 다시 쓰지도 않았다.
 
-This thesis studied whether Windows audit events available at a
-decision boundary can support prediction of the next attacker
-action. Modeling which received events concern the same target
-improved execution-weighted NLL and top-1 accuracy on controlled held
-configurations, and the benefit persisted when the number and names
-of the targets changed within the same procedure family. In the
-membership exchange control, exchanging events between targets while
-preserving group sizes and START--END pairs increased the loss of the
-target history model on both the 16-run development set and the
-127-run reused set.
+PROPHET forecasts the next of 18 attacker actions from the Windows
+execution and audit records received before a cutoff. The thesis
+followed one line of argument through four steps. It first measured
+that seeds of REL\_GLOBAL trained on the same 603 FIT runs disagree
+widely once the benign worker~C appears, and that their scores on the
+training conditions do not say which seed will hold up. It then traced
+much of the in-house disagreement to a single file decision, whether to
+COPY or to keep searching, which the seeds resolve from the observed
+result for the current target in different ways. From that diagnosis
+it moved to a remedy that leaves the deployed model unchanged: a
+student of the same architecture follows the averaged probabilities of
+five selected teachers on unlabeled environment inputs. Finally, the
+remedy was tested against criteria sealed before training. In the v3
+round, with 30 new seeds and 157 new runs, mean NLL on
+\texttt{A+C FLAT} fell from 0.0731 to 0.0276 and all three primary
+criteria passed. On ADS-24 the seed standard deviation fell from 0.163
+to 0.025, and the three encoder adaptations passed their criteria on
+both datasets.
+% 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
+% 166, 170 (v3), 219 (ADS-24 SD), 294 (세 인코더). 숫자는 개요대로 세 개만 다시 썼다.
+% ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
+% (8, 9장에서 밝힘). 여기서는 판정 이름만 쓰고 지위를 다시 설명하지 않았다.
 
-Benign interleaving revealed more specific conditions for the
-improvement. Exposing the recurrent history at each event helped
-when the B and C workloads ran together, but with workload C alone the
-final-state variant performed better in the C-fold. The results apply to
-controlled procedures with known decision boundaries and to target
-relationships that can be recovered from the available audit logs.
+These results have firm edges. CD narrows the spread across seeds; it
+does not undo the cost of moving to an unseen environment. On ADS-24
+most distilled models still scored worse than the majority-class
+baseline at an NLL of 1.830, and only the Transformer students cleared
+it. Nor does every seed gain: in each architecture--dataset combination
+between 20 and 30 of the 30 seeds improved, and seeds that had been
+lucky were pulled down to the level of the consensus. The diagnosis
+holds for one model in one lab, and the agreement ranking used to pick
+teachers did not carry over to ADS-24. What a defender gets from CD is
+a forecaster whose quality depends less on the draw of the seed, at the
+price of training 30 baselines before the student. It is not a
+forecaster that has learned more about the new environment.
+% 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
+% 297 (20~30/30, 운 좋은 seed 하락), 405 (합의도 seed 선택 ADS-24 미재현),
+% 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
 
-The results motivate forecasting from both receipt order and
-observable target membership. They identify the evidence boundary,
-matched comparisons and workload-specific reporting needed to
-judge how far such a forecast can be trusted.
+\section{Future Work}
+\label{sec:future}
+
+One bundle of closing checks was planned before this thesis was written
+and is not reported here; whatever it shows will be added to the
+limitations rather than covered by new experiments. Three of the checks
+require training. The first varies the teacher set, using five teachers
+chosen at random, two teachers, and the full set of 30, to learn whether
+training 30 baselines and ranking them by agreement is worth its cost.
+The second trains students on 25\% and 50\% of the unlabeled
+environment inputs to estimate how much new-environment data the KL
+term needs. The third repeats the comparison with other single-model
+methods on a Transformer encoder, so that the comparison does not rest
+on one architecture. The remaining checks reuse frozen models. They run
+inference on the 119 ADS-24 runs that no earlier stage has used, which
+would give the first ADS-24 result on runs no one has looked at, and on
+a fresh in-house collection that completes the method comparison
+stopped at 110 runs. They also recompute the intervals with seeds
+resampled along with runs, so that a verdict no longer speaks only for
+these 30 seeds, and summarize temperature scaling and probability
+ensembles as the strongest simple competitors.
+% 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
+% 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
+% TODO(사람): 개요 질문 A1에서 온도 보정·확률 앙상블 요약을 본문(11장 또는 9장)에
+% 넣기로 하면 이 문단의 마지막 항목("and summarize temperature scaling ...")을 뺀다.
+% 지금은 A1의 답이 없어 남겨 두었다.
+
+A separate line of work concerns the mechanism. The account of why the
+seeds diverge was built for REL\_GLOBAL in the in-house lab, and CD
+passed on ADS-24 and on the general encoders without a matching
+diagnosis there. Whether those models also split on one decision, and
+whether their disagreement sits where the in-house lookup sits, is
+open. Extending the diagnosis to ADS-24 and to the general encoders
+would show whether the step from diagnosis to remedy holds outside the
+setting in which it was found.
+% 근거: RECORD:430--437, 6장 첫 문단 ("We did not study the mechanism separately on
+% ADS-24 or for the encoders"), 11장 sec:disc-mechanism. 개요 12장 마지막 항목.
+
+% ---------------------------------------------------------------
+% 사람에게 물을 것 (12장)
+% 1. 개요 질문 A1: 온도 보정·확률 앙상블 요약을 본문에 넣는지. 넣으면 Future Work
+%    첫 문단의 마지막 항목을 지운다.
+% 2. 옛 결론의 문장(대상 소속, 소속 교환 16/127실행, benign interleaving 조건)을
+%    부록 B 첫머리 요약으로 옮길지, 그냥 버릴지.
+% 3. 장 제목을 "Conclusion and Future Work"로 바꿨다. 양식상 "Conclusion"만 써야
+%    하면 알려 주세요. label은 서론이 참조하는 ch:conclusion을 그대로 쓴다.
+% ---------------------------------------------------------------
