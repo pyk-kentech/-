@@ -2,11 +2,10 @@
 \label{app:repro}
 % 새 부록(방법 리뷰 P1-5, P1-6, P3-2). 근거는 각 절의 주석.
 
-This appendix collects the settings, selection grids, eligibility
-outcomes, and resampling details that the main chapters refer to. It
-records what the stored contracts and reports state; where a detail is
-not documented there, the gap is marked. It is not a complete
-reproduction package. The field layout of the in-house event
+Settings, selection grids, eligibility outcomes, and resampling details
+are given below as the stored contracts and reports state them; where a
+detail is not documented there, the gap is marked. What follows is not
+a complete reproduction package. The field layout of the in-house event
 representation, the treatment of UNKNOWN records, the exact relational
 residual and output head, the event selection of
 $\mathcal{R}_{\mathrm{GLOBAL}}$, the sampling of FIT occurrences, the
@@ -19,14 +18,16 @@ eligibility seals that the stored reports cite (for example
 \texttt{ELIGIBILITY\_SEAL.json}) are not part of the archive available
 to us. The in-house model and the v3 round can therefore be neither
 reimplemented nor rescored independently from this thesis and that
-archive; the reported values are those of the stored reports.
+archive; the reported values are those of the stored reports, and the
+v3 verdict, although sealed according to those reports, has not been
+audited independently.
 % TODO(사람): 코드 commit/hash, 실행 환경, split manifest, 계약별 봉인 hash, seed 목록을
 % 독자가 얻을 수 있는 위치(저장소 URL 또는 "요청 시 제공")를 알려 주세요. 지어내지 않았다.
 
 \section{Training settings and seeds}
 \label{sec:repro-training}
 
-The in-house REL\_GLOBAL and every in-house student are trained on the
+Every in-house fit, of REL\_GLOBAL and of the students alike, uses the
 603 runs of the C-fold FIT set with execution-weighted 18-way
 cross-entropy, the input-gradient penalty $\mathcal{R}_{\mathrm{GLOBAL}}$
 with coefficient 0.1, and LogitNorm with $\tau=0.1$. Each fit runs
@@ -41,7 +42,7 @@ generality study and the method comparison use the seeds 4500001 to
 4500030 for every group. In the FIT-input distillation group of the
 method comparison, the one row per occurrence that receives the KL term
 is drawn in advance with PCG64 seeded by 2026112305 plus the training
-seed. Weight averaging averages the weights at updates 1,010, 1,122,
+seed. SWA averages the weights at updates 1,010, 1,122,
 1,234, and 1,346 of the cross-entropy trajectory.
 % 근거: PAPER_DEFINITIONS.md §2 (C-fold 603 FIT, 404-only 전처리, 1,346×32, 같은 초기
 % tensor·FIT trace, AdamW .002→.0002 cosine, wd .01, clip 2, 마지막 checkpoint; 상위 5
@@ -57,8 +58,8 @@ seed. Weight averaging averages the weights at updates 1,010, 1,122,
 \section{General encoders}
 \label{sec:repro-encoders}
 
-The three general encoders read the same receipt-bounded prefix as
-REL\_GLOBAL, with the 48-dimensional event representation and the age
+Like REL\_GLOBAL, the three general encoders read the receipt-bounded
+prefix, with the 48-dimensional event representation and the age
 and receipt features, and map an empty prefix to a learned common
 state. The LSTM encoder is one unidirectional layer whose last state
 feeds a softmax head. The Transformer encoder has two layers and four
@@ -79,7 +80,12 @@ scenario on ADS-24, and 483 and 120 runs split by a hash of the run
 identifier family in-house. Ties would have gone to the smaller width
 and then the lower learning rate. Table~\ref{tab:repro-encoders} lists
 the selected settings; the method comparison reuses those of the plain
-GRU.
+GRU. Within an encoder and dataset, the base model and the CD student
+share the selected setting, so each contrast of
+Chapter~\ref{ch:generality} compares two models of the same setting.
+Comparisons between encoders are less secure: each setting was chosen
+with one pilot seed, the selection was not repeated across seeds, and
+the absolute ranking of the encoders is conditional on that choice.
 
 \begin{table}[htbp]
 \centering
@@ -207,7 +213,7 @@ runs).}
 \small
 \begin{tabular}{@{}llrrrr@{}}
 \toprule
-& & \multicolumn{2}{c}{Baseline model} & \multicolumn{2}{c}{CD student} \\
+& & \multicolumn{2}{c}{Base model} & \multicolumn{2}{c}{CD student} \\
 \cmidrule(lr){3-4}\cmidrule(l){5-6}
 Encoder & Layout & All eligible & Complete & All eligible & Complete \\
 \midrule

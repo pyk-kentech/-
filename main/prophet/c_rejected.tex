@@ -3,11 +3,12 @@
 % 개요 14장(부록 C). label app:rejected는 07_discussion.tex, 09_generality.tex의 참조에
 % 맞췄다. 근거: RECORD:360--415. 반올림은 본문 규칙(셋째 자리)을 따랐다.
 
-This appendix records what was tried and did not hold. Together with
-the criteria sealed before scoring, it is part of the evidence on which
-the main results rest: a reader can check which alternatives were tested
-and closed before the method was settled, and with what stored
-verdict. The
+What was tried and did not hold is part of the evidence on which the
+main results rest, together with the criteria sealed before scoring: a
+reader can check which alternatives were tested and closed before the
+method was settled. Each entry gives its \emph{stored verdict}, the
+outcome written in the project's report of that run, which we copy
+rather than recompute. The
 ledger is an extract. It keeps only the entries that bear directly on
 the line of work from REL\_GLOBAL to CD reported in this thesis, and it
 is not a complete record of every experiment in the PROPHET project.
@@ -184,16 +185,18 @@ archive supplied with this thesis.}
 13 & Extension of the 10-seed environment distillation to 30 seeds
   & Extension gate failed; not run \\
 14 & KD\_ENV\_TOP5 of v2 as a full method candidate
-  & A+C stabilization confirmed; preservation on
+  & A+C stabilization held on new runs; preservation on
     \texttt{ORIGINAL\_18} undecided; not adopted \\
 15 & Separate effect of the original-procedure inputs in KD\_ALL (v3)
   & KD\_ALL $-$ KD\_ENV\_TOP5 interval $[-0.120, +0.006]$ contained zero;
     not shown \\
 \midrule
 16 & Confidence-conditioned consensus target (extension candidate~A)
-  & ADS-24: 1.779, below the teacher mean 1.945 and the prior 1.818;
-    in-house \texttt{A+C FLAT}: 0.142, worse than the teacher mean
-    0.042; dropped as a general candidate \\
+  & ADS-24: 1.779, below the probability mean of all 30 teachers
+    (1.945) and below the FIT tactic frequencies with each boundary
+    weighted equally (1.818), unlike the run-weighted FIT prior of
+    Chapter~\ref{ch:ads24}; in-house \texttt{A+C FLAT}: 0.142, worse than the 30-teacher
+    mean 0.042; dropped as a general candidate \\
 17 & Projection onto a representation shared by the seeds (extension
      candidate~B)
   & With $k=4$, unseen-condition seed standard deviation $0.163 \to 0.040$, but
@@ -211,6 +214,11 @@ archive supplied with this thesis.}
 \end{tabularx}
 \end{table}
 % 15행 구간의 여섯 자리 원값 [−.120492, +.006306]은 부록 B.6에 있다.
+% 16행(4회차 지시 4번): 1.945는 30개 REL_GLOBAL-ADS seed의 확률 평균(8장의 1.945와 같은
+% 값)이고, 1.818은 후보 A가 물러나는 사전분포 π = FIT 자연 경계의 행동 빈도(경계 동일
+% 가중)다. 8장의 FIT prior 1.830은 FIT 실행 동일 가중이라 다르다. 상위 5개 교사 평균
+% 2.038은 이 행에서 쓰지 않았다.
+% 출처: ORIGINAL_TEXT/outputs/PROPHET_ENV_CONSENSUS_KD_V3_20261120/METHOD_EXTENSION_PREFLIGHT.md:10, 28.
 % 16행 수치는 30개 교사의 값이다. 상위 5개 교사도 같은 방향이다(ADS-24 2.037885 →
 % 1.784083; A+C FLAT .022769 → .120531).
 
@@ -255,12 +263,4 @@ The general encoders, lacking LogitNorm, would vary less across seeds
 % TODO(사람): "seed 평균을 빠뜨린 해상도 계산"과 "18-way margin"이 무엇의 해상도·
 % margin인지 기록에 설명이 없다. 확인되면 표의 왼쪽 칸을 구체적으로 고치겠다.
 
-% ---------------------------------------------------------------
-% 사람에게 물을 것 (부록 C)
-% 1. C.1 "한 발 늦은 예측"의 행 수, 3대상 대비의 수치(개요 B′표에서 미확인).
-% 2. C.1의 근거 없는 다섯 행(hint 표식, FIT 위치, 마지막 DISCOVERY, parser key,
-%    일반형 원래 과제)의 근거 파일과 가설 내용.
-% 3. C.2 옛 후보 1--10행에 한 줄 정의를 붙일지.
-% 4. C.3 "ρ0 초기화", "해상도 계산", "18-way margin 10.3"이 가리키는 대상.
-% 5. Yang 등 DEED의 서지.
-% ---------------------------------------------------------------
+% 이 부록의 질문은 결론 뒤 "저자 확인 목록"에 모았다.

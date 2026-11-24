@@ -240,10 +240,12 @@ not from the C-fold data, before its first file-processing decision
 names distinguish three synthetic targets. The marker concerns
 \texttt{alpha}, whose earlier payload search returned a nonzero exit
 status, while the marker's own zero exit status belongs to a different
-process. Within the \texttt{alpha} group, the latest received result is
-therefore a success, and the search result comes from an earlier record.
-Grouping the records by target lets a model read the two processes
-together while keeping their results apart. The next recorded action
+process. The most recent exit status received in the \texttt{alpha}
+group is therefore the marker's zero, even though the payload search
+on that target failed; a model that read only the latest status would
+see a success that the search never had. Grouping the records by
+target lets a model read the two processes together while keeping
+their results apart. The next recorded action
 was a synthetic file search. The example illustrates the kind of
 target-result lookup examined in Chapter~\ref{ch:diagnosis}.
 
@@ -266,16 +268,8 @@ Target group & Record ID & Evidence available before the decision \\
 \end{table}
 % 기존 원고의 target-wise GRU 대 relation attention 확률 비교 문장
 % (0.434/0.450/0.481, 0.984/0.483/0.517)은 개요에 따라 부록 B.5로 옮긴다.
-% 부록 B를 쓸 때 그 문장과 함께 "target-wise GRU: [직접 기입]" 자리를 남긴다.
-% 기존 sec:membership 참조는 이 장에서 뺐다(소속 교환 설명은 부록 B에서 한 번만).
-
-% ---------------------------------------------------------------
-% 사람에게 물을 것 (3장)
-% 1. UNKNOWN 상태의 범위: 결속되지 않은 END·대상 미배정 record만인지,
-%    END가 아직 수신되지 않은 START의 결과도 UNKNOWN으로 부르는지.
-% 2. FLAT/NESTED 배치가 C_ONLY, B+C 실행과 FIT 603실행에 어떻게 들어가는지
-%    (표 tab:conditions의 "---" 칸).
-% 3. "IP hint"의 정의: ipconfig 사건에서 만든 입력 표현이 맞는지.
-% 4. THME0064가 속한 3대상 개발 집합이 C-fold FIT로 학습한 모델로 평가된
-%    것인지(6장 기제 예고 문장의 범위 확인).
-% ---------------------------------------------------------------
+% 4회차 지시 9번: 표와 맞지 않던 "latest received result is therefore a success"를
+% 고쳤다. alpha 그룹에서 마지막으로 받은 종료 상태는 marker END(0)이고 payload
+% 검색 END는 nonzero다.
+% 부록 B의 target-wise GRU 확률 비교는 원 파일에서 찾지 못해 TODO로 바꿨다.
+% 이 장의 질문은 결론 뒤 "저자 확인 목록"에 모았다.

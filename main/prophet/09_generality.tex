@@ -26,7 +26,9 @@ contrasts were read on the same runs that selected them. Because the
 selection favored combinations with a large baseline spread, part of
 the later reduction could be regression toward the mean, which this
 design cannot rule out. The ADS-24 results reuse the 35
-environment-evaluation runs scored in Chapter~\ref{ch:ads24}. The three encoders are the
+environment-evaluation runs scored in Chapter~\ref{ch:ads24}.
+
+The three encoders are the
 LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
 adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 baseline seeds of
@@ -66,12 +68,13 @@ more than the preservation runs did.
 
 \begin{table}[htbp]
 \centering
-\caption{Baseline and CD student for the three general encoders
+\caption{Base model and CD student for the three general encoders
 (30 seeds each). In-house values are on \texttt{A+C FLAT} of the new
 PAG1 runs (31 runs, 341 rows); ADS-24 values are on the 35
 environment-evaluation runs (5,639 rows). Both halves are development
 comparisons.
-Each cell gives baseline model $\rightarrow$ CD student; accuracy is
+Each cell gives base model $\rightarrow$ CD student, where the base
+model is the encoder trained with cross-entropy alone; accuracy is
 execution-weighted. The last two rows are the predictors of
 Chapters~\ref{ch:results} and~\ref{ch:ads24} on the same runs, for
 reference (in-house: REL\_GLOBAL $\rightarrow$ KD\_ALL, frozen v3
@@ -125,11 +128,11 @@ preservation, into one family of six encoder--dataset contrasts with
 run had been inspected, these intervals describe the uncertainty of a
 development comparison and do not amount to confirmation. No joint
 family of all 18 contrasts was defined either, so the result is not a
-claim that all 18 hold together at a 5\% familywise level. The closest
-stability result was the ADS-24 Transformer encoder, with a seed
-standard deviation difference of $-0.099$ $[-0.127, -0.075]$; the
-closest mean result was the ADS-24 plain GRU, at $-0.092$
-$[-0.113, -0.071]$. One preservation interval cleared its limit only
+claim that all 18 hold together at a 5\% familywise level. The
+stability interval nearest to zero was that of the ADS-24 Transformer
+encoder, with a seed standard deviation difference of $-0.099$
+$[-0.127, -0.075]$; the mean interval nearest to zero was that of the
+ADS-24 plain GRU, at $-0.092$ $[-0.113, -0.071]$. One preservation interval cleared its limit only
 narrowly, as discussed below.
 % 근거: RECORD:279, 294; ARCH_GENERALITY_STAGE2_REPORT.md "주 판정" (99.1667% 구간:
 % ADS LOGBERT SD −0.099170 [−0.127209, −0.075001]; ADS PLAIN_GRU 평균 −0.091707
@@ -141,9 +144,9 @@ narrowly, as discussed below.
 
 Not every seed improved. Seeds that had been better than the consensus
 of their teachers moved toward it and gave up part of their advantage,
-so the best baseline seed was sometimes better than every student. On
-ADS-24, for instance, two LSTM baseline models scored below the FIT
-prior baseline and none of the LSTM students did, so those two seeds
+so the best base-model seed was sometimes better than every student. On
+ADS-24, for instance, two LSTM base models had lower NLL than the FIT
+prior and none of the LSTM students did, so those two seeds
 were worse after distillation; the best REL\_GLOBAL-ADS seed of
 Chapter~\ref{ch:ads24} was likewise better than every CD seed.
 % TODO(사람): 조합별로 개선된 seed 수(기록 RECORD:297의 "30개 중 20~30개")는 seed별
@@ -162,7 +165,7 @@ them.
 % 위이므로 증류 후 나빠졌다(쌍 비교로 따라 나온다).
 
 On ADS-24, lower spread did not mean a useful absolute level. Only the
-Transformer students beat the FIT prior baseline of 1.830 defined in
+Transformer students beat the FIT prior of 1.830 defined in
 Chapter~\ref{ch:ads24}, 27 of 30 seeds with a mean 0.034 below it. The
 LSTM and plain-GRU students, like REL\_GLOBAL-ADS in
 Chapter~\ref{ch:ads24}, remained above it with every seed, by 0.250 and
@@ -181,9 +184,9 @@ Two in-house details qualify the result for the plain GRU. Its
 preservation interval on \texttt{ORIGINAL\_18} had an upper end of
 $+0.0198$, just below the limit of $+0.020$, and its seed-mean accuracy
 on that condition fell from 84.5\% to 84.0\%. The self-distillation control, in which each seed
-is distilled from its own frozen baseline with the same KL term, scored
+is distilled from its own frozen base model with the same KL term, scored
 1.112 with a seed standard deviation of 0.558 on \texttt{A+C FLAT},
-essentially the baseline values of 1.139 and 0.579. This is the second
+essentially the base-model values of 1.139 and 0.579. This is the second
 dataset, after ADS-24, on which distillation without a consensus left
 the instability in place.
 
@@ -207,23 +210,24 @@ carried forward (Appendix~\ref{app:rejected}).
 % (C-fold FIT603, seed 11/29/47, 동결 checkpoint를 PAG1 적격 실행에 적용;
 % A+C FLAT/NESTED: CL-AP² 0.967384/0.975969, ORTHRUS 0.145795/0.133481,
 % BiTA 0.159013/0.132978; ADS-24 적용판 없음; 원 논문 파이프라인 재현 아님).
-% TODO(사람): 부록 C(c_rejected.tex)의 label을 app:rejected로 가정했습니다.
 
 \section{Comparison with other single-model methods}
 \label{sec:gen-methods}
 
 The second study compares CD with five other ways of training one
-model, all on the plain GRU; with the reused baseline model and
-self-distillation control, it scores eight groups. The in-house runs are again newly collected under
-a sealed contract in the same lab design; the ADS-24 runs are the
-inspected environment-evaluation runs, so that half is a development
-comparison. The contract fixed the contrasts and intervals but no
-pass-or-fail rule (Table~\ref{tab:rounds}, note~c). Stochastic weight
-averaging (SWA) averages the weights of the baseline's own training trajectory
-at updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
-Pseudo-labeling adds a cross-entropy term toward the hard predictions
-of the same seed's frozen baseline on the unlabeled environment
-inputs. Entropy minimization adds the entropy of the
+model, all on the plain GRU; with the reused base model and
+self-distillation control, it scores eight groups. The whole comparison
+is a development comparison. The in-house runs were newly collected
+under a sealed contract in the same lab design, but the contract fixed
+the contrasts and intervals without a pass-or-fail rule
+(Table~\ref{tab:rounds}, note~c), and the ADS-24 runs are the inspected
+environment-evaluation runs. Here the \emph{base model} is the plain
+GRU trained with cross-entropy alone. Stochastic weight averaging (SWA)
+averages the weights of the base model's own training trajectory at
+updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
+The \emph{hard-label control} adds a cross-entropy term toward the
+top-1 predictions of the same seed's frozen base model on the unlabeled
+environment inputs, with no confidence threshold. Entropy minimization adds the entropy of the
 student's own predictions on those inputs~\cite{grandvalet2004semi}.
 FIT-input distillation follows the same five-teacher average as CD but
 on FIT inputs instead of environment inputs. Geometric-pool distillation
@@ -235,51 +239,51 @@ Every method kept the FIT loss,
 the 1,346 updates, the coefficient of 0.25 on the added term, a
 temperature of 1, and 32 added rows per update, and the 30 seeds started
 from the same initial weights. The study trained 300 new models; the
-baseline, CD, and self-distillation groups were reused from
+base-model, CD, and self-distillation groups were reused from
 Section~\ref{sec:gen-arch}. The five comparison methods were thus
 trained in a later run than the checkpoints they are compared with,
 and no cross-entropy control was retrained alongside them, so in-house,
 where retraining the plain GRU on CPU is not deterministic, a contrast
 can include rerun variation as well as the effect of the method. We
-read the comparison as a development comparison under one common,
-untuned protocol and draw no conclusion about the methods beyond it.
+draw no conclusion about the methods beyond this common, untuned
+protocol.
 % 근거: RECORD:338, 452; ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md:3
 % (ADS-24 ON35 = 이미 열람한 실행의 사후 방법 비교, PROPHET = 같은 실험실 설계의
 % 새 실행); METHOD_BASELINES_CONTRACT_SEALED.md:7 (다섯 기준선, 300 fit), :15
 % (1,346 update × 32 FIT occurrence, 같은 초기 tensor), :17 (계수 0.25, 온도 1, 32행),
 % :19--27 (군별 계산; PSEUDO 신뢰도 문턱 없음; FIT_KD 교사 FIT 출력은 in-sample;
 % BASE·KD_ENV·KD_SELF 재사용), :35--37 (판정 규칙 없이 네 통계와 99% 구간).
-% 원 파일 이름 대응: SWA = weight averaging, PSEUDO = pseudo-labeling,
-% ENTROPY = entropy minimization, FIT_KD = FIT-input distillation,
-% GEO_KD = geometric-pool distillation, KD_ENV = CD student.
-% Lee(pseudo-label)의 임시 key(tmp_lee)는 엔진에서 확인되지 않아 지웠다(2장 TODO와 같다).
-% TODO(사람): Lee의 서지를 ref.bib에 넣어 주시면 "environment inputs" 뒤에 인용합니다. Grandvalet·Bengio는 이제 ref.bib의 grandvalet2004semi다. 기하평균 교사의 출처로 개요가
-% 지목한 Ilichev 등(RANLP 2021)은 정확한 제목을 확신할 수 없어 인용을 빼고
-% 2.7절의 로그 의견 풀(Heskes)로 연결했습니다.
-% TODO(사람): 기하평균 교사 증류의 선행 문헌 서지를 알려 주시면 이 자리에 인용하겠습니다.
+% 원 파일 이름 대응: SWA = SWA(부록의 옛 "weight averaging"도 SWA로 통일),
+% PSEUDO = hard-label control, ENTROPY = entropy minimization, FIT_KD = FIT-input
+% distillation, GEO_KD = geometric-pool distillation, BASE = base model, KD_ENV = CD student.
+% 4회차 지시 6번: pseudo-labeling의 출처가 확인되지 않아 선행 방법 이름 대신 이 논문이
+% 실행한 절차("hard-label control")로 썼다.
+% TODO(사람): 기하평균 교사 증류의 선행 문헌 서지(개요가 지목한 Ilichev 등, RANLP 2021).
 
 Under this common protocol, which tuned no method on its own, only the
 two groups that follow a consensus of several models on environment
 inputs produced a very small seed standard deviation on both datasets
 (Table~\ref{tab:gen-methods}). On \texttt{A+C FLAT} the CD student had
 a seed standard deviation of 0.013 and the geometric-pool student
-0.020, while the baseline model and the other five groups stayed
+0.020, while the base model and the other five groups stayed
 between 0.324 and 1.215. On ADS-24 the two consensus groups had 0.026
 and 0.030, against 0.174 to 0.490 for the others. Some of the other
-groups were also below the baseline model as point estimates: entropy
+groups were also below the base model as point estimates: entropy
 minimization at 0.324 against 0.693 in-house, and SWA at 0.681 and
 0.174 against 0.693 and 0.180. We do not test those differences from
-the baseline model here, and the table gives no interval for them. Table~\ref{tab:gen-methods-contrast} gives the paired contrasts.
-In the in-house lab CD had a lower mean NLL than SWA,
-pseudo-labeling, entropy minimization, and FIT-input distillation, with
-every interval above zero. Against geometric-pool distillation the
+the base model here, and the table gives no interval for them.
+
+Table~\ref{tab:gen-methods-contrast} gives the paired contrasts against
+CD. In the in-house lab CD had a lower mean NLL than SWA, the
+hard-label control, entropy minimization, and FIT-input distillation,
+with every interval above zero. Against geometric-pool distillation the
 direction was not resolved: the mean difference was $-0.011$
 $[-0.067, 0.027]$ and the difference in seed standard deviation $0.003$
 $[-0.003, 0.018]$. On ADS-24, CD had a lower mean than all five methods,
 including the geometric pool. Even so, its mean of 2.130 remained above
-the FIT prior baseline of 1.830, and of all 210 models in the
-comparison on ADS-24 only one seed of FIT-input distillation fell below
-that baseline.
+the FIT prior of 1.830, and of all 210 models in the comparison on
+ADS-24 only one seed of FIT-input distillation had lower NLL than the
+FIT prior.
 % 근거: RECORD:340--349, 356; METHOD_BASELINES_REPORT.md:7--8, "주 비교: 단일 기준선
 % − KD_ENV" (ADS24, PROPHET 표), :37 (다수 기준보다 나은 seed: BASE 0, KD_ENV 0,
 % SWA 0, PSEUDO 0, ENTROPY 0, FIT_KD 1, GEO_KD 0; 7군 × 30 = 210), :39, :53.
@@ -293,7 +297,7 @@ that baseline.
 new runs of this comparison (21 runs, 231 rows); ADS-24 columns are the
 35 environment-evaluation runs (5,639 rows), a development comparison.
 The in-house runs differ from those of Table~\ref{tab:gen-arch}, so the
-baseline and CD values of the two tables are not compared with each
+base-model and CD values of the two tables are not compared with each
 other. Self-distillation was not part of the ADS-24 comparison.}
 \label{tab:gen-methods}
 \small
@@ -304,13 +308,13 @@ other. Self-distillation was not part of the ADS-24 comparison.}
 \cmidrule(lr){2-4}\cmidrule(l){5-6}
 Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
 \midrule
-Baseline                      & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
+Base model                    & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
 CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
 Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
 SWA                           & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
 FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
 Self-distillation             & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
-Pseudo-labeling               & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
+Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
 Entropy minimization          & 2.702 & 0.324 & 80.5 (all seeds) & 6.873 & 0.490 \\
 \bottomrule
 \end{tabular}
@@ -329,7 +333,7 @@ score here is the 1:1 average of \texttt{A+C FLAT} and
 Table~\ref{tab:gen-methods}; point estimates use all eligible runs, and
 intervals resample the configurations with both repeats complete. The
 last column states whether the upper end of the method's preservation
-interval against the baseline lies below the limit ($+0.020$ in-house,
+interval against the base model lies below the limit ($+0.020$ in-house,
 $+0.043$ on ADS-24).}
 \label{tab:gen-methods-contrast}
 \small
@@ -339,13 +343,13 @@ Data & Method & \multicolumn{2}{c}{Seed SD difference}
  & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
 \midrule
 In-house & SWA                    & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
-In-house & Pseudo-labeling        & 1.194 & $[1.103, 1.329]$ & 1.789 & $[1.602, 1.973]$ & no \\
+In-house & Hard-label control     & 1.194 & $[1.103, 1.329]$ & 1.789 & $[1.602, 1.973]$ & no \\
 In-house & Entropy minimization   & 0.291 & $[0.207, 0.444]$ & 2.374 & $[1.703, 3.408]$ & no \\
 In-house & FIT-input distillation & 0.802 & $[0.730, 0.883]$ & 1.065 & $[0.921, 1.206]$ & yes \\
 In-house & Geometric-pool distillation & 0.003 & $[-0.003, 0.018]$ & $-0.011$ & $[-0.067, 0.027]$ & yes \\
 \midrule
 ADS-24 & SWA                    & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
-ADS-24 & Pseudo-labeling        & 0.412 & $[0.345, 0.482]$ & 1.225 & $[1.004, 1.437]$ & no \\
+ADS-24 & Hard-label control     & 0.412 & $[0.345, 0.482]$ & 1.225 & $[1.004, 1.437]$ & no \\
 ADS-24 & Entropy minimization   & 0.463 & $[0.394, 0.541]$ & 4.743 & $[4.088, 5.347]$ & no \\
 ADS-24 & FIT-input distillation & 0.166 & $[0.131, 0.200]$ & 0.097 & $[0.075, 0.120]$ & yes \\
 ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.082, 0.133]$ & yes \\
@@ -362,13 +366,13 @@ ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.08
 
 Within this protocol the controls separate three parts of the method.
 Following one's own frozen copy, softly in self-distillation or by hard
-labels in pseudo-labeling, either changed nothing or made the loss
+labels in the hard-label control, either changed nothing or made the loss
 worse, so the consensus of several models mattered. Following the same
-five-teacher average on FIT inputs left the spread at the baseline
+five-teacher average on FIT inputs left the spread at the base-model
 level, so the environment inputs mattered; why the FIT inputs did not
-help was not established (Section~\ref{sec:disc-rejected}). And weight
-averaging along a single training trajectory stayed at the baseline's
-spread on both datasets. These are statements about the methods as run
+help was not established (Section~\ref{sec:disc-rejected}). And SWA,
+which averages along a single training trajectory, stayed at the base
+model's spread on both datasets. These are statements about the methods as run
 here, with one coefficient, one exposure, and one schedule shared by
 all; they do not show that any of the algorithms is inferior when
 tuned for its own purpose. Between the arithmetic and the
@@ -399,7 +403,7 @@ SWA did not use the cyclical or constant learning-rate
 schedule of the original method. The size of the rerun variation is
 visible for SWA: the cross-entropy run from which its
 weights were averaged ended with weights identical, bit for bit, to the
-stored baseline for 30 of 30 seeds on ADS-24 and for none in-house.
+stored base model for 30 of 30 seeds on ADS-24 and for none in-house.
 Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.
 On the same new runs the A+C score of REL\_GLOBAL was 0.086, against
 0.226 for the plain-GRU student.
@@ -407,80 +411,5 @@ On the same new runs the A+C score of REL\_GLOBAL was 0.086, against
 % KD_ENV 0.226057, A+C 1:1), :10, :15--16 (계획 160, 시도 119, THREE_SOURCE_FAILURES,
 % 미시도 41, 완전 구성 FLAT 6/16, NESTED 9/16), :18 (SWA bitwise 일치 ADS 30/30,
 % PROPHET 0/30, CPU GRU 비결정성).
-
-Two simpler references come from the same collection but have a
-different status. Temperature scaling~\cite{guo2017calibration} divides
-the logits of each baseline seed by one scalar fitted on FIT data and
-is a single model at inference. The contract planned it as a reference
-only. It was added as a sixth single-model contrast after training had
-started but before any new score was read, so its 99.1667\% intervals
-form a later six-method family and do not change the sealed five-method
-family above. A probability ensemble of the five selected teachers or
-of all 30 baseline seeds is a different predictor, with five or 30
-forward passes at inference, and we report it as a reference upper
-bound rather than as a competitor of the same cost.
-Table~\ref{tab:gen-reference} gives both for the three encoders and
-REL\_GLOBAL. For the
-plain GRU, temperature scaling minus CD was $+0.993$
-$[+0.886, +1.101]$ in mean NLL and $+0.667$ $[+0.593, +0.752]$ in seed
-standard deviation in-house, and $+0.033$ $[+0.017, +0.049]$ and
-$+0.138$ $[+0.107, +0.168]$ on ADS-24. For the plain GRU, temperature
-scaling lowered the baseline mean slightly but left the spread of the
-seeds where it was; for the in-house LSTM encoder and REL\_GLOBAL it
-raised the mean. The ensembles scored below CD in nine of the ten cells
-where both are available, and on ADS-24 the 30-seed ensemble was the
-best predictor for every encoder.
-That is the gap Section~\ref{sec:disc-ensemble} discusses: CD returns
-part, not all, of what the ensemble gains, and it does so at the cost
-of one model.
-% 근거: METHOD_BASELINES_CONTRACT_SEALED.md (확률 앙상블은 참고 상한, FIT 온도 보정은
-% 단일 모델 참고 대조; PROPHET 기존 기준 온도는 FIT 고정 120실행 in-sample);
-% SINGLE_MODEL_SCOPE_CLARIFICATION.md (학습 시작 뒤·점수 열람 전 여섯째 대조 추가,
-% 99.1667%, 원래 다섯 가족 판정 불변); METHOD_BASELINES_REPORT.md "앙상블·온도 보정
-% 참고" 및 "온도 보정을 포함한 여섯 단일 모델 민감도" (ADS24 0.033364 [0.016628,
-% 0.049431], SD 0.137918 [0.107162, 0.167891]; PROPHET 0.992984 [0.885849, 1.101081],
-% SD 0.666835 [0.593450, 0.751775]).
-% TODO(사람): 이 보고서(METHOD_BASELINES_20261123)는 2026-11-23 기록 범위 안이지만
-% 연구 기록은 "온도 보정·확률 앙상블 요약"을 마무리 확인 묶음에 올려 두었다
-% (RECORD:358, 498). 리뷰 지적에 따라 원 보고서의 값을 본문에 넣었다. 본문에 두는 것이
-% 맞는지 확인해 주세요. 빼야 하면 이 문단과 표를 지우고 결론 Future Work에 계획으로 되돌린다.
-
-\begin{table}[htbp]
-\centering
-\caption{Single-model and ensemble references on the unseen condition
-(mean NLL; in-house: 1:1 mean of \texttt{A+C FLAT} and
-\texttt{A+C NESTED} on the runs of the method comparison; ADS-24: the 35
-environment-evaluation runs, a development comparison). Baseline and
-temperature-scaled values are 30-seed means of single models; the
-ensembles average the probabilities of five or 30 models. The CD column
-is given only where the CD student was scored on the same runs. The
-in-house REL\_GLOBAL temperature was fitted in-sample on 120 FIT runs.}
-\label{tab:gen-reference}
-\small
-\begin{tabular}{@{}llrrrrr@{}}
-\toprule
-Data & Encoder & Baseline & Temperature & Top-five ensemble
-  & 30-seed ensemble & CD student \\
-\midrule
-In-house & LSTM (DeepLog-style)        & 0.695 & 0.763 & 0.428 & 0.321 & --- \\
-In-house & Transformer (LogBERT-style) & 0.993 & 0.920 & 0.415 & 0.422 & --- \\
-In-house & plain GRU                   & 1.237 & 1.219 & 0.214 & 0.445 & 0.226 \\
-In-house & REL\_GLOBAL                 & 0.086 & 0.103 & 0.022 & 0.049 & --- \\
-\midrule
-ADS-24 & LSTM (DeepLog-style)          & 2.249 & 2.229 & 2.054 & 1.842 & 2.079 \\
-ADS-24 & Transformer (LogBERT-style)   & 2.134 & 2.065 & 1.784 & 1.753 & 1.796 \\
-ADS-24 & plain GRU                     & 2.221 & 2.163 & 2.080 & 1.963 & 2.130 \\
-ADS-24 & REL\_GLOBAL-ADS               & 2.276 & 2.185 & 2.038 & 1.945 & 2.060 \\
-\bottomrule
-\end{tabular}
-\end{table}
-% 근거: METHOD_BASELINES_REPORT.md "앙상블·온도 보정 참고" (BASE/상위5/30/온도 원값:
-% ADS24 LSTM 2.248586/2.053577/1.841886/2.229396, Transformer 2.134342/1.783663/
-% 1.753357/2.064998, GRU 2.221359/2.079862/1.962718/2.163016, REF 2.276041/2.037885/
-% 1.945412/2.184814; PROPHET LSTM 0.695279/0.427706/0.320941/0.763100, Transformer
-% 0.993020/0.414734/0.421735/0.919611, GRU 1.236530/0.213731/0.445200/1.219041,
-% REF 0.085753/0.022455/0.048526/0.102500). CD 열: ADS-24는
-% ARCH_GENERALITY_STAGE2_REPORT.md EVAL_ON KD_ENV (2.079452, 1.795571, 2.129651)와
-% ADS24_STAGE2_REPORT.md (2.060390); 자체 plain GRU는 METHOD_BASELINES_REPORT.md:9
-% (KD_ENV A+C 1:1 0.226057). 자체 LSTM·Transformer·REL_GLOBAL 학생은 이 수집에서
-% 채점되지 않았다.
+% 4회차 지시 1번·방법 리뷰 P1-1: 온도 보정·확률 앙상블 문단과 표 tab:gen-reference는
+% 2026-11-23 이후 마무리 확인 묶음이라 지우고 결론 Future Work에 계획으로만 남겼다.

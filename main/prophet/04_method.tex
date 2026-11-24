@@ -1,4 +1,4 @@
-\chapter{Baseline Predictor and Environment-Consensus Distillation}
+\chapter{Baseline Predictor and Consensus Distillation}
 \label{ch:method}
 % 개요 4장. 다시 썼다. 옛 EVENT GRU/flat/THM/REL/Local History/확률 평균/
 % 빈도 기준선의 정의, 식 eq:eventgru·eq:relation·eq:mixture·eq:table, 그림
@@ -7,12 +7,12 @@
 % 파일에 있다. 부록 B를 다시 쓸 때 fig:model, eq:mixture, eq:table 라벨을 그쪽에
 % 살려야 b_supplemental_results.tex의 기존 참조가 깨지지 않는다.
 
-This chapter defines the baseline predictor, REL\_GLOBAL, and the
-training change that turns it into a CD student. The two share one
-architecture; they differ only in the loss used during training. The
-chapter also fixes the names of the trained groups used in later
-chapters and states what was changed when the method was moved to
-ADS-24 and to three general encoders.
+A CD student and the baseline predictor, REL\_GLOBAL, share one
+architecture and differ only in the loss used during training. We
+first describe REL\_GLOBAL and then the added loss term, the choice of
+teachers, the names of the trained groups used in later chapters, and
+what was changed when the method was moved to ADS-24 and to three
+general encoders.
 
 \section{The baseline predictor}
 \label{sec:method-baseline}
@@ -170,11 +170,10 @@ serves as the reference; each model's own vote is included. A model's
 \emph{top-1 agreement} is the fraction of rows on which its top-1
 action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
-form $J$, and these five teachers are used in every in-house round.
-Ranking seeds by unlabeled agreement is motivated by the use of model
-agreement on unlabeled data in Baek et al.~\cite{baek2022agreement},
-but it is not their Agreement-on-the-Line estimator: it fits no line
-and uses no labeled in-distribution data.
+form $J$; they are the teachers of KD\_ENV\_TOP5 and KD\_ALL in the v2
+and v3 rounds (Table~\ref{tab:variants}). Section~\ref{sec:related-underspec}
+explains how this ranking relates to the agreement estimator of Baek
+et al.~\cite{baek2022agreement}.
 The rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
 blind. No round compared it with five teachers chosen at random, with

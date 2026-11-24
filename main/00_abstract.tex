@@ -1,30 +1,25 @@
 \begin{abstract}
 PROPHET predicts which of 18 attacker actions comes next from the
-Windows audit records received before a prediction cutoff. Under benign
-workloads absent from every labeled training run, models sharing data
-and architecture diverge across seeds, and the final training-batch
-loss did not rank the seeds. Consensus distillation (CD), a standard
-ensemble-distillation setup, trains one student toward the averaged
+Windows audit records received before a prediction cutoff. Under a
+benign workload absent from every labeled training run, models trained
+on the same data with the same architecture diverge across random
+seeds, and their loss on the final training minibatch did not rank
+them. With consensus distillation (CD), a standard ensemble-distillation
+setup, one student of the same architecture follows the averaged
 probabilities of five baseline models on unlabeled inputs from the new
-workload. In a sealed in-house evaluation on new runs, CD met all
-three pre-specified criteria: the seed standard deviation of the
-negative log-likelihood (NLL) narrowed on both unseen layouts, from
-0.056 to 0.010 on one of them, and the NLL on the seen procedure
-improved. On the public ADS-24 dataset, in a development comparison on
-inspected runs, the seed standard deviation fell from 0.163 to 0.025,
-yet every distilled seed of our model stayed worse than the FIT prior
-baseline, which predicts the training tactic frequencies (NLL 1.830).
-Three general encoders showed the same reduction in seed spread in
-development comparisons, though not every seed improved. CD narrowed
-the spread among the trained checkpoints without removing the loss
-under environment shift.
-% 근거: RECORD:166, 170 (v3, A+C FLAT); RECORD:218--219, 221, 234 (ADS-24);
-% RECORD:294 (세 인코더). 세 인코더 결과는 자체·ADS-24 모두 이미 열람한 실행의
-% 개발 비교다(answers 2026-11-24 07:10, 4번). "20 to 30 of 30"은 seed별 원자료를
-% atlas에서 찾지 못해 뺐다. "not every seed improved"는 9장의 검증된 사례(ADS-24
-% LSTM 기준 seed 2개가 기준선 아래, 학생은 0개)가 받친다. "FIT prior baseline" = FIT 실행 동등 전술 빈도 예측기(8장 정의).
-% 3회차 방법 리뷰 P1-1: A+C 평균 NLL(0.0731→0.0276)은 주 기준이 아니므로 초록에서 빼고
-% 세 주 기준(두 SD, ORIGINAL_18 보존)으로 바꿨다. 0.056→0.010은 RECORD:176--183.
+workload. In a sealed in-house round with new seeds and runs, CD passed
+all three sealed criteria: on the main unseen condition the
+seed standard deviation of the negative log-likelihood fell from 0.056
+to 0.010, and the loss on the seen condition fell too. On the public
+ADS-24 dataset, in a development comparison, the spread also narrowed,
+yet every distilled seed of our model stayed worse than a predictor of
+the training tactic frequencies. CD makes the models agree; it does not
+remove the loss caused by the new environment.
+% 근거: RECORD:166, 176--183 (v3 세 봉인 기준, A+C FLAT SD .055591→.009508,
+% ORIGINAL_18 차 −.060741 [−.130850, −.004082]); RECORD:218--221, 234 (ADS-24 SD
+% .163→.025, FIT 사전 빈도 1.830보다 모든 CD seed가 나쁨). "main unseen condition" =
+% A+C FLAT. 4회차 지시 7번: 핵심 결과 하나, ADS-24 한계 하나, 결론 하나. 세 인코더와
+% A+C 평균 NLL은 본문(9장, 7장)으로 넘겼다. "FIT"는 초록에서 풀어 썼다.
 \end{abstract}
 
 \begin{Engkeyword}
@@ -39,13 +34,13 @@ Consensus distillation, Unlabeled adaptation, Windows audit logs
 미니배치의 손실로는 시드의 순위를 가릴 수 없었다. 이를 줄이기 위해 기존의
 앙상블 증류 방식을 적용하여, 새 작업 조건의 정답 없는 입력에서 기준 모델
 다섯 개의 평균 확률을 구조가 같은 단일 학생 모델이 따르게 한다. 사전에 봉인한
-자체 실험실 평가에서 학생은 세 가지 주 기준을 모두 통과했다. 보지 못한 두
+자체 실험실 평가에서 학생은 세 가지 봉인 기준을 모두 통과했다. 보지 못한 두
 배치에서 시드 간 표준편차가 줄었고, 학습한 절차의 손실도 나빠지지 않았다.
 ADS-24와 세 일반 인코더에서도 이미 열람한 실행에서의 개발 비교로 같은 방향을
 보였지만(ADS-24 표준편차 0.163→0.025), 모든 시드가 좋아지지는 않았다.
-ADS-24에서 우리 모델의 증류 시드는 모두 FIT 전술 빈도 기준선(1.830)보다
-손실이 높았다. 이 방법은 시드 간 흔들림을 줄이지만 환경 이동에 따른 성능
-저하 자체를 없애지는 못한다.
+ADS-24에서 우리 모델의 증류 시드는 모두 학습 실행의 전술 빈도만으로 예측하는
+기준(1.830)보다 손실이 높았다. 이 방법은 시드 간 흔들림을 줄이지만 환경
+이동에 따른 성능 저하 자체를 없애지는 못한다.
 \end{korabstract}
 
 \begin{Korkeyword}

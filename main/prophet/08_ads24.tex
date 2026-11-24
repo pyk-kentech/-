@@ -1,8 +1,8 @@
 \chapter{Cross-Dataset Evaluation on ADS-24}
 \label{ch:ads24}
 
-The in-house results of Chapter~\ref{ch:results} come from one
-laboratory, so we repeated the study on data collected elsewhere. We
+Because the in-house results of Chapter~\ref{ch:results} come from one
+laboratory, we repeated the study on data collected elsewhere. We
 did not find a public dataset that could reproduce the PROPHET task as
 defined in Chapter~\ref{ch:task}, and three of its requirements were
 relaxed. Alerts are ordered by the time at which they occurred rather
@@ -15,9 +15,14 @@ episodes in a cyber range defended by automated response agents, collected with
 simulated users switched on or off~\cite{nyberg2026cyber}. With the
 task, the time axis, the labels, and the environment all changed, this
 chapter is a cross-dataset evaluation of the method, not a replication
-of the in-house study. Appendix~\ref{app:ads24-data} describes how the
-task was built from the data and why six other candidates were not
-used.
+of the in-house study. It also concerns a derived set, not ADS-24 as a
+whole: the 132 runs that we built from the downloaded files and
+examined, whose correspondence to the episodes described with the
+dataset we did not check, with stage labels bound to alert times by a
+stored rule that we could not validate. The results are therefore
+exploratory development results on derived labels.
+Appendix~\ref{app:ads24-data} describes how the task was built from the
+data and why six other candidates were not used.
 % 근거: RECORD:212, 236, 265--275 (선정 경위, 후보 7행 표는 부록 D).
 % ADS24_CONTRACT_SEALED.md "과제와 자료": cutoff 이전 Wazuh @timestamp 경보만
 % 입력. 이 시각이 수신 시각인지 확인되지 않아 계약은 "경보 시각 예측"이라 부른다.
@@ -29,7 +34,7 @@ used.
 \section{Task and data roles}
 \label{sec:ads24-task}
 
-The input at a prediction boundary is the sequence of Wazuh alerts
+At each prediction boundary the input is the sequence of Wazuh alerts
 recorded before it, read through the Wazuh rule identifier and rule
 level, \texttt{rule.id} and
 \texttt{rule.level},\footnote{Wazuh rule syntax:
@@ -40,7 +45,7 @@ tactic, and every segment after the first starts a boundary. We fixed
 this merging rule before any model was scored, because without it most
 boundaries would simply repeat the previous tactic
 (Appendix~\ref{app:ads24-data}). Each boundary is one prediction row.
-The contract assigns the runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
+The contract assigns the 132 runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
 15 further runs without users (2,982 boundaries) check preservation;
 the condition without users is therefore the seen one. The 34 runs
 with simulated users supply unlabeled adaptation inputs (5,811
@@ -68,8 +73,7 @@ an effect of the simulated users alone.
 % 각주 URL로 바꿨다. TODO(사람): 접근일과, 수집에 쓰인 Wazuh 버전에 맞는 문서 판을
 % 확인해 주세요(지금 URL은 current 판).
 
-The study ran in two stages, each under its own sealed contract.
-Stage~1 trained 30 REL\_GLOBAL-ADS seeds on FIT and asked only whether they
+Two stages were run, each under its own sealed contract. Stage~1 trained 30 REL\_GLOBAL-ADS seeds on FIT and asked only whether they
 diverged enough on the environment evaluation to justify distillation;
 the gate required a seed standard deviation of at least 0.050 with the
 lower end of its 95\% interval at least 0.020, and it passed with 0.163
@@ -109,11 +113,11 @@ individual 95\% intervals, the CD student minus the control was
 $-0.215$ $[-0.248, -0.181]$ in mean NLL and $-0.137$
 $[-0.163, -0.115]$ in seed standard deviation. The reduction is thus
 tied to the consensus of several models, not to the distillation step
-as such.
+as such. Section~\ref{sec:app-raw} gives the stage-1 statistics to six
+decimals.
 % 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
 % "봉인한 주 판정", "TOP5−SELF 보조 대비" (env_mean −0.214832 [−0.248399, −0.181309];
-% env_sd −0.136728 [−0.162917, −0.114904]). 여섯 자리 원값은 부록 B.6.
-% TODO(사람): 부록 B.6의 label이 아직 없어 본문에서 참조하지 않았습니다.
+% env_sd −0.136728 [−0.162917, −0.114904]). 해결된 label TODO는 지웠다.
 
 \begin{table}[htbp]
 \centering
@@ -122,18 +126,18 @@ are the 35 runs with simulated users (5,639 boundaries); preservation is
 the 15 runs without users (2,982 boundaries). NLL is execution-weighted
 as in Equation~\ref{eq:nll}; accuracy is top-1 accuracy. The last
 column counts the seeds whose environment NLL is lower than that of the
-FIT prior baseline defined below.}
+FIT prior defined below.}
 \label{tab:ads24-groups}
 \small
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
 Group & Env.\ NLL & Seed SD & Worst seed & Env.\ accuracy
-  & Pres.\ NLL & Seeds beating baseline \\
+  & Pres.\ NLL & Seeds below FIT prior \\
 \midrule
 REL\_GLOBAL-ADS            & 2.276 & 0.163 & 2.690 & 28.4\% & 1.449 & 0/30 \\
 CD student                 & 2.060 & 0.025 & 2.121 & 31.5\% & 1.430 & 0/30 \\
 Self-distillation control  & 2.275 & 0.162 & 2.681 & 28.2\% & 1.438 & 0/30 \\
-FIT prior baseline         & 1.830 & ---   & ---   & 33.9\% & ---   & --- \\
+FIT prior                  & 1.830 & ---   & ---   & 33.9\% & ---   & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -204,15 +208,17 @@ give no evidence that agreement picked good teachers.
 % ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125).
 
 Absolute performance stayed low. We compare it with the \emph{FIT
-prior baseline}, which predicts at every boundary the tactic
-frequencies of the FIT runs, weighting each run equally, and whose
-top-1 choice is therefore the majority tactic of FIT. It is estimated
-from the 48 FIT runs alone and scored, like the models, on the 35
+prior}, which predicts at every boundary the tactic frequencies of the
+FIT runs, weighting each run equally, and whose top-1 choice is
+therefore the majority tactic of FIT. It is estimated from the 48 FIT
+runs alone and scored, like the models, on the 35
 environment-evaluation runs. The stored reports do not say whether the
 frequencies were smoothed, or with what coefficient, so we report the
 value as stored and do not claim it can be recomputed from this
-description. On the environment evaluation its NLL is 1.830, and all 30
-CD seeds were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
+description.
+% TODO(사람): FIT prior의 평활 여부·계수, zero-count 처리(방법 리뷰 P2-2).
+On the environment evaluation its NLL is 1.830, and all 30 CD seeds
+were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
 baseline. Not every seed gained either. The best REL\_GLOBAL-ADS seed
 scored 1.953, lower than every CD seed, whose best was 2.020; consensus
@@ -226,8 +232,6 @@ to a later collection period, remains after CD
 % 이 기준선(FIT만으로 정한 다수 전술, 환경 ON35)은 부록 D의 라벨 기준선
 % (132실행 5-fold, 1.8547/32.0%)과 다르다.
 % 정의: METHOD_EXTENSION 원장의 "실행 동등 FIT 사전 빈도"(FIT 다수 전술 1.829580).
-% TODO(사람): 이 사전 빈도에 평활(smoothing)을 했는지, 했다면 어떤 값인지 원 파일에서
-% 확인하지 못했습니다. 알려 주시면 한 구절로 넣겠습니다.
 
 Stage~1 also fixed in advance three breakdowns of the environment loss,
 none of which entered a criterion. Boundaries with no new alert since

@@ -16,16 +16,19 @@ binding dropped 288 stages that fell outside the extraction window and
 one run whose Wazuh JSON could not be parsed. The stored records do not
 state which two timestamps the binding compares or the rule that
 attaches a stage to an alert time, so we could not verify the binding
-independently. The ADS-24 results use the stored derived task, and a
-different binding could move segment boundaries and next-tactic labels. The contract population
+independently, and no sample of bindings was checked by hand. The
+ADS-24 results use the stored derived task, and a different binding
+could move segment boundaries and next-tactic labels. The contract population
 then excludes runs flagged with \texttt{malicious\_users} or
-\texttt{block\_blinds\_blue} and runs whose defender is unknown. Two
+\texttt{block\_blinds\_blue} and runs whose defender is unknown. Every
+ADS-24 result in this thesis concerns the resulting derived set of 132
+runs, not the dataset as distributed. Two
 label baselines, computed on the 132 runs with five folds, show how much
-the labels alone reveal. They are not the FIT prior baseline against which Chapter~\ref{ch:ads24} compares the models
+the labels alone reveal. They are not the FIT prior against which Chapter~\ref{ch:ads24} compares the models
 (Table~\ref{tab:ads24-groups}).
 
-The input keeps only alert identity, severity, host role, and timing. Every field that names the answer or
-the run was removed. In particular, Wazuh rules can map an alert to
+Only alert identity, severity, host role, and timing enter the input;
+every field that names the answer or the run was removed. In particular, Wazuh rules can map an alert to
 ATT\&CK techniques and tactics through the \texttt{rule.mitre.*}
 fields,\footnote{Wazuh documentation on the MITRE ATT\&CK mapping of
 rules: \url{https://documentation.wazuh.com/current/user-manual/ruleset/mitre.html}.}
@@ -33,9 +36,9 @@ which would name the answer. In our parse of
 the data these fields are present on 1,252,951 alerts, and they were
 removed.
 
-The segment rule of
-Section~\ref{sec:ads24-task} was fixed before any model was scored
-because of how often a stage repeats its predecessor: if stages are not
+Before any model was scored, we fixed the segment rule of
+Section~\ref{sec:ads24-task} because of how often a stage repeats its
+predecessor: if stages are not
 merged, about 62.7\% of consecutive boundaries carry the same tactic as
 the stage before them, and a model could score well by copying the last
 label. The alert window of 512 and the 1,346 updates were chosen by an
@@ -133,7 +136,7 @@ Candidate & Decision & Reason \\
 \midrule
 ADS-24/Crate~\cite{nyberg2026cyber} & adopted & 254 runs with stage labels;
   simulated users on and off; downloaded \\
-CAM-LDS, \url{https://zenodo.org/records/18861762} & not used & Linux; no benign
+CAM-LDS\footnote{\url{https://zenodo.org/records/18861762}.} & not used & Linux; no benign
   user activity during attacks; 34 runs; with a scenario held out, 295 of
   849 boundaries have a label absent from training \\
 Windows multi-source ATT\&CK-labeled data~\cite{niloy2026multi} & not used

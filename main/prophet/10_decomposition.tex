@@ -1,7 +1,7 @@
 \chapter{Post Hoc Decomposition of Seed Loss}
 \label{ch:decomposition}
 
-This chapter is a post hoc analysis: we introduced it after the primary
+Everything here is a post hoc analysis: we introduced it after the primary
 experiments of Chapters~\ref{ch:results} to~\ref{ch:generality} had
 been scored, and none of its results entered any criterion
 (Section~\ref{sec:eval-rounds}). It uses only class probabilities that
@@ -28,12 +28,10 @@ identity follows directly from the definitions: if $Z(x)$ is the
 normalizer of $\tilde p$, then $V(x)=-\log Z(x)$ and
 $-\log\tilde p(y\mid x)=\frac{1}{S}\sum_s[-\log p_s(y\mid x)]+\log Z(x)$.
 It is the logarithmic-opinion-pool decomposition analyzed by
-Heskes~\cite{heskes1997selecting}, and Gruber and Buettner already
-propose a proper-score variance term of this kind as a label-free
-uncertainty estimate under domain drift~\cite{gruber2022uncertainty}.
-What we add is narrower: the computation for the 30 seeds of one
-configuration on this task's environment inputs, and a reading of which
-term CD reduced. Like NLL, $V$ is averaged over
+Heskes~\cite{heskes1997selecting}, and its use as a label-free
+uncertainty measure follows Gruber and
+Buettner~\cite{gruber2022uncertainty}; Section~\ref{sec:related-decomposition}
+states what our computation adds. Like NLL, $V$ is averaged over
 the natural boundaries of a run and then over runs with equal weight.
 Recomputed from the saved probabilities, the two sides of
 Equation~\ref{eq:decomposition} differed by at most about $10^{-15}$.
@@ -57,7 +55,7 @@ encoders and for REL\_GLOBAL, and 70\% for the plain GRU, against 15\%
 to 28\% on \texttt{ORIGINAL\_18}. On ADS-24 the share was 7\% to 14\%.
 The ADS-24 loss is therefore mostly a loss on which the seeds agree,
 which matches Chapter~\ref{ch:ads24}: there the models stay near or
-above the NLL of the FIT prior baseline, and lowering $V$ alone cannot
+above the NLL of the FIT prior, and lowering $V$ alone cannot
 move them far.
 
 \begin{table}[htbp]
@@ -154,21 +152,22 @@ common answer is right.
 % decision". 방법 비교 군은 9.2절의 새 110실행 기준이다. ADS-24의 엔트로피 최소화는
 % V가 0.179로 0이 아니었다.
 
-Three things the analysis might suggest were not established. First,
-$V$ on the unlabeled adaptation inputs did not rank the encoders by
-their evaluation seed standard deviation: the Spearman correlation was
-$-0.800$ on ADS-24 ($n=4$) and $+0.500$ in the in-house lab ($n=3$), too
-few points and inconsistent in sign to support a selection rule.
-Second, the decomposition does not make the geometric pool the better
-teacher. Scored as teachers, the geometric pool had the lower NLL in
-only 24 of 56 same-membership comparisons, and the student comparison
-of Section~\ref{sec:gen-methods} did not separate the two pools.
-Third, the adaptation-input $V$ of the 30 REL\_GLOBAL seeds of the
-in-house lab could not be computed, because only their aggregated
-teacher probabilities, not the 30 individual distributions, had been
-saved; we did not reconstruct them by re-running the checkpoints.
 Nothing in our data shows that $V$ measured before deployment predicts
-later seed instability.
+later seed instability. Across encoders, $V$ on the unlabeled
+adaptation inputs did not rank them by their evaluation seed standard
+deviation: the Spearman correlation was $-0.800$ on ADS-24 ($n=4$) and
+$+0.500$ in the in-house lab ($n=3$), too few points and inconsistent in
+sign to support a selection rule. For the in-house REL\_GLOBAL seeds
+the question could not even be asked, because only their aggregated
+teacher probabilities on the adaptation inputs, not the 30 individual
+distributions, had been saved, and we did not reconstruct them by
+re-running the checkpoints.
+
+Nor does the decomposition make the geometric pool the better teacher,
+although that pool is the consensus in Equation~\ref{eq:decomposition}.
+Scored as teachers, the geometric pool had the lower NLL in only 24 of
+56 same-membership comparisons, and the student comparison of
+Section~\ref{sec:gen-methods} did not separate the two pools.
 % 근거: RECORD:333, 404, 406, 506; VARIANCE_DECOMPOSITION_REPORT.md "Arithmetic versus
 % geometric teachers" (24/56), "Can unlabeled adaptation V anticipate..." (ADS ρ=-0.800,
 % PROPHET ρ=0.500; REL_GLOBAL 50k 계보는 30개 적응 입력 개별 확률이 없음),

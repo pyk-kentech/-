@@ -3,9 +3,12 @@
 
 During a multi-stage incident, an analyst often has to decide which
 activity to investigate before the attacker's next action is visible.
-Forecasting systems such as Tiresias~\cite{shen2018tiresias} and
-EFI~\cite{zhu2024nip} support this decision by forecasting likely
-follow-up activity. Such a forecast is only useful if it rests
+Forecasting systems such as Tiresias~\cite{shen2018tiresias},
+EFI~\cite{zhu2024nip}, and the alert-driven attack graphs of
+B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting} support this
+decision by forecasting likely follow-up activity; the last works from
+the alerts of a network detector, whereas we work from host audit
+records. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
@@ -64,7 +67,7 @@ three questions.
     encoders, and against other single-model methods?
 \end{description}
 
-Our approach, \emph{environment-consensus distillation} (CD), starts
+Our approach, \emph{consensus distillation} (CD), starts
 from two known uses of independently trained models. Their disagreement
 indicates predictive uncertainty~\cite{lakshminarayanan2016simple}, and
 where accuracy under shift tracks in-distribution accuracy across
@@ -94,12 +97,12 @@ training, where 30 baseline models must be fitted before the student.
 
 In a sealed in-house evaluation with 30 new seeds, 157 new eligible
 runs, and 1,611 prediction rows, the CD student met all three
-primary criteria fixed before training and collection. The seed
+criteria sealed before training and collection. The seed
 standard deviation fell on both A+C layouts, on FLAT from about 0.056
 to 0.010, and on ORIGINAL\_18, the seen procedure without benign
-workers, the mean NLL moved from 0.7036 to 0.6428 (difference interval
+workers, the mean NLL moved from 0.704 to 0.643 (difference interval
 $[-0.131, -0.0041]$). As a secondary point estimate, the mean NLL on
-A+C FLAT was 0.0276 against 0.0731 for REL\_GLOBAL. These intervals
+A+C FLAT was 0.028 against 0.073 for REL\_GLOBAL. These intervals
 resample runs for 30 fixed checkpoints and do not cover other seeds.
 Applied unchanged to the public ADS-24 dataset, CD reduced the seed
 standard deviation from 0.163 to 0.025 and the mean NLL from 2.276 to
@@ -108,7 +111,7 @@ been scored. Three general encoders (an LSTM encoder in the style of
 DeepLog, a Transformer encoder in the style of LogBERT, and a plain
 GRU) showed the same direction in all six encoder--dataset
 combinations, again in development comparisons. On ADS-24 every CD
-student of our own model remained worse than the FIT prior baseline,
+student of our own model remained worse than the \emph{FIT prior},
 which predicts the FIT tactic frequencies (NLL 1.830), and CD did not
 improve every seed (Chapter~\ref{ch:generality}).
 % 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294 (세 인코더).
@@ -122,17 +125,18 @@ The thesis makes three contributions. (a) It measures seed instability
 with 30 seeds per configuration, across four encoder configurations, on
 the in-house task and on ADS-24. (b) It observes that, on unlabeled
 inputs from the unseen workload, the seeds disagree on the rows where
-their loss concentrates, and it turns that observation into a consensus
-objective that reduces the disagreement while keeping the architecture.
+their loss concentrates, and it applies an existing consensus-distillation
+objective to reduce that disagreement while keeping the architecture.
 A separate in-house diagnosis locates many errors in one file decision;
 the head we built on that diagnosis was not adopted
-(Section~\ref{sec:diag-intervention}). (c) It evaluates the method
-under contracts sealed before training and collection, and it labels
-every result as a sealed criterion, a development comparison, or a post
-hoc analysis. Only the in-house v3 round passed all of its sealed
-criteria; the v2 recheck passed stability but did not show
-preservation, and the ADS-24 study, the encoder study, and the method comparison on
-ADS-24 are development comparisons, and the decomposition is post hoc.
+(Section~\ref{sec:diag-intervention}). (c) Following the security-ML
+guidance of Arp et al.~\cite{arp2020dos}, it evaluates the method under
+contracts sealed before training and collection, and it labels every
+result as a sealed criterion, a development comparison, or a post hoc
+analysis. Only the in-house v3 round passed all of its sealed criteria;
+the v2 recheck passed stability but did not show preservation. The
+ADS-24 study, the encoder study, and the method comparison are
+development comparisons, and the decomposition is post hoc.
 The distillation computation itself is a combination of existing
 techniques; we claim the evidence and the evaluation behind it, not a
 new training objective.

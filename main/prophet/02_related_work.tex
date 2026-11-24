@@ -119,7 +119,7 @@ anomalous when it falls outside the predicted next
 keys~\cite{du2017deeplog}. LogBERT replaces the recurrent model with a
 Transformer encoder~\cite{vaswani2017attention} trained by self-supervised
 objectives on log sequences~\cite{guo2021logbert}. The gated recurrent unit
-(GRU)~\cite{cho2014gru} is the simpler recurrent cell that our baseline
+(GRU)~\cite{cho2014gru} is the recurrent cell that our baseline
 predictor uses at the event level (Chapter~\ref{ch:method}).
 
 Chapter~\ref{ch:generality} uses three encoders drawn from this
@@ -161,42 +161,46 @@ those inputs.
 Knowledge distillation trains a student to match the softened output
 distribution of a teacher or of an ensemble~\cite{hinton2015distilling}.
 Deep ensembles average the predictions of independently trained
-networks and give better-calibrated predictive uncertainty than a single
-network~\cite{lakshminarayanan2016simple}, at a cost that grows with the
-number of members. Ensemble distribution distillation compresses an
+networks and yield well-calibrated predictive uncertainty
+estimates~\cite{lakshminarayanan2016simple}, at an inference cost that
+grows with the number of members. Ensemble distribution distillation compresses an
 ensemble into a single model that represents not only the mean
 prediction but also the spread among members~\cite{malinin2019ensemble}. The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities
 as the target, and a student with the teachers' architecture.
 Rath-Manakidis et al.\ show that ensembling reduces variance-related
-error under distribution shift~\cite{rathmanakidis2022reduction}. That
-observation is the reason to expect a consensus to vary less than its
-members. What we test is whether a single student trained on unlabeled
-inputs from the shifted condition keeps that reduction, judged by sealed
-criteria on the seed standard deviation.
+error under distribution shift~\cite{rathmanakidis2022reduction}. Their
+result concerns the error of an ensemble, not the spread among
+distilled students, so it motivated, but did not establish, our
+expectation that a student of a consensus would vary less across seeds
+than its baseline. What we test is whether a single student trained on
+unlabeled inputs from the shifted condition shows that reduction,
+judged in-house by sealed criteria on the seed standard deviation and
+elsewhere by development comparisons.
 
 The comparison methods in Chapter~\ref{ch:generality} come from work
-on stabilizing a single model or adapting it without labels.
-Pseudo-labeling trains on the model's own most confident predictions
-for unlabeled data, and entropy minimization penalizes
-uncertain predictions on unlabeled inputs~\cite{grandvalet2004semi}.
-Stochastic weight averaging (SWA) averages weights along one training
-trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits with
-one parameter fitted on held-out data~\cite{guo2017calibration}. In security, Kan
-et al.\ study adapting malware detectors to drift without labels,
-where self-training on pseudo-labels can reinforce the model's own
-errors~\cite{kan2021investigating}. Distillation on unlabeled inputs is
-itself not new either, since the transfer set of Hinton et al.\ needs
-no labels~\cite{hinton2015distilling}. As in labelless drift
-adaptation~\cite{kan2021investigating}, our transfer set comes from
-unlabeled data of the target environment. What we examine is whether a
-student distilled from a seed ensemble on that set narrows the seed
-standard deviation.
-% 근거: RECORD:470--475. 온도 보정·확률 앙상블은 9.2절에서 보고한다.
-% TODO(사람): pseudo-labeling의 출처 "Pseudo-Label: The Simple and Efficient
-% Semi-Supervised Learning Method for Deep Neural Networks"(Lee)가 엔진에서 확인되지 않아
-% 임시 key(tmp_lee)를 지웠다. ref.bib에 넣어 주시면 "for unlabeled data" 뒤에 인용합니다.
+on stabilizing a single model or adapting it without labels. Entropy
+minimization penalizes uncertain predictions on unlabeled
+inputs~\cite{grandvalet2004semi}, and stochastic weight averaging (SWA)
+averages weights along one training
+trajectory~\cite{izmailov2018averaging}. We also run a hard-label
+control that trains on the frozen base model's own top-1 predictions
+for the unlabeled inputs; it is defined in
+Section~\ref{sec:gen-methods} by the procedure we ran, not as a
+reproduction of a published method. Distillation on unlabeled inputs
+is not new either: the transfer set of Hinton et al.\ needs no
+labels~\cite{hinton2015distilling}, and Kan et al.\ adapt malware
+detectors to drift with unlabeled data from the target environment,
+warning that training on a model's own labels can reinforce its
+errors~\cite{kan2021investigating}. Our transfer set is likewise drawn
+from the target environment. What we examine is whether a student
+distilled from a seed ensemble on that set narrows the seed standard
+deviation.
+% 근거: RECORD:470--475. 4회차 지시 1번: 온도 보정·확률 앙상블은 마무리 확인 묶음이라
+% 이 절에서 빼고 결론 Future Work에 계획으로만 둔다(guo2017calibration은 그곳에서 인용).
+% 4회차 지시 6번: pseudo-labeling의 출처가 확인되지 않아 선행 방법 이름 대신 이 논문이
+% 실행한 절차("hard-label control")로 썼다.
 
 \section{Decomposition of ensemble log loss}
 \label{sec:related-decomposition}
