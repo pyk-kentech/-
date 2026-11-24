@@ -170,13 +170,13 @@ The comparison methods in Chapter~\ref{ch:generality} come from work
 on stabilizing a single model or adapting it without labels.
 Pseudo-labeling trains on the model's own most confident predictions
 for unlabeled data~\cite{tmp_lee}, and entropy minimization penalizes
-uncertain predictions on unlabeled inputs~\cite{tmp_grandvalet}.
+uncertain predictions on unlabeled inputs~\cite{grandvalet2004semi}.
 Stochastic weight averaging (SWA) averages weights along one training
 trajectory~\cite{izmailov2018averaging}, and temperature scaling rescales logits with
 one parameter fitted on held-out data~\cite{guo2017calibration}. In security, Kan
 et al.\ study adapting malware detectors to drift without labels,
 where self-training on pseudo-labels can reinforce the model's own
-errors~\cite{tmp_kan}. In this thesis the seed standard deviation of a
+errors~\cite{kan2021investigating}. In this thesis the seed standard deviation of a
 distilled single model under unseen conditions is sealed as a primary
 criterion, alongside the mean and the preservation of seen-condition
 performance (Chapter~\ref{ch:evaluation}).

@@ -161,7 +161,7 @@ this thesis and is not a complete record of the PROPHET project.
 \textbf{Data.}
 Of the pitfalls that Arp et al.\ list for machine learning in
 security, lab-only evaluation and reuse of inspected data apply most
-directly here~\cite{tmp_arp}. ADS-24 is the only external dataset, and
+directly here~\cite{arp2020dos}. ADS-24 is the only external dataset, and
 it has confounds of its own. Runs without simulated users were
 collected mostly in early April and runs with users in mid-April, so
 the split between seen and unseen conditions is also a split by
@@ -236,8 +236,7 @@ boundary.
 
 None of the computational parts is new. The distillation loss combines
 distillation toward an ensemble
-average~\cite{hinton2015distilling, lakshminarayanan2016simple,
-malinin2019ensemble} with the regularizers already in REL\_GLOBAL, and
+average~\cite{hinton2015distilling, lakshminarayanan2016simple, malinin2019ensemble} with the regularizers already in REL\_GLOBAL, and
 the decomposition of Chapter~\ref{ch:decomposition} is the identity
 Heskes published in 1997~\cite{heskes1997selecting}, and the
 expectation that a consensus varies less than its members under shift
@@ -245,7 +244,7 @@ follows work on ensembling~\cite{rathmanakidis2022reduction}. The two extensions
 that failed also have close precedents: distillation that handles
 disagreement among teachers instead of averaging it
 away~\cite{tmp_du}, and comparison of networks through the subspace
-their representations share~\cite{tmp_raghu}. What the thesis adds is
+their representations share~\cite{raghu2017svcca}. What the thesis adds is
 the chain that connects these parts on one security task, from a
 measured instability through an in-house localization of the errors to
 an intervention that keeps the architecture. Only the in-house

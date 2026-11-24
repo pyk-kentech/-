@@ -22,8 +22,7 @@ earlier rounds. The ADS-24 results reuse the 35 environment-evaluation
 runs scored in Chapter~\ref{ch:ads24} and are therefore development
 comparisons (Section~\ref{sec:eval-rounds}). The three encoders are the
 LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
-the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention,
-guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
+the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
 adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 baseline seeds of
 each encoder on each dataset (180 fits). In stage~2, with the
 computation sealed in stage~1, we trained a CD student for every seed
@@ -215,7 +214,7 @@ at updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
 Pseudo-labeling adds a cross-entropy term toward the hard predictions
 of the same seed's frozen baseline on the unlabeled environment
 inputs~\cite{tmp_lee}. Entropy minimization adds the entropy of the
-student's own predictions on those inputs~\cite{tmp_grandvalet}.
+student's own predictions on those inputs~\cite{grandvalet2004semi}.
 FIT-input distillation follows the same five-teacher average as CD but
 on FIT inputs instead of environment inputs. Geometric-pool distillation
 follows the normalized geometric mean of the five teachers on
