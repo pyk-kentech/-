@@ -1,56 +1,18 @@
-\chapter{Evaluation}
+\chapter{Evaluation Protocol}
 \label{ch:evaluation}
+% 옛 분할 문단(404/75, 476실행·3,427행·58,259 view, 900 update, seed 11/29/47,
+% 파라미터 48,970/57,658/57,658/59,962)과 표 tab:cohorts는 개요에 따라 부록 B로
+% 옮긴다. 이 파일에서는 지웠다. 원문은 git 1e0de05의 05_evaluation.tex에 있다.
+% TODO(사람): 부록 B(b_supplemental_results.tex)를 쓸 때 위 문단과 tab:cohorts를
+% 그대로 옮겨 주세요. 옛 TODO의 B-fold·C-fold 부분은 3.3절에서 닫혔다.
 
-\section{Splits and observation views}
-
-A \emph{natural} row is a decision row evaluated with the receipt
-order recorded during collection; a \emph{delayed} view replays the
-same boundary under a permitted alternative delivery schedule, which
-changes the events available at that boundary while retaining its
-label. The base training split contains 404 executions and 3,003
-natural rows, and the original development split contains 75 other
-executions and 555 rows. For the first target-aware comparison, the
-training set grows to 476 executions and 3,427 natural rows, which
-yield 58,259 natural and delayed views. All views of a given
-execution remain in its split, and evaluation uses a vocabulary fixed
-from the training data.
-% TODO(사람): Please confirm that "natural" means the recorded delivery schedule, and define the B-fold and C-fold (which training executions each fold uses) so that Table~\ref{tab:local} can be read without guessing.
-
-In the first target-aware comparison, EVENT GRU, flat history
-attention, THM, and REL were each fitted for 900 updates, using 32
-sampled execution occurrences per update and the fixed seeds 11, 29,
-and 47. Their active parameter counts were 48,970, 57,658, 57,658, and
-59,962, respectively, and the target-aware models shared the same
-target parser. Later cohorts with benign workloads use separate
-training fits and saved checkpoints. For example, the later C-fold
-comparison uses 603 training executions, preprocessing from the
-404-run split, and 1,346 updates of 32 execution occurrences. Scores
-from such a cohort are compared only with models trained in the same
-cohort.
-
-\begin{table}[tb]
-\centering
-\caption{Selected evaluation cohorts. Repeated evaluations on the
-same saved executions are grouped in one row.}
-\label{tab:cohorts}
-\begin{tabularx}{\textwidth}{@{}Xrr@{}}
-\toprule
-Condition and use & Executions & Rows \\
-\midrule
-Repeated runs in held target configurations & 64 & 512 \\
-Four targets with unseen names & 64 & 704 \\
-New runs for event-wise history comparison & 111 & 1,163 \\
-New runs for the fixed probability average & 135 & 1,427 \\
-Original action task for receipt-history lookup & 64 & 472 \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\section{Metrics and uncertainty}
+\section{Metrics}
+\label{sec:eval-metrics}
 
 For seed $s$, let $R$ be the set of eligible executions, with $n_r$
 natural prediction rows in execution $r$. The primary metric is
-negative log likelihood (NLL) with equal weight on each execution,
+negative log likelihood (NLL) in nats with equal weight on each
+execution,
 \begin{equation}
   L_s = -\frac{1}{|R|}
          \sum_{r\in R}\frac{1}{n_r}\sum_{j=1}^{n_r}
@@ -58,37 +20,196 @@ negative log likelihood (NLL) with equal weight on each execution,
   \qquad L = \frac{1}{|S|}\sum_{s\in S} L_s .
   \label{eq:nll}
 \end{equation}
-The seed-specific scores are averaged across the set $S$.
-Top-1 accuracy measures how often the highest-probability action
-matches the observed label; reported as row accuracy, it gives each
-natural row equal weight. Accuracy
-can stay constant while NLL changes because the probability
-assigned to the observed label can change without changing the
-highest-scoring action.
+Every natural boundary of an execution enters its inner mean, so a long
+execution counts no more than a short one. The group score $L$ is the
+arithmetic mean of the per-seed scores over the fixed set $S$ of 30
+seeds. We never average the probabilities of different student seeds:
+each student is deployed as a single model, and an average of 30
+students would be a 30-model ensemble with a different inference cost.
+Probability averages appear only for teachers, where they are labeled
+as such.
+% TODO(사람): natural 경계·natural row의 정의. [직접 기입]
+% (옛 문장: "A natural row is a decision row evaluated with the receipt order
+% recorded during collection; a delayed view replays the same boundary under a
+% permitted alternative delivery schedule ..." 이 정의가 맞는지 확인 후 기입.)
+% TODO(사람): eligible execution의 정확한 판정 규칙. 원 계약은 "적격성 선봉인,
+% fixture 인증 전후 검사, 전체 필수 경계, cleanup"을 적는다(CONTRACT_V3.md:15;
+% METHOD_BASELINES_CONTRACT_SEALED.md). 한 문장 정의가 필요하면 알려 주세요.
+% 근거: RECORD:15, 32; PAPER_DEFINITIONS.md:48 ("학생 seed 확률을 평균하지 않는다").
 
-For comparisons on repeated configurations, paired resampling keeps
-predictions from the same executions together across systems, but the
-resampling unit differs by comparison. The initial
-target-aware comparison resamples repeated runs within fixed
-configurations. The later fixed-system comparisons resample
-complete configurations with both repetitions together. A table
-point estimate can include every eligible execution even when a
-reported interval uses only complete configurations; the tables
-identify this distinction. Multiplicity adjustment uses the
-family of contrasts specified for each comparison. Fixed-seed
-intervals characterize the listed checkpoints. The separate
-retraining comparison adds resampling over the new training seeds.
+Top-1 accuracy is a secondary metric. It measures how often the
+highest-probability action matches the observed label; reported as row
+accuracy, it gives each natural row equal weight. Accuracy can stay
+constant while NLL changes, because the probability assigned to the
+observed label can move without changing the highest-scoring action.
+Because the problem studied here is variation across training runs, we
+also report three seed-stability statistics for each group and
+condition: the sample standard deviation of the 30 values $L_s$ (the
+\emph{seed standard deviation}), the largest $L_s$ (the \emph{worst
+seed}), and the range of per-seed accuracy. The seed standard deviation
+is the statistic on which the primary criteria are sealed; the other
+two describe the spread it summarizes.
+% 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
+% METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
+% TODO(사람): 9장 정확도 seed 범위가 행 가중인지 실행 동등인지 확인해 주세요.
+% 방법 비교 계약은 정확도도 "실행 안 평균 → 실행 동등 평균"이라고 적는다.
 
-\section{Evidence and comparison scope}
+\section{The sealed contract}
+\label{sec:eval-contract}
 
-Models were frozen before the new repeats in the fixed-system
-evaluations. The configurations and workloads of those repeats
-come from the same controlled Windows environment. The four-target
-test changes the number and names of objects. It provides a narrower
-generalization test than introducing entirely new attack procedures
-or a different organization. Reused evaluation inputs and post-hoc
-analyses are identified where the results are presented. The
-predictions use the collector's evidence available at each boundary
-under Equation~\ref{eq:receipt}. The experimental record includes
-checks of saved-output alignment, probability normalization and
-execution-level score recomputation for the later studies.
+Choices made after looking at test data are a common way for security
+evaluations of machine learning to go wrong~\cite{tmp1}, so each round
+followed a written contract. The contract, the seeds, and
+the hashes of the code, the training inputs, and the collection plan
+were sealed before any model of the round was trained and before any of
+its executions were collected. Each planned execution identifier was
+attempted once; executions that failed collection or the eligibility
+checks were recorded with their reason and not replaced. After
+collection, every model wrote its probabilities over all actions for
+every row to disk before the labels were joined, and the hashes of these
+files were fixed. Scoring then recomputed NLL independently from the
+stored log-probabilities and checked it against a reload of each saved
+checkpoint, along with row, column, and execution alignment and
+normalization. Criteria, limits, coefficients, and seeds were not
+changed after scores were seen. When a round failed, it was reported
+as failed and the next round was sealed as a new contract.
+% 근거: RECORD:48--54; CONTRACT_V3.md:15; METHOD_BASELINES_CONTRACT_SEALED.md
+% "재현·종료". 독립 재계산 오차·재적재 차이 수치(예: v3 FINAL_REPORT_KO.md:63,75)는
+% 7장 또는 부록에서 쓴다.
+
+\section{Form of the primary criteria}
+\label{sec:eval-criteria}
+
+Every primary criterion is a one-sided reading of a two-sided adjusted
+interval on a paired difference, student minus baseline. Stability
+holds on an unseen condition if the upper end of the interval for the
+difference in seed standard deviation is below zero. Where the
+contract includes it, mean improvement holds if the upper end for the
+difference in $L$ is below zero. Preservation holds on the seen
+condition if the upper end for the difference in $L$ is below a fixed
+limit: $+0.020$ on \texttt{ORIGINAL\_18} and, on ADS-24, 3\% of the
+baseline's mean NLL on the preservation runs, about $+0.043$. The
+families differ by round. In the v3 round the family has three
+contrasts, the seed standard deviation on \texttt{A+C FLAT} and on
+\texttt{A+C NESTED} and preservation on \texttt{ORIGINAL\_18}; an upper
+end below zero on the last also counts as improvement there. On ADS-24
+and in the generality rounds the family is stability, mean improvement,
+and preservation.
+% 근거: CONTRACT_V3.md:11; ADS24_CONTRACT_SEALED.md:27 (한도 3%);
+% ADS24_STAGE2_REPORT.md:21 (한도 +0.043482);
+% ARCH_GENERALITY_STAGE2_REPORT.md:9 (ADS 3%, PROPHET +0.020).
+% 주의: ADS-24 계약의 (b)(c)는 "상단 ≤"로 적혀 있다. 본문은 "below"로 썼다.
+% TODO(사람): ≤와 <의 차이를 본문에 밝힐지 정해 주세요.
+
+Intervals come from 100,000 paired resamples. In the in-house lab a
+resample draws complete configurations and moves their repetitions
+together; on ADS-24 it draws executions within scenarios. The same
+resample indices are applied to every group, so differences are paired
+by execution and by seed. A point estimate in a table may use every
+eligible execution even when the interval uses complete configurations
+only; the tables mark the distinction. Each family is Bonferroni
+adjusted: 98.3333\% for the three contrasts of the v3 round and of the
+ADS-24 second stage, 99.1667\% for the six encoder--dataset
+combinations of the generality rounds, and 99\% for the five
+baselines per dataset in the method-comparison collection. The 30 seeds
+are held fixed and are never resampled. Each interval therefore
+describes these 30 checkpoints on resampled executions and contains no
+uncertainty about the population of seeds from which they were drawn.
+% 근거: CONTRACT_V3.md:11 (100,000회, 98.3333%); ADS24_STAGE2_REPORT.md:15;
+% ARCH_GENERALITY_STAGE2_REPORT.md:9 (98.3333% 자료별 / 99.1667% 여섯 대비);
+% METHOD_BASELINES_CONTRACT_SEALED.md:37 (99%); RECORD:446.
+% 10-seed 1차는 12대비 보정을 썼다(PAPER_DEFINITIONS.md:52). 수준은 원 파일에서
+% 찾지 못해 적지 않았다.
+
+\section{Rounds and the status of evidence}
+\label{sec:eval-rounds}
+
+Table~\ref{tab:rounds} is the ledger of every round in which the method
+was tested, including the rounds that failed. Code names
+(\texttt{PEKD2}--\texttt{PEKD4}, \texttt{PAG1}) appear only here; the
+text uses the round names in the first column. The in-house loss level
+of \texttt{ORIGINAL\_18} differs widely between collections, so a score
+is compared only with scores from the same round. The two plain-GRU
+baselines of Chapter~\ref{ch:generality} come from different
+collections for the same reason and are never placed on one scale.
+% 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
+
+\begin{table}[htbp]
+\centering
+\caption{Ledger of the rounds that tested consensus distillation.
+Evaluation runs and rows are those scored in the round, not the
+unlabeled adaptation inputs. Status uses the three categories of
+Section~\ref{sec:eval-rounds}.}
+\label{tab:rounds}
+\small
+\begin{tabularx}{\textwidth}{@{}lrXlX@{}}
+\toprule
+Round & New fits & Evaluation runs / rows & Status & Outcome \\
+\midrule
+10-seed development & 30 & 157 / 1,611, already inspected
+  & development & no interval excluded zero; extension gate failed \\
+\quad target-count variants & 0 & 32 / 256 (3 targets), 32 / 448 (5 targets)
+  & development & no interval upper end below zero \\
+v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
+  & sealed & safety stop; not adjudicated \\
+v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
+  & sealed & stability passed; preservation not shown; not adopted \\
+v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
+  & sealed & all three criteria passed \\
+PAG1 re-inference & 0 & 156 / 1,600
+  & sealed & stability passed; preservation not shown \\
+ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982
+  & sealed & instability gate passed \\
+ADS-24, stage 2 & 60 & as stage 1
+  & sealed$^{a}$ & all three criteria passed \\
+Generality, stage 1 & 180 (+24 pilot) & 156 / 1,600; ADS-24 as stage 1
+  & sealed / development$^{b}$ & baselines measured \\
+Generality, stage 2 & 210 & as stage 1
+  & sealed / development$^{b}$ & all criteria passed in six combinations \\
+Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
+  & sealed / development$^{b,c}$ & reported contrasts; no pass rule \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+$^{a}$The 35 environment-evaluation runs had been scored once in
+stage~1, before the stage-2 contract was sealed.
+$^{b}$Sealed for the new in-house runs; a development comparison for
+ADS-24, whose evaluation runs had been inspected in earlier stages.
+$^{c}$The contract fixed the contrasts and their intervals but no
+pass-or-fail rule.
+The 10-seed round reused development runs; its 157 runs are not those
+of the v3 round.
+\end{minipage}
+\end{table}
+% 근거: PAPER_DEFINITIONS.md:52--56 (10-seed 157/1,611 = FLAT 30/330, NESTED
+% 32/352, C_ONLY 32/352, B+C 31/341, 원래 32/236; PEKD2 계획160·시도117·적격116;
+% PEKD3 159/1,633; PEKD4 157/1,611); RECORD:196 (PAG1 156/1,600);
+% RECORD:247 (ADS 환경 평가 35/5,639, 보존 15/2,982); RECORD:519--523 (fit 수);
+% ADS24_CONTRACT_SEALED.md:21 (1단계 관문); ADS24_STAGE2_REPORT.md;
+% ARCH_GENERALITY_CONTRACT_SEALED.md:51; METHOD_BASELINES_REPORT.md:3,10
+% (110실행·1,119행, 계획 160). PAG1 재추론의 사전 등록:
+% ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md:10.
+% TODO(사람): 10-seed 1차의 157실행이 "1단계 실행 재사용"(RECORD:516)이라는데,
+% 어느 1단계인지(135실행 개발 집합과의 관계) 확인해 주세요. 표 각주는 v3의
+% 157실행과 다른 실행이라는 점만 적었다.
+% TODO(사람): 방법 비교 계약에는 통과·실패 판정이 없고 네 통계와 99% 구간을
+% 보고하도록만 되어 있다(METHOD_BASELINES_CONTRACT_SEALED.md:35--37). 9.2절에서
+% "판정을 통과했다"고 쓰지 않도록 각주 c를 달았다. 맞는지 확인해 주세요.
+
+Every result in the following chapters carries one of three labels. A
+\emph{sealed criterion} is a contrast whose form, limit, and interval
+level were fixed in a contract before the round's models were trained
+and its executions collected, and which was then read once on those
+executions. A \emph{development comparison} is any contrast computed on
+executions that had already been inspected, or one that was not fixed
+in advance; this covers the 135-run development set used for the
+diagnosis of Chapter~\ref{ch:diagnosis} and the ADS-24 results of
+Chapter~\ref{ch:generality}. A \emph{post hoc analysis} is a quantity
+defined after the primary experiments, such as the decomposition of
+Chapter~\ref{ch:decomposition}; it supports interpretation and was used
+in no criterion. A sealed criterion on new in-house executions is
+still a repetition within one laboratory and one configuration design,
+not a test on another organization's hosts.
+% 근거: 개요 전체 규칙 "증거의 지위 표시"; RECORD:126, 334, 442, 443.
+% ADS-24 2단계는 표 각주 a의 단서를 단 sealed criterion으로 분류했다(개요 8장 주장 3).
