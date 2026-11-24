@@ -1,72 +1,350 @@
-\chapter{Supplementary Model Comparisons}
+\chapter{Earlier Relation-Model Evidence and Raw Values}
 \label{app:secondary-results}
+% 개요 13장(부록 B). 옛 원고의 표와 수치를 모았다. 새 결과(v3, PAG1, ADS-24,
+% 구조 일반성, 방법 비교)는 B.6의 원값 표에만 두고 옛 결과와 같은 표에 섞지 않았다.
+% label app:secondary-results는 03_task.tex, 04_method.tex의 참조 때문에 그대로 둔다.
+% 06_results.tex 끝의 \iffalse 블록(옛 세 절)은 B.1--B.5로 옮겼다. 그 블록과 그
+% 파일의 TODO 주석은 06장을 다시 열 때 지워 주세요(이 파일만 고치라는 지시).
 
-\section{Fixed probability combination and training-seed repeat}
+This appendix collects the results of the project's earlier stage, from
+which the relational residual of REL\_GLOBAL was carried over
+(Section~\ref{sec:method-relation-evidence}), and the six-digit values
+behind the rounded numbers of the main chapters. The earlier models
+were trained on different data from the FIT set: an extended set of 476
+runs with no benign worker for the relation comparison, 436 runs for the
+membership exchange control, and, for the event-wise history
+comparison, B-fold and C-fold fits with preprocessing from the 404-run
+split. They were also scored on their own evaluation runs. No score in
+Sections~\ref{sec:app-relations}--\ref{sec:app-mix} is therefore
+comparable with a score in Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition},
+and none of them enters a criterion of this thesis. Within this appendix,
+a model is compared only with models fitted for the same cohort.
+% 근거: 개요 C표; ORIG:THM_RELATION_VALUE_FOLLOWUP_FIXED_20261109/REPORT_KO.md:11,18,23
+% (FIT 476, 900 update, seed 11/29/47).
 
-For the probability combination in Equation~\ref{eq:mixture}, 144
-executions were attempted and 135 were eligible, yielding 1,427
-natural rows. The models and mixing rule were frozen before
-collection. Table~\ref{tab:mix} compares them on the same
-eligible inputs. The five seeds were 53, 67, 79, 97, and 113.
-All rows in the two A+C layouts had observed targets, so
-conditional mixing and an unconditional half-average produced the
-same predictions in those layouts, and the improvement there is that
-of the combined system rather than of the conditioning rule.
+The earlier stage used a base training split of 404 executions and 3,003
+natural rows and a development split of 75 other executions and 555
+rows. For the first target-aware comparison the training set grew to 476
+executions and 3,427 natural rows. Together with delayed views, which
+replay a boundary under a permitted alternative delivery schedule and
+keep its label, these yield 58,259 views. All views of an execution stay
+in its split, and the vocabulary is fixed from the training data.
+Table~\ref{tab:cohorts} lists the evaluation cohorts reported below.
+% TODO(사람): natural 전달 일정의 정의는 5장과 같이 [직접 기입]. 5장의 정의가
+% 들어가면 이 문단의 "natural rows"는 그 정의를 따르는 것으로 읽힌다.
 
-\begin{table}[tb]
+\begin{table}[htbp]
+\centering
+\caption{Evaluation cohorts of the earlier stage. Repeated evaluations on
+the same saved executions are grouped in one row. None of these cohorts
+is used in the main chapters.}
+\label{tab:cohorts}
+\begin{tabularx}{\textwidth}{@{}Xrr@{}}
+\toprule
+Condition and use & Executions & Rows \\
+\midrule
+Repeated runs in held target configurations (Section~\ref{sec:app-relations}) & 64 & 512 \\
+Four targets with unseen names (Section~\ref{sec:app-four}) & 64 & 704 \\
+New runs for the event-wise history comparison (Section~\ref{sec:app-local}) & 111 & 1,163 \\
+New runs for the fixed probability average (Section~\ref{sec:app-mix}) & 135 & 1,427 \\
+Original action task for the receipt-history lookup (Section~\ref{sec:app-mix}) & 64 & 472 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Relation versus relation-free predictors}
+\label{sec:app-relations}
+
+Four predictors were compared. EVENT GRU encodes each admitted START or
+END as a vector $e_i$ and runs a GRU~\cite{cho2014gru} over the events in
+receipt order,
+\begin{equation}
+  h_i = \operatorname{GRU}(e_i,h_{i-1}),
+  \qquad z_{\mathrm{event}} = f(h_T),
+  \label{eq:eventgru}
+\end{equation}
+where $T$ is the number of admitted events and $f$ returns 18 action
+scores; an empty prefix starts from a zero history. Flat history
+attention adds a readout, queried by the history state, over all
+received events as one pool. The target history model (THM) groups the
+received events by observed target. For the index set $I_g$ of target
+$g$ it forms the mean slot $m_g = |I_g|^{-1}\sum_{i\in I_g} e_i$, which
+the final history state then queries, so two groups with the same mean
+present the same slot. Relation attention (REL) keeps individual events:
+events of the same target first attend to each other, and a history
+query then reads the enriched events across groups. THM and REL are
+residual predictors on top of EVENT GRU (Figure~\ref{fig:model}),
+\begin{equation}
+  z(X_t) = z_{\mathrm{event}}(X_t) + \Delta z(X_t,\{I_g\}),
+  \qquad p(y\mid X_t) = \operatorname{softmax}(z(X_t))_y ,
+  \label{eq:relation}
+\end{equation}
+and a prefix without usable target evidence follows the EVENT GRU path.
+Each model was fitted for 900 updates of 32 sampled execution
+occurrences with the seeds 11, 29, and 47. The active parameter counts
+were 48,970, 57,658, 57,658, and 59,962 in the order above, and the
+target-aware models shared one target parser.
+% 질문 A3의 답이 없어 fig:model은 옛 잔차 구조 그대로 이 부록에 둔다(개요 13장 B.1).
+% 식은 집계 방식의 차이만 보이며 구현의 투영층은 생략했다(옛 4.2절).
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,font=\small,
+  box/.style={draw=black!55,rounded corners=2pt,align=center,inner sep=5pt,
+    minimum width=3.1cm,minimum height=0.9cm},
+  resultbox/.style={box,fill=black!4,minimum width=2cm},
+  bluepath/.style={->,semithick,draw=blue!57!black},
+  greenpath/.style={->,semithick,draw=teal!70!black}]
+  \node[box,fill=black!4] (input) at (0,0) {Received events\\before boundary};
+  \node[box,fill=blue!5] (history) at (4,0.9) {Receipt order\\Event GRU};
+  \node[box,fill=teal!7] (rel) at (4,-0.9) {Observed target groups\\Relation readout};
+  \node[draw,circle,fill=black!4,inner sep=3pt] (plus) at (8.25,0) {$+$};
+  \node[resultbox] (pred) at (10.55,0) {Softmax\\18 probabilities};
+  \draw[bluepath] (input.east) -- ++(0.44,0) |- (history.west);
+  \draw[greenpath] (input.east) -- ++(0.44,0) |- (rel.west);
+  \draw[bluepath] (history.east) -| node[pos=.32,above] {Base scores} (plus.north);
+  \draw[greenpath] (rel.east) -| node[pos=.32,below] {Correction} (plus.south);
+  \draw[->,dashed,black!60] (history.south) -- node[midway,right,font=\scriptsize]
+    {History query} (rel.north);
+  \draw[->,semithick] (plus.east) -- (pred.west);
+\end{tikzpicture}
+\caption{The earlier residual models THM and REL. The receipt-order
+history supplies the base scores and a query for the target-linked
+evidence, and the relation readout supplies a correction to the action
+scores. This is not the architecture of REL\_GLOBAL.}
+\label{fig:model}
+\end{figure}
+
+The models were frozen before 64 new executions of 16 held
+configurations were collected. REL had the lowest loss and the highest
+row accuracy, and THM also improved on both relation-free models
+(Table~\ref{tab:relations}). THM's NLL difference from EVENT GRU was
+$-0.149750$, with a Bonferroni-adjusted 97.5\% interval of
+$[-0.156307,-0.143693]$, and its difference from flat history attention
+was $-0.174032$ $[-0.180327,-0.166922]$. Intervals were computed only for
+these two THM contrasts, so the REL--THM comparison in the table is
+descriptive. The resampling draws repeated runs within the same
+configurations, so the intervals describe uncertainty over repetitions
+of those configurations rather than over new ones.
+
+\begin{table}[htbp]
+\centering
+\caption{Target-aware prediction on 64 new executions and 512 rows from
+16 held configurations (FIT 476, 900 updates). NLL is execution-weighted
+and accuracy is per row; each value averages the scores of seeds 11, 29,
+and 47.}
+\label{tab:relations}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Predictor & NLL & Top-1 accuracy \\
+\midrule
+EVENT GRU & 0.217124 & 89.06\% \\
+Flat history attention & 0.241406 & 87.76\% \\
+Target history model (THM) & 0.067375 & 97.27\% \\
+Relation attention (REL) & \textbf{0.045797} & \textbf{97.98\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Four targets with unseen names}
+\label{sec:app-four}
+
+A separate evaluation of 64 executions and 704 rows placed four targets
+with names not seen in training, whereas training had used two- and
+three-target configurations. REL scored 0.066618 and EVENT GRU 0.402682.
+The REL checkpoint here is the one saved after 1,061 updates, not the
+900-update checkpoint of Table~\ref{tab:relations}, so the two REL
+scores are not read as a change between conditions. The test widens the
+number and names of objects within the same task family; it does not
+introduce new attack procedures.
+% 근거: 개요 C표(4대상, 64실행·704행, REL 1,061-update checkpoint).
+
+\section{Membership exchange control}
+\label{sec:app-exchange}
+
+The exchange control asks whether the gain of the target-aware models
+can come from the group layout alone. THM was trained, on 436 FIT runs
+with three seeds, either with the observed memberships or with exchanged
+memberships that keep the number and sizes of the groups and move each
+START together with its linked END. On a 16-run development set the
+correct and exchanged memberships gave losses of 0.035109 and 0.120010.
+On a reused set of 127 runs and 508 rows, which had been inspected
+during earlier development, they gave 0.058365 and 0.086855. The paired
+95\% intervals for correct minus exchanged membership were
+$[-0.166172,-0.024583]$ and $[-0.052213,-0.002666]$. An exchanged
+membership can contradict a visible command path, so the control shows
+the value of the observed membership relative to such contradictory
+groupings, not relative to every alternative grouping.
+% 소속 교환 대조의 설명은 논문 전체에서 이 절에서 한 번만 한다(개요 전체 규칙).
+
+\section{Event-wise history under benign interleaving}
+\label{sec:app-local}
+
+When benign work is interleaved with the source procedure, the final
+history vector summarizes every admitted event, and an older
+target-linked event can carry a context different from the final state.
+Local History attaches the history state $h_i$ to the relation-enriched
+representation of event $i$ before pooling; the Final History control
+attaches the same final state $h_T$ to every event. The two share inputs,
+readout, and capacity. Replacing $h_i$ by $h_T$ changes both the states
+the readout sees and the paths by which the recurrent encoder receives
+gradients, so the comparison is between two complete placements of
+history. Both were fitted with the seeds 11, 29, and 47 on the B-fold
+and on the C-fold (Section~\ref{sec:conditions}) and scored on 111 new
+eligible executions with 1,163 rows.
+
+Local History was better than Final History most consistently when B
+and C ran concurrently (Table~\ref{tab:local}). The Bonferroni-adjusted
+99.375\% intervals over eight contrasts for Local minus Final History
+NLL were $[-0.364155,-0.152826]$ in the B-fold and
+$[-0.494571,-0.210046]$ in the C-fold. With only C running, Final
+History was better in the C-fold, so a score from this collection is
+meaningful only together with its benign workload and training fold.
+
+\begin{table}[htbp]
+\centering
+\caption{Event-wise and final-state history exposure on selected
+conditions of the 111-execution collection. \texttt{B+C} and
+\texttt{C\_ONLY} each have 32 executions and 352 rows, and both folds are
+scored on the same executions of a condition.}
+\label{tab:local}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Benign workload & Training fold & Local History & Final History & Event-only \\
+% TODO(사람): "Event-only" 열의 값은 원 파일 EVENT 열의 여섯 자리 값과 같다
+% (0.510148 / 0.672836 / 1.204049). 그러나 EVENT가 표 tab:relations의 EVENT GRU라는
+% 정의는 원 파일에서 찾지 못해 열 이름은 바꾸지 않았다(answers 7-(3)). EVENT GRU가
+% 맞으면 열 이름을 "EVENT GRU"로 바꿔 주세요.
+\midrule
+\texttt{B+C} & B & \textbf{0.155520} & 0.409578 & 0.510148 \\
+\texttt{B+C} & C & \textbf{0.061857} & 0.409930 & 0.672836 \\
+\texttt{C\_ONLY} & C & 0.328044 & \textbf{0.136957} & 1.204049 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A further collection compared Local History with task adaptations of
+three prior architectures: BiTA~\cite{nayeri2026bita},
+ORTHRUS~\cite{jiang2025orthrus}, and CL-AP$^2$~\cite{liu2024clap2}. The
+adaptations use this thesis's inputs, labels, and receipt boundary and
+are not reproductions of the original systems. Of 112 attempted new
+executions, 94 of 96 benign and 16 of 16 original-procedure executions
+were eligible, 110 in all, and no model was refitted. In the C-fold
+\texttt{B+C} condition the NLLs were 0.071534 for Local History,
+0.079912 for BiTA, 0.193812 for ORTHRUS, and 1.051944 for CL-AP$^2$; the
+interval for the Local History--BiTA difference, adjusted over the 24
+contrasts of the collection, was $[-0.041776, 0.067143]$ and included
+zero. In the C-fold \texttt{C\_ONLY} condition the BiTA adaptation scored
+0.125017 against 0.280621 for Local History, and the adjusted interval
+for BiTA minus Local History was $[-0.247739,-0.073143]$.
+% 근거: ORIG:SLOT_LOCAL_BITA_CONFIRM_20261115/FINAL_REPORT_KO.md:3 (112 시도, 배경 94/96,
+% 원래 16/16), :12, :14, :33, :56 (24대비 Bonferroni, C-fold B+C [-0.041776, 0.067143]).
+
+\section{Probability averaging, retraining, frequency baselines, and inference cost}
+\label{sec:app-mix}
+
+At a prediction boundary, a process record, its target, and its semantic
+action answer different questions: what Windows audited, which object
+may recur across processes, and which unit the forecast is scored on.
+The recorded case of Section~\ref{sec:recorded-case} shows both
+distinctions, since one target is associated with several processes and
+an exit status means different things on different processes. The
+earlier stage compared the target-aware models with two simpler
+references. A prior estimated from training labels puts the same
+distribution at every boundary and does well when labels are
+concentrated. A lookup over short received histories is stronger when
+training and evaluation share repeated patterns, but its reliability
+depends on how many training executions support each key, and routine
+processes can create a new key even when the relevant part of the
+source procedure is unchanged.
+% 옛 2.4절 "Evidence granularity and forecasting baselines"의 배경 문단을 줄여 옮겼다.
+
+On the same three-target development set as that case, a post hoc
+comparison of three seeds looked at the decision of
+\texttt{THME0064}, whose next recorded action was synthetic file search.
+The target-wise GRU ranked file copy first on all three seeds, whereas
+REL ranked file search first on two. The probabilities assigned to file
+search were 0.434, 0.450, and 0.481 for the target-wise GRU and 0.984,
+0.483, and 0.517 for REL.
+% TODO(사람): [직접 기입] target-wise GRU가 어떤 모델인지(THM, 대상 그룹마다 돌린
+% GRU, 다른 변형) 정의를 넣어 주세요. 이 부록의 모델 이름과 맞추면 문장도 고치겠습니다.
+
+The fixed combination averages a single-history baseline
+$p_{\mathrm{base}}$ with a separately trained dual-history model
+$p_{\mathrm{dual}}$, labeled Full Step in the tables, which has two
+independent 64-dimensional recurrent states updated once per admitted
+event without assigned attacker or benign roles. With $G(X_t)$ the set
+of observed target groups,
+\begin{equation}
+  p_{\mathrm{mix}}(\cdot\mid X_t)=
+  \begin{cases}
+    \tfrac12 p_{\mathrm{base}}(\cdot\mid X_t)
+      + \tfrac12 p_{\mathrm{dual}}(\cdot\mid X_t), & G(X_t)\ne\varnothing,\\
+    p_{\mathrm{base}}(\cdot\mid X_t), & G(X_t)=\varnothing .
+  \end{cases}
+  \label{eq:mixture}
+\end{equation}
+The models and the rule were frozen before collection, with the seeds
+53, 67, 79, 97, and 113. Of 144 attempted executions, 135 were eligible,
+with 1,427 natural rows (Table~\ref{tab:mix}). Against the baseline,
+the average changed NLL by $-0.055074$ in \texttt{A+C FLAT} and
+$-0.083086$ in \texttt{A+C NESTED}. The paired bootstrap over complete
+configurations, using 30 flat and 26 nested runs from configurations
+with both repeats, gave Bonferroni-adjusted 97.5\% intervals of
+$[-0.092701,-0.027024]$ and $[-0.145118,-0.038204]$. The system improved
+in four of five seeds in each A+C layout. Every row of the two A+C
+layouts had an observed target, so there the conditional rule and an
+unconditional half-average coincide, and the gain is that of the
+combined system rather than of the conditioning. On the 96 target-free
+rows of the \texttt{ORIGINAL\_18} subset the rule kept the baseline
+distribution. \texttt{C\_ONLY} shows its cost: the conditional average
+scored 0.062979, against 0.060420 for the baseline and 0.054544 for the
+unconditional average.
+% TODO(사람): 확률 평균(seed 53/67/79/97/113)과 재학습(seed 127/149/163/181/199)
+% 모델이 B-fold, C-fold 중 어느 fold로, 몇 개의 FIT 실행으로 학습되었는지 원 파일에서
+% 확인하지 못했습니다(개요 C표). 알려 주시면 이 문단에 fold 문장 한 줄을 넣겠습니다.
+
+\begin{table}[htbp]
 \centering
 \caption{Fixed probability combination on newly collected runs from the
-same laboratory. All values are execution-weighted NLL. Rows with no
-usable target receive the baseline distribution.}
+same lab. All values are execution-weighted NLL. Rows with no usable
+target receive the baseline distribution.}
 \label{tab:mix}
 \begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
 \toprule
 Condition & Runs / rows & Baseline & Full Step (dual history) & Conditional average \\
 \midrule
-A+C, flat & 31 / 341 & 0.135230 & 0.107396 & \textbf{0.080156} \\
-A+C, nested & 29 / 319 & 0.160900 & \textbf{0.075783} & 0.077815 \\
-C-only & 27 / 297 & \textbf{0.060420} & 0.091372 & 0.062979 \\
-B+C & 32 / 352 & 0.052914 & 0.059751 & \textbf{0.039371} \\
-Original 18-action task & 16 / 118 & 0.645963 & 0.668895 & \textbf{0.640501} \\
+\texttt{A+C FLAT} & 31 / 341 & 0.135230 & 0.107396 & \textbf{0.080156} \\
+\texttt{A+C NESTED} & 29 / 319 & 0.160900 & \textbf{0.075783} & 0.077815 \\
+\texttt{C\_ONLY} & 27 / 297 & \textbf{0.060420} & 0.091372 & 0.062979 \\
+\texttt{B+C} & 32 / 352 & 0.052914 & 0.059751 & \textbf{0.039371} \\
+\texttt{ORIGINAL\_18} & 16 / 118 & 0.645963 & 0.668895 & \textbf{0.640501} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-For the full eligible set, the average's loss differences versus the
-baseline were $-0.055074$ in the flat A+C layout and $-0.083086$ in the
-nested layout. In paired bootstrap estimates using complete
-configurations, the Bonferroni-adjusted 97.5\% intervals were
-$[-0.092701,-0.027024]$ and $[-0.145118,-0.038204]$,
-respectively. The intervals used 30 flat and 26 nested runs from
-configurations with both repetitions. The system improved in
-four of five seeds on each A+C layout. The conditional rule
-retained the baseline distribution on all 96 target-free rows of
-the original-task subset. C-only shows the trade-off of the rule:
-the conditional average scored 0.062979, compared with 0.060420
-for the baseline and 0.054544 for the unconditional average.
+A matched retraining refitted every model from scratch with the seeds
+127, 149, 163, 181, and 199 and reused the same 135 evaluation
+executions (Table~\ref{tab:matched}). The paired controls apply the same
+rule with a single wider recurrent model, a BiTA-inspired aggregator,
+or an independently trained second baseline. The dual-history average
+reduced NLL against its own baseline in both A+C layouts, but all four
+adjusted 98.75\% intervals against the wider single-history and BiTA
+combinations included zero, and so did the separate post hoc comparison
+with an average of two independent baseline checkpoints. The gain of
+the fixed combination therefore cannot be attributed to the dual-history
+architecture.
 
-A matched retraining comparison fitted all models from scratch with
-five new seeds (127, 149, 163, 181, and 199) and reused the same 135
-evaluation executions. Table~\ref{tab:matched} shows the resulting
-A+C scores. The dual-history average reduced NLL versus its own
-baseline in both layouts. Relative to the wider single-history
-and BiTA combinations, all four adjusted 98.75\% intervals included
-zero. The separate, post-hoc comparison against an average of two
-independent baseline checkpoints also yielded intervals that
-included zero in both layouts. Because these intervals cross zero,
-the gains of the fixed combination cannot be attributed to the
-dual-history architecture itself.
-
-\begin{table}[tb]
+\begin{table}[htbp]
 \centering
-\caption{A+C comparison after training with five new seeds. All
-combinations apply the same target-conditioned 50:50 average and share
-the same baseline within each seed. The evaluation executions are
-reused from Table~\ref{tab:mix}.}
+\caption{A+C comparison after training with five new seeds. Every
+combination uses the target-conditioned 50:50 average of
+Equation~\ref{eq:mixture} and shares the baseline within each seed. The
+evaluation executions are those of Table~\ref{tab:mix}.}
 \label{tab:matched}
 \begin{tabularx}{\textwidth}{@{}Xrr@{}}
 \toprule
-Predictor & A+C, flat & A+C, nested \\
+Predictor & \texttt{A+C FLAT} & \texttt{A+C NESTED} \\
 \midrule
 Single baseline & 0.192507 & 0.176440 \\
 Baseline + dual history & 0.123421 & \textbf{0.108952} \\
@@ -76,26 +354,120 @@ Baseline + BiTA-inspired aggregator & 0.124414 & 0.129035 \\
 \end{tabularx}
 \end{table}
 
-\section{Observed-history support on target-poor prefixes}
+The frequency baseline is a non-neural lookup. Its key is the received
+START order of records with an observed action hint, derived from the
+observed commands, together with whether the latest such START has a
+uniquely linked received END. Each training execution casts one vote per
+key, after averaging its own labeled occurrences. With $C_k$ the vote
+vector, $n_k$ the number of supporting executions, and $\pi$ the
+training prior,
+\begin{equation}
+  q_k = \frac{C_k+\pi}{n_k+1},
+  \label{eq:table}
+\end{equation}
+and an unseen key returns $\pi$. Built from 603 training executions and
+4,824 natural rows, the table scored 0.495788 on the 64-execution,
+472-row original-action cohort, against 2.843204 for the prior alone.
+To separate the key from the effect of injecting extra probability
+mass, either $q_k$ or $\pi$ was mixed into a frozen model with the same
+small fixed weight on the 386 target-free rows of that cohort. The
+mixture gave 0.313385 overall with the table and 0.317622 with the
+prior, and the adjusted 98.75\% interval for their difference was
+$[-0.026307,0.021147]$. On the 660 natural rows of the two A+C layouts
+in Table~\ref{tab:mix}, no exact key had training support, so the
+table returned the prior on every row; keeping unclassified START
+records in the key gave the same fallback. A coarser stage key found
+support on 161 of 341 flat and 148 of 319 nested rows and scored
+1.181161 and 1.268327. Exact lookup loses its support once benign
+activity changes the sequence of received events on which the key
+depends.
 
-The frequency table in Equation~\ref{eq:table} was constructed
-from 603 training executions and 4,824 natural rows. For the
-64-execution, 472-row original-action cohort, the stand-alone
-table scored 0.495788, versus 2.843204 for the training prior alone.
-For 386 target-free rows in this cohort, mixing the table into
-a frozen model yielded 0.313385 overall, compared with 0.317622
-for the same mixture using the training prior. The adjusted
-98.75\% interval for the difference between the mixtures was
-$[-0.026307,0.021147]$. The table thus provides a useful simple
-forecast in this cohort, with uncertain additional value once
-the learned model and prior mixing are available.
+For the fixed A+C system, the CPU time for one batch of 32 prepared rows
+from the new runs, with two threads, 20 warm-up passes, and 100 timed
+passes, had a median of 9.32~ms for the baseline forward and 30.91~ms
+for the two models with the conditional average. These are batch
+timings in the measured environment, not per-row latency, and they
+exclude log receipt, preprocessing, and model loading.
+% 근거: ORIG:PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/FINAL_REPORT_KO.md:81
+% (32행 batch, CPU 2 threads, 20회 warm-up+100회, 9.32 / 30.91 ms). 옛 Discussion에서 옮겼다.
 
-The same key definition was checked on the 660 natural rows across
-the two A+C layouts in Table~\ref{tab:mix}. None had an
-exact key supported in training, so the table returned the same
-training prior on every row. Preserving unclassified START
-records in the key yielded the same fallback pattern. A coarser
-stage key found support on 161 of 341 flat rows and 148 of 319
-nested rows. It scored 1.181161 and 1.268327, respectively. Exact lookup thus
-loses its support when benign activity changes the sequence of
-received events on which the key depends.
+\section{Raw values for the main results}
+\label{sec:app-raw}
+
+Table~\ref{tab:app-raw} lists, to six decimals, the contrasts and gate
+statistics that the main chapters report to three or four. The evidence
+status of each block is that given where the result is reported: the v3
+and PAG1 families are sealed criteria, ADS-24 stage~1 is the sealed
+gate of that study, and the ADS-24 half of the method comparison is a
+development comparison on inspected runs. The values come from the
+research record and from the reports it cites, and the rounded values
+in the main text follow from them.
+
+\begin{table}[htbp]
+\centering
+\caption{Six-digit values behind the main results. Differences are
+the first group minus the second. For the method comparison, each
+method minus the CD student, so positive values favor CD; the in-house
+score there is the 1:1 average of \texttt{A+C FLAT} and
+\texttt{A+C NESTED}.}
+\label{tab:app-raw}
+\small
+\begin{tabularx}{\textwidth}{@{}Xrl@{}}
+\toprule
+Quantity & Estimate & Interval \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{v3 round, Bonferroni 98.3333\% over three contrasts (Section~\ref{sec:results-v3})}} \\
+\texttt{A+C FLAT}, SD(KD\_ALL) $-$ SD(REL\_GLOBAL) & $-0.045624$ & $[-0.070590, -0.026229]$ \\
+\texttt{A+C NESTED}, SD(KD\_ALL) $-$ SD(REL\_GLOBAL) & $-0.050396$ & $[-0.070833, -0.032222]$ \\
+\texttt{ORIGINAL\_18}, KD\_ALL $-$ REL\_GLOBAL NLL & $-0.060741$ & $[-0.130850, -0.004082]$ \\
+\texttt{ORIGINAL\_18}, KD\_ALL $-$ KD\_ENV\_TOP5 NLL (95\%) & $-0.053708$ & $[-0.120492, +0.006306]$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{v2 round, separate re-check (95\%)}} \\
+\texttt{ORIGINAL\_18}, KD\_ENV\_TOP5 $-$ REL\_GLOBAL NLL & $+0.020252$ & $[-0.006494, +0.053519]$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{PAG1 re-inference, Bonferroni 98.3333\% (Section~\ref{sec:results-pag1})}} \\
+A+C seed SD difference, KD\_ALL $-$ REL\_GLOBAL & $-0.052192$ & $[-0.073685, -0.034516]$ \\
+A+C seed SD difference, KD\_ENV\_TOP5 $-$ REL\_GLOBAL & $-0.058469$ & $[-0.081699, -0.038253]$ \\
+\texttt{ORIGINAL\_18}, KD\_ALL $-$ REL\_GLOBAL NLL & $-0.049603$ & $[-0.140958, +0.020741]$ \\
+\texttt{ORIGINAL\_18}, KD\_ENV\_TOP5 $-$ REL\_GLOBAL NLL & $+0.008939$ & $[-0.012341, +0.039212]$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{ADS-24 stage 1, 30 REL\_GLOBAL seeds (Chapter~\ref{ch:ads24})}} \\
+Environment-evaluation NLL, seed mean & 2.276041 & \\
+Seed standard deviation (95\%) & 0.162925 & $[0.140425, 0.190702]$ \\
+Best seed (301008) / worst seed (301005) NLL & 1.953152 / 2.690182 & \\
+Preservation-condition NLL, seed mean & 1.449387 & \\
+Rank correlation of agreement with NLL & $+0.127475$ & permutation $p=0.503125$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Method comparison, in-house, Bonferroni 99\% over five methods (Section~\ref{sec:gen-methods})}} \\
+Weight averaging, seed SD & 0.663830 & $[0.593308, 0.744949]$ \\
+Weight averaging, mean NLL & 0.984864 & $[0.874657, 1.085095]$ \\
+Pseudo-labeling, seed SD & 1.193680 & $[1.102631, 1.328560]$ \\
+Pseudo-labeling, mean NLL & 1.789300 & $[1.602264, 1.973016]$ \\
+Entropy minimization, seed SD & 0.290769 & $[0.206665, 0.443927]$ \\
+Entropy minimization, mean NLL & 2.373905 & $[1.703380, 3.408069]$ \\
+FIT-input distillation, seed SD & 0.802084 & $[0.730275, 0.882835]$ \\
+FIT-input distillation, mean NLL & 1.065409 & $[0.920974, 1.206364]$ \\
+Geometric-pool distillation, seed SD & 0.003269 & $[-0.003391, 0.017722]$ \\
+Geometric-pool distillation, mean NLL & $-0.010878$ & $[-0.066843, 0.026656]$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Method comparison, ADS-24, Bonferroni 99\% over five methods (development comparison)}} \\
+Weight averaging, seed SD & 0.147918 & $[0.115694, 0.179608]$ \\
+Weight averaging, mean NLL & 0.071385 & $[0.053901, 0.088954]$ \\
+Pseudo-labeling, seed SD & 0.412088 & $[0.344512, 0.481907]$ \\
+Pseudo-labeling, mean NLL & 1.225292 & $[1.003717, 1.436922]$ \\
+Entropy minimization, seed SD & 0.463392 & $[0.394157, 0.540560]$ \\
+Entropy minimization, mean NLL & 4.743466 & $[4.088409, 5.347078]$ \\
+FIT-input distillation, seed SD & 0.166284 & $[0.131466, 0.200113]$ \\
+FIT-input distillation, mean NLL & 0.096777 & $[0.075206, 0.119658]$ \\
+Geometric-pool distillation, seed SD & 0.003518 & $[0.001652, 0.005974]$ \\
+Geometric-pool distillation, mean NLL & 0.107978 & $[0.082388, 0.133180]$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 근거: v3 = ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/FINAL_REPORT_KO.md (사전 주 가족,
+% 보조 비교 표); RECORD:194--195. v2 재확인 = ORIG:PROPHET_ENV_KD_V2_DIAG_RECHECK_20261120/
+% FINAL_REPORT_KO.md:42. PAG1 = RECORD:196. ADS-24 1단계 = RECORD:258--260.
+% 방법 비교 = ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md "주 비교: 단일
+% 기준선 − KD_ENV"(원 파일의 KD_ENV = CD student). 원 파일 이름 대응은 9.2절 주석과 같다.
+% 원 파일의 정확도 SD·최저 정확도 차이와 본 조건 보존 열은 9장 표에 반올림 값이 없어
+% 이 표에 넣지 않았다.
