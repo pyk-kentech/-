@@ -1,165 +1,291 @@
-\chapter{Prediction Model Design}
+\chapter{Baseline Predictor and Environment-Consensus Distillation}
 \label{ch:method}
+% 개요 4장. 다시 썼다. 옛 EVENT GRU/flat/THM/REL/Local History/확률 평균/
+% 빈도 기준선의 정의, 식 eq:eventgru·eq:relation·eq:mixture·eq:table, 그림
+% fig:model은 4.2절의 요약과 부록 B로 옮긴다(개요 13장 B.1, B.5). 질문 A3의 답이
+% 없어 fig:model은 이 장에 두지 않는다. 그림의 TikZ 원본은 커밋 28c02eb의 이
+% 파일에 있다. 부록 B를 다시 쓸 때 fig:model, eq:mixture, eq:table 라벨을 그쪽에
+% 살려야 b_supplemental_results.tex의 기존 참조가 깨지지 않는다.
 
-The predictor receives the audit prefix $X_t$ and returns one
-probability for each of the 18 action categories. Its two principal
-inputs are the order in which records reached the collector and
-the observed relationships among records. Order locates an event
-relative to preceding activity, while target membership distinguishes
-which of several earlier outcomes belongs to the object currently in
-view. The design retains a sequence path so that the predictor can
-still use received events when the available records do not identify
-an eligible target.
+This chapter defines the baseline predictor, REL\_GLOBAL, and the
+training change that turns it into a CD student. The two share one
+architecture; they differ only in the loss used during training. The
+chapter also fixes the names of the trained groups used in later
+chapters and states what was changed when the method was moved to
+ADS-24 and to three general encoders.
 
-The chapter defines the following models. EVENT GRU and flat history
-attention test how much a forecast can recover from order and
-flexible history retrieval. The target history model (THM) and
-relation attention (REL) add explicit observed target membership and
-differ in whether they summarize each group before or after modeling
-relationships among events; both are residual predictors that add a
-target-based correction to EVENT GRU (Figure~\ref{fig:model}). Local
-History and Final History retain a target-aware readout and differ in
-the recurrent state attached to each event. The dual-history model and
-its probability average with a single-history baseline, and a
-non-neural frequency baseline, complete the comparisons.
+\section{The baseline predictor}
+\label{sec:method-baseline}
 
-\section{Receipt-order predictor}
+REL\_GLOBAL maps the received prefix $X_t$ of
+Equation~\ref{eq:receipt} to a distribution over the 18 actions. Each
+admitted event is encoded as a 48-dimensional vector, and event-level
+gated recurrent units (GRUs)~\cite{cho2014gru} with a 64-dimensional
+state advance once per admitted event in receipt order. A relational
+residual adds a correction to the action scores, computed over events
+that share an observed target key, so that the result recorded for one
+target is kept apart from the results of the others. Two regularizers
+complete the model. LogitNorm~\cite{wei2022mitigating} computes the cross-entropy on
+logits divided by their $L_2$ norm and scaled by a temperature $\tau$,
+here $\tau=0.1$; it limits how far the training loss can be lowered by
+inflating the logits. Input-gradient regularization~\cite{ross2017improving} penalizes
+the gradient of the loss with respect to the input representation,
+which discourages predictions that change sharply with small changes
+to individual events. Our variant, $\mathcal{R}_{\mathrm{GLOBAL}}$,
+applies the penalty to events drawn at random from the whole prefix.
+The model has 59,882 parameters.
+% 근거: RECORD:46 (48차원, 사건별 GRU, 대상 key 관계 잔차, LogitNorm τ=0.1,
+% 규제 .1, 59,882). GRU 폭 64: RECORD:157의 ADS-24 적용판 "그대로 둔 것"
+% (GRU 64). 자체 실험실 모델의 폭도 64인지는 질문 A3에서 확인 요청 중이다.
+% R_GLOBAL은 원 파일의 GLOBAL_COUNT_MATCH: "동일 선택 수의 전체 사건 무작위
+% 규제"(ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/PAPER_DEFINITIONS.md §4).
+% TODO(사람): 질문 A3. REL_GLOBAL의 사건 인코더, 사건별 GRU, 대상 key 관계
+% 잔차의 식을 쓰려면 원 계약이나 코드 문서가 필요합니다. "동일 선택 수"가 무엇의
+% 개수와 맞춘 것인지(worker 사건 수?), 규제가 쓰는 Rademacher trace의 역할,
+% LogitNorm 정규화가 추론 때도 적용되는지 알려 주세요. 답이 오면 관계 잔차 식을
+% 이 자리에 넣고, 그림 fig:model을 새 구조로 다시 그릴지 정합니다.
 
-The event encoder maps each admitted START or END to a vector $e_i$.
-A gated recurrent unit (GRU)~\cite{cho2014gru} processes the resulting
-sequence in receipt order. For the event-wise checkpoints used in
-the later comparisons, its state advances as
+Training uses the 603 runs of the FIT set
+(Section~\ref{sec:conditions}). The objective is
 \begin{equation}
-  h_i = \operatorname{GRU}(e_i,h_{i-1}),
-  \qquad z_{\mathrm{event}} = f(h_T).
-  \label{eq:eventgru}
+  \mathcal{L}_{\mathrm{base}}
+  = \mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}
+  + 0.1\,\mathcal{R}_{\mathrm{GLOBAL}},
+  \label{eq:base-loss}
 \end{equation}
-Here $T$ is the number of admitted events and $f$ outputs 18 action
-scores. The softmax of these scores is the distribution of the
-EVENT GRU baseline. A zero-initialized history handles a boundary with
-an empty prefix. The flat history attention comparator adds a readout,
-queried by the history state, that attends over all received events
-as a single pool without target grouping.
+where $\mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}$ is the 18-way action
+cross-entropy with each FIT run given equal weight. Each model is
+trained for 1,346 updates of 32 occurrences with AdamW~\cite{loshchilov2017decoupled}
+(weight decay 0.01, gradient clipping at 2), and the learning rate
+follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
+kept; no checkpoint is selected by a validation score. All 30 seeds of
+a configuration share this procedure and differ only in the seed as
+defined in Chapter~\ref{ch:introduction}.
+% 근거: RECORD:151; PAPER_DEFINITIONS.md §2 (실행 동등 18-way CE, 계수 .1의
+% GLOBAL_COUNT_MATCH, weight decay .01, clip 2, 마지막 checkpoint).
+% 원 파일은 "404-only 전처리"도 적는다. 정의가 본문에 없어 쓰지 않았다.
+% TODO(사람): "404-only 전처리"가 무엇인지 알려 주시면 한 구절로 넣겠습니다.
 
-\section{Target history and relation attention}
+\section{Evidence for the relational residual}
+\label{sec:method-relation-evidence}
 
-Let $I_g$ be the index set of received events assigned to observed
-target $g$. The target history model (THM) computes a mean slot for
-each nonempty target group,
+The relational residual is kept from earlier models in this project. An
+earlier relation model, REL, read target groups through the same kind
+of target-key relation path, and it was compared with EVENT GRU, the
+same event-level recurrent predictor without any relation path. On 64
+new runs (512 rows) from 16 held-out configurations, averaged over
+three seeds, the mean NLL was 0.217 for EVENT GRU and 0.046 for REL, and
+accuracy rose from 89.1\% to 98.0\%. A control that exchanged target
+membership between groups while keeping the group sizes fixed raised
+the loss of the relation model from 0.058 to 0.087 on 127 runs (508
+rows) that had already been inspected, again with three seeds. The
+relation path therefore used which records belong to which target, not
+only how many records each group held.
+% 근거: ORIG:THM_RELATION_VALUE_FOLLOWUP_FIXED_20261109/REPORT_KO.md:11,18,23
+% (EVENT 0.217124 → REL 0.045797, 89.06% → 97.98%, FIT 476 확장, 900 update,
+% seed 11/29/47, 새 64실행·512행, 16개 보류 구성). 소속 교환 0.058365 →
+% 0.086855, FIT 436, 이미 열람한 127실행·508행, 3 seed(개요 C표의 대조).
+% 소속 교환 대조의 설명은 부록 B.3에서 한 번만 한다.
+
+These results come from a different stage of the project and are not
+comparable with the numbers in later chapters. Both models were trained
+on an extended set of 476 FIT runs (436 for the exchange control) with
+no benign worker and for 900 updates, so neither the B-fold nor the
+C-fold applies, and they were evaluated on their own runs. We use them
+only as the reason for keeping a relational residual in the baseline.
+None of the criteria in this thesis tests that residual, and
+Appendix~\ref{app:secondary-results} gives the definitions of the
+earlier models and the full tables.
+% TODO(사람): 질문 A2. REL(FIT 476, 정상 worker 없음, 900 update)에서
+% REL_GLOBAL(C-fold 603 FIT, LogitNorm, GLOBAL_COUNT_MATCH, 1,346 update)까지
+% 무엇이 언제 더해졌는지 알려 주세요. ORIG:SLOT_LOCAL_BITA_MATCHED_20261115 표의
+% "hard REL" 열이 REL_GLOBAL의 직전 형태인지도 확인이 필요합니다. 답이 오면
+% 이 문단에 계보 문장 한 줄을 넣습니다. 지금은 "같은 대상 key 관계 경로를 쓴
+% 앞선 모델"이라고만 썼습니다.
+
+\section{Consensus distillation}
+\label{sec:method-cd}
+
+A CD student has the architecture of REL\_GLOBAL and no additional
+parameters, so at inference it is the same single model. What changes
+is the training loss. Let $J$ be a fixed set of \emph{teachers},
+trained REL\_GLOBAL models whose weights are frozen, and let $p_j$ be
+the predicted distribution of teacher $j$ at temperature~1. On an
+unlabeled input $x$ from the deployment environment, the target is the
+arithmetic mean of the teachers' probabilities, and the student
+$p_\theta$ is pulled toward it by a Kullback--Leibler term:
 \begin{equation}
-  m_g = |I_g|^{-1}\!\sum_{i \in I_g} e_i .
+  \bar{p}_J(a\mid x)=\frac{1}{|J|}\sum_{j\in J}p_j(a\mid x),
+  \qquad
+  \mathrm{KL}\bigl(\bar{p}_J \,\|\, p_\theta\bigr)(x)
+  =\sum_{a=1}^{18}\bar{p}_J(a\mid x)
+   \log\frac{\bar{p}_J(a\mid x)}{p_\theta(a\mid x)} .
+  \label{eq:cd-target}
 \end{equation}
-The final event-history state queries these slots, and the readout
-contributes a correction to the EVENT GRU prediction. Because THM
-averages before the readout, the target group is its unit of
-retrieval, and two groups with the same mean event representation
-present the same slot to the readout.
-
-REL instead keeps individual events. It first lets events associated
-with the same target attend to each other, so that group membership
-limits where the within-target context comes from; a history query
-then reads the relation-enriched events and can combine evidence
-across observed groups for the same forecast. At the level of the
-output head, both residual models can be written as
+The divergence runs from the teachers to the student, so the student is
+penalized most where the teachers place probability that it does not.
+The student's loss keeps both terms of Equation~\ref{eq:base-loss} and
+adds this divergence with coefficient 0.25:
 \begin{equation}
-  z(X_t) = z_{\mathrm{event}}(X_t) + \Delta z(X_t,\{I_g\}),
-  \qquad p(y\mid X_t) = \operatorname{softmax}(z(X_t))_y .
-  \label{eq:relation}
+  \mathcal{L}
+  = \mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}
+  + 0.1\,\mathcal{R}_{\mathrm{GLOBAL}}
+  + 0.25\,\mathrm{KL}\bigl(\bar{p}_J \,\|\, p_\theta\bigr)_{\mathrm{env}} ,
+  \label{eq:cd-loss}
 \end{equation}
-The relation path in these models uses observed membership, roles and
-timing. An input without usable target evidence follows the EVENT GRU
-path. Figure~\ref{fig:model} shows how identical audit evidence feeds
-both the ordered history and the target readout. The equations isolate
-the difference in aggregation and omit implementation-specific
-projection layers.
+where the subscript denotes the mean over the unlabeled environment
+rows of the update. Each update adds 32 such rows to its 32 labeled FIT
+occurrences; no label, run identifier, or source and worker
+membership of these rows enters the loss. The distillation temperature
+is unrelated to the LogitNorm temperature $\tau$: the student still
+trains with LogitNorm at $\tau=0.1$, and the teacher target is taken at
+temperature~1 without further rescaling. As
+Section~\ref{sec:related-distillation} notes, the computation combines
+knowledge distillation~\cite{hinton2015distilling} with a teacher target
+formed from several models~\cite{malinin2019ensemble}; the target here is
+the plain mean and carries no model of the spread among teachers.
+% 근거: RECORD:130--139, 153; PAPER_DEFINITIONS.md §2 (q_J 식, KL 방향 교사‖학생,
+% 구현 F.kl_div(log_softmax(student), teacher_prob).sum(-1).mean(), 계수 .25,
+% update당 무라벨 32행, "LogitNorm 0.1은 증류 온도 1과 별개").
 
-\begin{figure}[tb]
+\section{Teacher selection}
+\label{sec:method-teachers}
+
+Teachers are chosen from 30 REL\_GLOBAL seeds trained with
+Equation~\ref{eq:base-loss}. For each row of the unlabeled A+C inputs,
+the 30 models vote with their top-1 actions, and the majority action
+serves as the reference; each model's own vote is included. A model's
+\emph{top-1 agreement} is the fraction of rows on which its top-1
+action equals that majority, computed within each run and then averaged
+over runs with equal weight. The five models with the highest agreement
+form $J$, and these five teachers are used in every in-house round. The
+rule uses no labels, but it was fixed while we were studying development
+runs that had already been inspected, so the teacher choice is not
+blind.
+% 근거: PAPER_DEFINITIONS.md §2 "고정 상위 5개 교사 선정". 상위 5 seed는
+% 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
+% 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
+
+Agreement is used to choose teachers, not to choose a deployed model.
+The single seed ranked first by agreement failed preservation on
+ORIGINAL\_18: on the development runs its NLL was 0.109 above the mean of
+the 30 seeds, against a limit of $+0.020$, while
+the average of the top five passed it at the cost of running five models
+at inference. Distillation is what returns that five-model target to a
+single model. The link between agreement and loss that motivates the
+rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}). On
+ADS-24 it did not hold for individual seeds (Chapter~\ref{ch:ads24}), so
+there the selection step rests on weaker grounds than in the in-house
+setting.
+% 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:3,43,47
+% (S1 단일 seed 50572의 ORIGINAL_18 NLL .739376, 한도 .650865(모집단 평균
+% .630865 + .020), 초과 +.108511; 상위5 결합 .548374로 통과. 135실행 개발 집합).
+% ADS-24 ρ=+0.127, p=0.503은 2.3절과 8장에 있어 여기서 되풀이하지 않았다.
+
+\section{Trained groups}
+\label{sec:method-variants}
+
+Table~\ref{tab:variants} lists the groups that appear in the in-house
+rounds of Chapters~\ref{ch:evaluation} and~\ref{ch:results}. All groups
+share the FIT procedure of Section~\ref{sec:method-baseline}; they differ
+in the teacher set and in the unlabeled inputs of the KL term. The
+background inputs are 119 runs (1,309 rows) under background conditions.
+KD\_ALL adds 48 runs (354 rows) of the original procedure to them and
+splits the 32 unlabeled rows of each update between the two sources in
+the ratio of their run counts, 119:48. The labels and the source and
+worker roles of the original-procedure rows are not used. KD\_ALL is the
+final student of Chapter~\ref{ch:results}.
+% 근거: RECORD:142--149; PAPER_DEFINITIONS.md §2 군 표. 원래 입력 B는 기존
+% 16실행·118행 + 1단계 32실행·236행 = 48실행·354행.
+
+\begin{table}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,font=\small,
-  box/.style={draw=black!55,rounded corners=2pt,align=center,inner sep=5pt,
-    minimum width=3.1cm,minimum height=0.9cm},
-  resultbox/.style={box,fill=black!4,minimum width=2cm},
-  bluepath/.style={->,semithick,draw=blue!57!black},
-  greenpath/.style={->,semithick,draw=teal!70!black}]
-  \node[box,fill=black!4] (input) at (0,0) {Received events\\before boundary};
-  \node[box,fill=blue!5] (history) at (4,0.9) {Receipt order\\Event GRU};
-  \node[box,fill=teal!7] (rel) at (4,-0.9) {Observed target groups\\Relation readout};
-  \node[draw,circle,fill=black!4,inner sep=3pt] (plus) at (8.25,0) {$+$};
-  \node[resultbox] (pred) at (10.55,0) {Softmax\\18 probabilities};
-  \draw[bluepath] (input.east) -- ++(0.44,0) |- (history.west);
-  \draw[greenpath] (input.east) -- ++(0.44,0) |- (rel.west);
-  \draw[bluepath] (history.east) -| node[pos=.32,above] {Base scores} (plus.north);
-  \draw[greenpath] (rel.east) -| node[pos=.32,below] {Correction} (plus.south);
-  \draw[->,dashed,black!60] (history.south) -- node[midway,right,font=\scriptsize]
-    {History query} (rel.north);
-  \draw[->,semithick] (plus.east) -- (pred.west);
-\end{tikzpicture}
-\caption{Target-aware prediction in the residual models. The
-receipt-order history supplies the base scores and a query for the
-target-linked evidence. The readout supplies an action-score correction.}
-\label{fig:model}
-\end{figure}
+\caption{Trained groups in the in-house rounds. All groups use the FIT
+loss of Equation~\ref{eq:base-loss}; the KD groups add the KL term of
+Equation~\ref{eq:cd-loss}.}
+\label{tab:variants}
+\small
+\begin{tabularx}{\textwidth}{@{}lXXl@{}}
+\toprule
+Group & Teacher & Unlabeled KL inputs & Rounds \\
+\midrule
+REL\_GLOBAL & none (control) & none & all \\
+KD\_ENV / KD\_ENV\_ALL30 & mean of all 30 REL\_GLOBAL models
+  & background inputs (119 runs, 1,309 rows) & 10-seed, v2 \\
+KD\_FIT & mean of all 30, in-sample on FIT & FIT inputs & 10-seed \\
+KD\_SELF & the same seed's single REL\_GLOBAL & background inputs
+  & 10-seed, v2 \\
+KD\_ENV\_TOP5 & mean of the top five & background inputs & v2, v3 \\
+KD\_ALL & mean of the top five & background inputs and 48 original-procedure
+  runs (354 rows) & v3 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+The ``CD student'' of Chapter~\ref{ch:generality} repeats this computation
+with teachers drawn from each encoder's own 30 baseline models
+(Section~\ref{sec:method-transfer}); the original report calls that
+group \texttt{KD\_ENV}.
+\end{minipage}
+\end{table}
+% KD_ENV_ALL30은 v2에서 KD_ENV 계산을 새 seed로 재현한 것(PAPER_DEFINITIONS.md §2).
+% 차수 이름은 개요 전체 규칙을 따른다(10-seed development round, v2 round,
+% v3 round). 표에서는 줄여 썼다.
 
-\section{History exposure at each event}
+\section{Transfer to other data and encoders}
+\label{sec:method-transfer}
 
-Under interleaved benign activity, the final history vector summarizes
-evidence from every admitted event. An older target-linked event can
-carry a different context from the boundary's final state. The
-Local History variant attaches the history state $h_i$ to the
-relation-enriched representation of event $i$ before pooling. The
-Final History control attaches the same final state $h_T$ to
-each event. Both choices use the same input prefix and readout
-structure. Replacing $h_i$ by $h_T$ changes both the states exposed to
-the readout and the paths through which the recurrent encoder
-receives training gradients. The comparison therefore tests these
-two complete placements of history at the same model capacity.
+The method was moved to two further settings with as few changes as
+possible (Table~\ref{tab:transfer}). On ADS-24 the input encoder reads
+Wazuh alert fields, the head predicts nine tactic classes, and the
+relational residual is removed; the resulting model has 31,685
+parameters. The three general encoders replace the event encoder with
+an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
+a Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert},
+or a plain GRU. They are encoder adaptations to our supervised task, not
+reproductions of DeepLog or LogBERT. LogitNorm, input-gradient
+regularization, and the relational residual are all removed, and the
+width and learning rate of each encoder were chosen by validation inside
+the FIT set.
+% 근거: RECORD:155--160, 281. ADS-24 9-way, 경보 창 512, 31,685 파라미터.
+% TODO(사람): 기록은 ADS-24 적용판에서 관계 잔차를 뺀 사실만 적고 이유는 적지
+% 않습니다. 이유(예: 대상 key에 해당하는 필드가 없음)를 한 구절 넣을지 알려 주세요.
 
-\section{Target-conditioned probability average}
+\begin{table}[htbp]
+\centering
+\caption{What was changed and what was kept when the method was applied to
+ADS-24 and to the three general encoders.}
+\label{tab:transfer}
+\small
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+Application & Changed & Kept \\
+\midrule
+ADS-24, own model
+  & input encoder over Wazuh alert fields; 9-way head; relational residual
+    removed; alert window 512; 31,685 parameters
+  & 64-dimensional GRU; LogitNorm ($\tau=0.1$); input-gradient
+    regularization (0.1); 1,346 updates; all distillation settings \\
+Three general encoders
+  & encoder replaced by LSTM, Transformer, or GRU; LogitNorm,
+    regularization, and relational residual removed; width and learning
+    rate chosen by FIT-internal validation
+  & 1,346 updates; run-weighted cross-entropy; AdamW with cosine schedule;
+    all distillation settings \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-A later comparison uses a single-history baseline $p_{\mathrm{base}}$
-and a separately trained dual-history model $p_{\mathrm{dual}}$ with
-two independent 64-dimensional recurrent states; tables label the
-dual-history model as Full Step. Its two recurrent cells each receive
-the event history and update once per admitted event using standard
-GRU updates. The model is trained with the action objective, and the
-two states feed its relation and output pathways without assigned
-attacker and benign roles.
-
-For each seed, the fixed combination averages the separately trained
-probabilities on a prefix with at least one observed target.
-\begin{equation}
-  p_{\mathrm{mix}}(\cdot\mid X_t)=
-  \begin{cases}
-    \tfrac12 p_{\mathrm{base}}(\cdot\mid X_t)
-      + \tfrac12 p_{\mathrm{dual}}(\cdot\mid X_t), & G(X_t)\ne\varnothing,\\
-    p_{\mathrm{base}}(\cdot\mid X_t), & G(X_t)=\varnothing,
-  \end{cases}
-  \label{eq:mixture}
-\end{equation}
-where $G(X_t)$ is the set of observed target groups. The fallback copies
-the full baseline distribution on a target-free prefix. The paired
-controls use the same rule with a single wider recurrent model, a
-BiTA-inspired aggregator, or an independently trained instance of the
-baseline. The fixed average tests the complete predictor, whereas the
-same-model-count controls are needed to assess the contribution of
-the dual-history architecture.
-
-\section{Observed-history frequency baseline}
-
-For target-poor inputs, a non-neural baseline summarizes the received
-START order for records with an observed action hint and indicates
-whether the latest such START has a uniquely linked received END.
-The key uses the hints derived from observed commands. Each training
-execution contributes one vote per key, with its own labeled
-occurrences averaged before voting. If $C_k$ is the resulting count
-vector, $n_k$ the number of training executions supporting key $k$,
-and $\pi$ the training action prior, then
-\begin{equation}
-  q_k = \frac{C_k+\pi}{n_k+1}.
-  \label{eq:table}
-\end{equation}
-An unseen key returns $\pi$. In a separate comparison on target-free
-inputs, either $q_k$ or $\pi$ is mixed into a frozen model's
-distribution with the same small fixed weight, which controls for the
-effect of injecting additional probability mass independently of the
-key.
+In each new setting the teachers are selected again, by the same
+agreement rule, from 30 baseline models of the same encoder trained on
+the same data. The in-house top five are never copied to another
+encoder. Selection uses only the unlabeled adaptation inputs: the 34
+ADS-24 runs with simulated users, and, in the in-house lab, the same 119
+background and 48 original-procedure runs that KD\_ALL uses for
+adaptation. Unlike the in-house REL\_GLOBAL teachers, these teachers are
+therefore chosen on the inputs they are distilled on rather than on the
+A+C development runs.
+% 근거: RECORD:162--163; ORIG:ARCH_GENERALITY_STAGE1_20261122/
+% ARCH_GENERALITY_STAGE1_REPORT.md:79 ("ADS 34 ON·PROPHET v3 A119+B48 입력만
+% 사용", 환경 평가 정답 미사용), ARCH_GENERALITY_CONTRACT_SEALED.md:49.
+% ADS-24 자체 모델 적용판의 교사도 무라벨 적응 입력에서 골랐다(RECORD:259).
