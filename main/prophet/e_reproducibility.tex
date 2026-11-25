@@ -131,8 +131,9 @@ generality study and the method comparison use the seeds 4500001 to
 4500030 for every group. In the FIT-input distillation group of the
 method comparison, the one row per occurrence that receives the KL term
 is drawn in advance with PCG64 seeded by 2026112305 plus the training
-seed. SWA averages the weights at updates 1,010, 1,122,
-1,234, and 1,346 of the cross-entropy trajectory.
+seed. Four-checkpoint weight averaging takes the mean of the weights at
+updates 1,010, 1,122, 1,234, and 1,346 of the cross-entropy trajectory,
+under the unchanged cosine schedule.
 % 근거: PAPER_DEFINITIONS.md §2 (C-fold 603 FIT, 404-only 전처리, 1,346×32, 같은 초기
 % tensor·FIT trace, AdamW .002→.0002 cosine, wd .01, clip 2, 마지막 checkpoint; 상위 5
 % seed); ADS24_STAGE2_REPORT.md "계보" (ADS 교사); ARCH_GENERALITY_CONTRACT_SEALED.md

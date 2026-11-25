@@ -271,13 +271,22 @@ FIT inputs instead of environment inputs, and geometric-pool
 distillation follows their normalized geometric mean, the logarithmic
 opinion pool of Section~\ref{sec:related-decomposition}, on environment
 inputs.
+\emph{Four-checkpoint weight averaging} stands apart as a baseline
+without environment inputs: it takes the arithmetic mean of the weights
+of the base model's own cross-entropy training trajectory at updates
+1,010, 1,122, 1,234, and 1,346, four snapshots 112 updates apart in the
+last quarter of training that end with the final update. It is
+motivated by stochastic weight averaging~\cite{izmailov2018averaging},
+but it is not that method: the original averages under a cyclical or
+constant learning rate, whereas this baseline kept the base model's
+cosine schedule unchanged.
 % 원문: Izmailov et al. arXiv:1803.05407 초록 "averaging of multiple points along the trajectory of SGD,
-%   with a cyclical or constant learning rate". 원 SWA 는 평균 구간에 주기·고정 학습률을 쓴다; 여기 적은
-%   네 update 의 평균이 그 학습률 일정을 따랐는지는 이 문장이 말하지 않는다(기록 확인 필요).
-Stochastic weight averaging (SWA)~\cite{izmailov2018averaging}
-stands apart as a baseline without environment inputs: it averages the
-weights of the base model's own training trajectory at updates 1,010,
-1,122, 1,234, and 1,346.
+%   with a cyclical or constant learning rate". 원 SWA 는 평균 구간에 주기·고정 학습률을 쓴다.
+% 근거(네 update 와 학습률): METHOD_BASELINES_CONTRACT_SEALED.md:21 ("같은 CE 궤적의 update 1010, 1122,
+%   1234, 1346 모델 tensor를 산술평균 … 기존 learning-rate 일정 유지"), :15 (cosine 최종 LR 0.1배,
+%   1,346 update). 왜 이 네 update 인지는 계약에 적혀 있지 않다(간격 112, 1,010 은 학습의 75% 지점 직후 —
+%   계산 사실만 적었다). 저장 checkpoint 가 이 네 개뿐이었는지도 기록에 없어 '마지막 네 checkpoint' 라고 쓰지 않았다.
+% 이름: Codex 인용 리뷰(원문 대조 1회차) P1 — 원 방법의 학습률 일정을 쓰지 않았으므로 SWA 라 부르지 않는다.
 
 Every method kept the FIT loss,
 the 1,346 updates, the coefficient of 0.25 on the added term, a
@@ -297,7 +306,7 @@ protocol.
 % (1,346 update × 32 FIT occurrence, 같은 초기 tensor), :17 (계수 0.25, 온도 1, 32행),
 % :19--27 (군별 계산; PSEUDO 신뢰도 문턱 없음; FIT_KD 교사 FIT 출력은 in-sample;
 % BASE·KD_ENV·KD_SELF 재사용), :35--37 (판정 규칙 없이 네 통계와 99% 구간).
-% 원 파일 이름 대응: SWA = SWA(부록의 옛 "weight averaging"도 SWA로 통일),
+% 원 파일 이름 대응: SWA = four-checkpoint weight averaging(원 SWA 학습률 일정을 쓰지 않아 이름을 바꿈),
 % PSEUDO = hard-label control, ENTROPY = entropy minimization, FIT_KD = FIT-input
 % distillation, GEO_KD = geometric-pool distillation, BASE = base model, KD_ENV = CD student.
 % decisions.md 32번: lee2013pseudo가 ref.bib에 들어가 pseudo-labeling 이름과 인용을 되살렸다.
@@ -313,12 +322,14 @@ a seed standard deviation of 0.013 and the geometric-pool student
 between 0.324 and 1.215. On ADS-24 the two consensus groups had 0.026
 and 0.030, against 0.174 to 0.490 for the others. Some of the other
 groups were also below the base model as point estimates: entropy
-minimization at 0.324 against 0.693 in-house, and SWA at 0.681 and
+minimization at 0.324 against 0.693 in-house, and four-checkpoint
+weight averaging at 0.681 and
 0.174 against 0.693 and 0.180. We do not test those differences from
 the base model here, and the table gives no interval for them.
 
 Table~\ref{tab:gen-methods-contrast} gives the paired contrasts against
-CD. In the in-house lab CD had a lower mean NLL than SWA, the
+CD. In the in-house lab CD had a lower mean NLL than four-checkpoint
+weight averaging, the
 hard-label control, entropy minimization, and FIT-input distillation,
 with every interval above zero. Against geometric-pool distillation the
 direction was not resolved: the mean difference was $-0.011$
@@ -355,7 +366,7 @@ Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
 Base model                    & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
 CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
 Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
-SWA                           & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
+Four-checkpoint weight averaging & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
 FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
 Self-distillation control     & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
 Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
@@ -386,13 +397,13 @@ $+0.043$ on ADS-24).}
 Data & Method & \multicolumn{2}{c}{Seed SD difference}
  & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
 \midrule
-In-house & SWA                    & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
+In-house & Four-checkpoint weight averaging & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
 In-house & Hard-label control     & 1.194 & $[1.103, 1.329]$ & 1.789 & $[1.602, 1.973]$ & no \\
 In-house & Entropy minimization   & 0.291 & $[0.207, 0.444]$ & 2.374 & $[1.703, 3.408]$ & no \\
 In-house & FIT-input distillation & 0.802 & $[0.730, 0.883]$ & 1.065 & $[0.921, 1.206]$ & yes \\
 In-house & Geometric-pool distillation & 0.003 & $[-0.003, 0.018]$ & $-0.011$ & $[-0.067, 0.027]$ & yes \\
 \midrule
-ADS-24 & SWA                    & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
+ADS-24 & Four-checkpoint weight averaging & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
 ADS-24 & Hard-label control     & 0.412 & $[0.345, 0.482]$ & 1.225 & $[1.004, 1.437]$ & no \\
 ADS-24 & Entropy minimization   & 0.463 & $[0.394, 0.541]$ & 4.743 & $[4.088, 5.347]$ & no \\
 ADS-24 & FIT-input distillation & 0.166 & $[0.131, 0.200]$ & 0.097 & $[0.075, 0.120]$ & yes \\
@@ -417,9 +428,10 @@ number of teachers, their selection, and the averaging were not varied
 separately, so their effects are not identified. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
 level, so the environment inputs mattered; why the FIT inputs did not
-help was not established (Section~\ref{sec:disc-rejected}). SWA,
-which averages along a single training trajectory, stayed at the base
-model's spread on both datasets.
+help was not established (Section~\ref{sec:disc-rejected}).
+Four-checkpoint weight averaging, which averages along a single
+training trajectory, stayed at the base model's spread on both
+datasets.
 
 Between the arithmetic and the
 geometric pool of the same teachers we cannot choose. They were
@@ -447,11 +459,13 @@ retried nor replaced. The \texttt{A+C} intervals therefore rest on six
 complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
 configurations. The comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
-SWA did not use the cyclical or constant learning-rate
-schedule of the original method, so the comparison does not show that
+four-checkpoint weight averaging kept the cosine schedule rather than
+the cyclical or constant learning rate of stochastic weight averaging,
+so the comparison does not show that
 any of the algorithms is inferior when tuned for its own purpose.
 Retraining the plain GRU on CPU is not deterministic, and the
-resulting rerun variation is visible for SWA: the cross-entropy run from which its
+resulting rerun variation is visible for four-checkpoint weight
+averaging: the cross-entropy run from which its
 weights were averaged ended with weights identical, bit for bit, to the
 stored base model for 30 of 30 seeds on ADS-24 and for none in-house.
 Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.

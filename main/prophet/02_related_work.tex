@@ -294,8 +294,10 @@ The comparison methods in Chapter~\ref{ch:generality} come from work
 on stabilizing a single model or adapting it without labels. Entropy
 minimization penalizes uncertain predictions on unlabeled
 inputs~\cite{grandvalet2004semi}, and stochastic weight averaging (SWA)
-averages weights along one training
-trajectory~\cite{izmailov2018averaging}.
+averages the weights visited along one training trajectory under a
+cyclical or constant learning rate~\cite{izmailov2018averaging}; our
+four-checkpoint weight averaging baseline borrows only the averaging
+and keeps a cosine schedule (Section~\ref{sec:gen-methods}).
 % 원문: Izmailov et al. arXiv:1803.05407 초록 "simple averaging of multiple points along the
 %   trajectory of SGD, with a cyclical or constant learning rate". 확인됨(원 방법은 주기·고정 학습률을 함께 쓴다).
 % 원문: Grandvalet & Bengio (NIPS 2004) §2.3 식 (6) p.4, 엔트로피 항은 "only affected by the value of fk(x) on unlabeled data".
