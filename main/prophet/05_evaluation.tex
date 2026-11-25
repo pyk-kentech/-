@@ -268,7 +268,7 @@ collections for the same reason and are never placed on one scale.
 % 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
 
 % 표와 주가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
-{\small
+{\small\setstretch{1}% 표는 1배수(작성 안내)
 \begin{xltabular}{\textwidth}{@{}lrXlX@{}}
 \caption{Ledger of the rounds that tested distillation toward a seed
 consensus (the 10-seed round used all 30 baseline models as teachers).
@@ -314,7 +314,7 @@ Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
   & development comparison$^{c}$ & reported contrasts; no pass rule \\
 \end{xltabular}}
 \vspace{-\medskipamount}
-\noindent\begin{minipage}{\textwidth}\footnotesize
+\noindent\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
 $^{a}$The contract was sealed before the stage's models were trained or
 run, but after its evaluation runs had been scored in an earlier stage:
 the 35 ADS-24 environment-evaluation runs in ADS-24 stage~1, and the

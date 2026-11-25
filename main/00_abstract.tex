@@ -2,21 +2,23 @@
 PROPHET predicts which of 18 attacker actions comes next from
 Windows audit records received before a cutoff. Under a
 benign workload absent from labeled training, models with the same
-data and architecture diverged across random seeds, and their final
-training loss did not rank them. With
+data and architecture diverged across seeds, and their final
+training loss did not rank them. In
 consensus distillation (CD), a standard ensemble-distillation setup,
-one student of the same architecture follows the averaged
-probabilities of five baseline models on unlabeled inputs from the new
-workload. In an in-house round, according to its stored report, CD met
+a student of the same architecture follows the mean
+probabilities of five baselines on unlabeled inputs from the new
+workload. In an in-house round, its stored report shows CD met
 all three criteria fixed before training. Over 30 checkpoints per
 group, the seed standard deviation of the log loss fell on both file
 layouts of an unseen two-worker condition (on one, 0.056 to 0.010), and
-the loss also fell on the condition without benign workers, which the
-training runs contain. On
-the public ADS-24 dataset the spread also narrowed, but every distilled
-seed of our predictor stayed worse than predicting the training tactic
+the loss fell on the condition without benign workers, seen in training. On
+the public ADS-24 dataset the spread narrowed, but every distilled
+seed stayed worse than predicting the training tactic
 frequencies. CD narrowed the variation among these checkpoints; it did
 not remove the loss caused by the new environment.
+% 2026-11-25 작성 안내 "1,000자(공백 포함) 내외"에 맞춰 1,127자에서 줄였다. 주장은 그대로이고
+% "random", "of our predictor", "also"(두 번)를 빼고 몇 구절을
+% 짧게 바꿨다(1,056자). 저장 보고서의 기록이라는 한정(방법 P1-1)은 "its stored report shows"로 남겼다.
 % 6회차 문장 P2-8: 세 기준 중 두 개만 나열하던 문장을 고치고, 제외 실행 문장은 뺐다(제외 사유가
 % 수집 단계 실패로 기록됨, e_reproducibility). 국문 초록과 같은 주장을 담도록 맞췄다(P3-13).
 % 7회차 문장 P2-1: "sealed", "three criteria", "target layouts", "two-worker condition",

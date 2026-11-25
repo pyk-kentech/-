@@ -6,9 +6,20 @@
 \usetikzlibrary{arrows.meta,positioning}
 
 \ifXeTeX
+  % 작성 안내·샘플의 영문 글꼴은 Times 계열이다. TeX Live(Overleaf 포함)에 있는 TeX Gyre Termes 를
+  % 본문에, 같은 계열의 TeX Gyre Termes Math 를 수식에 쓴다. 한글 글꼴은 아래에서 따로 고른다.
+  \usepackage{unicode-math}
+  % 글꼴 이름 대신 파일 이름으로 불러 시스템 글꼴 목록에 없어도 TeX 트리에서 찾게 한다.
+  \setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+    ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+  \setsansfont{texgyreheros}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+    ItalicFont=*-italic, BoldItalicFont=*-bolditalic, Scale=MatchLowercase]
+  \setmathfont{texgyretermes-math.otf}
   \IfFontExistsTF{Noto Serif CJK KR}{\setmainhangulfont[AutoFakeSlant]{Noto Serif CJK KR}}{%
     \IfFontExistsTF{UnBatang}{\setmainhangulfont{UnBatang}}{%
       \IfFontExistsTF{NanumMyeongjo}{\setmainhangulfont{NanumMyeongjo}}{}}}
+  % 곡선 따옴표·괄호 같은 문장 부호가 한글 글꼴로 찍히지 않게 영문 글꼴로 둔다.
+  \xetexkofontregime{latin}
 \fi
 
 % TODO(사람): 제목은 answers 2에 따라 지금 제목을 유지한다. 본문의 논지가
@@ -51,10 +62,10 @@
 }
 
 % 제출 전 할 일: 위 빈칸을 채우고, 클래스 선택지를 draft에서 final로 바꾼 뒤
-% 아래의 \makefrontcover·\makeapproval 두 줄을 지울 것(final 모드에서는
-% 클래스가 \begin{document}에서 두 쪽을 자동으로 만든다).
+% 아래의 \makefrontcover·\makeinnercover·\makeapproval 세 줄을 지울 것(final 모드에서는
+% 클래스가 \begin{document}에서 세 쪽을 자동으로 만든다).
 %
-% 문서 순서는 작성 안내 PDF를 따른다: 앞표지 → 인준서 → Abstract → 국문초록
+% 문서 순서는 작성 안내 PDF를 따른다: 앞표지 → 속표지 → 인준서 → Abstract → 국문초록
 % → 목차(표목차·그림목차 포함) → 본문 → 참고문헌 → 감사문.
 % 안내 PDF는 부록의 자리를 따로 정하지 않는다. 참고문헌과 감사문이 이어지도록
 % 부록을 본문 뒤, 참고문헌 앞에 둔다. 이 클래스의 참고문헌은 \chapter*로
@@ -67,6 +78,7 @@
 \begin{document}
 \hypersetup{pageanchor=false}
 \makefrontcover
+\makeinnercover
 \makeapproval
 \hypersetup{pageanchor=true}
 \input{main/00_abstract}

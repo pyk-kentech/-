@@ -4,9 +4,8 @@
 Everything here is a post hoc analysis: we introduced it after the primary
 experiments of Chapters~\ref{ch:results} to~\ref{ch:generality} had
 been scored, and none of its results entered any criterion
-(Section~\ref{sec:eval-rounds}). It uses only class probabilities that
-had already been saved; no model was trained and no execution was
-collected for it. For the $S=30$ seeds of one group and an input
+(Section~\ref{sec:eval-rounds}). It uses only saved class
+probabilities. For the $S=30$ seeds of one group and an input
 $x$ with true action $y$, let $p_s$ be the predictive distribution of
 seed $s$ and $\tilde p$ their logarithmic opinion pool, the normalized
 geometric mean. Then
@@ -24,10 +23,9 @@ geometric mean. Then
 \end{equation}
 The mean loss of the seeds is exactly the loss of their consensus plus a
 disagreement term $V$, and $V$ depends on the predictions alone, so it
-can be computed in the target environment without labels. The
-identity follows directly from the definitions: if $Z(x)$ is the
-normalizer of $\tilde p$, then $V(x)=-\log Z(x)$ and
-$-\log\tilde p(y\mid x)=\frac{1}{S}\sum_s[-\log p_s(y\mid x)]+\log Z(x)$.
+can be computed in the target environment without labels; with
+$Z(x)$ the normalizer of $\tilde p$, $V(x)=-\log Z(x)$.
+% 2026-11-25 분량 줄이기 C17: 항등식 유도 한 줄은 V=−log Z 만 남기고 뺐다(Heskes 가 유도함).
 It is the logarithmic-opinion-pool decomposition analyzed by
 Heskes~\cite{heskes1997selecting}, and its use as a label-free
 uncertainty measure follows Gruber and
@@ -40,8 +38,7 @@ states what our computation adds.
 %   OOD 탐지용 불확실성 척도로 쓴다. 확인됨.
 Like NLL, $V$ is averaged over
 the natural boundaries of a run and then over runs with equal weight.
-Recomputed from the saved probabilities, the two sides of
-Equation~\ref{eq:decomposition} differed by at most about $10^{-15}$.
+% C17: 저장 확률로 다시 계산한 양변 차이(최대 약 1e-15)는 아래 근거 주석에만 둔다.
 % 근거: RECORD:306--316, 334; ORIG:METHOD_EXTENSION_DECOMPOSITION_20261123/
 % VARIANCE_DECOMPOSITION_REPORT.md "Definition, exact check, and scope"
 % (V = -log Z, 2,040개 확률 파일 hash, 정규화 drift 최대 2.91e-07,
@@ -109,30 +106,29 @@ models on the five in-house evaluation sets of
 Section~\ref{sec:conditions} and on two ADS-24 evaluation sets), the
 Spearman correlation between $V$ and seed standard
 deviation was 0.929; it was 0.762 within ADS-24 ($n=8$) and 0.863 within
-the in-house lab ($n=20$). The points share seed populations and runs,
-so the correlation describes these baselines rather than 28 independent
-replications, and we computed no interval for it. The more useful property is that $V$ is available before
+the in-house lab ($n=20$). The points share seeds and runs, so this
+describes these baselines, not 28 independent replications (no interval). The more useful property is that $V$ is available before
 labels are. On ADS-24, $V$ measured on the 34 unlabeled adaptation runs
 was almost the same as $V$ on the 35 evaluation runs: 0.204 against
 0.197 for the LSTM encoder, 0.323 against 0.293 for the Transformer
 encoder, 0.148 against 0.149 for the plain GRU, and 0.231 against 0.230
-for REL\_GLOBAL-ADS. In the in-house lab the adaptation inputs gave
-somewhat lower values for the three general encoders (0.317, 0.455, and
-0.700, against 0.339, 0.554, and 0.790).
+for REL\_GLOBAL-ADS. In-house they were somewhat lower for the general
+encoders (0.317, 0.455, and 0.700 against 0.339, 0.554, and 0.790).
 % 근거: RECORD:329--330; VARIANCE_DECOMPOSITION_REPORT.md "Shift of V and relationship
 % to seed SD" (pooled 0.929, ADS 0.762, PROPHET 0.863), "Can unlabeled adaptation V
 % anticipate evaluation instability?" (ADS 34실행/5,811행, 자체 167실행/1,663행).
 
-The before-and-after comparison uses the same 28 model--set pairs, but
-each pair compares a baseline with the students trained from that same
-seed list: for the three general encoders and REL\_GLOBAL-ADS these are
+Each of the same 28 model--set pairs also compares a baseline with the
+students of its seed list: for the three general encoders and REL\_GLOBAL-ADS these are
 the populations above, while for in-house REL\_GLOBAL they are the v3
 baseline seeds and their KD\_ENV\_TOP5 students, scored on the PAG1
 runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
-mainly on the disagreement term. The ensemble analogue of this
+mainly on the disagreement term, and part of it is expected from
+distillation toward one fixed teacher set
+(Section~\ref{sec:disc-novelty}). The ensemble analogue of this
 reduction is shown by Gruber and Buettner: averaging members over
 initializations shrinks the Bregman Information that this randomness
 contributes, and with it the expected
@@ -140,10 +136,7 @@ loss~\cite{gruber2022uncertainty}.
 % 원문: Gruber & Buettner AISTATS 2023 §3.5 Prop. 3.8 식 (1)–(3), 식 (4)–(5) pp.6–7: W(초기값)에 대한 조건부
 %   Bregman Information 이 앙상블 크기와 함께 줄고 n→∞ 에서 0, "the expected negative log-likelihood reduces"
 %   by that amount. (옛 인용 rathmanakidis2022reduction 을 바꿈.)
-Part of the drop is expected
-from distillation toward one fixed teacher set
-(Section~\ref{sec:disc-novelty}); the measurement adds its size on these
-runs and the one pair where it did not occur. The decomposition is an identity and
+The decomposition is an identity and
 the change in $V$ is an observation after the fact, so the analysis
 does not show that the drop in $V$ produced the drop in seed standard
 deviation.
@@ -151,13 +144,11 @@ deviation.
 The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}. Between the v3
 baseline seeds and their paired KD\_ENV\_TOP5 students, distilled on the
 background inputs alone, $V$ rose from 0.068 to 0.077, and the seed
-standard deviation rose with it. These v3 seeds are a different
-REL\_GLOBAL population from that of Table~\ref{tab:decomposition}, and
-the two are never subtracted from each other.
+standard deviation rose with it. These v3 seeds are not the
+REL\_GLOBAL population of Table~\ref{tab:decomposition}.
 % 9회차 문장 P2-6 출처: VARIANCE_DECOMPOSITION_REPORT.md:11 ("its student V change instead uses
 %   the paired v3 2M-seed baseline and KD_ENV_TOP5 student on the same new PAG1 input"), :66, :100.
-Preservation on this condition is also the least settled in-house
-result (Section~\ref{sec:disc-mechanism}). For REL\_GLOBAL and its
+For REL\_GLOBAL and its
 KD\_ENV\_TOP5 students, the reduction therefore did not extend to the
 seen condition; for the three general encoders, $V$ on
 \texttt{ORIGINAL\_18} fell as well.
@@ -176,30 +167,19 @@ agreed, and they agreed on the wrong actions. The same can happen in a
 milder form after CD. For the plain GRU on the ADS-24 environment
 evaluation, $V$ fell from 0.149 to 0.025 while the consensus loss rose
 from 2.073 to 2.104; the seed-mean loss improved only because the drop
-in $V$ was larger. $V$ is thus a label-free reading of how much the
-seeds diverge, and it says nothing on its own about whether their
-common answer is right.
+in $V$ was larger. $V$ thus reads, without labels, how much the seeds
+diverge, not whether their common answer is right.
 % 근거: RECORD:332; METHOD_BASELINES_REPORT.md "V와 합의 예측" (PROPHET A_PLUS_C_FLAT
 % ENTROPY 합의 NLL 2.701564, V 0.000007; ADS24 EVAL_ON BASE 2.072554/0.148804,
 % KD_ENV 2.104398/0.025253); VARIANCE_DECOMPOSITION_REPORT.md "Interpretation and
 % decision". 방법 비교 군은 9.2절의 새 110실행 기준이다. ADS-24의 엔트로피 최소화는
 % V가 0.179로 0이 아니었다.
 
-Matching levels do not make $V$ a selection rule. Across encoders, $V$
-on the unlabeled adaptation inputs did not rank them by their evaluation seed standard
-deviation: the Spearman correlation was $-0.800$ on ADS-24 ($n=4$) and
-$+0.500$ in the in-house lab ($n=3$), too few points and inconsistent in
-sign to support a selection rule. For the in-house REL\_GLOBAL seeds
-the question could not even be asked, because only their aggregated
-teacher probabilities on the adaptation inputs, not the 30 individual
-distributions, had been saved, and we did not reconstruct them by
-re-running the checkpoints.
-
-Nor does the decomposition make the geometric pool the better teacher,
-although that pool is the consensus in Equation~\ref{eq:decomposition}.
-Scored as teachers, the geometric pool had the lower NLL in only 24 of
-56 same-membership comparisons, and the student comparison of
-Section~\ref{sec:gen-methods} did not separate the two pools.
+Nor is $V$ a selection rule: across encoders it did not rank them by
+seed standard deviation ($\rho=-0.800$ on ADS-24, $n=4$; $+0.500$ in-house, $n=3$).
+% C17: 기하 풀이 교사로 더 낫지 않았다는 부수 결과(같은 구성 56 비교 중 24)와 in-house REL_GLOBAL 의
+%   seed 별 적응 입력 확률이 저장되지 않았다는 단서는 아래 근거 주석에만 둔다.
+% 2026-11-25 분량 줄이기 C17: 두 문단을 한 문단으로 줄였다. 숫자와 주장은 그대로다.
 % 근거: RECORD:333, 404, 406, 506; VARIANCE_DECOMPOSITION_REPORT.md "Arithmetic versus
 % geometric teachers" (24/56), "Can unlabeled adaptation V anticipate..." (ADS ρ=-0.800,
 % PROPHET ρ=0.500; REL_GLOBAL 50k 계보는 30개 적응 입력 개별 확률이 없음),

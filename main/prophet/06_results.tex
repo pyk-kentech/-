@@ -19,19 +19,11 @@ models of Section~\ref{sec:method-teachers} and are not among the 30
 new seeds. Of 160 planned and attempted runs, 157 were eligible, with
 1,611 rows; none was replaced. The contract, its three criteria, and
 the 98.3333\% Bonferroni level were fixed before training and
-collection (Section~\ref{sec:eval-criteria}), so every criterion below
-is a sealed criterion in the sense of Section~\ref{sec:eval-rounds}.
-The values are those of the stored round report. The three
-exclusions are recorded as failures during source collection, and the
-seed-level score files stay on the original experiment machine
-(Section~\ref{sec:eval-contract}). The chapter
-therefore reports the v3 verdicts as the historical outcome recorded in
-that report. A reader can check that the tables transcribe the report,
-but not that they follow from the row-level scores, the exclusions,
-the execution weighting, or the resampling
-(Section~\ref{sec:repro-code}).
-Contrasts outside that family, including the differences in mean NLL
-on the background conditions, are marked as secondary.
+collection (Sections~\ref{sec:eval-criteria} and~\ref{sec:eval-rounds}).
+The values and verdicts are those recorded in the stored round report,
+which cannot be recomputed from this document
+(Sections~\ref{sec:eval-contract} and~\ref{sec:repro-code}).
+% 2026-11-25 분량 줄이기 C12: 저장 보고서 단서(T1)는 6.2절·E.1 에 두고 여기서는 한 문장으로 줄였다.
 % 근거: RECORD:166; CONTRACT_V3.md (군·초기 tensor·FIT trace 공유, 계획 160,
 % 보충 금지); v3 FINAL_REPORT_KO.md "수집과 계보" (계획 160, 시도 160, 적격 157,
 % 행 1611, 보충 0; 제외 배경 3, 원래 0).
@@ -41,18 +33,14 @@ on the background conditions, are marked as secondary.
 
 KD\_ALL had lower mean NLL than REL\_GLOBAL on all five evaluation sets
 (Table~\ref{tab:results-v3-nll}). Except on \texttt{ORIGINAL\_18}, these means are
-secondary point estimates: the contract did not make mean NLL on the
-background conditions a criterion, and we computed no interval for
-those differences, so they are not shown to be statistically
-established. On \texttt{A+C FLAT} the mean NLL of KD\_ALL was 0.028 against 0.073, and on
+secondary point estimates without intervals. On \texttt{A+C FLAT} the mean NLL of KD\_ALL was 0.028 against 0.073, and on
 \texttt{ORIGINAL\_18} it was 0.643 against 0.704. On the four
 evaluation sets with benign workers, KD\_ENV\_TOP5, which adapts on the background
 inputs alone, came within 0.002 of KD\_ALL, and on \texttt{C\_ONLY} and
 \texttt{B+C} it was slightly lower. The two students separate only on
 \texttt{ORIGINAL\_18}, the seen condition, whose unlabeled inputs KD\_ALL adds.
 \texttt{OBSERVED\_HEAD}, the frozen head variant of
-Section~\ref{sec:diag-intervention}, is included as a reference; it
-was not retrained in this round and is not part of any criterion.
+Section~\ref{sec:diag-intervention}, is a reference outside every criterion.
 % 근거: RECORD:168--174; v3 FINAL_REPORT_KO.md "같은 새 입력의 전체 NLL"
 % (여섯 자리 원값은 부록 B.6). OBSERVED_HEAD는 계약상 "기존 OBSERVED_HEAD 참고"
 % (CONTRACT_V3.md "함께 보고").
@@ -94,16 +82,10 @@ difference, $[-0.131, -0.0041]$, lies below the preservation limit of
 $+0.020$ and also below zero, which the contract counts as
 improvement. The
 seed standard deviation on \texttt{ORIGINAL\_18}, which was not a
-criterion, fell from 0.070 to 0.039. These figures describe the spread
-of 30 fixed checkpoints on resampled runs; they say nothing about seeds
-outside those 30 (Section~\ref{sec:eval-criteria}). The intervals
-resample complete configurations, 15 on \texttt{A+C FLAT}, 16 on
-\texttt{A+C NESTED} and 8 on \texttt{ORIGINAL\_18}, and the stored
-estimates of the three criteria equal the complete-only estimates
-recomputed from the seed-level scores. Leaving out any one configuration
-kept the sign of all three: the estimates ranged over
-$[-0.049, -0.041]$, $[-0.054, -0.047]$ and $[-0.075, -0.039]$
+criterion, fell from 0.070 to 0.039. Leaving out any one resampled
+configuration kept the sign of all three criteria
 (Section~\ref{sec:repro-complete}).
+% C12: 구성 수·LOO 범위는 E.6 으로 옮겼다.
 % 근거: RECORD:176--183; v3 FINAL_REPORT_KO.md "사전 주 가족" (점추정 −0.045624,
 % −0.050396, −0.060741) 및 "결과 해석의 경계" (SD FLAT .055591→.009508, NESTED
 % .056335→.005939; 최악 seed FLAT .226493→.066464, NESTED .203222→.045990).
@@ -221,10 +203,8 @@ KD\_ALL the NLL difference was $-0.050$ with interval
 $[-0.141, +0.0207]$, whose upper end lies just above the limit, and for
 KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$. An interval that
 crosses the limit leaves preservation undecided; it does not show that
-the student is worse. The \texttt{ORIGINAL\_18} loss of REL\_GLOBAL was
-0.467 here and 0.704 in v3. Loss levels on this condition differ that
-much between collections, so the two tables are read separately and
-their cells are never subtracted from each other.
+the student is worse. On \texttt{ORIGINAL\_18} REL\_GLOBAL scored
+0.467 here and 0.704 in v3, so the two tables are read separately.
 % 근거: RECORD:196, 198--208; ORIG:ARCH_GENERALITY_STAGE2_20261122/
 % V3_REINFERENCE_TABLE.md ("구조 일반성 주 판정 밖에 사전 등록한 별도 확인",
 % 신규 fit 0, 98.3333%, "보존 미확인은 동등성 또는 실패 확정이 아니다");
@@ -264,18 +244,10 @@ than REL\_GLOBAL of the same seed for 22 of 30 seeds on \texttt{A+C FLAT},
 and 25 on \texttt{ORIGINAL\_18}. In the PAG1 re-inference the counts
 were 25, 24, 15, 24 and 27 for KD\_ALL and 20, 23, 15, 25 and 15 for
 KD\_ENV\_TOP5; on \texttt{C\_ONLY} only half of the seeds improved.
-Chapter~\ref{ch:generality} gives further cases in which some seeds did
-not improve.
 
-The new runs also repeat the lab, the benign workers, and the
-configuration design of the runs used for development
-(Section~\ref{sec:eval-rounds}). Within that design the effect survived
-new seeds and new executions in v3, and the PAG1 re-inference points
-the same way; neither says anything about another organization's hosts
-or attack policies. Because the intervals hold the 30 seeds fixed, the
-v3 verdict concerns these checkpoints and not the seeds that another
-retraining would draw. Chapter~\ref{ch:ads24} moves the method, unchanged,
-to a public dataset collected elsewhere.
+The new runs repeat the lab, the benign workers, and the configuration
+design of the development runs (Section~\ref{sec:eval-rounds}), so they
+say nothing about another organization's hosts or attack policies.
 % 근거: RECORD:297, 424 (모든 seed가 좋아지지는 않음), 443 (같은 lab 반복);
 % v3 FINAL_REPORT_KO.md "한계와 선행".
 % 출처(v3 우세 seed 수): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SCORED_RESULTS.json:1

@@ -145,6 +145,7 @@
     \if@isFinal
         \checkparameters
         \makefrontcover
+        \makeinnercover
         \makeapproval
     \fi
     \renewcommand\thesection{\thechapter-\arabic{section}}%
@@ -155,7 +156,22 @@
 \usepackage[left=25.4mm,right=25.4mm,top=30mm,bottom=25.4mm,a4paper]{geometry}
 
 %% 줄간격 설정
-\linespread{1.3}			                     % ver1.0 : 줄간격 130
+% 작성 안내(2026-2): 본문·Abstract·국문초록은 2배수, 각주·표·그림·인용·두 줄 이상의 제목은 1배수.
+% 표지·목차 같은 앞부분은 원래의 130%로 두고, \makecontents 끝에서 본문을 2배수로 바꾼다.
+% setspace 는 각주와 떠다니는 표·그림(캡션 포함)을 1배수로 둔다.
+\RequirePackage{setspace}
+\setstretch{1.3}			                     % ver1.0 : 줄간격 130 (앞부분)
+\newcommand{\@kentechdouble}{1.667}           % setspace 의 10pt 2배수(\doublespacing)와 같은 값
+% 절 제목이 두 줄로 넘어가도 1배수가 되게 report 의 정의에 \setstretch{1}만 더한다.
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+  {-3.5ex \@plus -1ex \@minus -.2ex}{2.3ex \@plus.2ex}%
+  {\normalfont\Large\bfseries\setstretch{1}}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}{1.5ex \@plus .2ex}%
+  {\normalfont\large\bfseries\setstretch{1}}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}{1.5ex \@plus .2ex}%
+  {\normalfont\normalsize\bfseries\setstretch{1}}}
 
 %% 본문이 영어로 되어있는지 한글로 되어있는지 설정
 \newcommand{\@korean}{korean}
@@ -428,6 +444,9 @@
     \newpage
 }
 
+%% 속표지: 작성 안내는 앞표지 다음, 인준서 앞에 둔다. 샘플처럼 앞표지와 같은 내용이다.
+\newcommand{\makeinnercover}{\makefrontcover}
+
 %% 학위논문 심사완료 검인서 및 제출승인서 생성
 %%  Don't change size of letters.
 \newcommand{\makeapproval}{%
@@ -606,7 +625,8 @@
   \vspace{16pt}
   \setlength{\parindent}{2em}  % 들여쓰기
   \setlength{\parskip}{0pt}    % 문단 간 간격 없음
-  \fontsize{11pt}{14.3pt}\selectfont % 11pt at 130% leading
+  % \setstretch 는 글자 크기를 \normalsize 로 되돌리므로 \linespread 를 먼저 두고 11pt 를 고른다.
+  \linespread{\@kentechdouble}\fontsize{11pt}{13.2pt}\selectfont % 11pt, 2배수(작성 안내)
 }{\par\vspace*{66pt}}
 
 % Keywords 환경
@@ -631,7 +651,7 @@
     \vspace{16pt}
     \setlength{\parindent}{2em}  % 들여쓰기
     \setlength{\parskip}{0pt}    % 문단 간 간격 없음
-    \fontsize{11pt}{14.3pt}\selectfont % 11pt at 130% leading
+    \linespread{\@kentechdouble}\fontsize{11pt}{13.2pt}\selectfont % 11pt, 2배수(작성 안내)
 }{\par\vspace*{66pt}}
 
 
@@ -654,6 +674,8 @@
     \tableofcontents
     \listoftables
 	\listoffigures
+    \clearpage
+    \setstretch{\@kentechdouble}% 본문부터 2배수(작성 안내)
 }
 
 
@@ -912,7 +934,7 @@
 		\renewcommand{\listtablename}{
 			List of Tables}
 		\renewcommand{\bibname}{%
-			Bibliography}
+			References}% 작성 안내: 참고문헌(References)
 		\renewcommand{\abstractname}{
 			Abstract}
 		\renewcommand{\figurename}{
@@ -968,6 +990,7 @@
 			{
             % \parindent\z@ 
             \hspace{-1.2cm}
+            \setstretch{1}% 두 줄 이상의 제목은 1배수
             \fontsize{16pt}{16pt}\selectfont \bfseries
 				\hspace{1.4ex}\thechapter.\hspace{1ex}
 				#1\par
@@ -983,7 +1006,7 @@
 			\fi}
 		\def\@makeschapterhead#1{% <-- 전체 변경
 			\vspace*{10\p@}
-			{\centering \parindent\z@ \fontsize{14pt}{14pt}\selectfont \bfseries #1\par}
+			{\centering \parindent\z@ \setstretch{1}\fontsize{14pt}{14pt}\selectfont \bfseries #1\par}
 			\vspace*{20\p@}
 		}
 		

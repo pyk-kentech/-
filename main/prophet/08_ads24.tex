@@ -33,8 +33,8 @@ the in-house result holds on another dataset.
 %   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_V3_DRAFT.md:5,17,18 (KTH, DOI, CC BY-SA 4.0, 2026-11-20).
 %   사용권은 license 파일이 아니라 기록 API의 metadata.rights에서 읽은 것이다.
 % 사용자 on/off: 인용 리뷰 P2-5에 따라 우리가 검사한 배포본 기준으로 적었다.
-Appendix~\ref{app:ads24-data} describes how the task was built from the
-data and why six other candidates were not used.
+Appendix~\ref{app:ads24-data} describes how the task was built, why six
+other candidates were not used, and further breakdowns of the loss.
 % 근거: RECORD:212, 236, 265--275 (선정 경위, 후보 7행 표는 부록 D).
 % ADS24_CONTRACT_SEALED.md "과제와 자료": cutoff 이전 Wazuh @timestamp 경보만
 % 입력. 이 시각이 수신 시각인지 확인되지 않아 계약은 "경보 시각 예측"이라 부른다.
@@ -59,7 +59,7 @@ These are oracle boundaries. They are placed where the labeled tactic
 sequence changes, so the evaluation takes from the labels both the next
 tactic and the moment at which to predict it, and every result in this
 chapter is conditional next-tactic classification at those transitions.
-It is not a forecast that a deployed system could issue, and it does not reproduce the operational setting of the in-house task.
+It is not a forecast that a deployed system could issue.
 
 The contract assigns the 132 runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
 15 further runs without users (2,982 boundaries) check preservation;
@@ -76,9 +76,8 @@ The two conditions also differ in collection period: the runs without users were
 early April and those with users in mid-April, so the split is
 associated with the users and with the period at once. The results
 below compare models across this combined split and do not estimate
-an effect of the simulated users alone. A role manifest lists the run
-identifiers of each role, and a per-run audit file records the time
-and label exclusions.
+an effect of the simulated users alone.
+% 2026-11-25 분량 줄이기 C13: 역할 manifest·실행별 감사 파일 문장은 아래 출처 주석과 부록 E 의 manifest 목록에 맡겼다.
 % 132 대 134, episode=run, 시각 결속 규칙은 부록 D에 적었다(ads.md 25·26번).
 % 출처(역할 manifest): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE1/ROLE_MANIFEST.json:583
 %   (roles: FIT_OFF 48, PRESERVE_OFF 15, ADAPT_ON 34, EVAL_ON 35 — 본문 48/15/34/35와 같다).
@@ -107,9 +106,8 @@ REL\_GLOBAL-ADS on the 35 environment-evaluation runs, the stage-2
 contrasts were fixed before the students were trained but after those
 runs had been inspected and used to decide that stage~2 should run.
 Stage~2 is therefore a development comparison on previously inspected
-runs (Table~\ref{tab:rounds}, note~a). Its intervals summarize the
-technical uncertainty of that comparison; they are not an external test
-on unseen data, which would need ADS-24 runs that no stage has used.
+runs (Table~\ref{tab:rounds}, note~a), and its intervals are not an
+external test on unseen data.
 % 근거: RECORD:256--261; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (관문 SD≥.050,
 % 10,000회 95% 구간 하단≥.020), "2단계 예정 계약" (교사: ADAPT_ON34에서만,
 % 자기 포함 30모델 다수결; KD_SELF는 같은 seed의 동결 REL_BASE);
@@ -126,18 +124,15 @@ environment evaluation the seed standard deviation fell from 0.163 to
 0.025 and the mean NLL from 2.276 to 2.060; the worst seed moved from
 2.690 to 2.121. On the preservation runs the mean NLL fell from 1.449
 to 1.430, so the interval stays well below the limit of $+0.043$. The
-self-distillation control, which uses the same KL term with each seed
-as its own teacher, left the environment loss where it was, at 2.275
+self-distillation control left the environment loss where it was, at 2.275
 with a seed standard deviation of 0.162. As a secondary contrast with
 individual 95\% intervals, the CD student minus the control was
 $-0.215$ $[-0.248, -0.181]$ in mean NLL and $-0.137$
 $[-0.163, -0.115]$ in seed standard deviation. This is consistent with
 the multi-model teacher target contributing to the reduction, but the
 comparison changes several things at once: the number of teachers,
-their quality, the averaging, and the selection by agreement. No
-student of five random teachers, of all 30, or of one teacher of
-comparable quality was trained, so their separate effects are not
-identified. Section~\ref{sec:app-raw} gives the stage-1 statistics to six
+their quality, the averaging, and the selection by agreement, whose
+separate effects were not tested (Section~\ref{sec:future}). Section~\ref{sec:app-raw} gives the stage-1 statistics to six
 decimals.
 % 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
 % "봉인한 주 판정", "TOP5−SELF 보조 대비" (env_mean −0.214832 [−0.248399, −0.181309];
@@ -233,12 +228,9 @@ more with the rest did not have lower loss. Because the statistic is
 not the in-house S1, this is an unfavorable result for a related,
 pre-specified diagnostic, not a failed repetition of the in-house
 analysis, and it does not show that agreement-based teacher selection
-fails in general. Even
-in the lab the top-ranked seed failed preservation
-(Section~\ref{sec:method-teachers}). Agreement did not track loss
-here, and the teacher rule ranks seeds by agreement. On ADS-24 the CD student
-still reduced the spread with teachers chosen this way, but the data
-give no evidence that agreement picked good teachers.
+fails in general. The CD student still reduced the spread with
+teachers chosen by agreement, but the data give no evidence that
+agreement picked good teachers.
 % 근거: RECORD:233, 260, 405; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (Spearman
 % ρ≤−.50, 100,000회 양측 순열 p<.05; 진단 조건이며 증류 관문이 아님);
 % ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125); 30 seed 표(:25-54)에서 합의도(6열)–환경
@@ -250,9 +242,8 @@ prior}, which predicts at every boundary the tactic frequencies of the
 FIT runs, weighting each run equally, and whose top-1 choice is
 therefore the majority tactic of FIT. It is estimated from the 48 FIT
 runs alone and scored, like the models, on the 35
-environment-evaluation runs. The per-run tactic proportions are summed
-over the FIT runs and one is added to each tactic before normalizing,
-so a tactic never seen in FIT still has nonzero probability.
+environment-evaluation runs, with one count added to every tactic so
+that none has zero probability.
 % 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:71,72 (ads.md 27번).
 % 출처(+1 평활): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/ads24_stage1.py:574
 %   (p=(counts+1)/(counts.sum()+len(LABELS))). 옛 원고의 "원장에 평활 표시 없음"은 코드와 달라 고쳤다.
@@ -260,11 +251,8 @@ On the environment evaluation its NLL is 1.830, and all 30 CD seeds
 were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
 FIT prior. Not every seed gained either. The best REL\_GLOBAL-ADS seed
-scored 1.953, lower than every CD seed, whose best was 2.020; consensus
-distillation pulled that seed back toward the group. The loss that
-accompanies the move to the condition with simulated users, and with it
-to a later collection period, remains after CD
-(Section~\ref{sec:disc-does}).
+scored 1.953, lower than every CD seed, whose best was 2.020.
+% 2026-11-25 C13: "이동에 따른 손실은 CD 뒤에도 남는다"는 12.1절(sec:disc-does)에서 다룬다.
 % 근거: RECORD:212, 221, 234, 423; ADS24_STAGE2_REPORT.md "FIT 다수 전술 기준선과
 % 비교" (기준선 1.829580; 평균 차 +0.446462, +0.230810, +0.445642; 0/30) 및
 % 최고 seed (REL_BASE 301008 1.953153, KD_ENV_TOP5 301008 2.020009).
@@ -272,24 +260,6 @@ to a later collection period, remains after CD
 % (132실행 5-fold, 1.8547/32.0%)과 다르다.
 % 정의: METHOD_EXTENSION 원장의 "실행 동등 FIT 사전 빈도"(FIT 다수 전술 1.829580).
 
-Stage~1 also fixed in advance three breakdowns of the environment loss,
-none of which entered a criterion. Boundaries with no new alert since
-the previous one were easier for REL\_GLOBAL-ADS than the rest, 1.987
-against 2.323, and the CD student lowered both, to 1.790 and 2.103. The
-loss of REL\_GLOBAL-ADS was 2.446 on the runs in the lower half of user
-activity and 2.096 on the upper half, and it depended on the defender
-agent, ranging from 1.770 with NOPAgent to 2.544 with WhackAMoleAgent.
-
-One further quantity
-was computed only after the primary results, and we report it as a
-post hoc analysis. The probability average of the five teachers scored
-2.038 on the environment evaluation, and that of all 30 REL\_GLOBAL-ADS
-seeds 1.945. The full average was the better target here, which is
-consistent with the failed agreement diagnostic above; whether a
-student of all 30 would also be better was not tested.
-% 근거: RECORD:262--263; ADS24_STAGE2_REPORT.md "사전 지정 보조 분해" (new_alerts_zero
-% 852경계 1.987007/1.790397, new_alerts_positive 4,787경계 2.322911/2.103257;
-% 방어자 NOPAgent 1.770317, WhackAMoleAgent 2.544174, bustling-doe-36 2.303870,
-% nebulous-snail-417 2.423497). 사용자 활동량 하위/상위 절반 2.446/2.096(RECORD:262). 교사 평균 2.0379, 1.9454는 기록의 사후 계산이다.
+% 2026-11-25 분량 줄이기 C13: 사전 지정 보조 분해와 사후 교사 평균 두 문단을 부록 D 로 옮겼다.
 % 개요는 이 장을 7문단으로 잡았으나, 지위(1·2단계, 열람 여부)를 과제 문단과 나눠
 % 8문단이 되었다.

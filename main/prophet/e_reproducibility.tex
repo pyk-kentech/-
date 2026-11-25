@@ -251,7 +251,7 @@ Method comparison & 160 & 119 & 110 / 1,119
 \bottomrule
 \end{tabularx}
 \par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
+\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
 $^{*}$Reasons as recorded in the sealed eligibility file. The four PAG1
 and the three v3 exclusions are all failures at the source collection
 stage, before any prediction was made, and none depends on a score.
@@ -308,9 +308,10 @@ round the three exclusions are background runs, so at most three of the
 64 background configurations (16 per condition, two repetitions each)
 lost a repetition, and the seen-condition configurations are all
 complete. Its three criteria rest on 15, 16 and 8 complete
-configurations; their complete-only estimates equal the stored ones,
-and the leave-one-configuration-out ranges are given in
-Section~\ref{sec:results-v3}.
+configurations; their complete-only estimates equal the stored ones.
+Leaving out any one configuration kept the sign of all three: the
+estimates ranged over $[-0.049, -0.041]$, $[-0.054, -0.047]$ and
+$[-0.075, -0.039]$.
 % 출처: 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SCORED_RESULTS.json:1, :1191; score_v3.py:84;
 %   evaluate_v3.py:134 (codex_original_machine.md 저장값 5). 구성별 LOO 값은 원 답 파일에만 둔다.
 

@@ -201,7 +201,7 @@ PWNJUTSU$^{c}$~\cite{berady2022pwnjutsu} & not used & the authors' site was unre
 \bottomrule
 \end{tabularx}
 \par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
+\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
 $^{a}$\url{https://zenodo.org/records/18861762}; checked 20 November 2026.
 $^{b}$\url{https://github.com/FiveDirections/OpTC-data}, including its
 red-team ground-truth document; checked 20 November 2026.
@@ -218,3 +218,27 @@ $^{c}$IEEE DataPort, DOI 10.21227/ngjr-kh92; dataset paper DOI
 %   tenure가 확인하면 진짜 key로 바꾼다. DOI 표기는 배포본 접근 경로로 남겼다.
 % (해결, 저자 확인 31번) Wazuh 문서 URL 두 개의 접근일은 2026-11-24 로 각주에 적었다. 수집에 쓰인
 %   Wazuh 버전은 검사한 KTH 기록에 적혀 있지 않다.
+
+\section{Breakdowns of the environment loss}
+\label{sec:ads24-breakdowns}
+% 2026-11-25: 9장에서 옮겨 왔다(분량 줄이기 C13). 내용과 근거 주석은 그대로다.
+
+Stage~1 of the ADS-24 study (Chapter~\ref{ch:ads24}) fixed in advance
+three breakdowns of the environment loss, none of which entered a criterion. Boundaries with no new alert since
+the previous one were easier for REL\_GLOBAL-ADS than the rest, 1.987
+against 2.323, and the CD student lowered both, to 1.790 and 2.103. The
+loss of REL\_GLOBAL-ADS was 2.446 on the runs in the lower half of user
+activity and 2.096 on the upper half, and it depended on the defender
+agent, ranging from 1.770 with NOPAgent to 2.544 with WhackAMoleAgent.
+
+One further quantity
+was computed only after the primary results, and we report it as a
+post hoc analysis. The probability average of the five teachers scored
+2.038 on the environment evaluation, and that of all 30 REL\_GLOBAL-ADS
+seeds 1.945. The full average was the better target here, which is
+consistent with the failed agreement diagnostic of Chapter~\ref{ch:ads24}; whether a
+student of all 30 would also be better was not tested.
+% 근거: RECORD:262--263; ADS24_STAGE2_REPORT.md "사전 지정 보조 분해" (new_alerts_zero
+% 852경계 1.987007/1.790397, new_alerts_positive 4,787경계 2.322911/2.103257;
+% 방어자 NOPAgent 1.770317, WhackAMoleAgent 2.544174, bustling-doe-36 2.303870,
+% nebulous-snail-417 2.423497). 사용자 활동량 하위/상위 절반 2.446/2.096(RECORD:262). 교사 평균 2.0379, 1.9454는 기록의 사후 계산이다.

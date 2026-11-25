@@ -17,19 +17,15 @@ rows where they disagreed; a separate diagnosis traced many
 in-house errors to one file decision, COPY or DISCOVERY, although the
 head built on it was not adopted.
 
-From the disagreement the thesis moved to a remedy that keeps the deployed
-architecture and its single-model inference cost: a student of the same
+The remedy keeps the deployed architecture and its single-model
+inference cost: a student of the same
 architecture follows the averaged
 probabilities of five selected teachers on unlabeled inputs from the
 new workload. In the v3 round, the one sealed round in which CD met all
-three criteria fixed before training and collection, the stored round
+three pre-fixed criteria, the stored round
 report records that the seed standard deviation narrowed on
-both A+C layouts and that \texttt{ORIGINAL\_18} was preserved; the
-earlier sealed v2 recheck passed stability without showing
-preservation. The three
-excluded runs failed during source collection, but the seed-level files
-are not in the archive available to us, so the verdict is a historical
-result recorded in that report, not one rescored here. The exploratory check on
+both A+C layouts and that \texttt{ORIGINAL\_18} was preserved. The verdict is the one recorded in that report, not one
+rescored here (Section~\ref{sec:eval-contract}). The exploratory check on
 ADS-24 and the three encoder adaptations, all development comparisons
 on inspected runs, moved in the same direction.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
@@ -37,19 +33,16 @@ on inspected runs, moved in the same direction.
 % ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
 % (8, 9장에서 밝힘). 구조 일반성의 자체 실험실 쪽도 개발 비교로 낮췄다(answers 07:10).
 
-The results are bounded in several ways. Among these 30 checkpoints per
-group, CD narrowed the variation relative to the baseline models, at the price of training 30 baselines before the student;
-the intervals do not extend this to other seeds. CD relies on unlabeled
-inputs from the new environment and did not close the gap to a
-frequency baseline there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
-and plain-GRU encoders still had higher NLL than the FIT prior
-(1.830); only the Transformer students cleared it. Not every
-seed gained either: seeds that had scored better than the consensus
-moved toward it. The diagnosis holds for one model in one lab. On
-ADS-24, whose stage-to-alert time binding we did not rerun and whose
-boundaries are oracle boundaries, the in-house agreement statistic used
-to pick teachers was not computed, and a related leave-one-out
-agreement diagnostic was unfavorable.
+The results are bounded (Section~\ref{sec:disc-threats}). They concern
+these 30 checkpoints per group, and CD costs 30 baselines trained before
+the student. CD needs unlabeled inputs from the new environment and did
+not close the gap to a frequency baseline there: on ADS-24 every
+distilled seed of REL\_GLOBAL-ADS and of the LSTM and plain-GRU encoders
+still had higher NLL than the FIT prior (1.830), and only the
+Transformer students cleared it. Not every seed gained, and the
+diagnosis holds for one model in one lab.
+% 2026-11-25 분량 줄이기 C18: ADS-24 시각 결합·oracle 경계·LOO 합의 진단 단서는 9장과 12.5절에 있어
+% 여기서는 뺐다.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
 % 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
@@ -58,8 +51,7 @@ agreement diagnostic was unfavorable.
 \label{sec:future}
 
 A set of further checks was planned before this thesis was written;
-none of them is reported here. What CD costs and needs can only be answered with new
-training. Teacher sets of five
+none of them is reported here. Teacher sets of five
 seeds chosen at random, of two seeds, and of all 30 test whether
 training 30 baselines and ranking them by agreement is worth its cost.
 Students trained on 25\% and 50\% of the unlabeled environment inputs
@@ -73,30 +65,17 @@ the 119 usable ADS-24 runs outside the 132 of the contract
 (Appendix~\ref{app:ads24-data}), which no earlier stage has used, and
 on a fresh in-house collection completes the method comparison that
 stopped at 110 runs. Intervals recomputed with seeds resampled along
-with runs let a verdict speak for more than these 30 seeds. Two
-references complete these checks, scored as deployed references for
-every encoder and dataset: temperature scaling~\cite{guo2017calibration}
+with runs let a verdict speak for more than these 30 seeds. Two deployed references complete them for every encoder and dataset: temperature scaling~\cite{guo2017calibration}
 of each base model, and probability ensembles of the five teachers and
-of all 30 baseline seeds, with five or 30 forward passes.
+of all 30 baseline seeds.
 % 원문: Guo et al. ICML 2017 (PMLR 70) arXiv:1706.04599 §4.2 "Temperature scaling ... uses a single scalar
 %   parameter T > 0 for all classes". 방법 이름 인용, 확인됨.
-The
-in-house v3 teacher average and the ADS-24 averages of
-Section~\ref{sec:disc-ensemble} are the only ensemble figures reported
-so far.
+Whether the models of ADS-24 and the general encoders split on one
+decision, as in-house REL\_GLOBAL did, is also open.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라
 % 9장에서 결과를 지우고 이 절에 계획으로만 적었다(RECORD:358, 498).
-
-The mechanism needs its own study. The account of where the
-seeds diverge was built for REL\_GLOBAL in the in-house lab, and CD
-reduced the spread on ADS-24 and for the general encoders, in
-development comparisons, without a matching diagnosis there. Whether those models also split on one decision, and
-whether their disagreement sits where the in-house lookup sits, is
-open. Extending the diagnosis to ADS-24 and to the general encoders
-would show whether the disagreement in those models has a comparable
-source.
 % 근거: RECORD:430--437, 6장 첫 문단 ("We did not study the mechanism separately on
 % ADS-24 or for the encoders"), 11장 sec:disc-mechanism. 개요 12장 마지막 항목.
 

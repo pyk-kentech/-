@@ -154,7 +154,7 @@ condition of ADS-24 but raised the loss on its preservation runs from 1.449 to
 %   저장 판정과 보고서 판정 사이의 모순은 찾지 못했다(5행 보고서는 A+C 절대 상한 실패도 적지만 표 판정과 어긋나지 않음).
 
 % 표가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
-{\small
+{\small\setstretch{1}% 표는 1배수(작성 안내)
 \begin{xltabular}{\textwidth}{@{}r>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X@{}}
 \caption{Method candidates and their stored verdicts. Rows 1--15 were
 judged under criteria written before scoring; rows 16--20 are post hoc
