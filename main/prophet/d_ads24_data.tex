@@ -37,10 +37,10 @@ Chapter~\ref{ch:ads24} is an exploratory check.
 
 The contract population then excludes runs flagged with
 \texttt{malicious\_users} or \texttt{block\_blinds\_blue} and runs whose
-defender is unknown. These three flags leave 134 runs. The stored
-preflight report notes that this equals the number of episodes used in
-the dataset paper, which gives no list of identifiers, so the two sets
-were matched in number only. Two of the 134 runs are then dropped because one of their two
+defender is unknown. These three flags leave 134 runs, the same number
+as the 134 episodes on which the dataset paper bases its
+results~\cite{nyberg2026cyber}. We did not find a list of episode
+identifiers in that paper, so the two sets were matched in number only. Two of the 134 runs are then dropped because one of their two
 tactic stages falls after the end of the Wazuh extraction, which leaves
 the 132 runs on which every ADS-24 result in this thesis is computed.
 Two label baselines, computed on the 132 runs with five folds, show how
@@ -53,8 +53,8 @@ Chapter~\ref{ch:ads24} compares the models
 %   :29-31 (제외 목록), :35 (같은 time_start는 최소 action_id), :76 (receipt 필드 미확인),
 %   :80 ("논문의 134와 숫자만 일치", 2개 빠져 132); ADS24_CONTRACT_DRAFT.md:27 (cutoff와 같은 시각 제외).
 %   68 에피소드·중앙값 11.47초: RECORD(inputs/drop)의 시각 앵커 값, 정의는 PREFLIGHT:23.
-% 134를 "the dataset paper reports"로 적은 것은 PREFLIGHT:80의 문장(논문의 134)에 기댄다.
-%   TODO(사람): nyberg2026cyber 본문에서 134 episode를 확인해 주세요(인용 리뷰 P2-5).
+% 8회차 인용 P1-2: 134 episode는 nyberg2026cyber 본문에서 확인됐다(인용 리뷰). 134 바로 뒤에 인용을 달고,
+%   식별자 목록이 없다는 말은 "우리가 찾지 못했다"로 한정했다. 해결된 TODO는 지웠다.
 
 Only alert identity, severity, host role, and timing enter the input;
 every field that names the answer or the run was removed. In particular, Wazuh rules can map an alert to

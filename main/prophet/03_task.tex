@@ -176,9 +176,11 @@ source's actions, results, or requests, nor the defender's receipts,
 and the source keeps its own result-dependent choice of actions. The
 benign processes therefore enter the received stream without taking
 part in the source's decisions. We call a condition with at least one
-benign worker a \emph{background condition}.
-Table~\ref{tab:conditions} lists the conditions and the two placements
-of the file targets.
+benign worker a \emph{background condition}. Every background condition
+evaluated in this thesis contains worker~C and is therefore unseen in the
+sense defined below; runs with worker~A alone occur only in the training
+runs. Table~\ref{tab:conditions} lists the conditions and the two
+placements of the file targets.
 % 근거: RECORD:34--42; PAPER_DEFINITIONS.md §1.
 
 All new experiments in this thesis train on the C-fold, the outer fold
@@ -186,7 +188,9 @@ in which every variant of worker~C is withheld from the training runs.
 We call these 603 labeled runs the \emph{FIT set}. A condition is
 \emph{seen} if its benign work occurs in the FIT set and \emph{unseen}
 otherwise; under the C-fold, every condition that contains worker~C is
-unseen, and \texttt{ORIGINAL\_18} is the seen reference. ``Unseen''
+unseen. The \emph{seen condition} is \texttt{ORIGINAL\_18}, the source
+procedure without a benign worker, and the rest of the thesis calls it
+by one of these two names only. ``Unseen''
 refers to the labeled training data only. The baseline models never
 receive any record of worker~C, but the CD student of
 Chapter~\ref{ch:method} does read unlabeled inputs from other runs of
@@ -225,6 +229,14 @@ Identifier & C-fold FIT & Definition \\
 %   atlas OT/REL_EVIDENCE_PRESERVING_COMPARISON_20261113/EXECUTION_CONTRACT.md:3 (defs.md 14(c)).
 % TODO(사람): C_ONLY·B+C(135실행 개발 집합, v3, PAG1)가 어느 배치를 쓰는지는 atlas에 없다.
 
+An \emph{evaluation set} is one condition scored as one group of runs.
+\texttt{A+C} is scored separately under each layout, so the in-house
+chapters use five evaluation sets: \texttt{A+C FLAT},
+\texttt{A+C NESTED}, \texttt{C\_ONLY}, \texttt{B+C}, and
+\texttt{ORIGINAL\_18}.
+% 8회차 문장 P2-2: 조건(condition)과 평가 묶음(evaluation set)을 나눴다. C_ONLY·B+C의 배치는
+% 단정하지 않는다(저자 확인 목록 14번).
+
 The C-fold makes the difference between seen and unseen conditions
 concrete. Worker~C runs \texttt{ipconfig /all}, and received \texttt{ipconfig}
 records carry an \emph{IP hint}, the observed-command hint
@@ -254,10 +266,10 @@ search} is the synthetic file search (DISCOVERY) that looks for a
 target's payload file, and its exit status records whether it found
 one. A \emph{marker search} is a later search on the same target that
 marks it as the current one; its own exit status is not the payload
-result. Table~\ref{tab:recorded-case} shows part of the received prefix for
-execution \texttt{THME0064}, which comes from an earlier three-target
-collection of this project (Appendix~\ref{app:secondary-results}) and
-not from the C-fold data, before its first file-processing decision
+result. Execution \texttt{THME0064} comes from an earlier three-target
+collection of this project (Appendix~\ref{app:secondary-results}), not
+from the C-fold data. Table~\ref{tab:recorded-case} shows part of its
+received prefix before its first file-processing decision
 (\texttt{SEQ\_5}). The path
 names distinguish three synthetic targets. The marker concerns
 \texttt{alpha}, whose earlier payload search returned a nonzero exit

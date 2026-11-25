@@ -104,20 +104,26 @@ scoring. These rows are a record of the research history, not a
 basis for methodological comparison. The candidates appear only under
 their stored identifiers, and the archive available to us does not
 preserve their inputs, objectives, controls, or settings, so a reader
-cannot check what each stored verdict rejected. The last five rows have a
+cannot check what each stored verdict rejected.
+
+The last five rows have a
 different status. They are post hoc development analyses on runs whose
 scores had already been seen, and no new model was trained for the two
 extension candidates. Candidate~A replaces the teacher mean by a target
-that falls back toward the FIT action prior when few teachers agree.
+that falls back toward $\pi$, the boundary-weighted FIT action
+frequencies, when few teachers agree.
 Candidate~B keeps only the directions of the hidden state that the 30
-seeds share on FIT inputs. Candidate~A is close to ensemble distillation that adapts to
-disagreement among teachers~\cite{du2020agree}, and it differs from
+seeds share on FIT inputs. Like the adaptive ensemble distillation of
+Du et al.~\cite{du2020agree}, Candidate~A responds to disagreement among
+teachers, but it does so by interpolating the probability target toward
+$\pi$ rather than by weighting teachers in gradient space. It also
+differs from
 ensemble distribution distillation~\cite{malinin2019ensemble}, which keeps the
 distribution of the ensemble's predictions rather than falling back to
-a prior. Candidate~B builds on comparing networks through a shared
+fixed frequencies. Candidate~B builds on comparing networks through a shared
 representation subspace~\cite{raghu2017svcca}. Candidate~A scored better than the teacher mean on ADS-24
 but worse in-house. Candidate~B narrowed the spread on the unseen
-condition of ADS-24 but raised the seen-condition loss from 1.449 to
+condition of ADS-24 but raised the loss on its preservation runs from 1.449 to
 1.882. Neither was carried forward to a fit.
 % 근거: RECORD:385--406. 1--15행: ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/
 % PAPER_DEFINITIONS.md §4 (각 행의 근거 보고서 경로가 그 표에 있다).
@@ -140,7 +146,7 @@ condition of ADS-24 but raised the seen-condition loss from 1.449 to
 \caption{Method candidates and their stored verdicts. Rows 1--15 were
 judged under criteria written before scoring; rows 16--20 are post hoc
 development analyses on runs whose scores had already been seen. The
-preservation limit is $+0.020$ in NLL on the original procedure. Rows
+preservation limit is $+0.020$ in NLL on the seen condition, \texttt{ORIGINAL\_18}. Rows
 that name a candidate only by its stored identifier give the stored
 verdict; the candidate is not independently interpretable from the
 archive supplied with this thesis, and these rows record research
@@ -190,14 +196,14 @@ history rather than a comparison of defined methods.}
 14 & KD\_ENV\_TOP5 of v2 as a full method candidate
   & A+C stabilization held on new runs; preservation on
     \texttt{ORIGINAL\_18} undecided; not adopted \\
-15 & Separate effect of the original-procedure inputs in KD\_ALL (v3)
+15 & Separate effect of the seen-condition inputs in KD\_ALL (v3)
   & KD\_ALL $-$ KD\_ENV\_TOP5 interval $[-0.120, +0.006]$ contained zero;
     not shown \\
 \midrule
 16 & Confidence-conditioned consensus target (extension candidate~A)
-  & ADS-24: 1.779, below the probability mean of all 30 teachers
-    (1.945) and below the FIT tactic frequencies with each boundary
-    weighted equally (1.818), unlike the run-weighted FIT prior of
+    & ADS-24: 1.779, below the probability mean of all 30 teachers
+    (1.945) and below $\pi$, the boundary-weighted FIT action
+    frequencies (1.818), which differ from the run-weighted FIT prior of
     Chapter~\ref{ch:ads24}; in-house \texttt{A+C FLAT}: 0.142, worse than the 30-teacher
     mean 0.042; dropped as a general candidate \\
 17 & Projection onto a representation shared by the seeds (extension
@@ -208,10 +214,11 @@ history rather than a comparison of defined methods.}
   & Lower teacher NLL in 24 of 56 comparisons; student comparison
     undecided; arithmetic mean kept \\
 19 & Seed selection by agreement on ADS-24
-  & $\rho = +0.127$, $p = 0.503$; not reproduced
+    & Unfavorable (related leave-one-out diagnostic, $\rho = +0.127$,
+    $p = 0.503$); in-house S1 not computed on ADS-24
     (Chapter~\ref{ch:ads24}) \\
 20 & Predicting each encoder's seed standard deviation from $V$ on the adaptation inputs
-  & ADS-24 $\rho = -0.8$ ($n = 4$), in-house $\rho = +0.5$ ($n = 3$);
+    & ADS-24 $\rho = -0.800$ ($n = 4$), in-house $\rho = +0.500$ ($n = 3$);
     not confirmed (Chapter~\ref{ch:decomposition}) \\
 \bottomrule
 \end{tabularx}
@@ -247,12 +254,6 @@ Withdrawn claim & What replaced it \\
 The baseline's output read as the distribution of the action that
 follows the last received action
   & Withdrawn \\
-A resolution calculation that omitted the mean over seeds
-  & Withdrawn \\
-An 18-way margin of 10.3
-  & The actual upper bound is 14.14 \\
-The $\rho_0$ initialization described as a guarantee of preservation
-  & Withdrawn; preservation is tested per round \\
 A 10-seed contract whose main gate used the mean NLL
   & From v2 on, the seed standard deviation is the primary measure \\
 The general encoders, lacking LogitNorm, would vary less across seeds
@@ -260,10 +261,28 @@ The general encoders, lacking LogitNorm, would vary less across seeds
 \bottomrule
 \end{tabularx}
 \end{table}
-% TODO(사람): "ρ0 초기화"(RECORD:413)의 정의가 기록에 없다. 본문(4장)에 해당 기호가
-% 없으므로 무엇의 초기값인지 한 줄로 알려 주시면 표의 표현을 고치겠다.
-% "preservation is tested per round"는 5장의 차수별 보존 판정(tab:rounds)을 가리킨다.
-% TODO(사람): "seed 평균을 빠뜨린 해상도 계산"과 "18-way margin"이 무엇의 해상도·
-% margin인지 기록에 설명이 없다. 확인되면 표의 왼쪽 칸을 구체적으로 고치겠다.
+
+Three calculations made while we examined a proposed corrector for
+receipt delay were also corrected; they are not hypotheses and are not
+in the tables. The proposal multiplied the baseline distribution $p_0$
+by $A(x) = \rho_0 I + \rho_1 T + \rho_2 T^2$, a polynomial in a
+transition term $T$, and was never adopted. First, starting from
+$\rho_0 \approx 0.999$ was described as guaranteeing preservation; it
+only keeps the initial output, and keeping the $+0.020$ limit after
+training requires the constraint $\rho_0 \ge e^{-0.020} \approx 0.980$.
+Second, a resolution argument held that a one-row loss of about 0.03
+made a difference of 0.013 undetectable; it omitted the mean over
+seeds: a change of 10 in the loss of one row of one seed contributes
+only $10/(5 \times 341) = 0.005865$ to the mean over five seeds and the
+341 rows of \texttt{C\_ONLY}. Third, a maximum score difference of
+about 10.3 was given for the 18 logits under LogitNorm, whose logit
+vector has norm $1/\tau = 10$. The bound on the difference between any
+two of the 18 scores is $|z_i - z_j| \le \sqrt{2}\,\lVert z \rVert =
+10\sqrt{2} \approx 14.14$; 10.3 is the value in the special arrangement
+in which the other 17 scores are equal.
+% 저자 답(정의 묶음 18(a)): 세 계산은 수신 지연 보정기 제안을 검토하던 분석 단계의 정정이라 표에서 빼고
+%   이 문단으로 옮겼다. 10.3 검산: a²+17b²=100, b=−a/17 → a−b = 10·√(18/17)... = 10.29.
+%   |z_i−z_j| ≤ √2‖z‖ (‖z‖=10)은 코시–슈바르츠에서 나온다. 341 = C_ONLY 행 수(저자 답의 5×341).
+%   T의 정체(전이 행렬인지)는 저자 답에 없어 "transition term"으로만 썼다.
 
 % 이 부록의 질문은 결론 뒤 "저자 확인 목록"에 모았다.

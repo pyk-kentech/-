@@ -3,7 +3,7 @@
 
 The 30 REL\_GLOBAL seeds from which the teachers of
 Section~\ref{sec:method-teachers} are drawn do not rank the same way on
-the seen procedure and on the unseen conditions, and relative to their
+the seen condition and on the unseen conditions, and relative to their
 mean loss they spread far more on the unseen ones. We measure how far
 they diverge and locate where in the prediction they do so; the
 analysis localizes the errors and does not isolate a cause of the
@@ -52,20 +52,17 @@ describe the 30 seeds on one set of runs; we computed no interval for
 them, and the rows they share make them descriptive rather than
 inferential.
 
-The seeds are not alike on the seen procedure either. Their standard
+The seeds are not alike on the seen condition either. Their standard
 deviation on \texttt{ORIGINAL\_18} was 0.076, close to the 0.086 on
 \texttt{A+C FLAT}, so in absolute terms the two conditions spread the
 seeds about equally. Relative to the mean loss the picture differs: the
 standard deviation was about 0.12 of the mean on \texttt{ORIGINAL\_18}
 (0.076 against 0.631) and about 0.61 of it on \texttt{A+C FLAT} (0.086
-against 0.142). The disagreement term of Chapter~\ref{ch:decomposition}
-also stays at a similar absolute level for REL\_GLOBAL on the seen and
-the unseen conditions (0.067 and 0.075, on other runs), unlike for the
-three general encoders.
+against 0.142).
 % 출처(ORIGINAL_18 SD .076415, C_ONLY .068273/.288810, B+C .052282/.193977, 최악 .763586):
 %   atlas OT/PROPHET_MARKER_HEAD_INPUT_20261119/FINAL_REPORT_KO.md:19,25-27 (같은 30 checkpoint,
 %   같은 135실행; FLAT/NESTED 값이 SEED_POPULATION:37과 일치) (diag.md 19a).
-% 0.067/0.075: 10_decomposition.tex tab:decomposition (PAG1 실행).
+% 8회차 문장 P3-4: 10장 값(0.067/0.075, 다른 실행)을 앞당겨 쓰던 문장은 뺐다(10장 표에 있다).
 
 Three selection scores are also listed, each fixed before the A+C
 losses of these 30 seeds were read: S1, a seed's top-1 agreement with
@@ -123,10 +120,9 @@ layout (Table~\ref{tab:seed-population}).
 % 출처: ORIGINAL_TEXT/outputs/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:39
 % (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331).
 S1 is still not a rule for choosing one seed: the seed it ranked first
-failed preservation (Section~\ref{sec:method-teachers}). On ADS-24 a
-related leave-one-out agreement diagnostic was unfavorable, and S1
-itself was not computed there, so the in-house statistic was not
-replicated (Chapter~\ref{ch:ads24}).
+failed preservation (Section~\ref{sec:method-teachers}). S1 itself was
+not computed on ADS-24, and the related leave-one-out agreement
+diagnostic there was unfavorable (Chapter~\ref{ch:ads24}).
 Section~\ref{sec:diag-agreement} returns to it.
 
 S3 is the loss on the final training batch, not an NLL on held-out FIT
@@ -134,14 +130,14 @@ runs, and no held-out FIT score was computed for this population; the
 values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
 fail. S2 uses labels from another unseen condition and still ranks the
-seeds poorly. These results agree with the selection part of the
-underspecification described by D'Amour
+seeds poorly. These results resemble the deployment-selection
+difficulty discussed by D'Amour
 et al.~\cite{damour2020underspecification}
 (Section~\ref{sec:related-underspec}): neither the final training
 loss, nor labels from another unseen condition, nor the loss on the
-seen procedure recovered how the seeds would rank on these background
-conditions. They do not show the other part, a set of seeds that are
-equally good where the training data reach.
+seen condition recovered how the seeds would rank on these background
+conditions. They do not establish underspecification, which would need
+seeds that are equally good on the seen condition, and ours are not.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
 % NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
 % S4(고정 무작위 순열)는 무작위 대조라 표와 본문에서 뺐다.
@@ -161,7 +157,9 @@ condition. The figure describes the averaged prediction; we did not
 compute how the loss of each individual seed is distributed over these
 rows. This concentration is our own observation on these runs; it is consistent with the use of
 variation across an ensemble as a signal of predictive
-uncertainty~\cite{lakshminarayanan2016simple}.
+uncertainty~\cite{lakshminarayanan2016simple}. Disagreement on unlabeled
+environment inputs therefore marks, without labels, the places where
+the seeds' computations part.
 
 Unanimity is not a guarantee of
 correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
@@ -171,9 +169,7 @@ orders single seeds by their agreement with the majority; it is related
 to, but not the same as, the pairwise agreement line of Baek
 et al.~\cite{baek2022agreement}. On the 82,008 FIT views the
 30 models gave the same top-1 action for 90.3\% (74,074), so on FIT
-inputs the seeds mostly agree, though not on the remaining 9.7\%.
-Disagreement on unlabeled environment inputs therefore marks, without
-labels, the places where the seeds' computations part. The distillation of
+inputs the seeds mostly agree, though not on the remaining 9.7\%. The distillation of
 Chapter~\ref{ch:method} is designed to remove that disagreement, and
 Chapter~\ref{ch:results} tests it under a sealed contract.
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/
@@ -223,10 +219,10 @@ records before the cutoff, together with whether the last of them has a
 received END. For each key the table returns the smoothed action
 frequencies observed under it in FIT. Used alone, the table scored 0.554 on the 118
 \texttt{ORIGINAL\_18} rows and 0.496 on a separate, previously
-inspected set of 64 original-procedure runs and 472 rows. With each FIT
+inspected set of 64 runs and 472 rows of the seen condition. With each FIT
 run held out in turn, it reached 82.5\% accuracy and an NLL of 0.376,
 and splitting each key into two bins of the time since the last received
-batch (age) lowered the NLL to 0.338. On the original procedure the
+batch (age) lowered the NLL to 0.338. On the seen condition the
 hint-branch table, which knows nothing about targets, thus did better
 than the mean of the trained seeds (0.554 against 0.631), which leaves
 little for a change of encoder to gain there.
@@ -339,7 +335,7 @@ reused; by then they had been inspected. The gain held against both
 models on a five-target FLAT variant. With three targets, the contrast
 against \texttt{SHUFFLED\_HEAD} was not confirmed: on 32 runs and 256
 rows of \texttt{A+C FLAT} the difference was $-0.019$ with a 98.75\%
-interval of $[-0.043, +0.006]$. Preservation of the original task was not established. On 32 new
+interval of $[-0.043, +0.006]$. Preservation of the seen condition was not established. On 32 new
 \texttt{ORIGINAL\_18} runs \texttt{OBSERVED\_HEAD} was 0.015 worse than
 REL\_GLOBAL, inside the $+0.020$ limit, but the 95\% interval
 $[-0.017, +0.048]$ crossed it, so the model was not adopted as a
@@ -357,7 +353,7 @@ that the lookup causes the seed instability, because the features
 encode the source policy directly, the generic form failed, and the
 shuffled control does not preserve every temporal and structural
 property of a run. We also did not find an architectural change built
-on the lookup that is general and leaves the original task intact.
+on the lookup that is general and leaves the seen condition intact.
 % 근거: RECORD:112--124.
 % logit 분해(사후, 135실행): FOLLOWUP_REPORT_KO.md:31--44 (하위 5 seed COPY 오류
 % 77+71=148 중 관계 부호 오류 56+51=107, 기본 경로 역전 21+20=41; 상위 5 seed 10+11=21).

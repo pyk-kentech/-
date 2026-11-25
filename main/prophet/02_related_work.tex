@@ -137,10 +137,11 @@ return many predictors with equivalent held-out performance in the
 training domain that behave differently under deployment conditions,
 and the pipeline does not choose among them~\cite{damour2020underspecification}.
 Their work establishes and documents the phenomenon across domains. Our
-measurements on next attacker action prediction are consistent with
-one part of it: the scores we computed on the training side did not
-rank the seeds by their loss on the unseen conditions. They do not show
-that the seeds are equally good on the seen condition
+measurements on next attacker action prediction resemble the
+deployment-selection difficulty they discuss: the scores we computed on
+the training side did not rank the seeds by their loss on the unseen
+conditions. They do not establish underspecification, because the seeds
+are not equally good on the seen condition
 (Chapter~\ref{ch:diagnosis}), and the thesis then tries to reduce the
 spread it measures.
 

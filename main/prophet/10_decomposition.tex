@@ -96,9 +96,10 @@ ADS-24 & REL\_GLOBAL-ADS               & 0.043 & 0.230 & 5.3 & 10\% \\
 % 출처: atlas OT/METHOD_EXTENSION_DECOMPOSITION_20261123/VARIANCE_DECOMPOSITION_REPORT.md:27,28,58 (diag.md 23번).
 
 $V$ tracked the instability that the earlier chapters measured with the
-seed standard deviation of NLL. Over the 28 pairs of encoder and
-evaluation condition (four encoders on five in-house conditions and on
-two ADS-24 conditions), the Spearman correlation between $V$ and seed standard
+seed standard deviation of NLL. Over the 28 encoder--set pairs (four
+encoders on the five in-house evaluation sets of
+Section~\ref{sec:conditions} and on two ADS-24 evaluation sets), the
+Spearman correlation between $V$ and seed standard
 deviation was 0.929; it was 0.762 within ADS-24 ($n=8$) and 0.863 within
 the in-house lab ($n=20$). The points share seed populations and runs,
 so the correlation describes these baselines rather than 28 independent
@@ -114,16 +115,16 @@ somewhat lower values for the three general encoders (0.317, 0.455, and
 % to seed SD" (pooled 0.929, ADS 0.762, PROPHET 0.863), "Can unlabeled adaptation V
 % anticipate evaluation instability?" (ADS 34실행/5,811행, 자체 167실행/1,663행).
 
-After distillation, $V$ fell in 27 of the 28 conditions, often by an order
+After distillation, $V$ fell in 27 of the 28 encoder--set pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
 mainly on the disagreement term. The ensemble analogue of this
 reduction is studied by Rath-Manakidis et
-al.~\cite{rathmanakidis2022reduction}. For students that share one
-fixed teacher set, a lower $V$ is the expected outcome of distillation;
-what the measurement adds is its size on these runs and the one
-condition where it did not occur. The decomposition is an identity and
+al.~\cite{rathmanakidis2022reduction}. Part of the drop is expected
+from distillation toward one fixed teacher set
+(Section~\ref{sec:disc-novelty}); the measurement adds its size on these
+runs and the one pair where it did not occur. The decomposition is an identity and
 the change in $V$ is an observation after the fact, so the analysis
 does not show that the drop in $V$ produced the drop in seed standard
 deviation.
@@ -134,8 +135,10 @@ background inputs alone, $V$ rose from 0.068 to 0.077, and the seed
 standard deviation rose with it. These v3 seeds are a different
 REL\_GLOBAL population from that of Table~\ref{tab:decomposition}.
 Preservation on this condition is also the least settled in-house
-result (Section~\ref{sec:disc-mechanism}). The reduction did not extend
-to the seen condition.
+result (Section~\ref{sec:disc-mechanism}). For REL\_GLOBAL and its
+KD\_ENV\_TOP5 students, the reduction therefore did not extend to the
+seen condition; for the three general encoders, $V$ on
+\texttt{ORIGINAL\_18} fell as well.
 % 근거: RECORD:331, 433; VARIANCE_DECOMPOSITION_REPORT.md "Student after KD: paired
 % V changes". 자체 REL_GLOBAL 쌍은 v3의 2M seed 기준 모델과 KD_ENV_TOP5 학생
 % (같은 PAG1 입력)이며, 표 tab:decomposition의 원래 30-seed 계보와 다른 모집단이라

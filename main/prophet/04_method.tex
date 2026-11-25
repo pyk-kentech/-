@@ -81,7 +81,7 @@ do not enter the residual, so the result recorded for one target is
 read together with that target's other records and kept apart from the
 results of the others. The model has 59,882 parameters.
 
-\paragraph{Regularizers.} Wei et al.\ define LogitNorm as a training
+\paragraph{LogitNorm.} Wei et al.\ define LogitNorm as a training
 loss: the cross-entropy is computed on logits normalized to a fixed
 norm~\cite{wei2022mitigating}. We use a variant inspired by it that
 applies the same normalization in training and at inference, replacing
@@ -90,6 +90,8 @@ flowing through the denominator; applying it at inference is our
 choice, not part of the cited method. It limits how far the training
 loss can be lowered by inflating the logits. In this thesis
 \emph{LogitNorm} refers to this train-and-inference variant.
+
+\paragraph{Representation-gradient penalty.}
 $\mathcal{R}_{\mathrm{GLOBAL}}$ is a representation-gradient penalty
 inspired by input-gradient regularization~\cite{ross2017improving}:
 Ross and Doshi-Velez penalize the gradient with respect to the model
@@ -110,8 +112,8 @@ The model was reached in steps. REL, the relation model of
 Section~\ref{sec:method-relation-evidence}, added the residual of
 Equation~\ref{eq:relation-attn} to the event-level predictor. REL was
 then trained on the 603-run C-fold FIT set, which includes the
-benign-worker runs, for 1,346 updates; the round reports call this
-version hard REL. LogitNorm was then added (REL\_NORM), and finally
+benign-worker runs, for 1,346 updates (hard REL in the round reports).
+LogitNorm was then added (REL\_NORM), and finally
 $\mathcal{R}_{\mathrm{GLOBAL}}$ with coefficient 0.1. The parameter
 count stayed at 59,882 throughout.
 Appendix~\ref{app:repro} states which code and records exist and which
@@ -309,10 +311,10 @@ rounds of Chapters~\ref{ch:evaluation} and~\ref{ch:results}. All groups
 share the FIT procedure of Section~\ref{sec:method-baseline}; they differ
 in the teacher set and in the unlabeled inputs of the KL term. The
 background inputs are 119 runs (1,309 rows) under background conditions.
-KD\_ALL adds 48 runs (354 rows) of the original procedure to them and
+KD\_ALL adds 48 runs (354 rows) of the seen condition to them and
 splits the 32 unlabeled rows of each update between the two sources in
 the ratio of their run counts, 119:48. The labels and the source and
-worker roles of the original-procedure rows are not used. KD\_ALL is the
+worker roles of the seen-condition rows are not used. KD\_ALL is the
 final student of Chapter~\ref{ch:results}.
 % 근거: RECORD:142--149; PAPER_DEFINITIONS.md §2 군 표. 원래 입력 B는 기존
 % 16실행·118행 + 1단계 32실행·236행 = 48실행·354행.
@@ -335,7 +337,7 @@ KD\_FIT & mean of all 30, in-sample on FIT & FIT inputs & 10-seed \\
 KD\_SELF & the same seed's single REL\_GLOBAL & background inputs
   & 10-seed, v2 \\
 KD\_ENV\_TOP5 & mean of the top five & background inputs & v2, v3 \\
-KD\_ALL & mean of the top five & background inputs and 48 original-procedure
+KD\_ALL & mean of the top five & background inputs and 48 seen-condition
   runs (354 rows) & v3 \\
 \bottomrule
 \end{tabularx}
@@ -405,7 +407,7 @@ agreement rule, from 30 baseline models of the same encoder trained on
 the same data. The in-house top five are never copied to another
 encoder. Selection uses only the unlabeled adaptation inputs: the 34
 ADS-24 runs with simulated users, and, in the in-house lab, the same 119
-background and 48 original-procedure runs that KD\_ALL uses for
+background and 48 seen-condition runs that KD\_ALL uses for
 adaptation. Unlike the in-house REL\_GLOBAL teachers, these teachers are
 therefore chosen on the inputs they are distilled on rather than on the
 A+C development runs.

@@ -68,7 +68,8 @@ draws no conclusion from v3 that goes beyond what the report records.
 \section{Training settings and seeds}
 \label{sec:repro-training}
 
-Every in-house fit, of REL\_GLOBAL and of the students alike, uses the
+Every in-house fit of REL\_GLOBAL and of the CD students built on it
+(Table~\ref{tab:variants}) uses the
 603 runs of the C-fold FIT set with execution-weighted 18-way
 cross-entropy, the representation-gradient penalty $\mathcal{R}_{\mathrm{GLOBAL}}$
 with coefficient 0.1, and LogitNorm with $\tau=0.1$. Each fit runs
@@ -77,7 +78,11 @@ gradient clipping at 2) and a cosine learning rate from 0.002 to
 0.0002, and the last checkpoint is kept. Within a seed, all groups of a
 round share the initial tensors and the FIT occurrence and delivery
 trace. All in-house fits use the 404-only preprocessor of
-Section~\ref{sec:method-baseline}.
+Section~\ref{sec:method-baseline}. The three general encoders and
+their CD students drop LogitNorm, $\mathcal{R}_{\mathrm{GLOBAL}}$, and
+the relational residual; their settings are given in
+Section~\ref{sec:repro-encoders}.
+% 8회차 방법 P2-1: 범위를 REL_GLOBAL 계열로 한정하고 일반 인코더는 E.3절로 가리켰다.
 
 The 30 REL\_GLOBAL seeds of the teacher population are 3674, 12050, 15301, 16635, 16893, 20436, 28035,
 28756, 29771, 33674, 36720, 37406, 43142, 48192, 49208, 50572, 50836,
@@ -264,7 +269,7 @@ the direction of every contrast is the same under either. For the v3
 round the gap is bounded but not measured. Its three exclusions are
 background runs, so at most three of the 64 background configurations
 (16 per condition, two repetitions each) lost a repetition, and the
-original-procedure configurations are all complete. The v3 report keeps
+seen-condition configurations are all complete. The v3 report keeps
 the complete-configuration counts and the complete-only estimates in
 its seed-level file, which is not in the archive, and no
 leave-one-configuration-out analysis was run.

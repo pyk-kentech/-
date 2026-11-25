@@ -16,9 +16,12 @@ thing consistently: how far the seeds of one group disagree on
 inputs from an unseen environment. On the unseen conditions the seed
 standard deviation fell in every round in which it was compared, and in
 the post hoc decomposition of Chapter~\ref{ch:decomposition} the
-disagreement term $V$ fell in 27 of the 28 conditions. On the seen
-condition \texttt{ORIGINAL\_18}, by contrast, $V$ rose. Of these rounds only v3 is a sealed test
-(Section~\ref{sec:eval-rounds}), and the intervals hold the seeds
+disagreement term $V$ fell in 27 of the 28 encoder--set pairs. For
+REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
+contrast, $V$ rose. Two of these rounds were sealed
+(Section~\ref{sec:eval-rounds}): v3 is the only one in which CD met all
+three sealed criteria, and the v2 recheck passed stability without
+showing preservation. The intervals hold the seeds
 fixed, so whether another draw of seeds would show the same narrowing
 was not tested. Its verdict, moreover, is the one recorded in the
 stored round report; the row-level files that would let a reader
@@ -104,17 +107,17 @@ comparable reason is unknown.
 
 The agreement observation behind teacher selection is narrower still. Agreement
 ranked the REL\_GLOBAL seeds by loss in the lab. On ADS-24 a related
-leave-one-out agreement diagnostic was unfavorable ($\rho=+0.127$), and
-the in-house statistic itself was not computed there, so it was not
-replicated (Section~\ref{sec:ads24-results}); on ADS-24 the average of
+S1 itself was not computed on ADS-24, and the related leave-one-out
+diagnostic was unfavorable ($\rho=+0.127$,
+Section~\ref{sec:ads24-results}); on ADS-24 the average of
 all 30 seeds also scored better than the five most agreeing ones.
 
-Preservation of the seen procedure is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
+Preservation on the seen condition is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
 the v2 recheck, passed in v3, and was not shown in the PAG1
-re-inference, and this condition was the single one in which $V$ rose
-after distillation. The v3 gain there was in probabilities, with
+re-inference, and it was the single evaluation set on which $V$ rose
+after distillation, for REL\_GLOBAL. The v3 gain there was in probabilities, with
 accuracy almost unchanged, and the contribution of the
-original-procedure inputs of KD\_ALL was not isolated. We read the
+seen-condition inputs of KD\_ALL was not isolated. We read the
 in-house preservation result as holding in one sealed round, as its
 stored report records it, not as a property of the method.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
@@ -166,7 +169,8 @@ representation-gradient penalty, would vary less across seeds than
 REL\_GLOBAL was also wrong. They varied more: in-house, the accuracy of
 the plain-GRU seeds varied widely (Section~\ref{sec:gen-arch}). Appendix~\ref{app:rejected} lists the hypotheses of
 the diagnostic phase, the method candidates with their stored outcomes,
-and six withdrawn claims. The ledger covers the line of work reported in
+three withdrawn claims, and three calculations corrected during the
+analysis. The ledger covers the line of work reported in
 this thesis and is not a complete record of the PROPHET project.
 % 근거: RECORD:360--362 (원장의 범위), 385--406 (방법 후보 20행), 410--415 (철회한
 % 주장 6개: 10-seed 평균 관문, "일반 구조는 LogitNorm이 없어 덜 흔들릴 것").
@@ -252,7 +256,7 @@ collection stopped at 110 eligible runs (Section~\ref{sec:gen-methods}).
 \textbf{Adaptation inputs.}
 The unseen conditions are absent from the labeled FIT runs, but the CD
 student reads unlabeled inputs from other runs of those conditions
-during training: 119 background and 48 original-procedure runs in-house
+during training: 119 background and 48 seen-condition runs in-house
 and 34 runs with simulated users on ADS-24. The results therefore
 support CD as unlabeled adaptation to a target environment from which
 such inputs are available. They do not show robustness to a benign
@@ -293,22 +297,28 @@ measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
 Work on ensembling under shift~\cite{rathmanakidis2022reduction} gave
 the expectation that a student of a consensus would vary less across
 seeds (Section~\ref{sec:related-distillation}). Of the two extensions
-that failed, the target that falls back to the FIT prior where the
-teachers disagree is close to ensemble distillation that adapts to
-disagreement among teachers~\cite{du2020agree}, and the projection onto
-a shared hidden subspace builds on comparing networks through the
-subspace their representations share~\cite{raghu2017svcca}.
-% Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다.
+that failed, the first, like the adaptive ensemble distillation of Du
+et al.~\cite{du2020agree}, responds to disagreement among teachers, but
+it does so by interpolating the target toward the boundary-weighted FIT
+action frequencies rather than by weighting teachers in gradient space.
+The second, a projection onto a shared hidden subspace, builds on
+comparing networks through the subspace their representations
+share~\cite{raghu2017svcca}.
+% Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를
+% 메커니즘 차이(목표 보간 대 gradient 공간 교사 가중)까지 적어 좁혔다.
+
 Students that follow one fixed teacher set on unlabeled inputs from
 the environment are expected to agree with one another there; that much
 follows from distillation itself. What the thesis adds is evidence on
-one security task: a measured instability; the observation that the NLL
-of the 30-model probability average concentrates on the unlabeled rows
-where the seeds' top-1 predictions differ; and three findings about the
+one security task: the measured instability, the unlabeled
+disagreement rows that carry the consensus loss
+(Chapter~\ref{ch:diagnosis}), and three findings about the
 intervention. The students' agreement carried over to new runs of the
-same environment; in v3, as stored, the loss on the seen procedure was
+same environment; in v3, as stored, the loss on the seen condition was
 kept; and following the same teachers on FIT inputs, or each seed's own
-predictions, did not narrow the spread in the same way. The sealed
+predictions, did not narrow the spread in the same way, in development
+comparisons on the plain GRU (FIT inputs, in-house and on ADS-24) and
+on the in-house plain GRU and REL\_GLOBAL-ADS (self-distillation). The sealed
 contracts and the status label on every result respond to the warning
 of Arp et al.\ about reusing inspected data~\cite{arp2020dos}; they are
 our own procedure, and lab-only evaluation remains a limitation

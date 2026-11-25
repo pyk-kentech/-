@@ -39,17 +39,17 @@ on the background conditions, are marked as secondary.
 \section{The v3 round}
 \label{sec:results-v3}
 
-KD\_ALL had lower mean NLL than REL\_GLOBAL on all five conditions
+KD\_ALL had lower mean NLL than REL\_GLOBAL on all five evaluation sets
 (Table~\ref{tab:results-v3-nll}). Except on \texttt{ORIGINAL\_18}, these means are
 secondary point estimates: the contract did not make mean NLL on the
 background conditions a criterion, and we computed no interval for
 those differences, so they are not shown to be statistically
 established. On \texttt{A+C FLAT} the mean NLL of KD\_ALL was 0.028 against 0.073, and on
 \texttt{ORIGINAL\_18} it was 0.643 against 0.704. On the four
-background conditions KD\_ENV\_TOP5, which adapts on the background
+evaluation sets with benign workers, KD\_ENV\_TOP5, which adapts on the background
 inputs alone, came within 0.002 of KD\_ALL, and on \texttt{C\_ONLY} and
 \texttt{B+C} it was slightly lower. The two students separate only on
-\texttt{ORIGINAL\_18}, the condition whose unlabeled inputs KD\_ALL adds.
+\texttt{ORIGINAL\_18}, the seen condition, whose unlabeled inputs KD\_ALL adds.
 \texttt{OBSERVED\_HEAD}, the frozen head variant of
 Section~\ref{sec:diag-intervention}, is included as a reference; it
 was not retrained in this round and is not part of any criterion.
@@ -142,11 +142,11 @@ on \texttt{B+C}, so neither exceeded the $+0.020$ limit.
 % [−0.044449, −0.014710]).
 
 Further comparisons qualify what the round shows. The benefit of
-adding the original-procedure inputs was not isolated. On
+adding the seen-condition inputs was not isolated. On
 \texttt{ORIGINAL\_18}, KD\_ALL minus KD\_ENV\_TOP5 was $-0.054$, but
-its 95\% interval, $[-0.121, +0.006]$, contains zero. The round
+its 95\% interval, $[-0.120, +0.006]$, contains zero. The round
 supports KD\_ALL against REL\_GLOBAL; it does not show that the 48
-original-procedure runs account for the part of the gain that
+seen-condition runs account for the part of the gain that
 KD\_ENV\_TOP5 lacks. Nor did the student reach its teachers.
 On every condition the probability average of the five teachers had
 lower NLL than KD\_ALL, for example 0.023 against 0.028 on
@@ -181,7 +181,7 @@ $+0.0203$, and its 95\% interval, $[-0.006, +0.054]$, crossed the
 $+0.020$ limit. Preservation was
 therefore not shown, and the method was not adopted as a candidate on
 the strength of that round. The v3 question, whether adding unlabeled
-inputs from the seen procedure keeps the background gain and preserves
+inputs from the seen condition keeps the background gain and preserves
 \texttt{ORIGINAL\_18}, comes directly from this result.
 % 근거: RECORD:77--79, 189--196, 414; PAPER_DEFINITIONS.md §3 (10-seed 157/1,611,
 % 이미 열람한 1단계 실행; 12대비 가족, 99.5833%: PROPHET_ENV_CONSENSUS_KD_20261119/

@@ -11,7 +11,8 @@ workload. In an in-house round, according to its stored report, CD met
 three criteria fixed before training, over 30 checkpoints per group:
 the seed standard deviation of the log loss fell on both file layouts
 of an unseen condition with two benign workers (on one, 0.056 to
-0.010), and the loss on the attack procedure seen in training fell. On
+0.010), and the loss on runs without benign workers, seen in training,
+fell. On
 the public ADS-24 dataset the spread also narrowed, but every distilled
 seed of our predictor stayed worse than predicting the training tactic
 frequencies. CD narrowed the variation among these checkpoints; it did
@@ -46,8 +47,9 @@ Consensus distillation, Unlabeled adaptation, Windows audit logs
 정상 작업 조건의 두 배치 모두에서 음의 로그우도의 시드 간 표준편차가
 줄었고(한 배치에서 0.056→0.010), 학습한 절차의 손실도 줄었다. 공개 자료
 ADS-24의 탐색적 비교에서도 흔들림은 줄었지만, 우리 모델의 증류 시드는 모두
-학습 실행의 전술 빈도만으로 예측하는 기준보다 손실이 높았다. 이 방법은 시드
-간 흔들림을 줄이지만 환경 이동에 따른 성능 저하 자체를 없애지는 못한다.
+학습 실행의 전술 빈도만으로 예측하는 기준보다 손실이 높았다. 이 방법은 이
+체크포인트들 사이의 흔들림은 줄였지만 환경 이동에 따른 성능 저하 자체를 없애지는
+못한다.
 \end{korabstract}
 
 \begin{Korkeyword}

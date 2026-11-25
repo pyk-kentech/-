@@ -6,9 +6,9 @@ activity to investigate before the attacker's next action is visible.
 Forecasting systems such as Tiresias~\cite{shen2018tiresias},
 EFI~\cite{zhu2024nip}, and the alert-driven attack graphs of
 B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting} support this
-decision by forecasting likely follow-up activity; the last works from
-the alerts of a network detector, whereas we work from host audit
-records. Such a forecast is only useful if it rests
+decision by forecasting likely follow-up activity. B\u{a}b\u{a}lau et
+al.\ work from the alerts of a network detector, whereas we work from
+host audit records. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
@@ -43,7 +43,7 @@ a plain GRU trained on identical data reached anywhere between 51.0\%
 and 87.7\% accuracy, depending on the seed. The training-side score we checked did not rank the seeds: the
 rank correlation between a seed's cross-entropy on its final FIT
 minibatch and its loss on A+C was 0.160 on the FLAT layout and 0.033 on
-the NESTED layout. The seen procedure did not rank them either; between
+the NESTED layout. The seen condition did not rank them either; between
 a seed's loss there and on A+C FLAT the correlation was $-0.131$.
 Whoever deploys such a model therefore cannot tell from these scores
 which of the models they are getting.
@@ -53,12 +53,15 @@ which of the models they are getting.
 % (마지막 FIT 학습 minibatch CE)이며 FIT 보류 NLL이 아니다.
 % 단순 GRU 51--88%: RECORD:287 (PAG1 수집, A+C FLAT).
 
-This behavior is consistent with the \emph{underspecification}
-described by D'Amour et al.~\cite{damour2020underspecification}
-(Section~\ref{sec:related-underspec}). We show only part of that picture. Our seeds are not equally good
-on the seen procedure (Chapter~\ref{ch:diagnosis}); what we show is
-that the scores available before deployment did not identify the seeds
-that hold up under the new workload. For attack prediction the unseen data are
+This behavior resembles the deployment-selection difficulty that
+D'Amour et al.~\cite{damour2020underspecification} discuss under the
+name \emph{underspecification} (Section~\ref{sec:related-underspec}),
+but it does not establish underspecification: that notion starts from
+models that are equally good on held-out data of the training domain,
+and our seeds are not equally good on the seen condition
+(Chapter~\ref{ch:diagnosis}). What we show is that the scores available
+before deployment did not identify the seeds that hold up under the new
+workload. For attack prediction the unseen data are
 not exotic. A new benign job on a monitored host is enough to move the
 evidence away from what the model saw in training. We therefore ask
 three questions.
@@ -111,8 +114,8 @@ In the sealed in-house v3 round, with 30 new seeds, 157 new eligible
 runs, and 1,611 prediction rows, the stored round report records that
 the CD student met all three criteria sealed before training and
 collection. The seed standard deviation fell on both A+C layouts, on
-FLAT from about 0.056 to 0.010. On ORIGINAL\_18, the seen procedure
-without benign workers, the mean NLL moved from 0.704 to 0.643
+FLAT from about 0.056 to 0.010. On the seen condition,
+\texttt{ORIGINAL\_18}, the mean NLL moved from 0.704 to 0.643
 (difference interval $[-0.131, -0.0041]$). The intervals resample runs
 for 30 fixed checkpoints and do not cover other seeds. The three
 excluded runs are recorded as failures during source collection, but
@@ -132,8 +135,8 @@ attack stages and alerts on one time axis (Chapter~\ref{ch:ads24}). Three genera
 DeepLog, a Transformer encoder in the style of LogBERT, and a plain
 GRU) showed the same direction in all six encoder--dataset
 combinations, again in development comparisons. On ADS-24 every CD
-student of our own model remained worse than the \emph{FIT prior},
-which predicts the FIT tactic frequencies (NLL 1.830), and CD did not
+student of our own model remained worse than a frequency baseline that
+predicts the FIT tactic frequencies (NLL 1.830, Chapter~\ref{ch:ads24}), and CD did not
 improve every seed (Chapters~\ref{ch:ads24} and~\ref{ch:generality}).
 % 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294 (세 인코더).
 % ADS-24의 환경 평가 35실행은 1단계에서, PAG1 156실행은 구조 일반성 1단계에서
@@ -148,7 +151,9 @@ encoders, on the in-house task and on ADS-24. (b) It observes that, on
 unlabeled inputs from the unseen workload, the NLL of the 30-model
 probability average concentrates on the rows where the seeds' top-1
 predictions differ, and it applies a consensus target that keeps the
-architecture and single-model inference. Students that share one
+architecture and single-model inference.
+
+Students that share one
 fixed teacher set are expected to agree with one another; what the
 evidence adds is that the agreement held on new runs of the same
 environment, and that, in the comparisons that included them,
@@ -156,7 +161,9 @@ following the same teachers on FIT inputs or a seed's own predictions
 did not narrow the spread in the same way.
 A separate in-house diagnosis locates many errors in one file decision;
 the head we built on that diagnosis was not adopted
-(Section~\ref{sec:diag-intervention}). (c) Addressing the
+(Section~\ref{sec:diag-intervention}).
+
+(c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
@@ -173,18 +180,16 @@ new training objective.
 % 근거: idea.md "기여" 3항, RECORD:28; 참신성 리뷰 P2-1에 따라 (b)를 무라벨
 % 불일치 관찰 → 합의 목표로 고치고, COPY 국소화·OBSERVED_HEAD를 따로 낮췄다.
 
-Chapter~\ref{ch:related} reviews ATT\&CK, attack graphs, prior
-forecasting systems, and work on underspecification and distillation.
-Chapter~\ref{ch:task} defines the task, the receipt boundary, and the
-seen and unseen conditions, and Chapter~\ref{ch:method} describes
-REL\_GLOBAL and CD. Chapter~\ref{ch:evaluation} sets out the metrics,
-the sealing procedure, and the three kinds of evidence named above.
-Chapter~\ref{ch:diagnosis} measures the instability and locates
-where the in-house errors concentrate (Q1). Chapter~\ref{ch:results} reports the sealed
-in-house test of CD (Q2), and Chapters~\ref{ch:ads24}
-and~\ref{ch:generality} turn to ADS-24, the general encoders, and a
-comparison with other single-model methods (Q3).
-Chapter~\ref{ch:decomposition} splits mean seed loss into a consensus
-term and an unlabeled disagreement term. Chapter~\ref{ch:discussion} interprets the findings
-and their threats to validity, and Chapter~\ref{ch:conclusion}
-concludes with planned follow-up work.
+After a review of related work (Chapter~\ref{ch:related}), the thesis
+sets up the task, the receipt boundary, the seen and unseen conditions,
+REL\_GLOBAL and CD, and the rules of evidence
+(Chapters~\ref{ch:task}--\ref{ch:evaluation}). The evidence follows in
+the order of the three questions: the measured instability and where
+the in-house errors concentrate (Q1, Chapter~\ref{ch:diagnosis}), the
+sealed in-house test of CD (Q2, Chapter~\ref{ch:results}), and ADS-24,
+the general encoders, and the comparison with other single-model
+methods (Q3, Chapters~\ref{ch:ads24} and~\ref{ch:generality}). A post
+hoc split of mean seed loss into a consensus term and an unlabeled
+disagreement term (Chapter~\ref{ch:decomposition}) precedes the
+interpretation, the threats to validity, and planned follow-up work
+(Chapters~\ref{ch:discussion} and~\ref{ch:conclusion}).

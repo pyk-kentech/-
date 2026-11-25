@@ -200,8 +200,9 @@ For context, we also ran our own adaptations
 of ORTHRUS~\cite{jiang2025orthrus}, BiTA~\cite{nayeri2026bita}, and
 CL-AP$^{2}$~\cite{liu2024clap2}, which are not the original pipelines,
 with three seeds each on the same new inputs. In these runs the ORTHRUS
-and BiTA adaptations reached an A+C NLL of 0.13 to 0.16, close to
-REL\_GLOBAL, and the CL-AP$^{2}$ adaptation about 0.97. Three seeds are
+and BiTA adaptations reached an A+C NLL of 0.133 to 0.159 across the
+two layouts, close to REL\_GLOBAL, and the CL-AP$^{2}$ adaptation 0.967
+and 0.976. Three seeds are
 too few to measure their spread, so these figures say nothing about
 stability.
 
@@ -260,9 +261,9 @@ from the same initial weights. The study trained 300 new models; the
 base-model, CD, and self-distillation groups were reused from
 Section~\ref{sec:gen-arch}. The five comparison methods were thus
 trained in a later run than the checkpoints they are compared with,
-and no cross-entropy control was retrained alongside them, so in-house,
-where retraining the plain GRU on CPU is not deterministic, a contrast
-can include rerun variation as well as the effect of the method. We
+and no cross-entropy control was retrained alongside them, so in-house
+a contrast can include rerun variation as well as the effect of the
+method (see the limits at the end of this section). We
 draw no conclusion about the methods beyond this common, untuned
 protocol.
 % 근거: RECORD:338, 452; ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md:3
@@ -278,7 +279,7 @@ protocol.
 % 6회차 aitone P3-4: 방법 정의를 변경 축(자기 예측 / 입력 / 교사 결합)으로 묶었다.
 % Ilichev 등(기하평균 교사 증류)은 서지를 확인하지 못해 인용과 '선행' 주장을 넣지 않았다(decisions.md 33번).
 
-Under this common protocol, which tuned no method on its own, only the
+Under this protocol, only the
 two groups that follow a consensus of several models on environment
 inputs produced a very small seed standard deviation on both datasets
 (Table~\ref{tab:gen-methods}). On \texttt{A+C FLAT} the CD student had
@@ -393,10 +394,7 @@ five-teacher average on FIT inputs left the spread at the base-model
 level, so the environment inputs mattered; why the FIT inputs did not
 help was not established (Section~\ref{sec:disc-rejected}). SWA,
 which averages along a single training trajectory, stayed at the base
-model's spread on both datasets. These are statements about the methods as run
-here, with one coefficient, one exposure, and one schedule shared by
-all; they do not show that any of the algorithms is inferior when
-tuned for its own purpose.
+model's spread on both datasets.
 
 Between the arithmetic and the
 geometric pool of the same teachers we cannot choose. They were
@@ -425,7 +423,10 @@ complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
 configurations. The comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
 SWA did not use the cyclical or constant learning-rate
-schedule of the original method. Rerun variation is visible for SWA: the cross-entropy run from which its
+schedule of the original method, so the comparison does not show that
+any of the algorithms is inferior when tuned for its own purpose.
+Retraining the plain GRU on CPU is not deterministic, and the
+resulting rerun variation is visible for SWA: the cross-entropy run from which its
 weights were averaged ended with weights identical, bit for bit, to the
 stored base model for 30 of 30 seeds on ADS-24 and for none in-house.
 Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.

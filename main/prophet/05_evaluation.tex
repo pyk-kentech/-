@@ -152,7 +152,14 @@ them \emph{preservation limits}. The in-house limit
 of $+0.020$ has been used unchanged in this project's contracts since
 10 November 2026 and the ADS-24 limit first appears in its sealed
 contract, but neither is derived from an operational requirement, such as a tolerable change in an
-analyst's decisions, or from a measured spread. We therefore report the
+analyst's decisions, or from a measured spread. Both were set by the
+author and fixed in the contracts before the results they judge were
+seen. In size, an NLL increase of $0.020$ lowers the geometric mean of
+the probability given to the observed action by about 2\%
+($e^{-0.020} \approx 0.980$); on ADS-24, 3\% of the base model's
+preservation NLL of 1.449 is about $0.043$. The ADS-24 preservation
+difference, $-0.019$ with interval $[-0.024, -0.015]$
+(Chapter~\ref{ch:ads24}), passes under any positive limit. We therefore report the
 upper end of every preservation interval, so that a reader can apply
 another limit, and Section~\ref{sec:disc-threats} lists the outcomes
 that a different limit would reverse.
@@ -162,8 +169,9 @@ that a different limit would reverse.
 % V3_REINFERENCE 상단 0.020741; v2 재확인 상단 0.053519.
 % 출처: atlas OT/REL_OBSERVED_RESULT_AUX_FIXED_20261110/CONTRACT.md:20 (가장 이른 +0.020);
 %   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_CONTRACT_SEALED.md:27 (3%) (defs.md 15번).
-% TODO(사람): 한 보고서(PROPHET_ENS_BASE_KD_FIXED_20261116/FINAL_REPORT.md:34)는 +0.020을
-%   "사용자가 지정한 기준"이라 적는다. 연구자가 정한 값이라고 본문에 밝힐지 정해 주세요.
+% 저자 답(정의 묶음 6번, 15번): 두 한도는 저자가 정했고 결과를 보기 전에 계약에 고정했다. 크기의 뜻
+%   (e^−.020 ≈ .980, 1.449의 3% ≈ .043)과 ADS-24 보존 −.019 [−.024, −.015]를 더했다. 한도가 판정을
+%   가른 사례(v2 재확인 +.0203, 단순 GRU +.0198)는 6.3절과 11.5절에 있다. 해결된 TODO는 지웠다.
 
 Intervals come from 100,000 paired resamples. In the in-house lab a
 resample draws complete configurations and moves their repetitions
