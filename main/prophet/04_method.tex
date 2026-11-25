@@ -75,11 +75,13 @@ shared key and value maps $W_k$ and $W_v$,
 \end{equation}
 and the logits are $z=z_{\mathrm{EVENT}}+W_o\sum_i A_iW_v u_i$, where
 the sums run over assigned events. $W_o$ is initialized to zero. When no
-event is assigned, $z=z_{\mathrm{EVENT}}$. Unassigned events and events
-whose result is UNOBSERVED or UNMATCHED stay in the recurrent path but
-do not enter the residual, so the result recorded for one target is
+event is assigned, $z=z_{\mathrm{EVENT}}$. Unassigned events stay in the
+recurrent path but do not enter the residual, so the result recorded for one target is
 read together with that target's other records and kept apart from the
 results of the others. The model has 59,882 parameters.
+% 출처: OT/THM_RELATION_AWARE_ATTENTION_FIXED_20261108/CONTRACT.md:14 ("unmatched events do not
+% enter the residual read but remain in the original EVENT path"). 10회차 방법 P1-1: status 가
+% UNOBSERVED 인 사건을 잔차에서 뺀다는 근거는 계약에 없어 그 구절을 지웠다(2026-11-24, Claude).
 
 \paragraph{LogitNorm.} Wei et al.\ define LogitNorm as a training
 loss: the cross-entropy is computed on logits normalized to a fixed

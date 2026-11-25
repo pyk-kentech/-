@@ -63,8 +63,8 @@ Learned forecasters work from observed event streams rather than from a
 configuration model. The closest task to ours is that of
 B\u{a}b\u{a}lau et al., who build attack graphs from intrusion-detection
 alerts and use them to predict the next likely attacker action given a
-sequence of alerts~\cite{babalau2024forecasting}. Their evidence is the
-alert stream of a network detector; ours is the host audit stream
+sequence of alerts~\cite{babalau2024forecasting}. Their evidence is
+intrusion and endpoint alerts already raised by detectors; ours is the raw host audit stream
 before the receipt boundary, and our output is a distribution over 18
 action categories of a controlled procedure, evaluated across seeds and
 under benign workloads that the labeled training runs do not contain.
@@ -290,7 +290,7 @@ DeepLog~\cite{du2017deeplog}
   & Anomaly detection on log sequences \\
 LogBERT~\cite{guo2021logbert}
  & Sequences of system log keys
- & Anomaly score from self-supervised training \
+ & Anomaly score from self-supervised training \\
 Niloy et al.~\cite{niloy2026multi}
  & Multi-source logs of attack and benign sessions with ATT\&CK labels
  & Labels for observed events (small-language-model evaluation) \\
