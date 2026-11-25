@@ -16,13 +16,16 @@ thing consistently: how far the seeds of one group disagree on
 inputs from an unseen environment. On the unseen conditions the seed
 standard deviation fell in every round in which it was compared, and in
 the post hoc decomposition of Chapter~\ref{ch:decomposition} the
-disagreement term $V$ fell in 27 of the 28 conditions. On the unseen
-conditions, every group of 30 CD students we trained varied less than
-its 30 baseline models. The exception was the seen condition
-\texttt{ORIGINAL\_18}, where $V$ rose. Of these rounds only v3 is a sealed test
+disagreement term $V$ fell in 27 of the 28 conditions. On the seen
+condition \texttt{ORIGINAL\_18}, by contrast, $V$ rose. Of these rounds only v3 is a sealed test
 (Section~\ref{sec:eval-rounds}), and the intervals hold the seeds
 fixed, so whether another draw of seeds would show the same narrowing
-was not tested.
+was not tested. Its verdict, moreover, is the one recorded in the
+stored round report; the row-level files that would let a reader
+recompute it are not part of the material behind this thesis
+(Appendix~\ref{app:repro}). Part of the narrowing is also expected from
+distillation itself, since all students of a group follow one fixed
+teacher set (Section~\ref{sec:disc-novelty}).
 
 What CD did not change is the cost of the move to the unseen
 environment. On ADS-24 every CD seed of
@@ -93,15 +96,18 @@ the lookup held on new runs from the same lab, except for the
 three-target contrast against its shuffled control; its generic form
 did not keep the gain, and the head was not adopted. CD
 does not use this lookup. It rests on the separate observation that the
-seeds disagree on unlabeled inputs where their loss concentrates, and
-it reduced the spread on ADS-24 without any matching diagnosis there.
+NLL of the 30-model probability average concentrates on the unlabeled
+rows where the seeds' top-1 predictions differ, and it reduced the
+spread on ADS-24 without any matching diagnosis there.
 Whether the general encoders and the ADS-24 models diverge for a
 comparable reason is unknown.
 
 The agreement observation behind teacher selection is narrower still. Agreement
-ranked the REL\_GLOBAL seeds by loss in the lab but not on ADS-24
-($\rho=+0.127$), where the average of all 30 seeds was a better target
-than the five most agreeing ones.
+ranked the REL\_GLOBAL seeds by loss in the lab. On ADS-24 a related
+leave-one-out agreement diagnostic was unfavorable ($\rho=+0.127$), and
+the in-house statistic itself was not computed there, so it was not
+replicated (Section~\ref{sec:ads24-results}); on ADS-24 the average of
+all 30 seeds also scored better than the five most agreeing ones.
 
 Preservation of the seen procedure is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
 the v2 recheck, passed in v3, and was not shown in the PAG1
@@ -109,8 +115,8 @@ re-inference, and this condition was the single one in which $V$ rose
 after distillation. The v3 gain there was in probabilities, with
 accuracy almost unchanged, and the contribution of the
 original-procedure inputs of KD\_ALL was not isolated. We read the
-in-house preservation result as holding in one sealed round, not as a
-property of the method.
+in-house preservation result as holding in one sealed round, as its
+stored report records it, not as a property of the method.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
 % 효과 미분리, 정확도 79.87%→80.14%). 6장 sec:diag-intervention (GENERIC_HEAD 실패,
@@ -155,8 +161,8 @@ development round gated its extension on mean NLL, although the method
 was meant to narrow the spread across seeds; the gate failed, the
 failure stands in the ledger (Section~\ref{sec:results-failed}), and
 every later contract made the seed standard deviation primary. Our
-expectation that the general encoders, which lack LogitNorm and
-input-gradient regularization, would vary less across seeds than
+expectation that the general encoders, which lack LogitNorm and the
+representation-gradient penalty, would vary less across seeds than
 REL\_GLOBAL was also wrong. They varied more: in-house, the accuracy of
 the plain-GRU seeds varied widely (Section~\ref{sec:gen-arch}). Appendix~\ref{app:rejected} lists the hypotheses of
 the diagnostic phase, the method candidates with their stored outcomes,
@@ -211,7 +217,11 @@ express uncertainty about the runs for these seeds and say nothing
 about how another set of 30 seeds would have scored. The conclusions on
 seed spread are therefore conclusions about these 30 checkpoints per
 group; a hierarchical resampling of seeds and runs together would be
-needed to speak about retraining in general. The correlations
+needed to speak about retraining in general. The narrower spread of
+the CD students is also conditional on one fixed teacher set per
+setting. We did not measure the spread of the whole pipeline, in which
+the 30 baselines, the teacher selection, and the student are all
+retrained. The correlations
 between seed rankings, such as those of agreement with loss, are
 descriptive statistics without intervals.
 
@@ -280,19 +290,25 @@ al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}). The
 decomposition of Chapter~\ref{ch:decomposition} is that of
 Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
 measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
-Work on ensembling under shift~\cite{rathmanakidis2022reduction}
-motivated, but did not establish, our expectation that a student of a
-consensus would vary less across seeds. Of the two extensions
+Work on ensembling under shift~\cite{rathmanakidis2022reduction} gave
+the expectation that a student of a consensus would vary less across
+seeds (Section~\ref{sec:related-distillation}). Of the two extensions
 that failed, the target that falls back to the FIT prior where the
 teachers disagree is close to ensemble distillation that adapts to
 disagreement among teachers~\cite{du2020agree}, and the projection onto
 a shared hidden subspace builds on comparing networks through the
 subspace their representations share~\cite{raghu2017svcca}.
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다.
-What the thesis adds is evidence on one security task: a measured
-instability, the observation that the seeds disagree on unlabeled
-inputs where their loss concentrates, and an intervention that reduces
-that disagreement while keeping the architecture. The sealed
+Students that follow one fixed teacher set on unlabeled inputs from
+the environment are expected to agree with one another there; that much
+follows from distillation itself. What the thesis adds is evidence on
+one security task: a measured instability; the observation that the NLL
+of the 30-model probability average concentrates on the unlabeled rows
+where the seeds' top-1 predictions differ; and three findings about the
+intervention. The students' agreement carried over to new runs of the
+same environment; in v3, as stored, the loss on the seen procedure was
+kept; and following the same teachers on FIT inputs, or each seed's own
+predictions, did not narrow the spread in the same way. The sealed
 contracts and the status label on every result respond to the warning
 of Arp et al.\ about reusing inspected data~\cite{arp2020dos}; they are
 our own procedure, and lab-only evaluation remains a limitation
@@ -302,4 +318,8 @@ our own procedure, and lab-only evaluation remains a limitation
 % Raghu 등 SVCCA).
 % Yang 등 DEED는 서지를 확인하지 못해 인용과 '선행' 주장을 뺐다(decisions.md 33번).
 
+% 7회차 참신성 P2-1: 고정 교사 집합을 따르는 학생끼리의 일치는 증류에서 예상되는 결과임을 밝히고,
+%   증거가 더하는 것(새 실행으로 이어짐, v3 보존(저장 보고서 기준), FIT 입력·자기 증류 대조)을 좁혀 적었다.
+%   Threats에 교사 집합 고정 조건부 한계를 더했다. 방법 P2-1·P2-2: ADS-24 합의도 요약과
+%   "30확률 평균 NLL" 범위를 고쳤다.
 % 이 장의 질문은 결론 뒤 "저자 확인 목록"에 모았다.

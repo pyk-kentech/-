@@ -10,7 +10,9 @@ that seed-to-seed spread on new runs, without giving up the seen
 procedure, was tested in the in-house lab under a sealed contract, and
 the v3 round is the main evidence. It trained 30 new seeds in each of three groups,
 REL\_GLOBAL, KD\_ENV\_TOP5, and KD\_ALL (Table~\ref{tab:variants}),
-for 90 new fits. Within a seed the three groups share the initial
+for 90 new fits.
+
+Within a seed the three groups share the initial
 tensors and the FIT occurrence trace, so they differ only in the KL
 term of Equation~\ref{eq:cd-loss}. The five teachers are the fixed
 models of Section~\ref{sec:method-teachers} and are not among the 30
@@ -22,7 +24,12 @@ is a sealed criterion in the sense of Section~\ref{sec:eval-rounds}.
 The values are those of the stored round report. The three
 exclusions are recorded as failures during source collection, but the
 seed-level files needed to rescore the round are not in the archive
-available to us (Section~\ref{sec:eval-contract}).
+available to us (Section~\ref{sec:eval-contract}). The chapter
+therefore reports the v3 verdicts as the historical outcome recorded in
+that report. A reader can check that the tables transcribe the report,
+but not that they follow from the row-level scores, the exclusions,
+the execution weighting, or the resampling
+(Section~\ref{sec:repro-code}).
 Contrasts outside that family, including the differences in mean NLL
 on the background conditions, are marked as secondary.
 % 근거: RECORD:166; CONTRACT_V3.md (군·초기 tensor·FIT trace 공유, 계획 160,
@@ -125,9 +132,9 @@ Condition & Contrast & Estimate & Interval & Outcome \\
 The gain on \texttt{ORIGINAL\_18} is in the probabilities, not in the
 chosen actions. Row accuracy moved from 79.9\% to 80.1\%, so KD\_ALL
 selected nearly the same top-1 actions as REL\_GLOBAL and placed more
-probability on the observed ones. The other two unseen conditions were
-checked against the $+0.020$ non-inferiority margin used for
-preservation, as secondary contrasts with individual 95\% intervals. KD\_ALL minus REL\_GLOBAL was $-0.025$
+probability on the observed ones. \texttt{C\_ONLY} and \texttt{B+C}
+were checked against the $+0.020$ preservation limit, as secondary
+contrasts with individual 95\% intervals. KD\_ALL minus REL\_GLOBAL was $-0.025$
 $[-0.036, -0.015]$ on \texttt{C\_ONLY} and $-0.030$ $[-0.044, -0.015]$
 on \texttt{B+C}, so neither exceeded the $+0.020$ limit.
 % 근거: RECORD:184 (79.87%→80.14%); v3 FINAL_REPORT_KO.md "C_ONLY와 B_PLUS_C의

@@ -35,6 +35,25 @@ the seed-level score files that the reports cite
 contents are not in the archive available to us. Seed-level results,
 complete-configuration counts and resampling indices of the in-house
 rounds therefore cannot be recomputed here.
+
+This limits what the central result can claim. For the v3 round, the
+only round whose criteria on CD were sealed before training and all
+passed, the archive lacks the training, run and scoring programs and
+their commit, the seed plan with the 30 new seeds, the scored row-level
+outputs, the split and source manifests with the eligibility seal, the
+complete-configuration data and resampling indices, and the seed of the
+bootstrap generator. A reader can therefore check that
+Tables~\ref{tab:results-v3-nll} and~\ref{tab:results-v3-criteria}
+transcribe the stored report, but cannot recompute the means, seed
+standard deviations, worst seeds or intervals from row-level data, or
+check the exclusions, the execution weighting, and the bootstrap. The
+thesis accordingly presents the v3 verdicts as a historical result
+recorded in that report, not as an experiment reproduced here, and it
+draws no conclusion from v3 that goes beyond what the report records.
+% 7회차 방법 P1-1: 원자료를 보충자료로 낼 수 없으므로(atlas에 없음), v3를 "저장 보고서에 기록된
+%   역사적 결과"로 한정했다. 06_results, 01_introduction, 99_conclusion에 같은 한정을 넣었다.
+% TODO(사람): 위 파일들과 해시를 학위논문 보충자료로 공개할 수 있으면, v3 주표와 판정 구간을 한 번에
+%   다시 만드는 명령을 이 절에 넣는다(저자 확인 목록 5번).
 % 출처: sources/atlas_answers/repro.md 5번.
 %   atlas OT/PROPHET_COPYRIGHT_SUBMISSION_20261123/package/README.md:3,7,20,23;
 %   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/PAPER_DEFINITIONS.md:16,28 (fit_v3.py 등 이름만);
@@ -51,15 +70,16 @@ rounds therefore cannot be recomputed here.
 
 Every in-house fit, of REL\_GLOBAL and of the students alike, uses the
 603 runs of the C-fold FIT set with execution-weighted 18-way
-cross-entropy, the input-gradient penalty $\mathcal{R}_{\mathrm{GLOBAL}}$
+cross-entropy, the representation-gradient penalty $\mathcal{R}_{\mathrm{GLOBAL}}$
 with coefficient 0.1, and LogitNorm with $\tau=0.1$. Each fit runs
 1,346 updates of 32 FIT occurrences with AdamW (weight decay 0.01,
 gradient clipping at 2) and a cosine learning rate from 0.002 to
 0.0002, and the last checkpoint is kept. Within a seed, all groups of a
 round share the initial tensors and the FIT occurrence and delivery
 trace. All in-house fits use the 404-only preprocessor of
-Section~\ref{sec:method-baseline}. The 30 REL\_GLOBAL seeds of the
-teacher population are 3674, 12050, 15301, 16635, 16893, 20436, 28035,
+Section~\ref{sec:method-baseline}.
+
+The 30 REL\_GLOBAL seeds of the teacher population are 3674, 12050, 15301, 16635, 16893, 20436, 28035,
 28756, 29771, 33674, 36720, 37406, 43142, 48192, 49208, 50572, 50836,
 61616, 64832, 68498, 69205, 71526, 71556, 76939, 79043, 90835, 91513,
 95246, 97386, and 99609. The 30 seeds of the v2 round were drawn without

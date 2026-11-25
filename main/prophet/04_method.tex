@@ -81,12 +81,20 @@ do not enter the residual, so the result recorded for one target is
 read together with that target's other records and kept apart from the
 results of the others. The model has 59,882 parameters.
 
-\paragraph{Regularizers.} LogitNorm~\cite{wei2022mitigating} replaces $z$
-by $z/[\tau\max(\|z\|_2,10^{-8})]$ with $\tau=0.1$, in training and at
-inference, and the gradient flows through the denominator. It limits
-how far the training loss can be lowered by inflating the logits.
-$\mathcal{R}_{\mathrm{GLOBAL}}$ is a form of input-gradient
-regularization~\cite{ross2017improving}. For each FIT view it counts the
+\paragraph{Regularizers.} Wei et al.\ define LogitNorm as a training
+loss: the cross-entropy is computed on logits normalized to a fixed
+norm~\cite{wei2022mitigating}. We use a variant inspired by it that
+applies the same normalization in training and at inference, replacing
+$z$ by $z/[\tau\max(\|z\|_2,10^{-8})]$ with $\tau=0.1$, with the gradient
+flowing through the denominator; applying it at inference is our
+choice, not part of the cited method. It limits how far the training
+loss can be lowered by inflating the logits. In this thesis
+\emph{LogitNorm} refers to this train-and-inference variant.
+$\mathcal{R}_{\mathrm{GLOBAL}}$ is a representation-gradient penalty
+inspired by input-gradient regularization~\cite{ross2017improving}:
+Ross and Doshi-Velez penalize the gradient with respect to the model
+input, whereas $\mathcal{R}_{\mathrm{GLOBAL}}$ differentiates with
+respect to the internal 48-dimensional event representations. For each FIT view it counts the
 $k$ worker events whose role is known and draws exactly $k$ events at
 random from all received events. For each drawn event it takes the
 squared gradient, with respect to that event's 48-dimensional vector
@@ -100,11 +108,12 @@ role.
 
 The model was reached in steps. REL, the relation model of
 Section~\ref{sec:method-relation-evidence}, added the residual of
-Equation~\ref{eq:relation-attn} to the event-level predictor. Adding the
-benign-worker runs to FIT gave the 603-run C fold and 1,346 updates
-(called hard REL in the round reports); LogitNorm was then added (hard
-REL\_NORM), and finally $\mathcal{R}_{\mathrm{GLOBAL}}$ with coefficient
-0.1. The parameter count stayed at 59,882 throughout.
+Equation~\ref{eq:relation-attn} to the event-level predictor. REL was
+then trained on the 603-run C-fold FIT set, which includes the
+benign-worker runs, for 1,346 updates; the round reports call this
+version hard REL. LogitNorm was then added (REL\_NORM), and finally
+$\mathcal{R}_{\mathrm{GLOBAL}}$ with coefficient 0.1. The parameter
+count stayed at 59,882 throughout.
 Appendix~\ref{app:repro} states which code and records exist and which
 are not in the archive available to us; the thesis does not supply
 everything needed to repeat the in-house experiments
@@ -252,11 +261,12 @@ over runs with equal weight. The five models with the highest agreement
 form $J$. A tie in the majority vote goes to the lower action column,
 and a tie in agreement to the lower seed identifier. The stored
 per-action tables list the columns in the order of
-Appendix~\ref{app:actions}, which is alphabetical by action identifier; Section~\ref{sec:repro-training} lists the five
-seeds selected. They are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
+Appendix~\ref{app:actions}, and the tie rule refers to that order;
+Section~\ref{sec:repro-training} lists the five seeds selected. They are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
 the v2 and v3 rounds (Tables~\ref{tab:variants} and~\ref{tab:rounds}). Section~\ref{sec:related-underspec}
 explains how this ranking relates to the agreement estimator of Baek
 et al.~\cite{baek2022agreement}.
+
 The rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
 blind. No round compared it with five teachers chosen at random, with
@@ -288,6 +298,12 @@ not on ADS-24 (Chapter~\ref{ch:ads24}).
 \section{Trained groups}
 \label{sec:method-variants}
 
+Throughout the thesis, a \emph{CD student} is a student trained with
+Equation~\ref{eq:cd-loss} toward the mean of five teachers chosen by
+the rule of Section~\ref{sec:method-teachers}. In-house its final form
+is KD\_ALL; on ADS-24 and for the general encoders of
+Chapter~\ref{ch:generality} the teachers are drawn from the 30 baseline
+models of the same encoder and data (Section~\ref{sec:method-transfer}).
 Table~\ref{tab:variants} lists the groups that appear in the in-house
 rounds of Chapters~\ref{ch:evaluation} and~\ref{ch:results}. All groups
 share the FIT procedure of Section~\ref{sec:method-baseline}; they differ
@@ -329,12 +345,6 @@ KD\_SELF is the in-house \emph{self-distillation control}; the same
 control appears under that name in Chapters~\ref{ch:ads24}
 and~\ref{ch:generality}. The round names in the last column are
 defined in Table~\ref{tab:rounds}.
-Throughout the thesis, a \emph{CD student} is a student trained with
-Equation~\ref{eq:cd-loss} toward the mean of five teachers chosen by
-the rule of Section~\ref{sec:method-teachers}. In-house its final form
-is KD\_ALL; on ADS-24 and for the general encoders of
-Chapter~\ref{ch:generality} the teachers are drawn from the 30 baseline
-models of the same encoder and data (Section~\ref{sec:method-transfer}).
 \end{minipage}
 \end{table}
 % KD_ENV_ALL30은 v2에서 KD_ENV 계산을 새 seed로 재현한 것(PAPER_DEFINITIONS.md §2).
@@ -355,8 +365,9 @@ in-house REL\_GLOBAL. The three general encoders replace the event encoder with
 an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 a Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert},
 or a plain GRU. They are encoder adaptations to our supervised task, not
-reproductions of DeepLog or LogBERT. LogitNorm, input-gradient
-regularization, and the relational residual are all removed, and the
+reproductions of DeepLog or LogBERT. LogitNorm, the
+representation-gradient penalty, and the relational residual are all
+removed, and the
 width and learning rate of each encoder were chosen by validation inside
 the FIT set. Appendix~\ref{app:repro} gives the architectures, the
 candidate grid, the validation split, and the selected settings.
@@ -377,8 +388,8 @@ Application & Changed & Kept \\
 ADS-24, REL\_GLOBAL-ADS
   & input encoder over Wazuh alert fields; 9-way head; relational residual
     removed; alert window 512; 31,685 parameters
-  & 64-dimensional GRU; LogitNorm ($\tau=0.1$); input-gradient
-    regularization (0.1); 1,346 updates; all distillation settings \\
+  & 64-dimensional GRU; LogitNorm ($\tau=0.1$); representation-gradient
+    penalty (0.1); 1,346 updates; all distillation settings \\
 Three general encoders
   & encoder replaced by LSTM, Transformer, or GRU; LogitNorm,
     regularization, and relational residual removed; width and learning

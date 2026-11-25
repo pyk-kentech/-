@@ -229,24 +229,29 @@ is a development comparison. The in-house runs were newly collected
 under a sealed contract in the same lab design, but the contract fixed
 the contrasts and intervals without a pass-or-fail rule
 (Table~\ref{tab:rounds}, note~c), and the ADS-24 runs are the inspected
-environment-evaluation runs. Here the \emph{base model} is the plain
-GRU trained with cross-entropy alone.
+environment-evaluation runs. The base model is, as in
+Section~\ref{sec:gen-arch}, the plain GRU trained with cross-entropy
+alone.
 
-The five methods change one thing each relative to CD or to the base
-model. Two follow the model itself rather than other models. The
-\emph{hard-label control}, a form of pseudo-labeling~\cite{lee2013pseudo},
-adds a cross-entropy term toward the top-1 predictions of the same
-seed's frozen base model on the unlabeled environment inputs, with no
-confidence threshold, and entropy minimization~\cite{grandvalet2004semi}
-adds the entropy of the student's own predictions on those inputs. A
-third, stochastic weight averaging (SWA)~\cite{izmailov2018averaging},
-averages the weights of the base model's own training trajectory at
-updates 1,010, 1,122, 1,234, and 1,346 and uses no environment input.
-The last two keep the five teachers of CD and change one choice:
-FIT-input distillation follows their average on FIT inputs instead of
-environment inputs, and geometric-pool distillation follows their
-normalized geometric mean, the logarithmic opinion pool of
-Section~\ref{sec:related-decomposition}, on environment inputs.
+Each method changes one thing relative to CD or to the base model, and
+what separates them is the target a model follows on unlabeled inputs.
+The \emph{hard-label control}, a form of
+pseudo-labeling~\cite{lee2013pseudo}, follows the model itself: it adds
+a cross-entropy term toward the top-1 predictions of the same seed's
+frozen base model on the unlabeled environment inputs, with no
+confidence threshold. Entropy minimization~\cite{grandvalet2004semi}
+also involves no other model; it adds the entropy of the student's own
+predictions on those inputs.
+
+The other side of the comparison keeps the five teachers of CD and
+changes one choice. FIT-input distillation follows their average on
+FIT inputs instead of environment inputs, and geometric-pool
+distillation follows their normalized geometric mean, the logarithmic
+opinion pool of Section~\ref{sec:related-decomposition}, on environment
+inputs. Stochastic weight averaging (SWA)~\cite{izmailov2018averaging}
+stands apart as a baseline without environment inputs: it averages the
+weights of the base model's own training trajectory at updates 1,010,
+1,122, 1,234, and 1,346.
 
 Every method kept the FIT loss,
 the 1,346 updates, the coefficient of 0.25 on the added term, a
@@ -311,7 +316,7 @@ new runs of this comparison (21 runs, 231 rows); ADS-24 columns are the
 35 environment-evaluation runs (5,639 rows), a development comparison.
 The in-house runs differ from those of Table~\ref{tab:gen-arch}, so the
 base-model and CD values of the two tables are not compared with each
-other. Self-distillation was not part of the ADS-24 comparison.}
+other. The self-distillation control was not part of the ADS-24 comparison.}
 \label{tab:gen-methods}
 \small
 \begin{tabular}{@{}lrrcrr@{}}
@@ -326,7 +331,7 @@ CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
 Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
 SWA                           & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
 FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
-Self-distillation             & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
+Self-distillation control     & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
 Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
 Entropy minimization          & 2.702 & 0.324 & 80.5 (all seeds) & 6.873 & 0.490 \\
 \bottomrule

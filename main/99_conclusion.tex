@@ -12,11 +12,13 @@ execution and audit records received before a cutoff. The thesis
 first measured that seeds of REL\_GLOBAL trained on the same 603 FIT
 runs disagree widely once the benign worker~C appears, and that the
 final FIT minibatch loss did not rank them by how they would hold up.
-It observed that, on unlabeled inputs from the new workload, the seeds
-disagree on the rows where their loss concentrates; a separate
-diagnosis traced many in-house errors to one file decision, COPY or
-DISCOVERY, although the head built on it was not adopted. From
-the disagreement it moved to a remedy that keeps the deployed
+It observed that, on unlabeled inputs from the new workload, the NLL
+of the 30-model probability average concentrates on the rows where the
+seeds' top-1 predictions differ; a separate diagnosis traced many
+in-house errors to one file decision, COPY or DISCOVERY, although the
+head built on it was not adopted.
+
+From the disagreement the thesis moved to a remedy that keeps the deployed
 architecture and its single-model inference cost: a student of the same
 architecture follows the averaged
 probabilities of five selected teachers on unlabeled inputs from the
@@ -25,8 +27,8 @@ before training and collection, the stored round report records that
 all three criteria were met: the seed standard deviation narrowed on
 both A+C layouts, and \texttt{ORIGINAL\_18} was preserved. The three
 excluded runs failed during source collection, but the seed-level files
-are not in the archive available to us, so the verdict stands as stored
-rather than as rescored here. The exploratory check on
+are not in the archive available to us, so the verdict is a historical
+result recorded in that report, not one rescored here. The exploratory check on
 ADS-24 and the three encoder adaptations, all development comparisons
 on inspected runs, moved in the same direction.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
@@ -42,10 +44,11 @@ there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
 and plain-GRU encoders still had higher NLL than the FIT prior
 (1.830); only the Transformer students cleared it. Not every
 seed gained either: seeds that had scored better than the consensus
-moved toward it. The diagnosis holds for one model in one lab, and the
-agreement ranking used to pick teachers did not carry over to ADS-24,
-whose stage-to-alert time binding we did not rerun and whose boundaries
-are oracle boundaries.
+moved toward it. The diagnosis holds for one model in one lab. On
+ADS-24, whose stage-to-alert time binding we did not rerun and whose
+boundaries are oracle boundaries, a related leave-one-out agreement
+diagnostic was unfavorable, and the in-house agreement statistic used
+to pick teachers was not replicated there.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
 % 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
@@ -53,25 +56,27 @@ are oracle boundaries.
 \section{Future Work}
 \label{sec:future}
 
-One bundle of closing checks was planned before this thesis was written
-and is not reported here. Some of the checks require training. Varying the teacher set, with five teachers chosen at
-random, two teachers, and the full set of 30, would show whether
+One bundle of closing checks was planned before this thesis was
+written and is not reported here. Part of it asks what CD costs and
+needs, and answering that takes new training. Teacher sets of five
+seeds chosen at random, of two seeds, and of all 30 test whether
 training 30 baselines and ranking them by agreement is worth its cost.
 Students trained on 25\% and 50\% of the unlabeled environment inputs
-would estimate how much new-environment data the KL term needs, and
-repeating the comparison with other single-model methods on a
-Transformer encoder would keep that comparison from resting on one
-architecture. The other checks reuse frozen models. They would run
-inference on the 119 usable ADS-24 runs outside the 132 of the
-contract (Appendix~\ref{app:ads24-data}), which no earlier stage has
-used, and on a fresh in-house collection that completes the method
-comparison stopped at 110 runs. They would also recompute the
-intervals with seeds resampled along with runs, so that a verdict no
-longer speaks only for these 30 seeds. Two single-model and ensemble references belong to the
-same bundle and are planned, not reported: temperature
-scaling~\cite{guo2017calibration} of each base model, and probability
-ensembles of the five teachers and of all 30 baseline seeds as an upper
-reference with five or 30 forward passes.
+estimate how much new-environment data the KL term needs. A repeat of
+the comparison with other single-model methods on a Transformer
+encoder keeps that comparison from resting on one architecture.
+
+The other part asks whether the reported results hold beyond the runs
+and seeds that produced them, and it reuses frozen models. Inference on
+the 119 usable ADS-24 runs outside the 132 of the contract
+(Appendix~\ref{app:ads24-data}), which no earlier stage has used, and
+on a fresh in-house collection completes the method comparison that
+stopped at 110 runs. Intervals recomputed with seeds resampled along
+with runs let a verdict speak for more than these 30 seeds. Two
+references complete the bundle and are planned, not reported:
+temperature scaling~\cite{guo2017calibration} of each base model, and
+probability ensembles of the five teachers and of all 30 baseline seeds
+as an upper reference with five or 30 forward passes.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라
@@ -104,6 +109,10 @@ source.
 % 재현·감사 자료
 %  5. 최소 실행본(seed 127 checkpoint)을 독자에게 줄지와 그 위치; 코드 commit/hash, 계약별 봉인
 %     hash의 내용; v3의 새 30 seed 값(TRAIN_SEED_PLAN.json) [e_reproducibility].
+%     (7회차 방법 P1-1) v3의 학습·실행·채점 코드와 commit, seed plan, 행 단위 채점 출력
+%     (SCORED_RESULTS.json, SEED_RESULTS.csv), split/source manifest·eligibility seal, bootstrap
+%     재생성 정보를 학위논문 보충자료로 공개할 수 있는가? 공개하면 v3 주표·판정 구간을 한 번에 다시
+%     만드는 명령을 부록 E에 넣는다. 지금 원고는 v3를 "저장 보고서에 기록된 역사적 결과"로만 쓴다.
 %  6. 603 계보 FIT occurrence 표집기의 구현(torch Generator인지 permutation 순환인지) [04_method 주석].
 %  8. PAG1 배경 4실행의 제외 ID·사유(ELIGIBILITY_SEAL.json) [05, e].
 %  9. v3 bootstrap의 생성기 seed [e_reproducibility].
@@ -119,19 +128,22 @@ source.
 %     [05_evaluation].
 % 18. 부록 C: "ρ0 초기화", "seed 평균을 빠뜨린 해상도 계산", "18-way margin 10.3"이 가리키는
 %     대상(14.14 ≈ 10√2는 LogitNorm τ=0.1 아래 logit 차 상한일 수 있다는 추론만 있음); 옛 후보
-%     1--15행에 한 줄 정의를 붙일지 [c_rejected].
+%     1--15행에 한 줄 정의를 붙일지, 그 후보들의 계약·결과 파일이 남아 있는지(7회차 방법 P3-1;
+%     지금은 "정의가 보존되지 않은 연구 이력"으로 분리했다) [c_rejected].
 % 24. 자체 실험실 FIT prior 1.412의 +1 평활 위치와 정규화 방법 [09_generality].
 % 36. 부록 B의 두 135실행을 실행 ID 수준으로 대조하는 일(ELIGIBILITY_SEAL.json 필요) [b].
 % 38. 모델 출력 열 index가 부록 A 순서와 같은지 코드로 확인 [04_method].
 %
 % ADS-24
-% 25. nyberg2026cyber 본문의 134 episode 확인(인용 리뷰 P2-5) [d_ads24_data].
+% (25번은 7회차 인용 리뷰가 원 논문에서 134 episode를 확인해 닫았다.)
 % 26. 역할별 run ID manifest, 실행별 제외 사유 CSV(ADS24_EPISODE_TIME_AUDIT.csv) [08].
 % 27. ADS-24 FIT prior의 평활 여부와 zero-count 처리 [08_ads24].
 %
 % 인용·웹 문서
 % 31. Wazuh 문서 두 URL의 접근일 [08, d].
 % 33. Yang 등 DEED·Ilichev 등의 서지(지금은 인용과 '선행' 주장을 뺐다) [07, c, 09].
+% 42. PWNJUTSU 데이터셋 논문(DOI 10.1109/TNSM.2022.3183476)을 임시 key tmp1로 인용 요청했다.
+%     확인되면 진짜 key로 바꾼다 [d_ads24_data].
 % 41. Kan 등(kan2021investigating) 원문에서 "자기 라벨 학습이 오류를 키울 수 있다"는 경고를
 %     확인하면 2.7절에 되살릴 수 있다 [02_related_work].
 %

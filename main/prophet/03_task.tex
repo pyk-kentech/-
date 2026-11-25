@@ -34,7 +34,15 @@ records. The \emph{natural} view is the prefix as it was actually
 received during collection, with no added delay, and a \emph{natural
 row} is one boundary of one run read in that view. A \emph{delayed} view
 replays the same boundary under a synthetic schedule and keeps its
-label. Each schedule delays every atomic receipt batch by 0, 1 or
+label. Scores in this thesis use natural views only. The FIT set gives
+4,824 natural views and $16\times4{,}824=77{,}184$ delayed ones,
+together the 82,008 \emph{FIT views}. A training \emph{occurrence}
+combines both kinds and is defined in Section~\ref{sec:method-baseline}.
+Finally, a \emph{development} set is a set of executions whose scores
+had already been inspected when a later analysis was defined on them
+(Section~\ref{sec:eval-rounds}).
+
+The delayed schedules follow fixed rules. Each schedule delays every atomic receipt batch by 0, 1 or
 2~seconds, with at most 4~seconds added per run, no delay on the first
 batch, first-in-first-out order kept, no batch moved past the run's last
 commit time, and admission still requiring a release time strictly
@@ -42,13 +50,9 @@ before the cutoff. Sixteen such schedules are fixed for each run, from a
 seed derived from the run identifier and without reference to labels or
 scores, and all boundaries of a run share a schedule. The grid is a
 robustness device, not an estimate of the delays that occur in
-practice. Scores in this thesis use natural views only; the FIT set
-gives 4,824 natural views and $16\times4{,}824=77{,}184$ delayed ones. A training \emph{occurrence} is one
-FIT execution under one delivery schedule, with all of its boundaries,
-and each update of training reads 32 of them. Finally, a
-\emph{development} set is a set of executions whose scores had already
-been inspected when a later analysis was defined on them
-(Section~\ref{sec:eval-rounds}).
+practice.
+% 7회차 문장 P2-2·aitone P3-1: 단위 정의와 지연 일정 규격을 두 문단으로 나눴고, occurrence 정의는
+%   4.1절(자연 view + 지연 view 하나, repro.md 6-(8))로 맞춰 그쪽을 가리켰다. P3-5: 82,008 FIT views를 정의했다.
 % 근거: METHOD_BASELINES_CONTRACT_SEALED.md ("PROPHET의 한 occurrence는 한 실행의
 % 특정 전달 view이며 전체 자연 경계를 포함한다"); 구성·반복: 각 수집 계약의
 % "16구성×2반복"; 지연 view: 부록 B 옛 정의. 82,008 FIT view = 4,824 자연 + 77,184 전달.
@@ -263,8 +267,8 @@ group is therefore the marker's zero, even though the payload search
 on that target failed; a model that read only the latest status would
 see a success that the search never had. Grouping the records by
 target lets a model read the two processes together while keeping
-their results apart. The next recorded action
-was a synthetic file search. The example illustrates the kind of
+their results apart. In this execution the action that followed was
+again a synthetic file search. The example illustrates the kind of
 target-result lookup examined in Chapter~\ref{ch:diagnosis}.
 
 \begin{table}[htbp]

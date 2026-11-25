@@ -80,7 +80,7 @@ boundary must be present, and every source REQUEST must be bound to the
 START and END records of its action. Admission must respect the strict
 rule $r(e)<t$ and the atomic receipt batches of
 Section~\ref{sec:receipt}, and no record identifier may occur twice. An
-empty prefix or an UNKNOWN record is not a reason for exclusion, and an
+empty prefix or a record with status UNOBSERVED is not a reason for exclusion, and an
 ineligible execution is excluded whole, never trimmed to its valid rows.
 
 According to the stored reports, the eligible set of each round was
@@ -140,14 +140,15 @@ Table~\ref{tab:rounds}. On ADS-24 and
 in the generality rounds the pre-specified contrasts are stability,
 mean improvement, and preservation, read in the same way; because those
 rounds are development comparisons (Section~\ref{sec:eval-rounds}),
-they remain contrasts.
+they are reported as contrasts, not as sealed criteria.
 % 근거: CONTRACT_V3.md:11; ADS24_CONTRACT_SEALED.md:27 (한도 3%, (b)(c)는 "상단 ≤");
 % ADS24_STAGE2_REPORT.md:21 (한도 +0.043482);
 % ARCH_GENERALITY_STAGE2_REPORT.md:9 (ADS 3%, PROPHET +0.020).
 % 방법 리뷰 P3-1: ≤와 <를 구분해 적었다. 한도와 같은 상단 값은 없다(가장 가까운 값
 % +0.019818, +0.020741).
 
-The contracts call these limits practical limits. The in-house limit
+The contracts call these limits practical limits; the thesis calls
+them \emph{preservation limits}. The in-house limit
 of $+0.020$ has been used unchanged in this project's contracts since
 10 November 2026 and the ADS-24 limit first appears in its sealed
 contract, but neither is derived from an operational requirement, such as a tolerable change in an
@@ -257,7 +258,10 @@ collections for the same reason and are never placed on one scale.
 consensus (the 10-seed round used all 30 baseline models as teachers).
 Evaluation runs and rows are those scored in the round, not the
 unlabeled adaptation inputs. Status uses the three labels defined
-above; the criteria of a sealed contract that ended in a safety stop were never read.}
+above, with two additions: ``sealed contract, not adjudicated'' marks a
+sealed contract that ended in a safety stop, whose criteria were never
+read, and ``sealed / development'' marks a stage that is sealed for some
+of its runs and a development comparison for the rest (note~b).}
 \label{tab:rounds}
 \small
 \begin{tabularx}{\textwidth}{@{}lrXlX@{}}

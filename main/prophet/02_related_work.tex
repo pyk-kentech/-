@@ -84,12 +84,14 @@ behavior by tactic, and estimates a trajectory from which it derives the
 adversary's next technique~\cite{liu2024clap2}. EFI extracts attack-scene
 graphs from threat intelligence reports, matches them against endpoint
 provenance, and forecasts the next interactions with a technique-level
-interpretation~\cite{zhu2024nip}. BiTA combines bidirectional GRU
+interpretation~\cite{zhu2024nip}. EFI thus shares host-level endpoint
+evidence and the forecasting goal with our task; it differs in drawing
+on threat-intelligence scene graphs and in its technique-level output. BiTA combines bidirectional GRU
 aggregation with a Transformer in a temporal graph network to predict
 future network alerts~\cite{nayeri2026bita}. Their outputs are a
 technique, an interaction graph, or an alert, whereas ours is a single
-normalized distribution over 18 action categories. Closer to our
-evidence, Niloy et al.\ release multi-source logs with ATT\&CK labels and evaluate small language models on
+normalized distribution over 18 action categories. Also on
+multi-source host evidence, Niloy et al.\ release multi-source logs with ATT\&CK labels and evaluate small language models on
 them~\cite{niloy2026multi}; that task labels events already observed,
 whereas ours predicts the next action from the prefix received before
 it.
@@ -197,7 +199,9 @@ inputs is not new either: the transfer set of Hinton et al.\ may
 consist of unlabeled data~\cite{hinton2015distilling}, and Kan et al.\
 investigate adapting malware detectors to drift without
 labels~\cite{kan2021investigating}. Our transfer set is likewise drawn
-from the target environment.
+from the target environment, but what we measure is the spread across
+seeds of one predictor on a forecasting task, not detection accuracy
+under drift.
 % 근거: RECORD:470--475. 4회차 지시 1번: 온도 보정·확률 앙상블은 마무리 확인 묶음이라
 % 이 절에서 빼고 결론 Future Work에 계획으로만 둔다(guo2017calibration은 그곳에서 인용).
 % decisions.md 32번: lee2013pseudo로 pseudo-labeling 이름과 인용을 되살렸다.

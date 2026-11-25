@@ -123,8 +123,10 @@ layout (Table~\ref{tab:seed-population}).
 % 출처: ORIGINAL_TEXT/outputs/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:39
 % (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331).
 S1 is still not a rule for choosing one seed: the seed it ranked first
-failed preservation (Section~\ref{sec:method-teachers}), and the
-association did not reproduce on ADS-24 (Chapter~\ref{ch:ads24}).
+failed preservation (Section~\ref{sec:method-teachers}). On ADS-24 a
+related leave-one-out agreement diagnostic was unfavorable, and S1
+itself was not computed there, so the in-house statistic was not
+replicated (Chapter~\ref{ch:ads24}).
 Section~\ref{sec:diag-agreement} returns to it.
 
 S3 is the loss on the final training batch, not an NLL on held-out FIT
@@ -132,12 +134,13 @@ runs, and no held-out FIT score was computed for this population; the
 values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
 fail. S2 uses labels from another unseen condition and still ranks the
-seeds poorly. These results agree with the underspecification described
-by D'Amour et al.~\cite{damour2020underspecification} in the part that
-concerns selection: neither the final training loss, nor labels from
-another unseen condition, nor the loss on the seen procedure recovered
-how the seeds would rank on these background conditions. They do not
-show the other part of that description, a set of seeds that are
+seeds poorly. These results agree with the selection part of the
+underspecification described by D'Amour
+et al.~\cite{damour2020underspecification}
+(Section~\ref{sec:related-underspec}): neither the final training
+loss, nor labels from another unseen condition, nor the loss on the
+seen procedure recovered how the seeds would rank on these background
+conditions. They do not show the other part, a set of seeds that are
 equally good where the training data reach.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
 % NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
@@ -152,20 +155,21 @@ equally good where the training data reach.
 The places where the seeds part can be found without labels. On 1,029 of the
 1,309 background rows all 30 seeds gave the same top-1 action, and
 every one of these unanimous answers was correct. The rows on which the
-seeds split carried between 84.2\% and 91.2\% of the NLL of the
-30-model average, depending on the condition. This concentration is our
-own observation on these runs; it is consistent with the use of
+seeds' top-1 predictions differed carried between 84.2\% and 91.2\%
+of the NLL of the 30-model probability average, depending on the
+condition. The figure describes the averaged prediction; we did not
+compute how the loss of each individual seed is distributed over these
+rows. This concentration is our own observation on these runs; it is consistent with the use of
 variation across an ensemble as a signal of predictive
 uncertainty~\cite{lakshminarayanan2016simple}.
 
 Unanimity is not a guarantee of
 correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
 wrong, and on the background, subsets of five seeds were sometimes
-unanimous and wrong. Agreement also tracks the quality of a seed: S1
-ranked the seeds much as their A+C losses did
-(Section~\ref{sec:diag-size}). This is a ranking of single seeds by
-their agreement with the majority, related to but not the same as the
-pairwise agreement line of Baek et al.~\cite{baek2022agreement}. On the 82,008 FIT views the
+unanimous and wrong. The S1 ranking of Section~\ref{sec:diag-size}
+orders single seeds by their agreement with the majority; it is related
+to, but not the same as, the pairwise agreement line of Baek
+et al.~\cite{baek2022agreement}. On the 82,008 FIT views the
 30 models gave the same top-1 action for 90.3\% (74,074), so on FIT
 inputs the seeds mostly agree, though not on the remaining 9.7\%.
 Disagreement on unlabeled environment inputs therefore marks, without
@@ -257,7 +261,9 @@ exit status zero; the source copies exactly when its observed result
 for the current target is a success. The errors of REL\_GLOBAL on
 COPY rows lie at the COPY decisions of the sixth, eighth and tenth
 natural boundaries, and further errors fall on the boundary just after
-a COPY, whose START has occurred but not yet been received. This order suggests a rule with no
+a COPY, whose START has occurred but not yet been received.
+
+This order suggests a rule with no
 parameters. Let $T$ be the folder of the last received marker START.
 Predict COPY if the last received payload END in $T$ has exit status
 zero and no COPY START has been received since that marker; otherwise
@@ -339,13 +345,14 @@ REL\_GLOBAL, inside the $+0.020$ limit, but the 95\% interval
 $[-0.017, +0.048]$ crossed it, so the model was not adopted as a
 general replacement.
 
-A generic version, again a development comparison on the 135 runs, \texttt{GENERIC\_HEAD}, which
-describes the most recent target key and its received results without
-the lab's marker and payload commands, did not keep the gain and did not
-beat its own capacity-matched shuffled control.
+We also built a generic version, \texttt{GENERIC\_HEAD}, and compared
+it again on the 135 development runs. It describes the most recent
+target key and its received results without the lab's marker and
+payload commands. It did not keep the gain and did not beat its own
+capacity-matched shuffled control.
 
-Supplying the lab-specific lookup to the head thus helps, which identifies a
-procedure-specific predictive bottleneck for this lab. It does not show
+Supplying the lab-specific lookup to the head thus helps, and the
+lookup is a procedure-specific predictive bottleneck for this lab. It does not show
 that the lookup causes the seed instability, because the features
 encode the source policy directly, the generic form failed, and the
 shuffled control does not preserve every temporal and structural

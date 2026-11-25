@@ -2,21 +2,24 @@
 PROPHET predicts which of 18 attacker actions comes next from
 Windows audit records received before a cutoff. Under a
 benign workload absent from labeled training, models with the same
-data and architecture diverge across random seeds, and their final
+data and architecture diverged across random seeds, and their final
 training loss did not rank them. With
 consensus distillation (CD), a standard ensemble-distillation setup,
 one student of the same architecture follows the averaged
 probabilities of five baseline models on unlabeled inputs from the new
-workload. In a sealed in-house round, the stored report records that
-CD passed all three criteria over 30 fixed checkpoints per group: the
-seed standard deviation of the log loss fell on both target layouts
-of the two-worker condition (on one, 0.056 to 0.010), and the loss on the seen procedure fell too. In an exploratory
-comparison on the public ADS-24 dataset the spread also narrowed, but
-every distilled seed of our predictor stayed worse than predicting the
-training tactic frequencies. CD narrowed the variation among these
-checkpoints; it does not remove the loss caused by the new environment.
+workload. In an in-house round, according to its stored report, CD met
+three criteria fixed before training, over 30 checkpoints per group:
+the seed standard deviation of the log loss fell on both file layouts
+of an unseen condition with two benign workers (on one, 0.056 to
+0.010), and the loss on the attack procedure seen in training fell. On
+the public ADS-24 dataset the spread also narrowed, but every distilled
+seed of our predictor stayed worse than predicting the training tactic
+frequencies. CD narrowed the variation among these checkpoints; it did
+not remove the loss caused by the new environment.
 % 6회차 문장 P2-8: 세 기준 중 두 개만 나열하던 문장을 고치고, 제외 실행 문장은 뺐다(제외 사유가
 % 수집 단계 실패로 기록됨, e_reproducibility). 국문 초록과 같은 주장을 담도록 맞췄다(P3-13).
+% 7회차 문장 P2-1: "sealed", "three criteria", "target layouts", "two-worker condition",
+% "seen procedure"를 풀어 쓰고 시제를 과거로 맞췄다. 방법 P1-1: 저장 보고서의 기록임을 유지했다.
 % 근거: RECORD:166, 176--183 (v3 세 봉인 기준, A+C FLAT SD .055591→.009508,
 % ORIGINAL_18 차 −.060741 [−.130850, −.004082]); RECORD:218--221, 234 (ADS-24 SD
 % .163→.025, FIT 사전 빈도 1.830보다 모든 CD seed가 나쁨). "with two benign workers
