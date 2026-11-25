@@ -178,9 +178,10 @@ architecture and single-model inference. Following other models'
 average to reduce retraining churn was shown for
 codistillation~\cite{anil2018large}; what we add is a measurement of
 that effect with fixed teachers on unlabeled target inputs. In
-development comparisons on the plain GRU, the controls point to the
-multi-model target on environment inputs rather than to the arithmetic
-mean (Section~\ref{sec:disc-novelty}). (c) Addressing the
+development comparisons on the plain GRU, the controls are consistent
+with the multi-model target on environment inputs mattering more than
+the arithmetic mean, without isolating either
+(Section~\ref{sec:disc-novelty}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
