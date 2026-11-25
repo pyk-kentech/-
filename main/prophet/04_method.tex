@@ -302,7 +302,8 @@ runs that had already been inspected, so the teacher choice is not
 blind. No round compared it with five teachers chosen at random, with
 fewer teachers, or with all 30 as teachers of a student. The results
 of later chapters therefore show that CD worked with this teacher rule,
-not that ranking by agreement is needed or better than another choice.
+a design choice, not that ranking by agreement is needed or better than
+another choice (Section~\ref{sec:future}).
 % 근거: PAPER_DEFINITIONS.md §2 "고정 상위 5개 교사 선정". 상위 5 seed는
 % 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
 % 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
@@ -317,10 +318,8 @@ the 30 seeds, against the preservation limit of $+0.020$
 the average of the top five passed it at the cost of running five models
 at inference. Distillation is what returns that five-model target to a
 single model. The link between agreement and loss that motivates the
-rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}) and
-not on ADS-24 (Chapter~\ref{ch:ads24}). Whether agreement-ranked teachers
-do better than five random seeds or all 30 was not tested, so the rule
-is a design choice, not a result (Section~\ref{sec:future}).
+rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}), and
+the related leave-one-out diagnostic on ADS-24 was unfavorable (Chapter~\ref{ch:ads24}).
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:3,43,47
 % (S1 단일 seed 50572의 ORIGINAL_18 NLL .739376, 한도 .650865(모집단 평균
 % .630865 + .020), 초과 +.108511; 상위5 결합 .548374로 통과. 135실행 개발 집합).

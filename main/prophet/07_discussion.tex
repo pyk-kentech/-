@@ -18,8 +18,11 @@ standard deviation fell in every round in which it was compared, and in
 the post hoc decomposition of Chapter~\ref{ch:decomposition} the
 disagreement term $V$ fell in 27 of the 28 baseline--student pairs. For
 REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
-contrast, $V$ rose. Two of these rounds were sealed
-(Table~\ref{tab:rounds}). Both verdicts hold the seeds fixed
+contrast, $V$ rose.
+
+Two of these rounds were sealed (Table~\ref{tab:rounds}): the v2
+recheck passed stability without showing preservation, and v3 passed
+all three criteria. Both hold the seeds fixed
 (Section~\ref{sec:disc-threats}). Part of the narrowing is also expected from
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
 distillation itself, since all students of a group follow one fixed
@@ -330,7 +333,9 @@ to reduce retraining churn was shown for
 codistillation~\cite{anil2018large}. CD differs in using fixed teachers
 trained from other seeds, unlabeled inputs from the target environment,
 and the NLL seed spread on unseen conditions as the measure; we did not
-compare it with codistillation. What the thesis adds is evidence on
+compare it with codistillation.
+
+What the thesis adds is evidence on
 one security task: the measured instability, the unlabeled
 disagreement rows that carry the consensus loss
 (Chapter~\ref{ch:diagnosis}), and three findings about the

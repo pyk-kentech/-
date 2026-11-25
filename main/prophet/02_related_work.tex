@@ -561,7 +561,7 @@ fitted line.
 % 원문: 같은 논문 §4 식 (3)--(4): 선은 짝별 ID·OOD 일치도(무라벨)로 맞추고, 라벨은 ID 정확도
 %   추정에만 쓴다("given its ID validation accuracy, one could simply plug"). 추정기 이름은 ALine-S/ALine-D.
 %   "fits ... agreement using labeled in-distribution data"가 선 맞춤에 라벨을 쓰는 것처럼 읽혀 고쳤다.
-The ranking tracked loss in the in-house lab and did not on ADS-24
+The ranking tracked loss in the in-house lab, and the related leave-one-out diagnostic on ADS-24 was unfavorable
 (Chapter~\ref{ch:ads24}). The training target itself is the mean
 probability of the selected teachers on those inputs.
 % 근거: RECORD:405, 467--468. 참신성 리뷰 P2-2, 인용 리뷰 P2-1(적용 조건 명시).
@@ -617,6 +617,7 @@ of two networks, without the ensemble's serving cost~\cite{anil2018large}.
 %   not increase serving costs"; 표 1 (DNN .029, 두 DNN 앙상블 .022, two-way codistilled .019). 확인됨.
 Of the methods in this section, codistillation is the closest to the
 goal of CD.
+
 The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities

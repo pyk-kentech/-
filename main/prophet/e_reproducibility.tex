@@ -26,8 +26,11 @@ of files instead (Table~\ref{tab:repro-hashes}). Training ran on a host with 251
 generated with two CPU threads. The exact Python and PyTorch versions
 used during the study were not recorded.
 
-The round contracts seal hashes of their code, inputs, FIT set,
-preprocessor and traces, and the original machine holds the training
+Each round has a seal file; the SHA-256 values we could read back are
+those of the v3 contract and \texttt{fit\_v3.py}, of the generality and
+ADS-24 contracts, and of the two plan files of the 135-run round, and
+the other entries of the seal files were not read for this thesis. The
+original machine holds the training
 seed plans, split and source manifests, run ledgers and eligibility
 seals (for example \texttt{TRAIN\_SEED\_PLAN.json},
 \texttt{SPLIT.json}, and \texttt{ELIGIBILITY\_SEAL.json}), as well as
@@ -272,7 +275,9 @@ stage, before any prediction was made, and none depends on a score.
 \section{Resampling}
 \label{sec:repro-resampling}
 
-Every interval comes from 100,000 resamples drawn with PCG64. In-house,
+Every contrast interval comes from 100,000 resamples drawn with PCG64;
+the stage-1 gate of the ADS-24 study used 10,000 resamples of
+executions within scenarios. In-house,
 a resample draws complete configurations and moves their repetitions
 together, and the two A+C layouts are resampled separately and then
 averaged 1:1 where the score combines them; on ADS-24, a resample draws
