@@ -173,16 +173,14 @@ with 30 seeds per model setting, for REL\_GLOBAL and three general
 encoders, on the in-house task and on ADS-24. (b) It observes that, on
 unlabeled inputs from the unseen workload, the NLL of the 30-model
 probability average concentrates on the rows where the seeds' top-1
-predictions differ, and it applies a consensus target that keeps the
-architecture and single-model inference; following other models'
+predictions differ. It then applies a consensus target that keeps the
+architecture and single-model inference. Following other models'
 average to reduce retraining churn was shown for
-codistillation~\cite{anil2018large}, and our part is to measure it with
-fixed teachers on unlabeled target inputs. The students' agreement held on
-new runs of the same environment. In the comparisons that included
-them, following the same teachers on FIT inputs or a seed's own
-predictions did not narrow the spread in the same way, while following
-a geometric pool of the same teachers narrowed it about as much
-(Section~\ref{sec:disc-novelty}). (c) Addressing the
+codistillation~\cite{anil2018large}; what we add is a measurement of
+that effect with fixed teachers on unlabeled target inputs. In
+development comparisons on the plain GRU, the controls point to the
+multi-model target on environment inputs rather than to the arithmetic
+mean (Section~\ref{sec:disc-novelty}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
@@ -191,12 +189,10 @@ analysis, with one intermediate new-run check
 (Section~\ref{sec:eval-rounds}).
 % 원문(arp2020dos): arXiv 2010.09470 전문, 2.2절 P3 "Data Snooping"(3쪽); test snooping은
 %   "the test set is used for experiments before the final evaluation". 확인됨.
-Only the in-house v3 round passed all of its sealed
-criteria; the v2 recheck, an earlier sealed round
-(Table~\ref{tab:rounds}), passed stability but did not show
-preservation. The
-ADS-24 study, the encoder study, and the method comparison are
-development comparisons, and the decomposition is post hoc.
+
+The ADS-24 study, the encoder study, and the method comparison are
+development comparisons, and the decomposition is post hoc
+(Table~\ref{tab:rounds}).
 The distillation computation itself is a combination of existing
 techniques; we claim the evidence and the evaluation behind it, not a
 new training objective. Apart from the three contributions, a separate

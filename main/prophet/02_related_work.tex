@@ -573,8 +573,9 @@ of a proper score, the NLL of Chapter~\ref{ch:evaluation}, across 30
 seeds of one model setting, separately on conditions seen and unseen
 in training, and we then train against it. Like Summers and Dinneen we
 treat that spread as something to reduce, but we do it inside one
-student that runs as a single forward pass, using unlabeled inputs of
-the target environment.
+student that runs as a single forward pass, as codistillation also does
+(Section~\ref{sec:related-distillation}), with fixed teachers and
+unlabeled inputs of the target environment.
 % 근거: 5장 평가(NLL·seed SD, 이 절에서 되풀이하지 않음), 4장 CD 정의. Summers & Dinneen 의 두 방법은
 %   시험 때 여러 예측을 평균한다(위 주석). 다른 연구가 seed 변동을 보고하지 않는다는 주장은 하지 않았다.
 
@@ -765,8 +766,8 @@ Ovadia et al.\ compared such methods, among them dropout, temperature
 scaling, and deep ensembles, under dataset shift. Their conclusions are
 that the quality of uncertainty degrades with increasing shift for
 every method, and that better calibration and accuracy on the
-in-distribution test set do not usually carry over to shifted
-data~\cite{ovadia2019trust}.
+in-distribution test set do not usually imply better calibration under
+shift~\cite{ovadia2019trust}.
 % 원문: Ovadia et al. NeurIPS 2019 (arXiv v2) §5 p.9 "the quality of uncertainty consistently degrades with
 %   increasing dataset shift regardless of method"; "Better calibration and accuracy on the i.i.d. test dataset does
 %   not usually translate to better calibration under dataset shift"; §3 p.3 비교 방법 목록(Dropout, Temp Scaling,
@@ -876,10 +877,9 @@ machine-learning work of Sections~\ref{sec:related-underspec}
 and~\ref{sec:related-distillation}; we did not assess whether the
 security works report it.
 
-Read together, the tables place this thesis at a junction that the two
-literatures approach from different sides. As cited here, the
-security works forecast or detect from alerts, events, graphs, or logs
-and report a single trained model or system. The machine-learning works
+Read together, the tables show what this thesis combines. The security
+works forecast or detect from alerts, events, graphs, or logs; we did
+not assess how they report seed variation. The machine-learning works
 study the spread among models, or use unlabeled target inputs, mostly
 on benchmarks outside security, with Kan et al.\ on malware as an
 exception. We forecast the next attacker action from Windows process

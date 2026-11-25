@@ -318,7 +318,9 @@ the average of the top five passed it at the cost of running five models
 at inference. Distillation is what returns that five-model target to a
 single model. The link between agreement and loss that motivates the
 rule was observed in the in-house lab (Chapter~\ref{ch:diagnosis}) and
-not on ADS-24 (Chapter~\ref{ch:ads24}).
+not on ADS-24 (Chapter~\ref{ch:ads24}). Whether agreement-ranked teachers
+do better than five random seeds or all 30 was not tested, so the rule
+is a design choice, not a result (Section~\ref{sec:future}).
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:3,43,47
 % (S1 단일 seed 50572의 ORIGINAL_18 NLL .739376, 한도 .650865(모집단 평균
 % .630865 + .020), 초과 +.108511; 상위5 결합 .548374로 통과. 135실행 개발 집합).
@@ -336,7 +338,8 @@ models of the same encoder and data (Section~\ref{sec:method-transfer}).
 Table~\ref{tab:variants} lists the groups that appear in the in-house
 rounds of Chapters~\ref{ch:evaluation} and~\ref{ch:results}. All groups
 share the FIT procedure of Section~\ref{sec:method-baseline}; they differ
-in the teacher set and in the unlabeled inputs of the KL term. The
+in the teacher set and in the unlabeled inputs of the KL term, which we
+call \emph{adaptation inputs}. The
 background inputs are 119 runs (1,309 rows) under background conditions.
 KD\_ALL adds 48 runs (354 rows) of the seen condition to them and
 draws the 32 unlabeled rows of each update from the two sources in
@@ -434,7 +437,7 @@ ADS-24, REL\_GLOBAL-ADS
     penalty (0.1); 1,346 updates; all distillation settings \\
 Three general encoders
   & event representation kept, recurrent state replaced by LSTM, Transformer, or GRU; LogitNorm,
-    regularization, and relational residual removed; width and learning
+    representation-gradient penalty, and relational residual removed; width and learning
     rate chosen by FIT-internal validation
   & 1,346 updates; run-weighted cross-entropy; AdamW with cosine schedule;
     all distillation settings \\

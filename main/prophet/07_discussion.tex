@@ -19,15 +19,13 @@ the post hoc decomposition of Chapter~\ref{ch:decomposition} the
 disagreement term $V$ fell in 27 of the 28 baseline--student pairs. For
 REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
 contrast, $V$ rose. Two of these rounds were sealed
-(Section~\ref{sec:eval-rounds}): v3 is the only one in which CD met all
-three sealed criteria, and the v2 recheck passed stability without
-showing preservation. Both verdicts hold the seeds fixed
+(Table~\ref{tab:rounds}). Both verdicts hold the seeds fixed
 (Section~\ref{sec:disc-threats}). Part of the narrowing is also expected from
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
 distillation itself, since all students of a group follow one fixed
 teacher set (Section~\ref{sec:disc-novelty}).
 
-What CD did not change is the gap to a frequency baseline on ADS-24.
+What CD did not do is close the gap to a frequency baseline on ADS-24.
 Every CD seed of REL\_GLOBAL-ADS stayed worse than the FIT prior there,
 and among the general encoders only the Transformer students beat it.
 

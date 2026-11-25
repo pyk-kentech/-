@@ -41,7 +41,7 @@ also report three seed-stability statistics for each group and
 condition: the sample standard deviation of the 30 values $L_s$ (the
 \emph{seed standard deviation}), the largest $L_s$ (the \emph{worst
 seed}), and the range of per-seed accuracy. The seed standard deviation
-is the statistic on which the v3 criteria are sealed; the other
+is the statistic of the v3 stability criteria; the other
 two describe the spread it summarizes.
 % 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
 % METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
@@ -142,7 +142,8 @@ The families differ by round. In the v3 round the family has three
 contrasts, the seed standard deviation on \texttt{A+C FLAT} and on
 \texttt{A+C NESTED} and preservation on \texttt{ORIGINAL\_18}; an upper
 end below zero on the last also counts as improvement there. These
-three are the only sealed criteria on CD that all passed; the v2
+three form the only sealed family on CD in which every criterion
+passed; the v2
 contracts that preceded them are listed with their outcomes in
 Table~\ref{tab:rounds}. On ADS-24 and
 in the generality rounds the pre-specified contrasts are stability,

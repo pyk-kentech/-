@@ -49,8 +49,9 @@ the natural boundaries of a run and then over runs with equal weight.
 
 We applied the identity to the baselines of
 Chapter~\ref{ch:generality}, that is, the three general encoders and
-REL\_GLOBAL,
-on the new PAG1 runs of the in-house lab and on ADS-24
+REL\_GLOBAL (the 30-seed teacher population of
+Section~\ref{sec:method-teachers}),
+on the PAG1 runs of the in-house lab and on ADS-24
 (Table~\ref{tab:decomposition}). On conditions
 absent from FIT, $V$ was three to seven times its value on the seen
 condition for every general encoder on both datasets. REL\_GLOBAL-ADS
@@ -66,7 +67,7 @@ move them far.
 
 \begin{table}[htbp]
 \centering
-\caption{Disagreement term $V$ of the 30 baseline seeds on the seen and
+\caption{Disagreement term $V$ of the 30 baseline seeds (for REL\_GLOBAL, the teacher population) on the seen and
 unseen conditions (post hoc). In-house: seen is \texttt{ORIGINAL\_18}
 (32 runs, 236 rows) and unseen is the 1:1 mean of \texttt{A+C FLAT}
 (31 runs, 341 rows) and \texttt{A+C NESTED} (30 runs, 330 rows) of the
@@ -121,8 +122,8 @@ encoders (0.317, 0.455, and 0.700 against 0.339, 0.554, and 0.790).
 Each of the same 28 model--set pairs also compares a baseline with the
 students of its seed list: for the three general encoders and REL\_GLOBAL-ADS these are
 the populations above, while for in-house REL\_GLOBAL they are the v3
-baseline seeds and their KD\_ENV\_TOP5 students, scored on the PAG1
-runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
+baseline seeds, a different population from that of the table, and
+their KD\_ENV\_TOP5 students, scored on the PAG1 runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
