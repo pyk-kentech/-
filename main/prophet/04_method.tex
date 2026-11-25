@@ -44,7 +44,9 @@ STATUS\_MALFORMED (Section~\ref{sec:receipt}). The vector is mapped to
 \end{equation}
 All vocabularies are fitted on FIT data only. The command-token
 vocabulary holds at most 1,024 tokens, in order of frequency, plus
-padding and unknown entries. The vocabularies and normalizers are those
+padding and unknown entries.
+% 출처: inputs/data/original_reports/lab/DIVERSE3K_20261027/COMMAND_REPRESENTATION_20261028/PRE_SPEC_V1.md:13
+%   ("train 정규화 명령에서만 빈도순 … 최대 1,024개 … PAD/UNK"; sources/atlas_answers/repro.md:77). The vocabularies and normalizers are those
 fitted on the original 404 FIT runs and are kept fixed for every
 extension of FIT; tokens that occur only in the added runs map to the
 unknown entry. The round reports call this the 404-only preprocessor.
@@ -101,10 +103,13 @@ $\mathcal{R}_{\mathrm{GLOBAL}}$ is a representation-gradient penalty
 inspired by input-gradient regularization~\cite{ross2017improving}:
 Ross and Doshi-Velez penalize the gradient with respect to the model
 input, whereas $\mathcal{R}_{\mathrm{GLOBAL}}$ differentiates with
-respect to the internal 48-dimensional event representations. For each FIT view it counts the
+respect to the internal 48-dimensional event representations. During
+training only, for each FIT occurrence, the audit-known worker roles
+set a count, the
 % 원문: Ross & Doshi-Velez (AAAI 2018) 'Input Gradient Regularization' 절 식 (6) p.3, 목적함수 H(y, y_hat) + lambda * ||grad_x H(y, y_hat)||_2^2.
-$k$ worker events whose role is known and draws exactly $k$ events at
-random from all received events. For each drawn event it takes the
+number $k$ of worker events; the penalty then draws exactly $k$ events
+at random from all received events, so it does not target the worker
+events themselves. For each drawn event it takes the
 squared gradient, with respect to that event's 48-dimensional vector
 $e_i$, of a single Rademacher projection of the centered 18-way logits;
 this is an unbiased estimate of the squared Frobenius norm of the
@@ -113,8 +118,7 @@ occurrences. These event draws are fixed by update, microbatch and seed;
 the FIT occurrences themselves are chosen by a separate generator
 (below).
 The penalty therefore discourages logits that change sharply with one
-event's representation, without singling out the worker events by
-role.
+event's representation.
 
 The model was reached in steps. REL, the relation model of
 Section~\ref{sec:method-relation-evidence}, added the residual of

@@ -8,8 +8,8 @@ the same way, and whether CD, unchanged, reduces that
 instability for them as well (Section~\ref{sec:gen-arch}). It then asks
 whether simpler single-model methods achieve the same reduction
 (Section~\ref{sec:gen-methods}). Both studies cover the in-house lab
-and ADS-24, and the status of the evidence differs between the two
-datasets; each section opens by stating it.
+and ADS-24, and both are development comparisons on both datasets, for
+reasons each section states.
 
 \section{Generality across encoders}
 \label{sec:gen-arch}
@@ -145,10 +145,9 @@ narrowly, as discussed below.
 % [−0.112726, −0.071334]; 여섯 조합 모두 Y·Y·Y). PROPHET 대비는 A+C FLAT/NESTED 1:1
 % 평균이다(같은 파일 :76).
 
-On the unseen conditions (the ADS-24 environment evaluation and A+C
-FLAT and NESTED), the worst CD seed of every encoder had a lower NLL
-than the median base-model seed. On the ADS-24 preservation runs and on
-\texttt{ORIGINAL\_18} this held for none of the three encoders.
+% 2026-11-25 리뷰 4회차 방법 P1-3: "최악 CD seed 가 기준 모델 중앙 seed 보다 낫다"는 문장은
+%   계산에 쓴 STAGE2_SEED_RESULTS.csv 가 자료에 없어 뺐다(값과 계산법은 아래 주석과
+%   inputs/data/ORIGINAL_MACHINE_ANSWERS_20261124.md 에 남긴다).
 % 출처: 원래 PC: ARCH_GENERALITY_STAGE2_20261122/STAGE2_SEED_RESULTS.csv:1 (같은 평가 층 30 seed로
 %   max(KD_ENV NLL) < median(REL_BASE NLL) 계산; 예: ADS-24 EVAL_ON LSTM 2.168570 / 2.270959,
 %   A+C FLAT GRU .294912 / 1.025930). PRESERVE_OFF·ORIGINAL_18은 세 구조 모두 거짓

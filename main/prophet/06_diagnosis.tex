@@ -129,14 +129,10 @@ runs, and no held-out FIT score was computed for this population; the
 values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
 fail. S2 uses labels from another unseen condition and still ranks the
-seeds poorly. These results resemble the deployment-selection
-difficulty discussed by D'Amour
-et al.~\cite{damour2020underspecification}
-(Section~\ref{sec:related-underspec}): neither the final training
-loss, nor labels from another unseen condition, nor the loss on the
-seen condition recovered how the seeds would rank on these background
-conditions. They do not establish underspecification, which would need
-seeds that are equally good on the seen condition, and ours are not.
+seeds poorly. Neither the final training loss, nor labels from another
+unseen condition, nor the loss on the seen condition recovered how the
+seeds would rank on these background conditions; Section~\ref{sec:related-underspec}
+says why this resembles, but does not establish, underspecification.
 % 원문: D'Amour et al. arXiv:2011.03395 v2 §2.1 "risk-equivalent near-optimal predictors" 가 출발점이라
 %   seen 조건에서 동등하지 않으면 해당하지 않는다는 한정은 원문과 맞다. 확인됨.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
@@ -169,7 +165,7 @@ Chapter~\ref{ch:method} is designed to reduce this disagreement on
 unlabeled environment inputs, and Chapter~\ref{ch:results} tests it
 under a sealed contract. Following the teachers on FIT inputs instead is
 one of the controls (Section~\ref{sec:gen-methods}); on FIT views the
-30 seeds gave the same top-1 action on 74,074 of 82,008 views (90.3\%),
+30 seeds gave the same top-1 action on 90.3\% of the 82,008 views,
 which Section~\ref{sec:disc-rejected} takes up.
 
 Unanimity is not a guarantee of
@@ -181,8 +177,8 @@ to, but not the same as, the pairwise agreement line of Baek
 et al.~\cite{baek2022agreement}. Jiang et al.\ relate the average
 disagreement rate between two runs to their test error
 (Section~\ref{sec:related-underspec}), which we did not compute; the S1
-ranking held in this lab, and the related leave-one-out diagnostic on ADS-24 was unfavorable
-(Section~\ref{sec:ads24-results}).
+ranking held in this lab (for ADS-24 see
+Section~\ref{sec:ads24-results}).
 % 원문: Baek et al. NeurIPS 2022 §3.1 식 (1)--(2) Agr(h,h′) 는 두 모델 짝의 일치도, §4 식 (4) 는 짝별
 %   ID·OOD 일치도의 probit 선형 회귀. 확인됨.
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/DISAGREEMENT_PREFLIGHT_20261119/

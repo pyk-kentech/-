@@ -127,8 +127,8 @@ environment; it is not tested on a workload that was never observed in
 any form. The price is paid during training, where 30 baseline models
 must be fitted before the student. The teacher rule also rests on an
 in-house observation: a seed's agreement ranked it by loss in the lab
-(Chapter~\ref{ch:diagnosis}), and the related leave-one-out diagnostic on ADS-24 was unfavorable
-(Chapter~\ref{ch:ads24}).
+(Chapter~\ref{ch:diagnosis}); for ADS-24 see
+Chapter~\ref{ch:ads24}.
 % 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
@@ -178,10 +178,9 @@ architecture and single-model inference. Following other models'
 average to reduce retraining churn was shown for
 codistillation~\cite{anil2018large}; what we add is a measurement of
 that effect with fixed teachers on unlabeled target inputs. In
-development comparisons on the plain GRU, the controls are consistent
-with following several models on environment inputs, rather than the
-choice between arithmetic and geometric pooling, carrying the effect;
-neither factor was isolated
+development comparisons on the plain GRU, students that followed
+several models on environment inputs narrowed the spread, whether the
+pool was arithmetic or geometric; neither factor was isolated
 (Section~\ref{sec:disc-novelty}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
@@ -192,9 +191,6 @@ analysis, with one intermediate new-run check
 % 원문(arp2020dos): arXiv 2010.09470 전문, 2.2절 P3 "Data Snooping"(3쪽); test snooping은
 %   "the test set is used for experiments before the final evaluation". 확인됨.
 
-The ADS-24 study, the encoder study, and the method comparison are
-development comparisons, and the decomposition is post hoc
-(Table~\ref{tab:rounds}).
 The distillation computation itself is a combination of existing
 techniques; we claim the evidence and the evaluation behind it, not a
 new training objective. Apart from the three contributions, a separate
