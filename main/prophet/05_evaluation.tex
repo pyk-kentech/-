@@ -118,13 +118,13 @@ We use \emph{contrast} for any pre-specified comparison; a
 \emph{sealed criterion} is the stricter kind defined in
 Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
 of a two-sided adjusted interval on a paired difference, student minus
-base model. Stability holds on an unseen condition if the upper end of
+baseline (REL\_GLOBAL or REL\_GLOBAL-ADS). Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
 zero. Where the contract includes it, mean improvement holds if the
 upper end for the difference in $L$ lies below zero. Preservation holds
 on the seen condition if the upper end for the difference in $L$ lies
 below a fixed limit: $+0.020$ on \texttt{ORIGINAL\_18} and, on ADS-24,
-3\% of the base model's mean NLL on the preservation runs, about
+3\% of the baseline's mean NLL on the preservation runs, about
 $+0.043$. The in-house contracts require the upper end to lie strictly
 below the threshold; the ADS-24 contract writes its mean and
 preservation contrasts with $\le$. No reported upper end equals its
@@ -156,7 +156,7 @@ analyst's decisions, or from a measured spread. Both were set by the
 author and fixed in the contracts before the results they judge were
 seen. In size, an NLL increase of $0.020$ lowers the geometric mean of
 the probability given to the observed action by about 2\%
-($e^{-0.020} \approx 0.980$); on ADS-24, 3\% of the base model's
+($e^{-0.020} \approx 0.980$); on ADS-24, 3\% of the baseline's
 preservation NLL of 1.449 is about $0.043$. The ADS-24 preservation
 difference, $-0.019$ with interval $[-0.024, -0.015]$
 (Chapter~\ref{ch:ads24}), passes under any positive limit. We therefore report the

@@ -197,9 +197,9 @@ inputs~\cite{lee2013pseudo}; our hard-label control is a form of it,
 using the frozen base model's top-1 predictions without a confidence
 threshold (Section~\ref{sec:gen-methods}). Distillation on unlabeled
 inputs is not new either: the transfer set of Hinton et al.\ may
-consist of unlabeled data~\cite{hinton2015distilling}, and Kan et al.\
-investigate adapting malware detectors to drift without
-labels~\cite{kan2021investigating}. Our transfer set is likewise drawn
+consist of unlabeled data~\cite{hinton2015distilling}. Labelless
+adaptation to drift has also been studied for malware
+detection~\cite{kan2021investigating}. CD likewise uses unlabeled inputs
 from the target environment, but what we measure is the spread across
 seeds of one predictor on a forecasting task, not detection accuracy
 under drift.
@@ -290,7 +290,10 @@ DeepLog~\cite{du2017deeplog}
   & Anomaly detection on log sequences \\
 LogBERT~\cite{guo2021logbert}
  & Sequences of system log keys
- & Anomaly score from self-supervised training \\
+ & Anomaly score from self-supervised training \
+Niloy et al.~\cite{niloy2026multi}
+ & Multi-source logs of attack and benign sessions with ATT\&CK labels
+ & Labels for observed events (small-language-model evaluation) \\
 PROPHET (this thesis)
  & Windows audit records received before a known boundary
  & Distribution over 18 next attacker actions \\

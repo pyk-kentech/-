@@ -151,19 +151,12 @@ encoders, on the in-house task and on ADS-24. (b) It observes that, on
 unlabeled inputs from the unseen workload, the NLL of the 30-model
 probability average concentrates on the rows where the seeds' top-1
 predictions differ, and it applies a consensus target that keeps the
-architecture and single-model inference.
-
-Students that share one
-fixed teacher set are expected to agree with one another; what the
-evidence adds is that the agreement held on new runs of the same
-environment, and that, in the comparisons that included them,
-following the same teachers on FIT inputs or a seed's own predictions
-did not narrow the spread in the same way.
-A separate in-house diagnosis locates many errors in one file decision;
-the head we built on that diagnosis was not adopted
-(Section~\ref{sec:diag-intervention}).
-
-(c) Addressing the
+architecture and single-model inference. The students' agreement held on
+new runs of the same environment. In the comparisons that included
+them, following the same teachers on FIT inputs or a seed's own
+predictions did not narrow the spread in the same way, while following
+a geometric pool of the same teachers narrowed it about as much
+(Section~\ref{sec:disc-novelty}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
@@ -176,7 +169,12 @@ ADS-24 study, the encoder study, and the method comparison are
 development comparisons, and the decomposition is post hoc.
 The distillation computation itself is a combination of existing
 techniques; we claim the evidence and the evaluation behind it, not a
-new training objective.
+new training objective. Apart from the three contributions, a separate
+in-house diagnosis locates many errors in one file decision; the head
+we built on that diagnosis was not adopted
+(Section~\ref{sec:diag-intervention}).
+% 9회차 문장 P3-9·참신성 P3-2: (a)–(c)를 한 문단으로 묶고, "고정 교사 집합 학생은 서로 일치할
+%   것으로 예상된다" 문장은 07장에만 두었다. geometric-pool 증류가 비슷하게 줄였다는 구절을 더했다.
 % 근거: idea.md "기여" 3항, RECORD:28; 참신성 리뷰 P2-1에 따라 (b)를 무라벨
 % 불일치 관찰 → 합의 목표로 고치고, COPY 국소화·OBSERVED_HEAD를 따로 낮췄다.
 

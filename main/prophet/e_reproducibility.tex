@@ -46,7 +46,12 @@ bootstrap generator. A reader can therefore check that
 Tables~\ref{tab:results-v3-nll} and~\ref{tab:results-v3-criteria}
 transcribe the stored report, but cannot recompute the means, seed
 standard deviations, worst seeds or intervals from row-level data, or
-check the exclusions, the execution weighting, and the bootstrap. The
+check the exclusions, the execution weighting, and the bootstrap. Nor
+can the training batches of the CD student be rebuilt exactly: the
+contract fixes the 119:48 ratio of the unlabeled rows
+(Section~\ref{sec:method-variants}), but the integer split per update,
+the sampling unit, replacement, and the sampling generator are not in
+the archive. The
 thesis accordingly presents the v3 verdicts as a historical result
 recorded in that report, not as an experiment reproduced here, and it
 draws no conclusion from v3 that goes beyond what the report records.

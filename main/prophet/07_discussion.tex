@@ -16,24 +16,23 @@ thing consistently: how far the seeds of one group disagree on
 inputs from an unseen environment. On the unseen conditions the seed
 standard deviation fell in every round in which it was compared, and in
 the post hoc decomposition of Chapter~\ref{ch:decomposition} the
-disagreement term $V$ fell in 27 of the 28 encoder--set pairs. For
+disagreement term $V$ fell in 27 of the 28 baseline--student pairs. For
 REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
 contrast, $V$ rose. Two of these rounds were sealed
 (Section~\ref{sec:eval-rounds}): v3 is the only one in which CD met all
 three sealed criteria, and the v2 recheck passed stability without
 showing preservation. The intervals hold the seeds
 fixed, so whether another draw of seeds would show the same narrowing
-was not tested. Its verdict, moreover, is the one recorded in the
+was not tested. The v3 verdict is the one recorded in the
 stored round report; the row-level files that would let a reader
 recompute it are not part of the material behind this thesis
 (Appendix~\ref{app:repro}). Part of the narrowing is also expected from
 distillation itself, since all students of a group follow one fixed
 teacher set (Section~\ref{sec:disc-novelty}).
 
-What CD did not change is the cost of the move to the unseen
-environment. On ADS-24 every CD seed of
-REL\_GLOBAL-ADS stayed worse than the FIT prior, and among the
-general encoders only the Transformer students beat it.
+What CD did not change is the gap to a frequency baseline on ADS-24.
+Every CD seed of REL\_GLOBAL-ADS stayed worse than the FIT prior there,
+and among the general encoders only the Transformer students beat it.
 
 The decomposition suggests a reason, although as a post hoc reading it is
 an interpretation and not a test. Mean seed loss is the loss of the
@@ -106,11 +105,11 @@ Whether the general encoders and the ADS-24 models diverge for a
 comparable reason is unknown.
 
 The agreement observation behind teacher selection is narrower still. Agreement
-ranked the REL\_GLOBAL seeds by loss in the lab. On ADS-24 a related
-S1 itself was not computed on ADS-24, and the related leave-one-out
-diagnostic was unfavorable ($\rho=+0.127$,
-Section~\ref{sec:ads24-results}); on ADS-24 the average of
-all 30 seeds also scored better than the five most agreeing ones.
+ranked the REL\_GLOBAL seeds by loss in the lab. The in-house S1 was not
+computed for ADS-24, and its leave-one-out counterpart there was
+unfavorable ($\rho=+0.127$, Section~\ref{sec:ads24-results}). On ADS-24
+the average of all 30 seeds also scored better than the five most
+agreeing ones.
 
 Preservation on the seen condition is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
 the v2 recheck, passed in v3, and was not shown in the PAG1
@@ -294,14 +293,17 @@ al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}). The
 decomposition of Chapter~\ref{ch:decomposition} is that of
 Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
 measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
-Work on ensembling under shift~\cite{rathmanakidis2022reduction} gave
-the expectation that a student of a consensus would vary less across
-seeds (Section~\ref{sec:related-distillation}). Of the two extensions
-that failed, the first, like the adaptive ensemble distillation of Du
+Rath-Manakidis et al.\ studied the variance-related error of ensembles
+under shift~\cite{rathmanakidis2022reduction}, not distilled students;
+their ensemble result motivated our separate hypothesis that a student
+of a consensus would vary less across seeds
+(Section~\ref{sec:related-distillation}). Two extensions of CD failed
+their preliminary checks (Appendix~\ref{app:rejected}). The first, the
+confidence-conditioned target (candidate~A), like the adaptive ensemble distillation of Du
 et al.~\cite{du2020agree}, responds to disagreement among teachers, but
 it does so by interpolating the target toward the boundary-weighted FIT
 action frequencies rather than by weighting teachers in gradient space.
-The second, a projection onto a shared hidden subspace, builds on
+The second, the shared-subspace projection (candidate~B), builds on
 comparing networks through the subspace their representations
 share~\cite{raghu2017svcca}.
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를
@@ -316,7 +318,9 @@ disagreement rows that carry the consensus loss
 intervention. The students' agreement carried over to new runs of the
 same environment; in v3, as stored, the loss on the seen condition was
 kept; and following the same teachers on FIT inputs, or each seed's own
-predictions, did not narrow the spread in the same way, in development
+predictions, did not narrow the spread in the same way, whereas
+following a geometric pool of the same teachers narrowed it about as
+much (Section~\ref{sec:gen-methods}). These are development
 comparisons on the plain GRU (FIT inputs, in-house and on ADS-24) and
 on the in-house plain GRU and REL\_GLOBAL-ADS (self-distillation). The sealed
 contracts and the status label on every result respond to the warning

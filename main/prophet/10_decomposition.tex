@@ -96,8 +96,8 @@ ADS-24 & REL\_GLOBAL-ADS               & 0.043 & 0.230 & 5.3 & 10\% \\
 % 출처: atlas OT/METHOD_EXTENSION_DECOMPOSITION_20261123/VARIANCE_DECOMPOSITION_REPORT.md:27,28,58 (diag.md 23번).
 
 $V$ tracked the instability that the earlier chapters measured with the
-seed standard deviation of NLL. Over the 28 encoder--set pairs (four
-encoders on the five in-house evaluation sets of
+seed standard deviation of NLL. Over the 28 model--set pairs (four
+models on the five in-house evaluation sets of
 Section~\ref{sec:conditions} and on two ADS-24 evaluation sets), the
 Spearman correlation between $V$ and seed standard
 deviation was 0.929; it was 0.762 within ADS-24 ($n=8$) and 0.863 within
@@ -115,7 +115,12 @@ somewhat lower values for the three general encoders (0.317, 0.455, and
 % to seed SD" (pooled 0.929, ADS 0.762, PROPHET 0.863), "Can unlabeled adaptation V
 % anticipate evaluation instability?" (ADS 34실행/5,811행, 자체 167실행/1,663행).
 
-After distillation, $V$ fell in 27 of the 28 encoder--set pairs, often by an order
+The before-and-after comparison uses the same 28 model--set pairs, but
+each pair compares a baseline with the students trained from that same
+seed list: for the three general encoders and REL\_GLOBAL-ADS these are
+the populations above, while for in-house REL\_GLOBAL they are the v3
+baseline seeds and their KD\_ENV\_TOP5 students, scored on the PAG1
+runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
@@ -133,7 +138,10 @@ The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}. Between the v3
 baseline seeds and their paired KD\_ENV\_TOP5 students, distilled on the
 background inputs alone, $V$ rose from 0.068 to 0.077, and the seed
 standard deviation rose with it. These v3 seeds are a different
-REL\_GLOBAL population from that of Table~\ref{tab:decomposition}.
+REL\_GLOBAL population from that of Table~\ref{tab:decomposition}, and
+the two are never subtracted from each other.
+% 9회차 문장 P2-6 출처: VARIANCE_DECOMPOSITION_REPORT.md:11 ("its student V change instead uses
+%   the paired v3 2M-seed baseline and KD_ENV_TOP5 student on the same new PAG1 input"), :66, :100.
 Preservation on this condition is also the least settled in-house
 result (Section~\ref{sec:disc-mechanism}). For REL\_GLOBAL and its
 KD\_ENV\_TOP5 students, the reduction therefore did not extend to the

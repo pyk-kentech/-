@@ -244,7 +244,23 @@ A further collection compared Local History with task adaptations of
 three prior architectures: BiTA~\cite{nayeri2026bita},
 ORTHRUS~\cite{jiang2025orthrus}, and CL-AP$^2$~\cite{liu2024clap2}. The
 adaptations use this thesis's inputs, labels, and receipt boundary and
-are not reproductions of the original systems. Of 112 attempted new
+are not reproductions of the original systems; each keeps one encoder
+component and drops the rest of its pipeline. The BiTA adaptation keeps
+the relation-message sequence, bidirectional GRU, cross-relation
+Transformer and mean readout of its Equations (1)--(9) and Algorithm~1,
+with observed target keys as relations and the received events assigned
+to each target as messages; the bidirectional pass runs only inside the
+received prefix. The ORTHRUS adaptation keeps the edge-aware attention
+and root-plus-neighbor aggregation of its graph encoder, built from the
+public code, but its graph is same-target membership rather than causal
+provenance, and it has neither the temporal neighbor sampling nor the
+anomaly detection and attack reconstruction of the original. The
+CL-AP$^2$ adaptation reimplements only the prediction stage from the
+paper's description, since we found no public code, and adds a
+same-target relation bias; it has no temporal attack knowledge graph,
+attack portraying, or threat labels. The results below are therefore
+results of these encoder adaptations on the PROPHET task, not of the
+original systems. Of 112 attempted new
 executions, 94 of 96 benign and 16 of 16 original-procedure executions
 were eligible, 110 in all, and no model was refitted. In the C-fold
 \texttt{B+C} condition the NLLs were 0.071534 for Local History,

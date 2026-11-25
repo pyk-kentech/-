@@ -40,8 +40,8 @@ on inspected runs, moved in the same direction.
 The results are bounded in several ways. Among these 30 checkpoints per
 group, CD narrowed the variation relative to the baseline models, at the price of training 30 baselines before the student;
 the intervals do not extend this to other seeds. CD relies on unlabeled
-inputs from the new environment and does not undo the cost of moving
-there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
+inputs from the new environment and did not close the gap to a
+frequency baseline there. On ADS-24 every distilled seed of REL\_GLOBAL-ADS and of the LSTM
 and plain-GRU encoders still had higher NLL than the FIT prior
 (1.830); only the Transformer students cleared it. Not every
 seed gained either: seeds that had scored better than the consensus
@@ -57,8 +57,8 @@ agreement diagnostic was unfavorable.
 \section{Future Work}
 \label{sec:future}
 
-Closing checks were planned before this thesis was written and are not
-reported here. What CD costs and needs can only be answered with new
+A set of further checks was planned before this thesis was written;
+none of them is reported here. What CD costs and needs can only be answered with new
 training. Teacher sets of five
 seeds chosen at random, of two seeds, and of all 30 test whether
 training 30 baselines and ranking them by agreement is worth its cost.
@@ -74,10 +74,13 @@ the 119 usable ADS-24 runs outside the 132 of the contract
 on a fresh in-house collection completes the method comparison that
 stopped at 110 runs. Intervals recomputed with seeds resampled along
 with runs let a verdict speak for more than these 30 seeds. Two
-references complete the bundle and are planned, not reported:
-temperature scaling~\cite{guo2017calibration} of each base model, and
-probability ensembles of the five teachers and of all 30 baseline seeds
-as an upper reference with five or 30 forward passes.
+references complete these checks, scored as deployed references for
+every encoder and dataset: temperature scaling~\cite{guo2017calibration}
+of each base model, and probability ensembles of the five teachers and
+of all 30 baseline seeds, with five or 30 forward passes. The
+in-house v3 teacher average and the ADS-24 averages of
+Section~\ref{sec:disc-ensemble} are the only ensemble figures reported
+so far.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라
@@ -131,7 +134,10 @@ source.
 %     15번(+0.020 한도)도 저자 답 6번으로 닫았다.
 % 24. 자체 실험실 FIT prior 1.412의 +1 평활 위치와 정규화 방법 [09_generality].
 % 36. 부록 B의 두 135실행을 실행 ID 수준으로 대조하는 일(ELIGIBILITY_SEAL.json 필요) [b].
-% 38. 모델 출력 열 index가 부록 A 순서와 같은지 코드로 확인 [04_method].
+% 38. 모델 출력 열 index가 부록 A 순서와 같은지 코드로 확인 [04_method]. 9회차 방법 P3-1에 따라
+%     본문은 "lower stored action-column index"로만 쓰고 부록 A 대응은 단정하지 않는다.
+% 43. (9회차 방법 P2-1) fit_v3.py의 무라벨 32행 추출: A:B(119:48) 정수 배분, 행 균등/실행 균등,
+%     복원 여부, RNG와 순환 규칙. atlas에는 비율만 있다(CONTRACT_V3.md:7) [04_method, e].
 %
 % ADS-24
 % (25번은 7회차 인용 리뷰가 원 논문에서 134 episode를 확인해 닫았다.)
@@ -141,8 +147,9 @@ source.
 % 인용·웹 문서
 % 31. Wazuh 문서 두 URL의 접근일 [08, d].
 % 33. Yang 등 DEED·Ilichev 등의 서지(지금은 인용과 '선행' 주장을 뺐다) [07, c, 09].
-% 42. PWNJUTSU 데이터셋 논문(DOI 10.1109/TNSM.2022.3183476)을 임시 key tmp1로 인용 요청했다.
-%     확인되면 진짜 key로 바꾼다 [d_ads24_data].
+% 44. (9회차 인용 P1) PWNJUTSU: 2026-11-20 검사에서 제작자 사이트는 연결 시간 초과, IEEE DataPort만
+%     읽었다(PWNJUTSU_BROWSER_V3_DRAFT.md:3). 제작자 사이트의 직접 다운로드를 따로 확인했는가?
+%     옛 표의 "files behind a login"의 근거가 있으면 알려 주세요 [d_ads24_data].
 % 41. Kan 등(kan2021investigating) 원문에서 "자기 라벨 학습이 오류를 키울 수 있다"는 경고를
 %     확인하면 2.7절에 되살릴 수 있다 [02_related_work].
 %

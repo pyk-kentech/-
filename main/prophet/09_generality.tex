@@ -4,7 +4,7 @@
 The results so far concern one predictor, REL\_GLOBAL, and its ADS-24
 adaptation, REL\_GLOBAL-ADS. This chapter asks whether encoders
 commonly used for log sequences are unstable under unseen conditions in
-the same way, and whether CD, frozen as it is, reduces that
+the same way, and whether CD, unchanged, reduces that
 instability for them as well (Section~\ref{sec:gen-arch}). It then asks
 whether simpler single-model methods achieve the same reduction
 (Section~\ref{sec:gen-methods}). Both studies cover the in-house lab
@@ -198,8 +198,11 @@ the instability in place.
 
 For context, we also ran our own adaptations
 of ORTHRUS~\cite{jiang2025orthrus}, BiTA~\cite{nayeri2026bita}, and
-CL-AP$^{2}$~\cite{liu2024clap2}, which are not the original pipelines,
-with three seeds each on the same new inputs. In these runs the ORTHRUS
+CL-AP$^{2}$~\cite{liu2024clap2} with three seeds each on the same new
+inputs. Each adaptation keeps one encoder component of the original and
+drops the rest of its pipeline (Appendix~\ref{sec:app-security-adapt}),
+so the figures describe these encoders on our task, not the original
+systems. In these runs the ORTHRUS
 and BiTA adaptations reached an A+C NLL of 0.133 to 0.159 across the
 two layouts, close to REL\_GLOBAL, and the CL-AP$^{2}$ adaptation 0.967
 and 0.976. Three seeds are
@@ -207,8 +210,8 @@ too few to measure their spread, so these figures say nothing about
 stability.
 
 Two attempts to extend CD,
-a confidence-conditioned target and a projection onto a representation
-shared by the seeds, failed their preliminary checks and were not
+the confidence-conditioned target (candidate~A) and the shared-subspace
+projection (candidate~B), failed their preliminary checks and were not
 carried forward (Appendix~\ref{app:rejected}).
 % 근거: RECORD:296, 299, 301, 302; ARCH_GENERALITY_STAGE2_REPORT.md "주 판정"
 % (PROPHET PLAIN_GRU 보존 −0.037245, 99.1667% [−0.096992, 0.019818]),
