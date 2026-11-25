@@ -1,99 +1,69 @@
-\chapter{Background and Related Work}
+\chapter{Related Work}
 \label{ch:related}
-% 개요 2장. 옛 비교(EVENT GRU, 소속 교환, history placement) 설명과
-% 옛 2.4절 "Evidence granularity and forecasting baselines"(빈도 기준선)는
-% 부록 B(app:secondary-results)로 옮긴다. 옮기는 작업은 부록 B를 쓸 때 한다.
-% 옛 원고의 sec:recorded-case, sec:membership 참조는 이 장에서 뺐다.
+% 2026-11-25: 지도교수 요청으로 갈래를 넓혔다(옛 2장 "Background and Related Work"를 둘로 나눔).
+% 옛 장 사본은 sources/expand/old_02_related_work.tex, 새 인용 초고·표는 sources/expand/{sec,sys,mlrel}.md.
+% 옛 개요 주석: 옛 비교(EVENT GRU, 소속 교환, history placement)와 빈도 기준선은 부록 B(app:secondary-results).
 
-\section{ATT\&CK, the kill chain, and Attack Flow}
-\label{sec:related-attack}
-
-MITRE ATT\&CK organizes observed adversary behavior into tactics, the
-objectives an activity serves, and techniques and sub-techniques, the
-ways an objective is pursued~\cite{mitreintro}; the Windows matrix lists
-the techniques that apply to that platform~\cite{mitrewindows}.
-% 원문: MITRE ATT&CK "Get Started"(attack.mitre.org/resources/, 2026-11-24 열람) Key Concepts:
-%   Tactics "the reason an adversary is performing an action", Techniques "how adversaries achieve
-%   tactical goals", Sub-techniques "a more specific or lower-level description". 확인됨.
-%   bib 의 옛 주소 /resources/enterprise-introduction/ 은 /resources 로 넘어가서 주소를 고쳤다.
-% 원문: Windows 행렬(attack.mitre.org/matrices/enterprise/windows/, v20) "tactics and techniques
-%   representing the MITRE ATT&CK® Windows platform". 확인됨.
-We use
-this vocabulary to situate the behaviors in our data, but the 18
-prediction labels (Appendix~\ref{app:actions}) are finer than ATT\&CK
-techniques. They name operations at the level of the controlled
-procedures. A system information enumeration and a registry query are
-both discovery activity, and they relate to System Information Discovery
-and Query Registry respectively; merging them into one output would erase
-exactly the distinction the classifier is asked to make. Conversely,
-different command lines that implement the same operation share a label.
-The label is the operation designated by the procedure and verified
-against the actual process start, not an ATT\&CK identifier.
-
-The intrusion kill chain of Hutchins et al.\ describes an intrusion as
-a sequence of phases so that defenders can reason about where a
-mitigation can break the chain~\cite{hutchins2011killchain}.
-% 원문: Hutchins et al. (Lockheed Martin 백서) 초록 "Using a kill chain model to describe phases of
-%   intrusions", 1절 "just one mitigation disrupts the chain and the adversary". 원문은 캠페인이 아니라
-%   침입(intrusion)을 단계로 나누고, 캠페인은 여러 침입을 묶은 것이라 "groups a campaign into phases"를 고쳤다.
-At a single host decision, however,
-several operations fall under the same phase or ATT\&CK tactic, and
-knowing that an actor is at the Discovery tactic does not say which
-resource it will examine next.
-% 원문 대조(묶음 B): discovery 는 킬체인 단계가 아니라 ATT&CK 전술이라 'phase or ATT&CK tactic' 으로 고쳤다.
-Attack
-Flow goes further and describes how adversaries combine and sequence
-techniques, linking actions, conditions, and relationships into a
-connected flow~\cite{mitreattackflow}.
-% 원문: CTID Attack Flow 프로젝트 쪽(ctid.mitre.org/projects/attack-flow/) "actions, conditions, and
-%   relationships as a connected flow"; 문서 v4.0(center-for-threat-informed-defense.github.io/attack-flow/)
-%   "combine and sequence various offensive techniques". 열람한 쪽에 "dependencies" 표현이 없어
-%   "order of and dependencies between"을 원문 표현으로 고쳤다.
-Both
-describe relations within an attack sequence. Our forecaster receives
-only the prefix that arrived before the next action, and it must commit
-to a distribution over that action before it is observed.
-
-\section{Attack graphs and attack progression}
-\label{sec:related-graphs}
-
-Classical attack graphs model how conditions and exploits combine to
-reach a security-relevant state. Sheyner et al.\ generate such graphs
-automatically from a system model~\cite{sheyner2002graphs}, and MulVAL
-derives security consequences from configuration facts with logic
-rules~\cite{ou2005mulval}.
-% 원문: Sheyner et al. (S&P 2002) 초록 "an automated technique for generating and analyzing attack
-%   graphs", "based on symbolic model checking"; 1절 절차 "1. Model the network." 다음 "2. Produce an attack
-%   graph."(호스트·취약점·공격자 모델). 확인됨.
-% 원문: Ou et al. (USENIX Security 2005) 초록 "MulVAL adopts Datalog as the modeling language"
-%   (configuration description, reasoning rules), 4.5절 p.119 "multistage, multihost attacks are derived". 확인됨.
-An edge in these graphs is a relation
-defined by the security model, which lets an analyst compare alternative
-routes and find the conditions several routes depend on. What the graph
-covers is bounded by the supplied facts and rules.
-
-These graphs answer the question of which paths are possible under a
-known configuration. PROPHET asks a different one: given the part of an
-execution that has become visible, how probable is each concrete next
-action? A feasible path is informative for the first question even if
-it never occurs, while the second requires probabilities that can be
-scored against what the actor actually did. Several feasible responses
-to the same preceding action carry no information about which one this
-actor will take.
+This chapter reviews eight lines of work. The first four come from
+security: forecasting attacker actions and security events, attack
+graphs, sequence models for log anomaly detection, and host provenance
+and intrusion detection. The last four come from machine learning:
+underspecification and model agreement, distillation and adaptation
+without labels, uncertainty under distribution shift, and the
+decomposition of ensemble log loss. Each section ends with how the
+work differs from ours, and Section~\ref{sec:related-summary} compares
+the tasks in two tables.
 
 \section{Forecasting attacker actions and security events}
 \label{sec:related-forecasting}
 
-Learned forecasters work from observed event streams rather than from a
-configuration model. The closest task to ours appears in a recent
-preprint by B\u{a}b\u{a}lau and Nadeem, who build alert-driven attack graphs from
-intrusion and endpoint alerts and predict the next likely attacker
-action given a sequence of observed actions~\cite{babalau2024forecasting}.
+Forecasting in security has been posed at several granularities. At the
+coarsest, the unit is an organization or a website. Soska and Christin
+predict whether a website that is not yet compromised will become
+malicious, using features extracted automatically from the site's
+content, and evaluate the prediction over a one-year
+horizon~\cite{soska2014automatically}.
+% 원문: Soska & Christin (USENIX Security 2014) 초록 p.625 "predicts, whether a given, not yet compromised website
+%   will become malicious in the future", "the set of features it relies on is automatically extracted from the data",
+%   "good detection accuracy over a one-year horizon". 확인됨.
+Liu et al.\ forecast whether an
+organization will suffer a security incident from externally measurable
+properties of its network, namely mismanagement symptoms and time
+series of malicious activity, with a random forest trained against
+incident reports~\cite{liu2015cloudy}.
+% 원문: Liu et al. (USENIX Security 2015) 초록 p.1009 "258 externally measurable features ... mismanagement symptoms
+%   ... and malicious activity time series", "train and test a Random Forest (RF) classifier against more than 1,000
+%   incident reports". 확인됨.
+At the level of a vulnerability, Sabottke et al.\ study information
+posted on Twitter about disclosed vulnerabilities and build a
+Twitter-based detector of exploits used in the real world, aimed at
+prioritizing the response to new disclosures~\cite{sabottke2015vulnerability}.
+% 원문: Sabottke, Suciu & Dumitraș (USENIX Security 2015) 초록 p.1041 "prioritizing the response to new disclosures by
+%   assessing which vulnerabilities are likely to be exploited"; "We then describe the design of a Twitter-based
+%   exploit detector". 확인됨.
+These works predict whether an
+incident will happen to an entity, or whether a vulnerability will be
+exploited, not which step an ongoing intrusion will take. Their
+evidence lies outside the attacked host.
+
+Learned forecasters at the step level work from observed event streams
+rather than from a configuration model such as the attack graphs of
+Section~\ref{sec:related-graphs}. The closest task to ours appears
+in a recent preprint by B\u{a}b\u{a}lau and Nadeem, who build
+alert-driven attack graphs from intrusion and endpoint alerts and
+predict the next likely attacker action given a sequence of observed
+actions~\cite{babalau2024forecasting}.
 % 원문: arXiv 2408.09888 전문. 초록 "predicting the next likely attacker action given a sequence of observed actions";
 %   3.3절(5쪽) "support endpoint alerts, e.g., from EDR systems, in addition to intrusion alerts"; 4절(6쪽) 세 자료
 %   (CPTC-2018 Suricata IDS, 상용 SOC의 Sentinel·NIDS·EDR). 예측 정확도 실험은 CPTC-2018 하나로 한다.
 %   고침: "intrusion-detection alerts"·"sequence of alerts" → "intrusion and endpoint alerts"·"sequence of observed actions".
 %   사전본 표시: arXiv v1(2024-08-19)만 있고 journal-ref 없음, UTwente 저장소 "Working paper › Preprint"(2026-11-24 확인). 저자 2명이라 "et al." 대신 이름 둘.
+Their system extends SAGE, which learns attack graphs from intrusion
+alerts (Section~\ref{sec:related-graphs}), into an early-warning system
+that forecasts from a partial attack path~\cite{babalau2024forecasting,nadeem2022alert}.
+% 원문: Băbălău & Nadeem arXiv 2408.09888 §1 p.1 "we transform SAGE into an early warning system (EWS) capable of
+%   forecasting the next likely attacker action given a partial attack path". 확인됨.
+% 원문: Băbălău & Nadeem §1 p.1 "We modify SAGE to incrementally create updated AGs whenever" "new alerts are triggered"; "A partial path is defined as an alert sequence". 확인됨.
 Their evidence is
 intrusion and endpoint alerts already raised by detectors; ours is the raw host audit stream
 before the receipt boundary, and our output is a distribution over 18
@@ -108,7 +78,15 @@ that context to group events for analyst triage~\cite{vanede2022deepcase}.
 %   system", "predicting the next event that will occur on a machine". 확인됨.
 % 원문(vanede2022deepcase): NSF PAR 사본(S&P 2022) 3절 개요(3쪽) "uses a deep learning model along with an attention
 %   mechanism", 이어 INTERPRETER가 "groups the sequences into clusters"; 3-B절 문맥은 앞선 사건들. 확인됨.
-In both, inputs and outputs are events at the granularity of the
+On telemetry of the same kind, ATTACK2VEC learns temporal word
+embeddings of attack steps from billions of intrusion-prevention events
+to track how steps are used together and how that use changes over
+time~\cite{shen2019attack2vec}; it characterizes attack steps rather
+than forecasting the next one.
+% 원문: Shen & Stringhini (USENIX Security 2019) 초록 p.905 "uses temporal word embeddings to model how attack steps
+%   are exploited in the wild, and track how they evolve"; "billions of security events collected from the customers
+%   of a commercial Intrusion Prevention System"; "flagging which attack steps are often used together". 확인됨.
+In these works, inputs and outputs are events at the granularity of the
 monitored stream. Our outputs are instead semantic attacker actions at a
 known boundary, and the records arriving before that action can include
 the termination of a previous operation and unrelated benign work.
@@ -147,49 +125,199 @@ it.
 %   "on Windows endpoints"; 두 과제 "chunk classification and ATT&CK technique identification". 원문에 자료
 %   배포 위치가 없어 "release"를 "build"로 고쳤다.
 
-Provenance-based detectors share the host-level evidence but not the
-forecasting goal. KAIROS detects intrusions in whole-system provenance
-graphs and reconstructs the activity relevant to an
-investigation~\cite{cheng2024kairos}, and ORTHRUS detects and attributes
-attacks at the level of provenance nodes~\cite{jiang2025orthrus}.
-% 원문: Cheng et al. (S&P 2024, arXiv:2308.05034 사전본) 초록 "quantify the degree of anomalousness for
-%   each system event", "reconstructs attack footprints, generating compact summary graphs". 확인됨.
-% 원문: Jiang et al. (USENIX Security 2025, pp.7173--7192) 초록 "high-QoA detection on data provenance
-%   graphs at the node level", "reconstructs the attack path through dependency analysis". 확인됨.
-Their
-outputs concern behavior that has already been observed. Chapter~\ref{ch:generality}
-runs adaptations of ORTHRUS, BiTA, and CL-AP$^{2}$ on our inputs as a
-reference point only; EFI is not adapted.
-% RECORD:477, 480의 "seed 변동 미보고" 판단은 초록 수준이라 본문 주장에서 뺐다.
+% (2026-11-25) KAIROS·ORTHRUS 문단은 sec:related-provenance 로 옮겼다.
 
-\section{Sequence models for logs}
+Across this branch, the works differ from ours along three axes. The
+evidence is alerts, intrusion-prevention events, threat reports,
+provenance graphs, external network measurements, or social media posts, whereas ours is
+Windows process creation and termination records as received before a
+boundary. The output is an incident indicator, a next event or alert, a
+technique, or a graph, whereas ours is one probability distribution over
+18 operations, scored by log loss against the action that followed.
+Finally, our evaluation holds out conditions in which benign work runs
+alongside the procedure, gives the training pipeline unlabeled inputs
+from those conditions, and measures how much the forecaster's loss
+varies across training seeds. We did not check whether the works above
+report seed variation and make no claim about it.
+\section{Attack graphs and attack progression}
+\label{sec:related-graphs}
+
+Phillips and Swiler proposed an early graph-based form of network
+vulnerability analysis. Their system matches a database of attack
+templates, broken into atomic steps, against network configuration and
+topology and an attacker profile to build an attack graph whose nodes
+are attack states and whose arcs are attack steps; with success
+probabilities or effort costs on the arcs, shortest-path algorithms find
+the paths most likely to succeed~\cite{phillips1998graph}.
+% 원문: Phillips & Swiler (NSPW 1998) 초록 p.71 "requires as input a database of common attacks, broken into atomic
+%   steps, specific network configuration and topology information, and an attacker profile"; "By assigning
+%   probabilities of success on the arcs ... shortest-path algorithms can identify the attack paths with the highest
+%   probability of success". 확인됨.
+Because the attack templates combine, a path in the graph can describe
+an attack that was never observed as a whole, assembled from pieces of
+known ones~\cite{phillips1998graph}.
+% 원문: Phillips & Swiler §1 p.72 "their combinations can lead to descriptions of new attacks. That is, any path in the
+%   attack graph represents an attack, though it could be cobbled together from many known attacks.". 확인됨.
+Classical attack graphs model how conditions and exploits combine to
+reach a security-relevant state. Sheyner et al.\ generate such graphs
+automatically from a system model~\cite{sheyner2002graphs}, and MulVAL
+derives security consequences from configuration facts with logic
+rules~\cite{ou2005mulval}.
+% 원문: Sheyner et al. (S&P 2002) 초록 "an automated technique for generating and analyzing attack
+%   graphs", "based on symbolic model checking"; 1절 절차 "1. Model the network." 다음 "2. Produce an attack
+%   graph."(호스트·취약점·공격자 모델). 확인됨.
+% 원문: Ou et al. (USENIX Security 2005) 초록 "MulVAL adopts Datalog as the modeling language"
+%   (configuration description, reasoning rules), 4.5절 p.119 "multistage, multihost attacks are derived". 확인됨.
+Ammann et al.\ argue that a full graph of exploit sequences represents
+more than the analyst needs. They assume monotonicity, that the
+precondition of an exploit is never invalidated by another exploit, so
+that the attacker never needs to backtrack, and this assumption reduces
+the analysis from exponential to polynomial
+complexity~\cite{ammann2002scalable}.
+% 원문: Ammann, Wijesekera & Kaushik (CCS 2002) 초록 p.217 "they represent more information explicitly than is
+%   necessary for the analyst"; "the precondition of a given exploit is never invalidated by the successful
+%   application of another exploit. In other words, the attacker never needs to backtrack."; "reduces the complexity
+%   of the analysis problem from exponential to polynomial". 확인됨.
+An edge in these graphs is a relation
+defined by the security model, which lets an analyst compare alternative
+routes and find the conditions several routes depend on. What the graph
+covers is bounded by the supplied facts and rules.
+
+Probabilistic attack graphs attach likelihoods to such structures.
+Poolsappasit et al.\ build a Bayesian attack graph in which each
+attribute has a local conditional probability distribution, estimated
+from CVSS exploitability metrics, and prior probabilities on external
+attributes are assigned by the administrator; the model then yields the
+unconditional probability that each network state is
+compromised~\cite{poolsappasit2012dynamic}.
+% 원문: Poolsappasit, Dewri & Ray (TDSC 2012, 저자 사본 cs.du.edu) §4 사본 p.5 "the probabilities Pr(Si) for all
+%   Si ∈ Nexternal, also called the prior probabilities, and is subjectively assigned by the administrator", "compute
+%   the unconditional probability Pr(Sj)"; §4.1 "We use the metrics defined in NIST's Common Vulnerability Scoring
+%   System (CVSS) [14] to estimate the attack likelihood". 확인됨.
+When attack incidents are observed in a deployed system, they enter as
+evidence, and forward and backward propagation update the probabilities
+to the posterior $\Pr(S_j \mid E)$ of the remaining
+states~\cite{poolsappasit2012dynamic}.
+% 원문: 같은 논문 §4 "Dynamic Risk Assessment" 사본 p.5 "an attack incident is evidence that an attribute is in the
+%   true state", "update the probabilities using the Bayesian inference techniques of forward and backward
+%   propagation"; §4.4 사본 p.6 "The probability we are interested in is Pr(Sj | E)". 확인됨.
+A different line learns the graph from data instead of from
+vulnerability descriptions. SAGE learns a suffix-based probabilistic
+deterministic finite automaton from intrusion alerts, without a priori
+expert input, and extracts attack graphs per victim and per
+objective~\cite{nadeem2022alert}. It is the basis of the forecasting
+preprint discussed in Section~\ref{sec:related-forecasting}, and its
+graphs, like the Diamond Model's activity threads
+(Section~\ref{sec:related-attack}), summarize paths that were actually
+observed.
+% 원문: Nadeem, Verwer, Moskal & Yang (TDSC 2022, 19(2):731--746) 초록 "automatically constructs AGs from intrusion
+%   alerts without a priori expert knowledge", "suffix-based probabilistic deterministic finite automaton (S-PDFA)",
+%   "Attack graphs are extracted from the model on a per-victim, per-objective basis". 확인됨.
+
+These graphs answer the question of which paths are possible under a
+known configuration. PROPHET asks a different one: given the part of an
+execution that has become visible, how probable is each concrete next
+action? A feasible path is informative for the first question even if
+it never occurs, while the second requires probabilities that can be
+scored against what the actor actually did. Several feasible responses
+to the same preceding action carry no information about which one this
+actor will take.
+The probabilistic graphs come closer, but their probabilities attach to
+states being compromised and derive from vulnerability scores and an
+administrator's priors, conditioned on alerts as evidence. Ours attach
+to the next operation among 18, are learned from labeled executions,
+and are scored by log loss on held-out runs; the evidence is the
+process records that the collector had received, not the states an
+analyst has confirmed.
+\section{Sequence models for log anomaly detection}
 \label{sec:related-sequence}
 
-Our inputs are Windows process creation and termination records, Security
-events 4688 and 4689~\cite{ms4688, ms4689}, read only as they become
-available at the receipt boundary defined in Chapter~\ref{ch:task}
+Our inputs are the Windows process creation and termination records of
+Section~\ref{sec:bg-audit}, read only as they become available at the
+receipt boundary defined in Chapter~\ref{ch:task}
 (Figure~\ref{fig:cutoff}).
-% 원문: Microsoft Learn 4688 "This event generates every time a new process starts."; 4689 "This event
-%   generates every time a process has exited." 확인됨.
-Sequence models for system logs are the
-closest general architectures for such input. DeepLog trains an LSTM
+Models of system logs are the closest general architectures for such
+input. Most of them were built to detect anomalies, and we review them
+in that light.
+
+Mining logs for problems predates deep sequence models. Xu et al.\
+parse free-text console logs with the help of the program source code,
+group the parsed messages by the identifiers they share, and build
+feature vectors such as message count vectors from each
+group~\cite{xu2009detecting}.
+% 원문: Xu et al. (SOSP 2009) 초록 p.1(인쇄 117) "We first parse console logs by combining source code
+%   analysis with information retrieval"; §2 p.4(인쇄 120) "we focus on constructing the state ratio
+%   vector and the message count vector features". 확인됨.
+A PCA-based detector, an unsupervised method, then labels each vector
+as normal or abnormal, and the result is summarized for operators as a
+decision tree~\cite{xu2009detecting}.
+% 원문: Xu et al. (SOSP 2009) §2 p.4(인쇄 120) "labeling each feature vector as normal or abnormal",
+%   "This method is an unsupervised learning algorithm"; 초록 p.1 "an operator-friendly one-page decision tree". 확인됨.
+The unit of judgment is a group of messages that share an identifier,
+and the output is a binary decision about that group.
+
+DeepLog trains an LSTM
 \cite{hochreiter1997long} on sequences of normal log keys and flags an entry as
 anomalous when it falls outside the top-$g$ predicted next
 keys~\cite{du2017deeplog}.
 % 원문(du2017deeplog): 저자 PDF(users.cs.utah.edu/~lifeifei/papers/deeplog.pdf) 3.1절(4쪽) "treat a key value as
 %   normal if it's among the top g candidates", 초록 "learn log patterns from normal execution". 확인됨("top-$g$" 덧붙임).
-% 원문(guo2021logbert): arXiv 2103.04475 3.1절 "leverages the Transformer encoder", 초록 "two novel self-supervised
-%   training tasks", "normal log sequences". 확인됨.
-LogBERT replaces the recurrent model with a
 % 원문 못 구함(초록 기준): hochreiter1997long 은 MIT Press 본이 유료이고 저자 연구소 PDF(bioinf.jku.at)는
 %   인증서 만료로 열리지 않음. 이 인용은 LSTM 이라는 구조 이름만 받치므로 낮출 주장 없음.
+LogAnomaly also uses LSTMs, but it represents each log template by a
+vector, template2vec, meant to carry semantic information such as
+synonyms and antonyms, rather than by an index~\cite{meng2019loganomaly}.
+% 원문: Meng et al. (IJCAI 2019) §1 p.2(인쇄 4740) "template2Vec ... captures not only word context, but
+%   also semantic information including synonyms and antonyms"; 초록 "using indexes rather than semantics
+%   of log templates, tend to cause false alarms". 확인됨.
+It detects sequential anomalies from the predicted next logs and
+quantitative anomalies from counts of templates in a window, and it
+merges newly appearing templates between two retrainings, without
+operator feedback, so that they do not raise false
+alarms~\cite{meng2019loganomaly}.
+% 원문: Meng et al. (IJCAI 2019) §1 p.2(인쇄 4740) "a mechanism to merge new templates without operators'
+%   feedback between two adjacent trainings", "We evaluate LogAnomaly on two benchmark datasets ... the
+%   HDFS dataset [Xu et al., 2009] and the BGL dataset". 확인됨.
+% 원문: Meng et al. (IJCAI 2019) 초록 p.1(인쇄 4739) "detect both sequential and quantitive log anomalies
+%   simultaneously", "avoid the false alarms caused by the newly appearing log templates between periodic
+%   model retrainings"; 그림 3 p.3 "utilize LSTM to predict the next logs likely to appear";
+%   §3 p.4 count vector C_i 정의. 확인됨.
+LogBERT replaces the recurrent model with a
 Transformer encoder~\cite{vaswani2017attention} trained by self-supervised
-objectives on log sequences~\cite{guo2021logbert}. The gated recurrent unit
+objectives on log sequences~\cite{guo2021logbert}.
+% 원문(guo2021logbert): arXiv 2103.04475 3.1절 "leverages the Transformer encoder", 초록 "two novel self-supervised
+%   training tasks", "normal log sequences". 확인됨.
 % 원문: Vaswani et al. (NIPS 2017) §3.1 p.3 "The encoder is composed of a stack of N = 6 identical layers."
+The gated recurrent unit
 (GRU)~\cite{cho2014gru} is the recurrent cell that our baseline
 predictor uses at the event level (Chapter~\ref{ch:method}).
 % 원문: Cho et al. (EMNLP 2014) §2.3 p.3 "propose a new type of hidden unit" (reset·update 게이트).
 %   'GRU'라는 이름은 이 논문 뒤에 붙었지만 같은 셀이다.
+
+How well such models work depends on how they are evaluated. Le and
+Zhang re-evaluated five deep learning detectors, DeepLog and LogAnomaly
+among them, on four public log datasets, varying training data
+selection, data grouping, class distribution, data noise, and early
+detection~\cite{le2022log}.
+% 원문: Le & Zhang (ICSE 2022) §1 p.2(인쇄 1357) "five representative deep learning models ... (including
+%   DeepLog [12], LogAnomaly [36], PLELog [48], LogRobust [54], and CNN [33]) on four datasets"; 초록 p.1
+%   "training data selection, data grouping, class distribution, data noise, and early detection ability". 확인됨.
+Randomly selecting training data, rather than splitting by time, could
+cause data leakage and unreasonably high accuracy, and the models lost
+accuracy on shorter log sequences~\cite{le2022log}. A small amount of noise, such as mislabeled logs or parsing errors,
+lowered performance.
+% 원문: Le & Zhang (ICSE 2022) §1 p.2(인쇄 1357) "A small amount of data noise, including mislabelled logs and
+%   log parsing errors can downgrade anomaly detection performance". 확인됨.
+% 원문: Le & Zhang (ICSE 2022) §1 p.2(인쇄 1357) "Randomly selecting training data could cause the data
+%   leakage problem and unreasonably high detection accuracy", "Models tend to lose their accuracy when
+%   dealing with shorter log sequences"; 초록 "The problem of log-based anomaly detection has not been
+%   solved yet". 확인됨.
+They repeat each experiment five times and report the average
+results~\cite{le2022log}. Their concern, that a score measured under
+one split may not hold under the conditions of use, is close to ours;
+the axis we vary is different.
+% 원문: Le & Zhang (ICSE 2022) §3.5 p.6(인쇄 1361) "we perform each experiment five times and report the
+%   average results". 확인됨. 평균만 보고한다는 사실만 쓰고, seed 변동을 다루지 않는다고는 쓰지 않는다.
 
 Chapter~\ref{ch:generality} uses three encoders drawn from this
 family, an LSTM encoder (DeepLog-style), a Transformer encoder
@@ -198,6 +326,142 @@ supervised task rather than reproductions of either system
 (Section~\ref{sec:method-transfer}).
 % 근거: RECORD:281, 478. 적용판의 정의는 4.6절에 한 번만 둔다.
 
+These systems differ from our task in what they learn from and what
+they output. Xu et al., DeepLog, LogAnomaly, and LogBERT learn from
+normal logs without attack labels, and they output a decision or an
+anomaly score for an entry, a window, or a group of messages; in
+DeepLog and LogAnomaly the predicted next key is a means of scoring,
+not the target. DeepLog's next-key model is the nearest in form to our
+predictor, since it also produces a distribution over what comes next;
+but its outcomes are log keys of normal execution, and the distribution
+is used only to test whether the observed key is among the top
+candidates.
+% 원문(du2017deeplog): 저자 PDF 3.1절 p.3 "the output is a probability distribution over the n log keys from K";
+%   p.4 "treat a key value as normal if it's among the top g candidates". 확인됨.
+Our predictor is trained with labels from controlled
+attack runs and outputs a normalized distribution over 18 action
+categories for the next operation, scored by its probability on the
+designated action (Chapter~\ref{ch:evaluation}). The input unit also
+differs. These detectors read parsed log keys or templates from
+system and application logs, grouped by session, window, or
+identifier. We read process records cut at the receipt boundary, and
+the prefix may include the termination of the previous operation and
+benign work unrelated to the attack. Finally, Le and Zhang vary how the
+training data are selected and grouped; we hold the data fixed, vary
+the training seed, and compare conditions seen and unseen in the
+labeled runs.
+
+\section{Host provenance and intrusion detection}
+\label{sec:related-provenance}
+
+Provenance-based work shares our host-level evidence but not our
+forecasting goal. It grew out of the audit-based reconstruction of
+Section~\ref{sec:bg-audit}: BackTracker traces back from a single
+detection point through processes, files, and
+filenames~\cite{king2003backtracking}, and SLEUTH detects attacks and
+reconstructs their scenarios in real time from a dependency graph of
+audit data~\cite{hossain2017sleuth}. In both, the question is how an
+intrusion that was noticed or flagged came about.
+% 원문: King & Chen (SOSP 2003) §2.1 p.224 "Three types of OS-level objects are relevant to
+%   BackTracker's analysis: processes, files, and filenames"; 초록 p.223 "Starting with a single detection point". 확인됨.
+% 원문: Hossain et al. (USENIX Security 2017) 초록 p.487 "dependency graph abstraction of audit-log data",
+%   "detect and reconstruct the details of the red team's attacks". 확인됨. (배경 장 sec:bg-audit 와 같은 원문.)
+
+Later systems detect attacks in such graphs. HOLMES starts from host
+audit data such as Linux auditd or Windows ETW, matches activity to
+tactics, techniques, and procedures along the kill chain, and links the
+matches by information flow into a high-level scenario graph that
+summarizes an ongoing campaign~\cite{milajerdi2019holmes}.
+% 원문: Milajerdi et al. (S&P 2019, arXiv:1810.01594 사본) §I p.2 "HOLMES begins with host audit data
+%   (e.g., Linux auditd or Windows ETW data)", "map the activities found in host logs ... directly to the
+%   kill chain"; §III p.4 "Each node in the HSG represents a matched TTP, while the edges represent
+%   information flow". 확인됨.
+Its matching rules encode prior knowledge of attacker behavior. Anomaly-based
+detectors instead learn normal behavior. UNICORN summarizes long-running
+whole-system provenance graphs with a compact, time-weighted graph
+sketch, so that slow attacks spread over a long time span remain
+visible, and models system
+behavior that changes over time, with the stated goal of learning only
+normal system behavior changes~\cite{han2020unicorn}.
+% 원문: Han et al. (NDSS 2020, arXiv:2001.01525 사본) 초록 p.1 "Using a graph sketching technique, it
+%   summarizes long-running system execution", "to combat slow-acting attacks that take place over a long time span"; §I p.2 "sketch-based, time-weighted provenance encoding"; §II p.3 "Learn only normal system behavior changes but not
+%   those directed by the attackers"; §IV p.4 "generate models that are evolutionary". 확인됨.
+ProvDetector targets stealthy malware that hides inside benign
+processes: it selects rare causal paths from a process's provenance
+graph, embeds them, and applies a novelty detector, with both the
+embedding and the detector trained on benign data only~\cite{wang2020you}.
+% 원문: Wang et al. (NDSS 2020, NDSS 사본) §I p.2 "Both the embedding model and the novelty detection model
+%   are trained with only benign data"; §V-A p.5 "an anomaly detection based technique that only learns from
+%   benign data", "uses causal paths"; p.6 "more rare a path is, more likely it is from the instance-specific
+%   workload". 확인됨.
+NodLink addresses online detection, modeling the recovery of concise
+attack-related provenance graphs as a Steiner tree problem so that
+detection does not sacrifice granularity~\cite{li2024nodlink}.
+% 원문: Li et al. (NDSS 2024, arXiv:2311.02331 사본) 초록 p.1 "can be modeled as a Steiner Tree Problem
+%   (STP)", "maintains high detection accuracy without sacrificing detection granularity". 확인됨.
+KAIROS detects intrusions in whole-system provenance
+graphs and reconstructs the activity relevant to an
+investigation~\cite{cheng2024kairos}, and ORTHRUS detects and attributes
+attacks at the level of provenance nodes~\cite{jiang2025orthrus}.
+% 원문: Cheng et al. (S&P 2024, arXiv:2308.05034 사전본) 초록 "quantify the degree of anomalousness for
+%   each system event", "reconstructs attack footprints, generating compact summary graphs". 확인됨.
+% 원문: Jiang et al. (USENIX Security 2025, pp.7173--7192) 초록 "high-QoA detection on data provenance
+%   graphs at the node level", "reconstructs the attack path through dependency analysis". 확인됨.
+
+These systems answer whether, and how, an attack has taken place in
+behavior that has already been recorded: BackTracker traces back from
+a detection point, and the detectors flag graphs, paths, or nodes and
+reconstruct the attack around them. Our predictor works on a prefix of
+a controlled procedure and assigns probabilities to the operation that
+has not yet occurred. Its evidence is also narrower, process creation
+and termination records rather than whole-system graphs with files and
+network flows. The training signal differs as well. UNICORN and
+ProvDetector learn from benign behavior and flag departures from it,
+and HOLMES relies on rules written from attack knowledge. We train on
+labeled attack runs, and unlabeled inputs from benign environments
+enter only through the distillation step of CD
+(Chapter~\ref{ch:method}). Chapter~\ref{ch:generality}
+runs adaptations of ORTHRUS, BiTA, and CL-AP$^{2}$ on our inputs as a
+reference point only; EFI is not adapted.
+% RECORD:477, 480의 "seed 변동 미보고" 판단은 초록 수준이라 본문 주장에서 뺐다.
+
+Security learning has also studied how performance changes when the
+data at use differ from the data at training. Transcend identifies
+aging malware classifiers during deployment by statistically comparing
+deployment samples with those used to train the model, using a
+conformal evaluator whose p-values give credibility and confidence for
+each decision~\cite{jordaney2017transcend}. The authors present this as
+a departure from retraining a model only after poor performance has
+been observed. Its case studies cover Android and Windows malware.
+% 원문: Jordaney et al. (USENIX Security 2017) 초록 p.2(인쇄 625) "a statistical comparison of samples seen
+%   during deployment with those used to train the model", "case studies on Android and Windows malware";
+%   §2 p.4(인쇄 627) "P-values compute an algorithm's credibility and confidence"; 초록 "a significant
+%   departure from conventional approaches that retrain aging models retrospectively when poor performance
+%   is observed". 확인됨.
+TESSERACT argues that published Android malware results are commonly
+inflated by spatial bias, from training and test distributions that do
+not represent deployment, and temporal bias, from incorrect time
+splits; it proposes constraints that remove both and a metric, AUT,
+for robustness to time decay~\cite{pendlebury2019tesseract}. Applied
+to three Android malware classifiers on 129K applications spanning
+three years, it confirms that earlier published results were biased.
+% 원문: Pendlebury et al. (USENIX Security 2019) 초록 p.2(인쇄 729) "spatial bias caused by distributions of
+%   training and testing data that are not representative of a real-world deployment; and temporal bias
+%   caused by incorrect time splits"; §1 p.3(인쇄 730) "a new metric, AUT, that captures a classifier's
+%   robustness to time decay"; 초록 "three Android malware classifiers from the literature on a dataset of
+%   129K applications spanning over three years", "confirms that earlier published results are biased". 확인됨.
+Arp et al.\ list sampling bias and lab-only evaluation among the
+pitfalls of machine learning in security~\cite{arp2020dos}.
+% 원문(arp2020dos): arXiv 2010.09470 §2.1 P1 p.2 "The collected data does not sufficiently represent the
+%   true data distribution"; §2.4 P9 p.6 "solely evaluated in a laboratory setting". 확인됨.
+These works treat the change as drift over time or as a mismatch
+between collected and deployed data, and they measure a classifier's
+performance or flag its decisions. Our unseen conditions are benign
+workloads mixed into otherwise controlled procedures, and the quantity
+we report is how much models that differ only in their seed disagree
+under those conditions. Transcend responds to drift by flagging
+unreliable decisions at deployment; CD instead changes how a single
+model is trained, using unlabeled inputs from the shifted condition.
 \section{Underspecification and model agreement}
 \label{sec:related-underspec}
 
@@ -220,6 +484,54 @@ are not equally good on the seen condition
 (Chapter~\ref{ch:diagnosis}), and the thesis then tries to reduce the
 spread it measures.
 
+A related line asks how far models that fit the data equally well
+disagree on individual predictions. Marx et al.\ define predictive
+multiplicity as the ability of a prediction problem to admit competing
+models with conflicting predictions~\cite{marx2020predictive}.
+% 원문: Marx, Calmon & Ustun (ICML 2020, PMLR 119) 초록 p.1 "the ability of a prediction problem to admit
+%   competing models with conflicting predictions". 확인됨.
+They measure it over the set of classifiers whose training error is
+within a tolerance of a baseline classifier, by two quantities:
+ambiguity, the share of examples that some competing model labels
+differently from the baseline, and discrepancy, the largest share of
+predictions that would change if the deployed model were replaced by a
+competing one.
+% 원문: 같은 논문 Def. 1 p.3 ε-level set "error rate of at most R̂(h0)+ϵ on the training data";
+%   Def. 3–4 p.4 ambiguity "proportion of points ... that can be assigned a conflicting prediction",
+%   discrepancy "maximum proportion of conflicting predictions". 확인됨.
+They compute both exactly with integer programming for linear
+classifiers and find that recidivism datasets can admit competing
+models with conflicting predictions.
+% 원문: 같은 논문 초록 p.1 "integer programming tools to compute them exactly for linear classification
+%   problems", "real-world datasets may admit competing models that assign wildly conflicting predictions". 확인됨.
+For neural networks, the competing models usually come from
+randomness in training, whose sources Section~\ref{sec:bg-seeds}
+lists after Summers and Dinneen~\cite{summers2021nondeterminism}.
+Their measures of the resulting variability include the standard deviation of accuracy and of
+cross-entropy across runs; of the remedies they tried, accelerated
+ensembling and test-time augmentation reduced this variability
+without increasing training time, and both average several
+predictions at test time.
+% 원문: 같은 논문 §1 p.2 "two approaches that reduce model variability without any increase in model
+%   training time: accelerated model ensembling and test-time augmentation"; §5 p.6 표 5 열
+%   "Accuracy SD", "Cross-Entropy SD"; TTA 는 "averaging model predictions made on each augmented example",
+%   snapshot ensemble 은 한 학습의 snapshot 들을 앙상블 구성원으로 쓴다. 확인됨.
+
+Agreement between runs has also been studied as a signal in its own
+right. Jiang et al.\ train the same architecture on the same data with
+two runs of stochastic gradient descent and find that the rate at which
+the two networks disagree on unlabeled test data estimates their test
+error~\cite{jiang2022assessing}.
+% 원문: Jiang, Nagarajan, Baek & Kolter (ICLR 2022) 초록 p.1 "training the same architecture on the same
+%   training set but with two different runs of Stochastic Gradient Descent (SGD), and then measuring the
+%   disagreement rate between the two networks on unlabeled test data". 확인됨.
+They link this to the calibration of ensembles of such models, and
+they report preliminary evidence that it holds approximately for many
+source and target pairs of a domain generalization benchmark.
+% 원문: 같은 논문 초록 "arises from the well-calibrated nature of ensembles of SGD-trained models";
+%   §1 기여 3 p.2 "preliminary observations showing that GDE is approximately satisfied even for certain
+%   distribution shifts within the PACS"; §3 p.6 "many pairs of source-target domains where GDE is
+%   approximately satisfied despite the distribution shift". 확인됨.
 Baek et al.\ observe that, when in-distribution and shifted accuracy are
 linearly related across models, agreement between pairs of models on
 in-distribution and shifted data follows a closely matching line, which
@@ -227,6 +539,17 @@ allows accuracy under shift to be estimated from unlabeled
 data~\cite{baek2022agreement}.
 % 원문: Baek et al. NeurIPS 2022 초록 "the slope and bias of OOD vs. ID agreement closely matches
 %   that of OOD vs. ID accuracy"; §3.4 "agreement can be estimated with just unlabeled data". 확인됨.
+Agreement can be compared below the output as well: SVCCA compares
+two representations through the subspaces their activations
+share~\cite{raghu2017svcca}, and centered kernel alignment, unlike
+canonical correlation analysis, reliably identifies corresponding
+layers in networks trained from different
+initializations~\cite{kornblith2019similarity}.
+% 원문: Raghu et al. NIPS 2017 초록 "a tool for quickly comparing two representations"; §2 SVD 후 CCA
+%   (07_discussion.tex 326–328줄 주석과 같은 확인). Kornblith, Norouzi, Lee & Hinton (ICML 2019, PMLR 97
+%   pp.3519–3529) 초록 p.1 "Unlike CCA, CKA can reliably identify correspondences between representations in
+%   networks trained from different initializations"; 그림 2 p.6. 확인됨.
+
 CD uses agreement only to choose
 teachers: it ranks the seeds by their mean top-1 agreement with the
 majority on unlabeled environment inputs. This rule is motivated by
@@ -242,6 +565,18 @@ The ranking tracked loss in the in-house lab and did not on ADS-24
 (Chapter~\ref{ch:ads24}). The training target itself is the mean
 probability of the selected teachers on those inputs.
 % 근거: RECORD:405, 467--468. 참신성 리뷰 P2-2, 인용 리뷰 P2-1(적용 조건 명시).
+The work above differs from ours in what it varies and what it reads.
+Predictive multiplicity is defined over a set of models within an error
+tolerance, and Jiang et al.\ and Baek et al.\ use disagreement to
+estimate the accuracy of models already trained. We measure the spread
+of a proper score, the NLL of Chapter~\ref{ch:evaluation}, across 30
+seeds of one model setting, separately on conditions seen and unseen
+in training, and we then train against it. Like Summers and Dinneen we
+treat that spread as something to reduce, but we do it inside one
+student that runs as a single forward pass, using unlabeled inputs of
+the target environment.
+% 근거: 5장 평가(NLL·seed SD, 이 절에서 되풀이하지 않음), 4장 CD 정의. Summers & Dinneen 의 두 방법은
+%   시험 때 여러 예측을 평균한다(위 주석). 다른 연구가 seed 변동을 보고하지 않는다는 주장은 하지 않았다.
 
 \section{Distillation, ensembles, and unlabeled adaptation}
 \label{sec:related-distillation}
@@ -264,6 +599,23 @@ ensemble into a single model that represents not only the mean
 prediction but also the spread among members~\cite{malinin2019ensemble}.
 % 원문: Malinin et al. arXiv:1905.00076 초록 "distilling the distribution of the predictions from an
 %   ensemble, rather than just the average prediction" (Prior Network, §3). 확인됨.
+Anil et al.\ propose codistillation, an online variant in which
+several copies of a model train in parallel and each adds a loss term
+that matches the average prediction of the
+others~\cite{anil2018large}.
+% 원문: Anil et al. (ICLR 2018) §1 p.2 "Codistillation trains n copies of a model in parallel by adding a term
+%   to the loss function of the ith model to match the average prediction of the other models". 확인됨.
+They also address prediction churn, the change in a network's
+predictions when it is retrained after a minor change or none: on the
+Criteo dataset, codistillation reduced the mean absolute difference
+between the predictions of two retrains by 35\%, close to an ensemble
+of two networks, without the ensemble's serving cost.
+% 원문: 같은 논문 §3.5 p.10 "retraining a neural network after a minor (or even no) change causes a change to
+%   the predictions as prediction churn"; "measured the mean absolute difference between the predictions of two
+%   retrains"; "codistillation reduces prediction churn by 35%, achieving similar results to ensembling, but does
+%   not increase serving costs"; 표 1 (DNN .029, 두 DNN 앙상블 .022, two-way codistilled .019). 확인됨.
+Of the methods in this section, codistillation is the closest to the
+goal of CD.
 The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities
@@ -281,6 +633,7 @@ shifts~\cite{ovadia2019trust}.
 %   Ovadia et al. NeurIPS 2019 (arXiv v2) §4.2 pp.6–7 "ensembles achieve highest accuracy under distributional shift",
 %   ECE 는 큰 shift 에서 앙상블이 앞섬. 분산 관련 오차가 shift 에서 줄어든다는 주장은 어느 원문도 직접 보이지 않아 뺐다.
 %   (옛 인용 rathmanakidis2022reduction 을 바꿈.)
+%   (mlrel) 이 Ovadia 구절은 07_discussion.tex 306–311줄이 이 절을 가리키므로 옮기지 않았다.
 These
 results concern the error of an ensemble, not the spread among
 distilled students, so they motivated, but did not establish, our
@@ -290,6 +643,14 @@ unlabeled inputs from the shifted condition shows that reduction,
 judged in-house by sealed criteria on the seed standard deviation and
 elsewhere by development comparisons.
 
+Teachers built from the student's own training are a second family.
+Mean Teacher keeps a teacher whose weights are an exponential moving
+average of the student's weights and adds a consistency cost between
+the predictions of the two, which applies to unlabeled examples as
+well as labeled ones~\cite{tarvainen2017mean}.
+% 원문: Tarvainen & Valpola (NIPS 2017, vol. 30) §2 그림 2 설명 p.3 "the teacher model weights are updated as an
+%   exponential moving average of the student weights", "A training step with an unlabeled example would be
+%   similar, except no classification cost would be applied"; §3 p.4 대부분 실험에서 MSE consistency cost. 확인됨.
 The comparison methods in Chapter~\ref{ch:generality} come from work
 on stabilizing a single model or adapting it without labels. Entropy
 minimization penalizes uncertain predictions on unlabeled
@@ -312,6 +673,29 @@ Distillation on unlabeled
 inputs is not new either: the transfer set of Hinton et al.\ may
 consist of unlabeled data~\cite{hinton2015distilling}.
 % 원문: Hinton et al. arXiv:1503.02531 §2 "The transfer set ... could consist entirely of unlabeled data". 확인됨.
+
+The same losses reappear in adaptation to a shifted target without
+target labels. Unsupervised domain adaptation trains on labeled source
+data and unlabeled target data; domain-adversarial training, for
+example, learns features that are discriminative for the main task on
+the source domain and indiscriminate with respect to the shift between
+domains~\cite{ganin2016domain}.
+% 원문: Ganin et al. (JMLR 17(59):1–35, 2016) 초록 p.1 "trained on labeled data from the source domain and
+%   unlabeled data from the target domain", "(i) discriminative for the main learning task on the source domain
+%   and (ii) indiscriminate with respect to the shift between the domains", "gradient reversal layer". 확인됨.
+SHOT keeps only the trained source model: it freezes the classifier
+and adapts the feature extractor to the target domain with information
+maximization and self-supervised pseudo-labeling~\cite{liang2020do}.
+% 원문: Liang, Hu & Feng (ICML 2020, PMLR 119 pp.6028–6039) 초록 p.1 "only a trained source model is
+%   available", "freezes the classifier module (hypothesis) of the source model and learns the target-specific
+%   feature extraction module by exploiting both information maximization and self-supervised pseudo-labeling". 확인됨.
+Tent goes further and adapts during testing with only the model and
+unlabeled target data, minimizing the entropy of its predictions by
+updating normalization statistics and channel-wise affine parameters
+batch by batch~\cite{wang2021tent}.
+% 원문: Wang et al. (ICLR 2021) 초록 p.1 "the model has only the test data and its own parameters", "optimize the
+%   model for confidence as measured by the entropy of its predictions", "estimates normalization statistics and
+%   optimizes channel-wise affine transformations to update online on each batch"; §2 표 1 p.3 설정 비교. 확인됨.
 Labelless
 adaptation to drift has also been studied for malware
 detection, where a detector that updates on its own pseudo-labels can
@@ -321,10 +705,25 @@ degrade quickly by poisoning itself~\cite{kan2021investigating}.
 %   2026-11-24 확인; 저자 확인 목록 41번 해결).
 % 원문: Kan et al. (AISec 2021) 초록 p.1 "a rapid onset of performance degradation as the model poisons itself";
 %   §3.3 p.4 "the model poisons itself due to weaknesses in the pseudo-label generation". 확인됨.
+
 CD likewise uses unlabeled inputs
 from the target environment, but what we measure is the spread across
 seeds of one predictor on a forecasting task, not detection accuracy
 under drift.
+In the terms of Wang et al., CD sits in the domain-adaptation setting
+rather than the test-time one: the labeled FIT loss stays in training,
+and the unlabeled environment inputs enter during training, not at
+inference~\cite{wang2021tent}.
+% 원문: Wang et al. (ICLR 2021) §2 표 1 p.3: domain adaptation 은 "xs, ys | xt | L(xs,ys) + L(xs,xt)",
+%   fully test-time adaptation 은 "- | xt | - | L(xt)". CD 의 FIT 손실·무라벨 환경 입력은 4장 식(eq:cd-loss). 확인됨.
+Its target differs from all of the above. Entropy minimization, Tent,
+pseudo-labeling, and SHOT follow the adapted model's own predictions;
+Mean Teacher follows an average of the student's own weights;
+codistillation follows peers trained at the same time on the same
+data. A CD student follows the averaged probabilities of five frozen
+models of the same architecture, trained from other seeds and chosen
+by their agreement on unlabeled environment inputs, and the question is
+whether that lowers the spread across seeds, not the mean error alone.
 % 근거: RECORD:470--475. 4회차 지시 1번: 온도 보정·확률 앙상블은 마무리 확인 묶음이라
 % 이 절에서 빼고 결론 Future Work에 계획으로만 둔다(guo2017calibration은 그곳에서 인용).
 % decisions.md 32번: lee2013pseudo로 pseudo-labeling 이름과 인용을 되살렸다.
@@ -332,10 +731,81 @@ under drift.
 % (해결, 저자 확인 41번) Kan 등 원문에서 "자기 라벨 학습이 오류를 키울 수 있다"는 경고를 확인해 되살렸다.
 % 원문 대조(D 묶음): Kan 등 전문 §3.3·초록에서 self-poisoning 경고를 확인했다. 위 문장은 원문이 받친다.
 % 6회차 문장 P2-5: 둘째 문단 끝의 되풀이 문장을 지웠다.
+% (mlrel) 교사 정의: 4장 sec:method-teachers(상위 5 seed, 무라벨 A+C 다수 일치도).
+
+\section{Uncertainty under distribution shift}
+\label{sec:related-uncertainty}
+
+A probabilistic forecaster is judged on its probabilities as well as on
+its top-1 action, and the quality of those probabilities is known to
+depend on the data. Guo et al.\ find that modern neural networks,
+unlike those of a decade earlier, are poorly calibrated, and that on
+most of their datasets temperature scaling, a single-parameter variant
+of Platt scaling, calibrates them~\cite{guo2017calibration}.
+% 원문: Guo, Pleiss, Sun & Weinberger (ICML 2017, PMLR 70) 초록 p.1 "modern neural networks, unlike those from a
+%   decade ago, are poorly calibrated"; "on most datasets, temperature scaling – a single-parameter variant of
+%   Platt Scaling – is surprisingly effective at calibrating predictions". 확인됨.
+%   'surprisingly effective' 는 수식어라 옮기지 않았다.
+Hendrycks and Gimpel show that the maximum softmax probability is a
+baseline for detecting misclassified and out-of-distribution inputs,
+because correctly classified examples tend to receive a larger maximum
+probability~\cite{hendrycks2017baseline}.
+% 원문: Hendrycks & Gimpel (ICLR 2017) 초록 p.1 "Correctly classified examples tend to have greater maximum
+%   softmax probabilities than erroneously classified and out-of-distribution examples, allowing for their
+%   detection". 확인됨.
+Monte Carlo dropout reads uncertainty from one trained network: Gal
+and Ghahramani cast dropout training as approximate Bayesian
+inference, and the resulting predictive estimate averages several
+stochastic forward passes with dropout kept on~\cite{gal2016dropout}.
+% 원문: Gal & Ghahramani (ICML 2016, PMLR 48 pp.1050–1059) 초록 p.1 "casting dropout training in deep neural
+%   networks (NNs) as approximate Bayesian inference in deep Gaussian processes"; §4 식 (6) p.4 "MC dropout ...
+%   equivalent to performing T stochastic forward passes through the network and averaging the results". 확인됨.
+
+Ovadia et al.\ compared such methods, among them dropout, temperature
+scaling, and deep ensembles, under dataset shift. Their conclusions are
+that the quality of uncertainty degrades with increasing shift for
+every method, and that better calibration and accuracy on the
+in-distribution test set do not usually carry over to shifted
+data~\cite{ovadia2019trust}.
+% 원문: Ovadia et al. NeurIPS 2019 (arXiv v2) §5 p.9 "the quality of uncertainty consistently degrades with
+%   increasing dataset shift regardless of method"; "Better calibration and accuracy on the i.i.d. test dataset does
+%   not usually translate to better calibration under dataset shift"; §3 p.3 비교 방법 목록(Dropout, Temp Scaling,
+%   Ensembles 등). 확인됨. (E2 의 Ovadia 구절과 다른 결론이다.)
+Minderer et al.\ revisit these trends on recent image classifiers and
+find that several of them, such as the decay of calibration under
+distribution shift, are less pronounced in recent architectures, with
+architecture a major determinant of calibration~\cite{minderer2021revisiting}.
+% 원문: Minderer et al. (NeurIPS 2021, vol. 34 pp.15682–15694) 초록 p.1 "Trends observed in prior model
+%   generations, such as decay of calibration with distribution shift or model size, are less pronounced in recent
+%   architectures"; "architecture is a major determinant of calibration properties". 확인됨.
+
+These studies compare methods or architectures by the calibration and
+accuracy of a trained model, and they study what happens to uncertainty
+as the shift grows. Our object is different. We score every seed with
+the NLL defined in Chapter~\ref{ch:evaluation} and read how much that
+score varies across seeds on conditions unseen in training; the
+in-house diagnosis found that scores on the seen condition did not
+rank the seeds on the unseen ones (Chapter~\ref{ch:diagnosis}), which
+is the seed-level counterpart of the gap Ovadia et al.\ report between
+in-distribution and shifted calibration. We do not run
+out-of-distribution detection, and temperature scaling is left to the
+checks planned in Chapter~\ref{ch:conclusion}.
+% 근거: 6장 진단(학습 쪽 점수가 seed 순위를 맞히지 못함, sec:related-underspec 첫 문단과 같은 사실),
+%   99_conclusion.tex 78줄 Future Work(온도 보정 계획, guo2017calibration). 4회차 지시 1번을 지킨다.
 
 \section{Decomposition of ensemble log loss}
 \label{sec:related-decomposition}
 
+Splitting the error of a combination into the errors of its members
+and their disagreement goes back to regression ensembles. Krogh and
+Vedelsby showed that, for a weighted average of networks under
+quadratic error, the ensemble error equals the weighted average of the
+members' errors minus the ensemble ambiguity, the weighted variance of
+the members around their mean, and they note that the ambiguity can be
+estimated from unlabeled data alone~\cite{krogh1994neural}.
+% 원문: Krogh & Vedelsby (NIPS 7, 1994) §2 식 (2) p.232 ambiguity "the variance of the weighted ensemble around
+%   the weighed mean, and it measures the disagreement among the networks"; 식 (6) e(x)=ε̄(x)−ā(x), 식 (10) p.233;
+%   p.233 "the correlation term A can be estimated entirely from unlabeled data". 확인됨.
 For the logarithmic loss, the natural way to combine probabilistic
 predictors is the logarithmic opinion pool, the normalized geometric
 mean of their distributions. Heskes analyzed such pools and decomposed
@@ -345,6 +815,16 @@ members~\cite{heskes1997selecting}.
 % 원문: Heskes, NIPS 10 (1997) pp.266--272, §2 식 (1)--(3): 풀 = 가중 정규화 기하평균, KL 은
 %   K(q,p)=∫q log(q/p), 식 (3) K(q,p̄)=Σ_α w_α K(q,p_α) − Σ_α w_α K(p̄,p_α), 모호성 항은
 %   "minus the logarithm of the normalization constant Z(x)". 방향은 KL(풀‖구성원)로 원고 식과 같다. 확인됨.
+Wood et al.\ generalize the ambiguity decomposition to every loss that
+admits a bias--variance decomposition, with the combiner determined by
+the loss: the arithmetic mean for squared loss and the normalized
+geometric mean for the Kullback--Leibler divergence, which they state
+is required to decompose the cross-entropy in this
+way~\cite{wood2023unified}.
+% 원문: Wood, Mu, Webb, Reeve, Luján & Brown (JMLR 24(359):1–49, 2023) §4.1 Prop. 3 p.9 "Generalised Ambiguity
+%   Decomposition" ℓ(y,q) = (1/m)Σℓ(y,q_i) − (1/m)Σℓ(q,q_i); 같은 쪽 "For KL-divergence, this results in
+%   q = Z^{-1} Π q_i^{1/m}, i.e., a normalised geometric mean"; §4.3 Corollary 9 p.14 "the normalized geometric
+%   mean is required to decompose the cross-entropy in this way". 확인됨.
 Gruber and Buettner derive a
 bias--variance decomposition for strictly proper scores, with the
 classification log-likelihood as a special case, whose variance term
@@ -355,46 +835,83 @@ domain drift~\cite{gruber2022uncertainty}.
 %   variance term", "the classification log-likelihood are special cases"; §3.4 Corollary 3.6
 %   B_LSE[ẑ] (logit 공간); §4.2·§5 "Bregman Information as uncertainty measure ... under domain drift".
 %   원 문장은 분산 항이 로그우도를 특수 경우로 '포함'한다고 읽혀, 분해 쪽이 특수 경우를 갖도록 고쳤다.
+
 Chapter~\ref{ch:decomposition} uses the logarithmic-opinion-pool form:
 mean seed loss splits exactly into the loss of the log-pooled consensus
-and a disagreement term $V$ that needs no labels. Using such a variance
+and a disagreement term $V$ that needs no labels. With a one-hot label
+it is the Kullback--Leibler case of the ambiguity decomposition of
+Wood et al., and, as in Krogh and Vedelsby, the disagreement term can
+be computed on unlabeled inputs.
+% 원문: Wood et al. Prop. 3 p.9 에 ℓ = KL, y = one-hot(§4.3 p.14 "K(y || q) = −y · ln q") 을 넣으면
+%   −log q̃(y) = (1/m)Σ[−log q_i(y)] − (1/m)Σ KL(q̃‖q_i) 로 10장 식(eq:decomposition)과 같다(직접 계산).
+%   Krogh & Vedelsby p.233 "estimated entirely from unlabeled data". 확인됨.
+Using such a variance
 term as a label-free uncertainty measure under drift is already part
 of Gruber and Buettner's proposal. Our part is narrower: we compute it
 for the 30 seeds of one model setting on the environment inputs of this
 task and read which of the two terms CD reduced, as a post hoc analysis
 introduced after the primary experiments.
+These decompositions are stated for an ensemble whose combined
+prediction is used. In this thesis no pool of the 30 seeds is
+deployed; the identity serves to read the spread of single models.
+The CD target is also an arithmetic mean, not the pool of the
+decomposition, and the geometric-pool control of
+Section~\ref{sec:gen-methods} is the one variant whose target matches
+the pool.
 % 근거: RECORD:308--316, 334, 469. 인용 리뷰 P2-2, P2-3, 참신성 리뷰 P2-3.
 % Heskes 방향은 원고 그대로 맞다(decisions.md 35번): 균등 가중 정규화 기하평균에 대해
 % 모호성 항은 멤버 평균 KL(p̄‖p_i) = −log Z. 식 번호는 붙이지 않는다.
+% (mlrel) CD 목표 = 산술평균(4장 eq:cd-target), 기하평균 풀 증류 = 9장 sec:gen-methods 272줄. 원고 사실.
 
 \section{Summary}
 \label{sec:related-summary}
 
 Table~\ref{tab:related-tasks} lists the evidence and output of the
-security and log-modeling works discussed above. It compares tasks
-only. Variation across seeds is studied directly in the machine-learning
-work of Sections~\ref{sec:related-underspec}
+security and log-modeling works discussed above, and
+Table~\ref{tab:related-ml} lists, for the machine-learning works, which
+models are involved, what data without labels they use, and what they
+study. The tables compare tasks only; each entry restates what the
+section above cites. Variation across seeds is studied directly in the
+machine-learning work of Sections~\ref{sec:related-underspec}
 and~\ref{sec:related-distillation}; we did not assess whether the
 security works report it.
 
-\begin{table}[htbp]
-\centering
-\small
+Read together, the tables place this thesis at a junction that the two
+literatures approach from different sides. The security works forecast
+or detect from alerts, events, graphs, or logs, and evaluate a single
+trained model or system. The machine-learning works study the spread
+among models, or use unlabeled target inputs, on benchmarks outside
+security. We forecast the next attacker action from Windows process
+records, measure the spread of the forecast loss across 30 seeds on
+conditions unseen in labeled training, and use unlabeled inputs from
+those conditions to reduce that spread in one deployed model.
+
+% 2026-11-25: 표를 xltabular 로 바꿔 쪽을 넘기게 했다(행이 늘어 한 쪽을 넘음).
+{\small
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \caption{Evidence and outputs of the security and log-modeling work
-discussed in this chapter.}
-\label{tab:related-tasks}
-\begin{tabularx}{\textwidth}{@{}p{0.22\textwidth}XX@{}}
+discussed in this chapter, in the order of the sections.}
+\label{tab:related-tasks}\\
 \toprule
 Work & Evidence & Original output \\
 \midrule
-Sheyner et al.~\cite{sheyner2002graphs}
- & System model of hosts, vulnerabilities, and attacker
- & Attack graph of possible paths \\
-% 원문: Sheyner et al. 1절 "1. Model the network." "2. Produce an attack graph." 확인됨.
-MulVAL~\cite{ou2005mulval}
- & Configuration facts and logic rules
- & Derived security consequences \\
-% 원문: Ou et al. 초록 Datalog(configuration description, reasoning rules), 4.5절 공격 사실 도출. 확인됨.
+\endfirsthead
+\toprule
+Work & Evidence & Original output \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\multicolumn{3}{@{}l}{\emph{Forecasting attacker actions and security events (Section~\ref{sec:related-forecasting})}} \\
+Soska and Christin~\cite{soska2014automatically}
+ & Features extracted automatically from website content
+ & Whether a website not yet compromised will become malicious \\
+Liu et al.~\cite{liu2015cloudy}
+ & Externally measured mismanagement symptoms and malicious-activity time series
+ & Whether an organization will suffer an incident \\
+Sabottke et al.~\cite{sabottke2015vulnerability}
+ & Twitter posts about disclosed vulnerabilities
+ & Whether a vulnerability is exploited in the real world \\
 B\u{a}b\u{a}lau and Nadeem~\cite{babalau2024forecasting} (preprint)
  & Intrusion and endpoint alerts, as alert-driven attack graphs
  & Next likely attacker action given a sequence of observed actions \\
@@ -402,6 +919,9 @@ B\u{a}b\u{a}lau and Nadeem~\cite{babalau2024forecasting} (preprint)
 Tiresias~\cite{shen2018tiresias}
  & Security event histories from intrusion-prevention telemetry
  & Next security event \\
+ATTACK2VEC~\cite{shen2019attack2vec}
+ & Intrusion-prevention events
+ & Temporal embeddings of attack steps and how their use evolves \\
 DeepCASE~\cite{vanede2022deepcase}
  & Sequences of security events
  & Event contexts grouped for analyst triage \\
@@ -419,6 +939,67 @@ BiTA~\cite{nayeri2026bita}
  & Temporal graph of network alerts
  & Future alerts \\
 % 원문: Nayeri & Rezvani 3.1절 미래 간선 발생과 그 범주 예측(실제 경보 데이터). 확인됨.
+Niloy et al.~\cite{niloy2026multi}
+ & Multi-source logs of attack and benign sessions with ATT\&CK labels
+ & Labels for observed events (small-language-model evaluation) \\
+% 원문: Niloy et al. 초록(70 attack·800 benign session, chunk 분류·technique 식별). 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Attack graphs (Section~\ref{sec:related-graphs})}} \\
+Phillips and Swiler~\cite{phillips1998graph}
+ & Attack templates, network configuration and topology, attacker profile
+ & Attack graph; paths most likely to succeed \\
+Sheyner et al.~\cite{sheyner2002graphs}
+ & System model of hosts, vulnerabilities, and attacker
+ & Attack graph of possible paths \\
+% 원문: Sheyner et al. 1절 "1. Model the network." "2. Produce an attack graph." 확인됨.
+Ammann et al.~\cite{ammann2002scalable}
+ & Exploits whose preconditions are never invalidated (monotonicity)
+ & Compact representation of attack paths \\
+MulVAL~\cite{ou2005mulval}
+ & Configuration facts and logic rules
+ & Derived security consequences \\
+% 원문: Ou et al. 초록 Datalog(configuration description, reasoning rules), 4.5절 공격 사실 도출. 확인됨.
+Poolsappasit et al.~\cite{poolsappasit2012dynamic}
+ & CVSS metrics, administrator priors, observed incidents as evidence
+ & Probability that each network state is compromised \\
+SAGE~\cite{nadeem2022alert}
+ & Intrusion alerts
+ & Attack graphs per victim and objective \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Sequence models for log anomaly detection (Section~\ref{sec:related-sequence})}} \\
+Xu et al.~\cite{xu2009detecting}
+ & Console logs parsed with the help of source code
+ & Normal or abnormal decision per group of messages \\
+DeepLog~\cite{du2017deeplog}
+ & Sequences of system log keys
+  & Anomaly detection on log sequences \\
+LogAnomaly~\cite{meng2019loganomaly}
+ & Log templates represented as semantic vectors
+ & Sequential and quantitative anomalies \\
+LogBERT~\cite{guo2021logbert}
+ & Sequences of system log keys
+ & Anomaly score from self-supervised training \\
+% 원문: DeepLog 3절 이상 탐지(로그 키·매개변수); LogBERT 3.3절 "derive the anomalous score of a log sequence". 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Host provenance and intrusion detection (Section~\ref{sec:related-provenance})}} \\
+BackTracker~\cite{king2003backtracking}
+ & Operating-system objects and events, from a detection point
+ & Dependency graph of events that could have led to it \\
+SLEUTH~\cite{hossain2017sleuth}
+ & Audit data as a main-memory dependency graph
+ & Real-time attack detection and scenario reconstruction \\
+HOLMES~\cite{milajerdi2019holmes}
+ & Host audit data matched to tactics, techniques, and procedures
+ & High-level scenario graph of a campaign \\
+UNICORN~\cite{han2020unicorn}
+ & Sketches of long-running whole-system provenance graphs
+ & Anomaly-based intrusion detection \\
+ProvDetector~\cite{wang2020you}
+ & Rare causal paths in a process's provenance graph
+ & Detection of stealthy malware \\
+NodLink~\cite{li2024nodlink}
+ & Provenance graphs, online
+ & Detection with concise attack-related graphs \\
 KAIROS~\cite{cheng2024kairos}
  & Whole-system provenance graph
   & Intrusion detection and investigation \\
@@ -426,21 +1007,74 @@ ORTHRUS~\cite{jiang2025orthrus}
  & Whole-system provenance graph
   & Attack detection and attribution \\
 % 원문: KAIROS 초록 탐지 + "reconstructs attack footprints"; ORTHRUS 초록 노드 수준 탐지 + 공격 경로 재구성. 확인됨.
-DeepLog~\cite{du2017deeplog}
- & Sequences of system log keys
-  & Anomaly detection on log sequences \\
-LogBERT~\cite{guo2021logbert}
- & Sequences of system log keys
- & Anomaly score from self-supervised training \\
-% 원문: DeepLog 3절 이상 탐지(로그 키·매개변수); LogBERT 3.3절 "derive the anomalous score of a log sequence". 확인됨.
-Niloy et al.~\cite{niloy2026multi}
- & Multi-source logs of attack and benign sessions with ATT\&CK labels
- & Labels for observed events (small-language-model evaluation) \\
-% 원문: Niloy et al. 초록(70 attack·800 benign session, chunk 분류·technique 식별). 확인됨.
+Transcend~\cite{jordaney2017transcend}
+ & Malware samples at deployment compared with training samples
+ & Credibility and confidence of each decision \\
+TESSERACT~\cite{pendlebury2019tesseract}
+ & Android applications spanning three years
+ & Evaluation free of spatial and temporal bias; AUT metric \\
+\midrule
 PROPHET (this thesis)
  & Windows audit records received before a known boundary
  & Distribution over 18 next attacker actions \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\end{xltabular}}
+% 원문 근거: 각 행은 위 절의 % 원문 주석과 같은 원문(sources/expand/{sec,sys}.md 표).
 % seed 변동 열은 원문 전체를 확인하지 않은 판단이라 뺐다(인용·참신성 리뷰).
+
+{\small
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.2\textwidth}>{\raggedright\arraybackslash}X@{}}
+\caption{Models, data without labels, and object of study in the
+machine-learning work discussed in this chapter. A dash means that the
+work, as cited here, uses no unlabeled data beyond its training and
+test sets.}
+\label{tab:related-ml}\\
+\toprule
+Work & Models involved & Data without labels & Object of study \\
+\midrule
+\endfirsthead
+\toprule
+Work & Models involved & Data without labels & Object of study \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+D'Amour et al.~\cite{damour2020underspecification}
+ & Predictors returned by one pipeline & --- & Behavior in deployment domains \\
+Marx et al.~\cite{marx2020predictive}
+ & Classifiers within an error tolerance & --- & Conflicting predictions \\
+Summers and Dinneen~\cite{summers2021nondeterminism}
+ & Runs differing in one source of nondeterminism & --- & Variability across runs \\
+Jiang et al.~\cite{jiang2022assessing}
+ & Two SGD runs of one architecture & Test inputs & Test error from disagreement \\
+Baek et al.~\cite{baek2022agreement}
+ & Pairs of trained models & Shifted inputs & Accuracy under shift \\
+\midrule
+Hinton et al.~\cite{hinton2015distilling}
+ & Teacher or ensemble, and a student & Transfer set may be unlabeled & Matching soft targets \\
+Anil et al.~\cite{anil2018large}
+ & Copies of a model trained in parallel & --- & Prediction churn between retrains \\
+Tarvainen and Valpola~\cite{tarvainen2017mean}
+ & Student and its weight-averaged teacher & Unlabeled examples & Consistency between the two \\
+Grandvalet and Bengio~\cite{grandvalet2004semi}
+ & One model & Unlabeled inputs & Entropy of predictions \\
+Lee~\cite{lee2013pseudo}
+ & One model & Unlabeled inputs & Training on its own top-1 labels \\
+Ganin et al.~\cite{ganin2016domain}
+ & One model & Target-domain inputs & Features indiscriminate between domains \\
+Liang et al.~\cite{liang2020do}
+ & Trained source model only & Target-domain inputs & Adapted feature extractor \\
+Wang et al.~\cite{wang2021tent}
+ & One model at test time & Test batches & Entropy of predictions \\
+\midrule
+Ovadia et al.~\cite{ovadia2019trust}
+ & Uncertainty methods, including ensembles & --- & Calibration and accuracy under shift \\
+Gruber and Buettner~\cite{gruber2022uncertainty}
+ & Ensemble members & Inputs under drift & Bregman Information as uncertainty \\
+\midrule
+CD (this thesis)
+ & Five frozen teachers and one student of the same architecture
+ & Inputs of the unseen environment conditions
+ & Spread of NLL across 30 student seeds \\
+\end{xltabular}}
+% 원문 근거: sec:related-underspec·sec:related-distillation·sec:related-uncertainty·sec:related-decomposition
+%   의 % 원문 주석(sources/expand/mlrel.md 표). Gruber "inputs under drift" = §4.2·§5 OOD 탐지 under domain drift.
