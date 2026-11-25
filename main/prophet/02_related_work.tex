@@ -59,8 +59,8 @@ actions~\cite{babalau2024forecasting}.
 %   고침: "intrusion-detection alerts"·"sequence of alerts" → "intrusion and endpoint alerts"·"sequence of observed actions".
 %   사전본 표시: arXiv v1(2024-08-19)만 있고 journal-ref 없음, UTwente 저장소 "Working paper › Preprint"(2026-11-24 확인). 저자 2명이라 "et al." 대신 이름 둘.
 Their system extends SAGE, which learns attack graphs from intrusion
-alerts (Section~\ref{sec:related-graphs}), into an early-warning system
-that forecasts from a partial attack path~\cite{babalau2024forecasting,nadeem2022alert}.
+alerts~\cite{nadeem2022alert} (Section~\ref{sec:related-graphs}), into an early-warning system
+that forecasts from a partial attack path~\cite{babalau2024forecasting}.
 % 원문: Băbălău & Nadeem arXiv 2408.09888 §1 p.1 "we transform SAGE into an early warning system (EWS) capable of
 %   forecasting the next likely attacker action given a partial attack path". 확인됨.
 % 원문: Băbălău & Nadeem §1 p.1 "We modify SAGE to incrementally create updated AGs whenever" "new alerts are triggered"; "A partial path is defined as an alert sequence". 확인됨.
@@ -609,7 +609,7 @@ They also address prediction churn, the change in a network's
 predictions when it is retrained after a minor change or none: on the
 Criteo dataset, codistillation reduced the mean absolute difference
 between the predictions of two retrains by 35\%, close to an ensemble
-of two networks, without the ensemble's serving cost.
+of two networks, without the ensemble's serving cost~\cite{anil2018large}.
 % 원문: 같은 논문 §3.5 p.10 "retraining a neural network after a minor (or even no) change causes a change to
 %   the predictions as prediction churn"; "measured the mean absolute difference between the predictions of two
 %   retrains"; "codistillation reduces prediction churn by 35%, achieving similar results to ensembling, but does
@@ -877,11 +877,12 @@ and~\ref{sec:related-distillation}; we did not assess whether the
 security works report it.
 
 Read together, the tables place this thesis at a junction that the two
-literatures approach from different sides. The security works forecast
-or detect from alerts, events, graphs, or logs, and evaluate a single
-trained model or system. The machine-learning works study the spread
-among models, or use unlabeled target inputs, on benchmarks outside
-security. We forecast the next attacker action from Windows process
+literatures approach from different sides. As cited here, the
+security works forecast or detect from alerts, events, graphs, or logs
+and report a single trained model or system. The machine-learning works
+study the spread among models, or use unlabeled target inputs, mostly
+on benchmarks outside security, with Kan et al.\ on malware as an
+exception. We forecast the next attacker action from Windows process
 records, measure the spread of the forecast loss across 30 seeds on
 conditions unseen in labeled training, and use unlabeled inputs from
 those conditions to reduce that spread in one deployed model.

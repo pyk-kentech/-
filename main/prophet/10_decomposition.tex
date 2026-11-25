@@ -167,16 +167,17 @@ agreed, and they agreed on the wrong actions. The same can happen in a
 milder form after CD. For the plain GRU on the ADS-24 environment
 evaluation, $V$ fell from 0.149 to 0.025 while the consensus loss rose
 from 2.073 to 2.104; the seed-mean loss improved only because the drop
-in $V$ was larger. $V$ thus reads, without labels, how much the seeds
-diverge, not whether their common answer is right.
+in $V$ was larger. $V$ thus reads how much the seeds diverge, not whether
+their common answer is right.
 % 근거: RECORD:332; METHOD_BASELINES_REPORT.md "V와 합의 예측" (PROPHET A_PLUS_C_FLAT
 % ENTROPY 합의 NLL 2.701564, V 0.000007; ADS24 EVAL_ON BASE 2.072554/0.148804,
 % KD_ENV 2.104398/0.025253); VARIANCE_DECOMPOSITION_REPORT.md "Interpretation and
 % decision". 방법 비교 군은 9.2절의 새 110실행 기준이다. ADS-24의 엔트로피 최소화는
 % V가 0.179로 0이 아니었다.
 
-Nor is $V$ a selection rule: across encoders it did not rank them by
-seed standard deviation ($\rho=-0.800$ on ADS-24, $n=4$; $+0.500$ in-house, $n=3$).
+Nor is $V$ a selection rule: on the adaptation inputs it did not rank
+the encoders by evaluation seed SD ($\rho=-0.800$ on ADS-24, $n=4$;
+$+0.500$ in-house, $n=3$, as REL\_GLOBAL's were not stored).
 % C17: 기하 풀이 교사로 더 낫지 않았다는 부수 결과(같은 구성 56 비교 중 24)와 in-house REL_GLOBAL 의
 %   seed 별 적응 입력 확률이 저장되지 않았다는 단서는 아래 근거 주석에만 둔다.
 % 2026-11-25 분량 줄이기 C17: 두 문단을 한 문단으로 줄였다. 숫자와 주장은 그대로다.

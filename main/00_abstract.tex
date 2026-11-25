@@ -1,24 +1,26 @@
 \begin{abstract}
 PROPHET predicts which of 18 attacker actions comes next from
-Windows audit records received before a cutoff. Under a
-benign workload absent from labeled training, models with the same
-data and architecture diverged across seeds, and their final
-training loss did not rank them. In
+Windows audit records seen before a cutoff. Under a
+benign workload absent from labeled training, same-data, same-architecture
+models diverged across seeds, and their last-minibatch training loss
+did not rank them. In
 consensus distillation (CD), a standard ensemble-distillation setup,
 a student of the same architecture follows the mean
-probabilities of five baselines on unlabeled inputs from the new
-workload. In an in-house round, its stored report shows CD met
+probabilities of five fixed baselines on unlabeled new-workload
+inputs. In-house, a stored round report shows CD met
 all three criteria fixed before training. Over 30 checkpoints per
-group, the seed standard deviation of the log loss fell on both file
+group (students of one teacher set), the seed standard deviation of the log loss fell on both file
 layouts of an unseen two-worker condition (on one, 0.056 to 0.010), and
-the loss fell on the condition without benign workers, seen in training. On
-the public ADS-24 dataset the spread narrowed, but every distilled
+the loss fell on the seen condition without benign workers. In
+an exploratory comparison on public ADS-24 data the spread narrowed, but every distilled
 seed stayed worse than predicting the training tactic
 frequencies. CD narrowed the variation among these checkpoints; it did
-not remove the loss caused by the new environment.
+not remove the loss from the new environment.
 % 2026-11-25 작성 안내 "1,000자(공백 포함) 내외"에 맞춰 1,127자에서 줄였다. 주장은 그대로이고
 % "random", "of our predictor", "also"(두 번)를 빼고 몇 구절을
-% 짧게 바꿨다(1,056자). 저장 보고서의 기록이라는 한정(방법 P1-1)은 "its stored report shows"로 남겼다.
+% 짧게 바꿨다(1,077자). 저장 보고서의 기록이라는 한정(방법 P1-1)은 "a stored round report shows"로 남겼다.
+% 2026-11-25 실제 리뷰 1회차: 문체 P2-2(마지막 미니배치 손실, ADS-24 "탐색적 비교"를 국문과 맞춤),
+% 참신성 P2-3(학생 30개가 교사 집합 하나를 따른다는 조건)을 넣었다.
 % 6회차 문장 P2-8: 세 기준 중 두 개만 나열하던 문장을 고치고, 제외 실행 문장은 뺐다(제외 사유가
 % 수집 단계 실패로 기록됨, e_reproducibility). 국문 초록과 같은 주장을 담도록 맞췄다(P3-13).
 % 7회차 문장 P2-1: "sealed", "three criteria", "target layouts", "two-worker condition",
@@ -45,7 +47,7 @@ Consensus distillation, Unlabeled adaptation, Windows audit logs
 앙상블 증류 방식을 적용하여, 새 작업 조건의 정답 없는 입력에서 기준 모델
 다섯 개의 평균 확률을 구조가 같은 단일 학생 모델이 따르게 한다(합의 증류).
 사전에 봉인한 자체 실험실 평가에서, 저장된 보고서에 따르면 학생은 세 가지
-봉인 기준을 모두 통과했다. 군마다 고정한 30개 체크포인트 사이에서, 보지 못한
+봉인 기준을 모두 통과했다. 군마다 고정한 30개 체크포인트(학생은 한 교사 집합을 따름) 사이에서, 보지 못한
 정상 작업 조건의 두 배치 모두에서 음의 로그우도의 시드 간 표준편차가
 줄었고(한 배치에서 0.056→0.010), 학습 실행에 있는 조건(정상 작업 없음)의
 손실도 줄었다. 공개 자료

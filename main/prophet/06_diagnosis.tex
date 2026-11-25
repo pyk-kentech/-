@@ -120,9 +120,8 @@ layout (Table~\ref{tab:seed-population}).
 % 출처: ORIGINAL_TEXT/outputs/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:39
 % (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331).
 S1 is still not a rule for choosing one seed: the seed it ranked first
-failed preservation (Section~\ref{sec:method-teachers}). S1 itself was
-not computed on ADS-24, and the related leave-one-out agreement
-diagnostic there was unfavorable (Chapter~\ref{ch:ads24}).
+failed preservation (Section~\ref{sec:method-teachers}), and it was not
+computed on ADS-24 (Section~\ref{sec:ads24-results}).
 Section~\ref{sec:diag-agreement} returns to it.
 
 S3 is the loss on the final training batch, not an NLL on held-out FIT
@@ -169,8 +168,9 @@ the seeds' computations part. The distillation of
 Chapter~\ref{ch:method} is designed to reduce this disagreement on
 unlabeled environment inputs, and Chapter~\ref{ch:results} tests it
 under a sealed contract. Following the teachers on FIT inputs instead is
-one of the controls (Section~\ref{sec:gen-methods}); how far the seeds
-already agree on FIT views is taken up in Section~\ref{sec:disc-rejected}.
+one of the controls (Section~\ref{sec:gen-methods}); on FIT views the
+30 seeds gave the same top-1 action on 74,074 of 82,008 views (90.3\%),
+which Section~\ref{sec:disc-rejected} takes up.
 
 Unanimity is not a guarantee of
 correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were

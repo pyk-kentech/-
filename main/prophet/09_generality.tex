@@ -426,8 +426,9 @@ multi-model teacher target contributing to the reduction, but the
 number of teachers, their selection, and the averaging were not varied
 separately, so their effects are not identified. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
-level, so the environment inputs mattered; why the FIT inputs did not
-help was not established (Section~\ref{sec:disc-rejected}).
+level, which points to the environment inputs, although the control and
+the reused base models were not trained together; why the FIT inputs
+did not help was not established (Section~\ref{sec:disc-rejected}).
 Four-checkpoint weight averaging, which averages along a single
 training trajectory, stayed at the base model's spread on both
 datasets.
@@ -456,18 +457,21 @@ as 160 attempts, and a sealed safety stop ended it after 119, leaving
 110 eligible runs and 1,119 rows; the 41 runs not attempted were neither
 retried nor replaced. The \texttt{A+C} intervals therefore rest on six
 complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
-configurations. The comparison used one encoder, and no method was tuned
+configurations.
+
+The comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
 four-checkpoint weight averaging kept the cosine schedule rather than
 the cyclical or constant learning rate of stochastic weight averaging,
 so the comparison does not show that
-any of the algorithms is inferior when tuned for its own purpose.
+any of the algorithms is inferior when tuned for its own purpose, and
+codistillation~\cite{anil2018large} was not among the methods.
 Retraining the plain GRU on CPU is not deterministic, and the
 resulting rerun variation is visible for four-checkpoint weight
 averaging: the cross-entropy run from which its
 weights were averaged ended with weights identical, bit for bit, to the
 stored base model for 30 of 30 seeds on ADS-24 and for none in-house.
-Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.
+The plain-GRU CD student is also not a substitute for REL\_GLOBAL.
 On the same new runs the A+C score of REL\_GLOBAL was 0.086, against
 0.226 for the plain-GRU student.
 % 근거: RECORD:358, 452, 504; METHOD_BASELINES_REPORT.md:9 (REL_GLOBAL 참고 0.085753,

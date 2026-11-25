@@ -121,9 +121,10 @@ reasons for the exclusions and stops that the reports record.
 \section{Form of the pre-specified contrasts}
 \label{sec:eval-criteria}
 
-We use \emph{contrast} for any pre-specified comparison; a
-\emph{sealed criterion} is the stricter kind defined in
-Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
+We use \emph{contrast} for a paired difference, student minus
+baseline, read from an adjusted interval; whether it counts as a sealed
+criterion, a development comparison, or a post hoc quantity is set by
+the rules of Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
 of a two-sided adjusted interval on a paired difference, student minus
 baseline (REL\_GLOBAL or REL\_GLOBAL-ADS). Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
@@ -192,7 +193,11 @@ held fixed and are never resampled. Each interval therefore describes
 these 30 checkpoints on resampled executions and contains no
 uncertainty about the population of seeds from which they were drawn,
 and every conclusion about seed spread in this thesis is a statement
-about these checkpoints.
+about these checkpoints. The intervals also rest on few independent
+units, 6 to 16 complete configurations per in-house condition, so their
+percentile endpoints are imprecise; for v3, leaving out any one
+configuration kept the sign of every criterion
+(Section~\ref{sec:repro-complete}).
 
 Each family is Bonferroni adjusted. The v3 round and the ADS-24 second
 stage each have one family of three contrasts (98.3333\%). In the

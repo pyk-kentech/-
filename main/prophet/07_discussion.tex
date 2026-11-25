@@ -21,9 +21,8 @@ REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
 contrast, $V$ rose. Two of these rounds were sealed
 (Section~\ref{sec:eval-rounds}): v3 is the only one in which CD met all
 three sealed criteria, and the v2 recheck passed stability without
-showing preservation. Both verdicts hold the seeds fixed, and the v3
-one is the verdict recorded in the stored round report
-(Section~\ref{sec:disc-threats}, Appendix~\ref{app:repro}). Part of the narrowing is also expected from
+showing preservation. Both verdicts hold the seeds fixed
+(Section~\ref{sec:disc-threats}). Part of the narrowing is also expected from
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
 distillation itself, since all students of a group follow one fixed
 teacher set (Section~\ref{sec:disc-novelty}).
@@ -103,9 +102,8 @@ Whether the general encoders and the ADS-24 models diverge for a
 comparable reason is unknown.
 
 The agreement observation behind teacher selection is narrower still. Agreement
-ranked the REL\_GLOBAL seeds by loss in the lab. The in-house S1 was not
-computed for ADS-24, and its leave-one-out counterpart there was
-unfavorable ($\rho=+0.127$, Section~\ref{sec:ads24-results}). On ADS-24
+ranked the REL\_GLOBAL seeds by loss in the lab; the related ADS-24
+diagnostic was unfavorable (Section~\ref{sec:ads24-results}). On ADS-24
 the average of all 30 seeds also scored better than the five most
 agreeing ones.
 
@@ -115,8 +113,8 @@ re-inference, and it was the single evaluation set on which $V$ rose
 after distillation, for REL\_GLOBAL. The v3 gain there was in probabilities, with
 accuracy almost unchanged, and the contribution of the
 seen-condition inputs of KD\_ALL was not isolated. We read the
-in-house preservation result as holding in one sealed round, as its
-stored report records it, not as a property of the method.
+in-house preservation result as holding in one sealed round, not as a
+property of the method.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
 % 효과 미분리, 정확도 79.87%→80.14%). 6장 sec:diag-intervention (GENERIC_HEAD 실패,
@@ -329,18 +327,24 @@ share~\cite{raghu2017svcca}.
 
 Students that follow one fixed teacher set on unlabeled inputs from
 the environment are expected to agree with one another there; that much
-follows from distillation itself. What the thesis adds is evidence on
+follows from distillation itself, and following other models' average
+to reduce retraining churn was shown for
+codistillation~\cite{anil2018large}. CD differs in using fixed teachers
+trained from other seeds, unlabeled inputs from the target environment,
+and the NLL seed spread on unseen conditions as the measure; we did not
+compare it with codistillation. What the thesis adds is evidence on
 one security task: the measured instability, the unlabeled
 disagreement rows that carry the consensus loss
 (Chapter~\ref{ch:diagnosis}), and three findings about the
 intervention. The students' agreement carried over to new runs of the
-same environment; in v3, as stored, the loss on the seen condition was
+same environment; in v3 the loss on the seen condition was
 kept; and following the same teachers on FIT inputs, or each seed's own
 predictions, did not narrow the spread in the same way, whereas
 following a geometric pool of the same teachers narrowed it about as
-much (Section~\ref{sec:gen-methods}). These are development
-comparisons on the plain GRU (FIT inputs, in-house and on ADS-24) and
-on the in-house plain GRU and REL\_GLOBAL-ADS (self-distillation). The sealed
+much (Section~\ref{sec:gen-methods}). The FIT-input control was run
+on the plain GRU in-house and on ADS-24, and the self-distillation
+control on the in-house plain GRU and on REL\_GLOBAL-ADS; both are
+development comparisons. The sealed
 contracts and the status label on every result respond to the warning
 of Arp et al.\ about reusing inspected data~\cite{arp2020dos}; they are
 our own procedure, and lab-only evaluation remains a limitation

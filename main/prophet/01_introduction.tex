@@ -139,10 +139,13 @@ collection. The seed standard deviation fell on both A+C layouts, on
 FLAT from about 0.056 to 0.010. On the seen condition,
 \texttt{ORIGINAL\_18}, the mean NLL moved from 0.704 to 0.643
 (difference interval $[-0.131, -0.0041]$). The intervals resample runs
-for 30 fixed checkpoints and do not cover other seeds, and the verdict
-is the historical outcome recorded in that report: the seed-level files
-are not in the archive available to us, so it could not be rescored
-here (Section~\ref{sec:eval-contract}, Appendix~\ref{app:repro}).
+for 30 fixed checkpoints, all students follow one fixed teacher set,
+and the spread after retraining the whole pipeline was not measured
+(Section~\ref{sec:disc-threats}). The seed-level files stay on the
+original experiment machine; seed counts were read there, but the three
+criteria were not recomputed (Section~\ref{sec:eval-contract},
+Appendix~\ref{app:repro}).
+% 2026-11-25 리뷰 1회차 문체 P2-4·참신성 P2-3: E.1 의 표현에 맞추고 고정 교사 집합 조건을 넣었다.
 % 2026-11-25 분량 줄이기(반복 단서 T1): 제외 실행 문장은 6.2절에 두고 여기서는 뺐다.
 
 The remaining evidence is weaker. On the public ADS-24 dataset, CD
@@ -171,7 +174,10 @@ encoders, on the in-house task and on ADS-24. (b) It observes that, on
 unlabeled inputs from the unseen workload, the NLL of the 30-model
 probability average concentrates on the rows where the seeds' top-1
 predictions differ, and it applies a consensus target that keeps the
-architecture and single-model inference. The students' agreement held on
+architecture and single-model inference; following other models'
+average to reduce retraining churn was shown for
+codistillation~\cite{anil2018large}, and our part is to measure it with
+fixed teachers on unlabeled target inputs. The students' agreement held on
 new runs of the same environment. In the comparisons that included
 them, following the same teachers on FIT inputs or a seed's own
 predictions did not narrow the spread in the same way, while following
@@ -181,11 +187,12 @@ data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
 result as a sealed criterion, a development comparison, or a post hoc
-analysis.
+analysis, with one intermediate new-run check
+(Section~\ref{sec:eval-rounds}).
 % 원문(arp2020dos): arXiv 2010.09470 전문, 2.2절 P3 "Data Snooping"(3쪽); test snooping은
 %   "the test set is used for experiments before the final evaluation". 확인됨.
 Only the in-house v3 round passed all of its sealed
-criteria, as its stored report records; the v2 recheck, an earlier sealed round
+criteria; the v2 recheck, an earlier sealed round
 (Table~\ref{tab:rounds}), passed stability but did not show
 preservation. The
 ADS-24 study, the encoder study, and the method comparison are

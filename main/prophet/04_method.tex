@@ -399,7 +399,8 @@ attack episodes whose host alerts come from the Wazuh security monitor
 relational residual, which the sealed contract describes as specific to
 PROPHET target keys, is removed; the resulting model has 31,685
 parameters. We call it REL\_GLOBAL-ADS to keep it apart from the
-in-house REL\_GLOBAL. The three general encoders replace the event encoder with
+in-house REL\_GLOBAL. The three general encoders keep the 48-dimensional
+event representation and replace the gated recurrent state with
 an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 a Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert},
 or a plain GRU. They are encoder adaptations to our supervised task, not
@@ -432,7 +433,7 @@ ADS-24, REL\_GLOBAL-ADS
   & 64-dimensional GRU; LogitNorm ($\tau=0.1$); representation-gradient
     penalty (0.1); 1,346 updates; all distillation settings \\
 Three general encoders
-  & encoder replaced by LSTM, Transformer, or GRU; LogitNorm,
+  & event representation kept, recurrent state replaced by LSTM, Transformer, or GRU; LogitNorm,
     regularization, and relational residual removed; width and learning
     rate chosen by FIT-internal validation
   & 1,346 updates; run-weighted cross-entropy; AdamW with cosine schedule;
@@ -445,11 +446,11 @@ In each new setting the teachers are selected again, by the same
 agreement rule, from 30 baseline models of the same encoder trained on
 the same data. The in-house top five are never copied to another
 encoder. Selection uses only the unlabeled adaptation inputs: the 34
-ADS-24 runs with simulated users, and, in the in-house lab, the same 119
-background and 48 seen-condition runs that KD\_ALL uses for
-adaptation. Unlike the in-house REL\_GLOBAL teachers, these teachers are
-therefore chosen on the inputs they are distilled on rather than on the
-A+C development runs.
+ADS-24 runs with simulated users, and, for the general encoders in the
+in-house lab, all 119 background and 48 seen-condition runs that
+KD\_ALL uses for adaptation. The in-house REL\_GLOBAL teachers were
+instead chosen on the A+C runs among those background inputs
+(Section~\ref{sec:method-teachers}).
 % 근거: RECORD:162--163; ORIG:ARCH_GENERALITY_STAGE1_20261122/
 % ARCH_GENERALITY_STAGE1_REPORT.md:79 ("ADS 34 ON·PROPHET v3 A119+B48 입력만
 % 사용", 환경 평가 정답 미사용), ARCH_GENERALITY_CONTRACT_SEALED.md:49.

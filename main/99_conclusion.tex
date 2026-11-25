@@ -24,8 +24,7 @@ probabilities of five selected teachers on unlabeled inputs from the
 new workload. In the v3 round, the one sealed round in which CD met all
 three pre-fixed criteria, the stored round
 report records that the seed standard deviation narrowed on
-both A+C layouts and that \texttt{ORIGINAL\_18} was preserved. The verdict is the one recorded in that report, not one
-rescored here (Section~\ref{sec:eval-contract}). The exploratory check on
+both A+C layouts and that \texttt{ORIGINAL\_18} was preserved. The exploratory check on
 ADS-24 and the three encoder adaptations, all development comparisons
 on inspected runs, moved in the same direction.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
@@ -62,16 +61,16 @@ encoder keeps that comparison from resting on one architecture.
 Whether the reported results hold beyond the runs and seeds that
 produced them can be checked with the frozen models. Inference on
 the 119 usable ADS-24 runs outside the 132 of the contract
-(Appendix~\ref{app:ads24-data}), which no earlier stage has used, and
-on a fresh in-house collection completes the method comparison that
-stopped at 110 runs. Intervals recomputed with seeds resampled along
-with runs let a verdict speak for more than these 30 seeds. Two deployed references complete them for every encoder and dataset: temperature scaling~\cite{guo2017calibration}
+(Appendix~\ref{app:ads24-data}), unused by any stage, gives an unused
+ADS-24 test; a fresh in-house collection completes the in-house method
+comparison that stopped at 110 runs. Intervals recomputed with seeds resampled along
+with runs let a verdict speak for more than these 30 seeds. Two deployed references, for every encoder and dataset, would complete these checks: temperature scaling~\cite{guo2017calibration}
 of each base model, and probability ensembles of the five teachers and
 of all 30 baseline seeds.
 % 원문: Guo et al. ICML 2017 (PMLR 70) arXiv:1706.04599 §4.2 "Temperature scaling ... uses a single scalar
 %   parameter T > 0 for all classes". 방법 이름 인용, 확인됨.
-Whether the models of ADS-24 and the general encoders split on one
-decision, as in-house REL\_GLOBAL did, is also open.
+Whether the ADS-24 and general-encoder models split on one decision,
+as in-house REL\_GLOBAL did, is open.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라
