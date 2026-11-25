@@ -11,14 +11,15 @@ $x$ with true action $y$, let $p_s$ be the predictive distribution of
 seed $s$ and $\tilde p$ their logarithmic opinion pool, the normalized
 geometric mean. Then
 \begin{equation}
+  \begin{gathered}
   \frac{1}{S}\sum_{s=1}^{S}\bigl[-\log p_s(y\mid x)\bigr]
-  = -\log \tilde p(y\mid x) + V(x),
-  \qquad
+  = -\log \tilde p(y\mid x) + V(x),\\
   \tilde p(a\mid x)\propto
   \exp\Bigl(\frac{1}{S}\sum_{s=1}^{S}\log p_s(a\mid x)\Bigr),
   \qquad
   V(x)=\frac{1}{S}\sum_{s=1}^{S}\mathrm{KL}\bigl(\tilde p\,\|\,p_s\bigr)(x)
   \ge 0 .
+  \end{gathered}
   \label{eq:decomposition}
 \end{equation}
 The mean loss of the seeds is exactly the loss of their consensus plus a

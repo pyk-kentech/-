@@ -161,9 +161,9 @@ ADS-24, for instance, two LSTM base models had lower NLL than the FIT
 prior and none of the LSTM students did, so those two seeds
 were worse after distillation; the best REL\_GLOBAL-ADS seed of
 Chapter~\ref{ch:ads24} was likewise better than every CD seed.
-% TODO(사람): 조합별로 개선된 seed 수(기록 RECORD:297의 "30개 중 20~30개")는 seed별
-% 원자료를 atlas에서 찾지 못해 쓰지 않았다. 원자료를 주시면 부록에 조합별 쌍 차이
-% 분포(방법 리뷰 P3-1)와 함께 넣겠습니다.
+% 메모: 조합별로 개선된 seed 수(기록 RECORD:297의 "30개 중 20~30개")는 다른 숫자를 옮긴 것일 수
+% 있어 쓰지 않는다(repro.md 10(b)). 원래 PC 의 ARCH_GENERALITY_STAGE2_20261122/STAGE2_SEED_RESULTS.csv
+% 로 셀 수 있으니, 부록에 조합별 쌍 차이 분포(방법 리뷰 P3-1)를 넣으려면 그 파일에서 센다.
 Among these 30 seeds, CD gave a level close to
 that of the teacher average rather than the best level any seed
 reached; whether another draw of seeds would spread as little was not

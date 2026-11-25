@@ -59,6 +59,9 @@
 % 안내 PDF는 부록의 자리를 따로 정하지 않는다. 참고문헌과 감사문이 이어지도록
 % 부록을 본문 뒤, 참고문헌 앞에 둔다. 이 클래스의 참고문헌은 \chapter*로
 % 찍히므로 \appendix 뒤에 와도 번호가 붙지 않고 목차에 "References"로 들어간다.
+\usepackage{xurl} % 참고문헌의 긴 URL 이 줄 끝을 넘지 않게
+\usepackage{xltabular} % 한 쪽보다 긴 표(부록 C·5장 회차 원장)가 쪽을 넘기게
+\setlength{\emergencystretch}{2em} % 밑줄 든 긴 이름 때문에 줄이 넘치지 않게
 \begin{document}
 \hypersetup{pageanchor=false}
 \makefrontcover

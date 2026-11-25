@@ -267,8 +267,9 @@ baselines of Chapter~\ref{ch:generality} come from different
 collections for the same reason and are never placed on one scale.
 % 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
 
-\begin{table}[htbp]
-\centering
+% 표와 주가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
+{\small
+\begin{xltabular}{\textwidth}{@{}lrXlX@{}}
 \caption{Ledger of the rounds that tested distillation toward a seed
 consensus (the 10-seed round used all 30 baseline models as teachers).
 Evaluation runs and rows are those scored in the round, not the
@@ -277,12 +278,18 @@ above, with two additions: ``sealed contract, not adjudicated'' marks a
 sealed contract that ended in a safety stop, whose criteria were never
 read, and ``sealed / development'' marks a stage that is sealed for some
 of its runs and a development comparison for the rest (note~b).}
-\label{tab:rounds}
-\small
-\begin{tabularx}{\textwidth}{@{}lrXlX@{}}
+\label{tab:rounds}\\
 \toprule
 Round & New fits & Evaluation runs / rows & Status & Outcome \\
 \midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\emph{Table~\ref{tab:rounds}, continued}}\\
+\toprule
+Round & New fits & Evaluation runs / rows & Status & Outcome \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
 10-seed development & 30 & 157 / 1,611, already inspected
   & development comparison & no interval excluded zero; extension gate$^{d}$ failed \\
 \quad target-count variants & 0 & 32 / 256 (3 targets), 32 / 448 (5 targets)
@@ -305,10 +312,9 @@ Generality, stage 2 & 210 & as stage 1
   & development comparison$^{a}$ & contrasts favorable in all six combinations \\
 Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
   & development comparison$^{c}$ & reported contrasts; no pass rule \\
-\bottomrule
-\end{tabularx}
-\par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
+\end{xltabular}}
+\vspace{-\medskipamount}
+\noindent\begin{minipage}{\textwidth}\footnotesize
 $^{a}$The contract was sealed before the stage's models were trained or
 run, but after its evaluation runs had been scored in an earlier stage:
 the 35 ADS-24 environment-evaluation runs in ADS-24 stage~1, and the
@@ -330,7 +336,7 @@ The 10-seed round reused the 157 runs first collected, as new runs, for
 the \texttt{OBSERVED\_HEAD} check of Section~\ref{sec:diag-intervention};
 they are not the runs of the v3 round.
 \end{minipage}
-\end{table}
+\medskip
 % 근거: PAPER_DEFINITIONS.md:52--56 (10-seed 157/1,611 = FLAT 30/330, NESTED
 % 32/352, C_ONLY 32/352, B+C 31/341, 원래 32/236; PEKD2 계획160·시도117·적격116;
 % PEKD3 159/1,633; PEKD4 157/1,611); RECORD:196 (PAG1 156/1,600);

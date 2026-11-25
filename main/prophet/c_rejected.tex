@@ -153,9 +153,9 @@ condition of ADS-24 but raised the loss on its preservation runs from 1.449 to
 %   7·9·13행은 계약 파일이 없어 보고서 기준. 9행 정의는 범위 제한(무대상 행에만 적용)만 적었다.
 %   저장 판정과 보고서 판정 사이의 모순은 찾지 못했다(5행 보고서는 A+C 절대 상한 실패도 적지만 표 판정과 어긋나지 않음).
 
-\begin{table}[htbp]
-\centering
-\small
+% 표가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
+{\small
+\begin{xltabular}{\textwidth}{@{}r>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X@{}}
 \caption{Method candidates and their stored verdicts. Rows 1--15 were
 judged under criteria written before scoring; rows 16--20 are post hoc
 development analyses on runs whose scores had already been seen. The
@@ -164,11 +164,21 @@ preservation limit is $+0.020$ in NLL on the seen condition, \texttt{ORIGINAL\_1
 contract or report states one, and the stored verdict against that
 candidate's own control; they record research history rather than a
 comparison of methods across rows.}
-\label{tab:rej-candidates}
-\begin{tabularx}{\textwidth}{@{}r>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X@{}}
+\label{tab:rej-candidates}\\
 \toprule
 & Candidate & Stored verdict \\
 \midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\emph{Table~\ref{tab:rej-candidates}, continued}}\\
+\toprule
+& Candidate & Stored verdict \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r@{}}{\emph{continued on the next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
 1 & \texttt{HISTORY\_MARGINAL}: averages 18-way probabilities over four
     role histories; \texttt{STATE\_MEAN} averages their hidden states
   & Additional A+C gain over \texttt{STATE\_MEAN} not shown;
@@ -266,9 +276,7 @@ comparison of methods across rows.}
 20 & Predicting each encoder's seed standard deviation from $V$ on the adaptation inputs
     & ADS-24 $\rho = -0.800$ ($n = 4$), in-house $\rho = +0.500$ ($n = 3$);
     not confirmed (Chapter~\ref{ch:decomposition}) \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\end{xltabular}}
 % 15행 구간의 여섯 자리 원값 [−.120492, +.006306]은 부록 B.6에 있다.
 % 16행(4회차 지시 4번): 1.945는 30개 REL_GLOBAL-ADS seed의 확률 평균(8장의 1.945와 같은
 % 값)이고, 1.818은 후보 A가 물러나는 사전분포 π = FIT 자연 경계의 행동 빈도(경계 동일

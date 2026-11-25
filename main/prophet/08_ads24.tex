@@ -91,7 +91,7 @@ and label exclusions.
 % KD_SELF = self-distillation control.
 % RECORD:441 (OFF 4월 초, ON 4월 중순). Wazuh 문서는 answers 07:10 2번에 따라
 % 각주 URL로 바꿨다. 수집에 쓰인 Wazuh 버전은 우리가 검사한 KTH 기록에 적혀 있지 않다(ads.md 31번).
-% TODO(사람): Wazuh 문서 URL의 접근일(atlas 근거 없음).
+% (해결, 저자 확인 31번) Wazuh 문서 URL의 접근일은 2026-11-24 에 열어 확인한 날로 각주에 적었다.
 
 Two stages were run, each under its own sealed contract. Stage~1 trained 30 REL\_GLOBAL-ADS seeds on FIT and asked only whether they
 diverged enough on the environment evaluation to justify distillation;
@@ -153,6 +153,7 @@ column counts the seeds whose environment NLL is lower than that of the
 FIT prior defined below.}
 \label{tab:ads24-groups}
 \small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
 Group & Env.\ NLL & Seed SD & Worst seed & Env.\ accuracy
