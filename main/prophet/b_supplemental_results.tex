@@ -30,8 +30,8 @@ replay a boundary under a permitted alternative delivery schedule and
 keep its label, these yield 58,259 views. All views of an execution stay
 in its split, and the vocabulary is fixed from the training data.
 Table~\ref{tab:cohorts} lists the evaluation cohorts reported below.
-% TODO(사람): natural 전달 일정의 정의는 5장과 같이 [직접 기입]. 5장의 정의가
-% 들어가면 이 문단의 "natural rows"는 그 정의를 따르는 것으로 읽힌다.
+Natural rows and delayed views follow the definitions of
+Section~\ref{sec:task-rows}.
 
 \begin{table}[htbp]
 \centering
@@ -44,7 +44,10 @@ Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition}.}
 \label{tab:cohorts}
 % 135/1,427 = 6장 개발 집합(SEED_POPULATION FINAL_REPORT_KO.md:15의 집합별 실행·행이
 % tab:mix와 같다; BASE_FULL_MIX_NEW_CONFIRM "전체 적격은 135실행·1,427행").
-% TODO(사람): 두 135실행이 실행 ID까지 같은 집합인지 확인해 주세요.
+% 두 135실행은 같은 봉인 적격 집합으로 읽힌다: 조건별 실행·행이 같고, 재학습·seed 모집단 보고서가
+%   "기존 적격 135실행"을 쓴다(atlas OT/PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/FINAL_REPORT_KO.md:19;
+%   OT/PROPHET_FOUR_MODEL_NEW_SEEDS_20261117/RUN_STATE.md:5; diag.md 36a).
+% TODO(사람): 실행 ID 수준 대조에는 원 ELIGIBILITY_SEAL.json이 필요하다(atlas에 없음).
 \begin{tabularx}{\textwidth}{@{}Xrr@{}}
 \toprule
 Condition and use & Executions & Rows \\
@@ -218,22 +221,24 @@ meaningful only together with its benign workload and training fold.
 \caption{Event-wise and final-state history exposure on selected
 conditions of the 111-execution collection. \texttt{B+C} and
 \texttt{C\_ONLY} each have 32 executions and 352 rows, and both folds are
-scored on the same executions of a condition.}
+scored on the same executions of a condition. The EVENT GRU column has
+the structure of the EVENT GRU of Table~\ref{tab:relations} but was
+trained on the B- or C-fold FIT runs for 1,346 updates with the 404-only
+vocabulary, so it is a different model (48,890 parameters).}
 \label{tab:local}
-\begin{tabular}{@{}llrr@{}}
+\begin{tabular}{@{}llrrr@{}}
 \toprule
-Benign workload & Training fold & Local History & Final History \\
-% TODO(사람): 옛 "Event-only" 열(0.510148 / 0.672836 / 1.204049)은 원 파일
-% SLOT_LOCAL_BITA_MATCHED_20261115/FINAL_REPORT_KO.md:13의 "EVENT" 열과 값은 같지만,
-% 그 EVENT가 표 tab:relations의 EVENT GRU와 같은 모델이라는 정의를 원 파일에서 찾지
-% 못했다(answers 7-(3), 방법 리뷰 P2-4). 열을 뺐다. 같은 모델이면 "EVENT GRU" 열로 되살린다.
+Benign workload & Training fold & EVENT GRU & Local History & Final History \\
 \midrule
-\texttt{B+C} & B & \textbf{0.155520} & 0.409578 \\
-\texttt{B+C} & C & \textbf{0.061857} & 0.409930 \\
-\texttt{C\_ONLY} & C & 0.328044 & \textbf{0.136957} \\
+\texttt{B+C} & B & 0.510148 & \textbf{0.155520} & 0.409578 \\
+\texttt{B+C} & C & 0.672836 & \textbf{0.061857} & 0.409930 \\
+\texttt{C\_ONLY} & C & 1.204049 & 0.328044 & \textbf{0.136957} \\
 \bottomrule
 \end{tabular}
 \end{table}
+% 출처(EVENT GRU 열): atlas OT/SLOT_LOCAL_BITA_MATCHED_20261115/FINAL_REPORT_KO.md:7-13;
+%   OT/SLOT_LOCAL_FINAL_SYSTEM_FOLLOWUP_20261115/FINAL_REPORT_KO.md:7 (B/C fold 604/603 FIT, 404-only,
+%   seed 11/29/47, 1,346 update, 48,890) (defs.md 13번).
 
 A further collection compared Local History with task adaptations of
 three prior architectures: BiTA~\cite{nayeri2026bita},
@@ -271,10 +276,19 @@ processes can create a new key even when the relevant part of the
 source procedure is unchanged.
 % 옛 2.4절 "Evidence granularity and forecasting baselines"의 배경 문단을 줄여 옮겼다.
 
-% TODO(사람): THME0064 결정에서 "target-wise GRU"와 REL의 seed별 확률을 비교한 옛 문단
-% (0.434/0.450/0.481 대 0.984/0.483/0.517)은 원 파일에서 값을 찾지 못했고 target-wise
-% GRU의 정의도 없어(answers 7-(1) [직접 기입], 방법 리뷰 P1-2·P2-4) 지웠다. 정의와 출처를
-% 주시면 되살린다.
+The recorded case of Section~\ref{sec:recorded-case} was also read
+off two earlier residual models in a post hoc development diagnosis on
+32 three-target runs. A \emph{target-wise GRU} updates one shared GRU
+cell per target with that target's events in receipt order and adds a
+residual read of those states to the base logits; it has more active
+parameters than its comparison models. Over the seeds 11, 29, and 47,
+it gave the observed file search at \texttt{SEQ\_5} of
+\texttt{THME0064} probabilities of 0.434, 0.450, and 0.481, against
+0.984, 0.483, and 0.517 for an adapter version of the relation model,
+which is not the REL checkpoint of Table~\ref{tab:relations}.
+% 출처: atlas OT/TARGET_SEQUENTIAL_UPDATE_FIXED_20261109/CONTRACT.md:9,11;
+%   OT/TARGET_ERROR_CAUSE_AUDIT_20261109/REPORT_KO.md:7,42,47 (GRU .4337/.4496/.4806, ADAPTER_REL
+%   .9840/.4832/.5167, THREE_HELD 32실행·256행, 사후 개발 진단) (defs.md 12번).
 
 The fixed combination averages a single-history baseline
 $p_{\mathrm{base}}$ with a separately trained dual-history model
@@ -306,10 +320,11 @@ combined system rather than of the conditioning. On the 96 target-free
 rows of the \texttt{ORIGINAL\_18} subset the rule kept the baseline
 distribution. \texttt{C\_ONLY} shows its cost: the conditional average
 scored 0.062979, against 0.060420 for the baseline and 0.054544 for the
-unconditional average.
-% TODO(사람): 확률 평균(seed 53/67/79/97/113)과 재학습(seed 127/149/163/181/199)
-% 모델이 B-fold, C-fold 중 어느 fold로, 몇 개의 FIT 실행으로 학습되었는지 원 파일에서
-% 확인하지 못했습니다(개요 C표). 알려 주시면 이 문단에 fold 문장 한 줄을 넣겠습니다.
+unconditional average. All models of this section were trained on the
+C-fold FIT set of 603 runs; the retraining refitted four models for
+each of five seeds, 20 fits in all.
+% 출처: atlas OT/PROPHET_BASE_FULL_CONDITIONAL_MIX_FIXED_20261117/CONTRACT.md:3;
+%   OT/PROPHET_FOUR_MODEL_NEW_SEEDS_20261117/FINAL_REPORT_KO.md:9 (diag.md 36b).
 
 \begin{table}[htbp]
 \centering

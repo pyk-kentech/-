@@ -30,10 +30,20 @@ collected in several \emph{repetitions}, executions that share it;
 interval estimates resample configurations and keep their repetitions
 together (Section~\ref{sec:eval-criteria}). A \emph{view} is a
 prediction row read under one delivery schedule of the received
-records. The \emph{natural} view uses the receipt order recorded during
-collection, and a delayed view replays the same boundary under a
-permitted alternative delivery schedule and keeps its label; scores in
-this thesis use natural views only. A training \emph{occurrence} is one
+records. The \emph{natural} view is the prefix as it was actually
+received during collection, with no added delay, and a \emph{natural
+row} is one boundary of one run read in that view. A \emph{delayed} view
+replays the same boundary under a synthetic schedule and keeps its
+label. Each schedule delays every atomic receipt batch by 0, 1 or
+2~seconds, with at most 4~seconds added per run, no delay on the first
+batch, first-in-first-out order kept, no batch moved past the run's last
+commit time, and admission still requiring a release time strictly
+before the cutoff. Sixteen such schedules are fixed for each run, from a
+seed derived from the run identifier and without reference to labels or
+scores, and all boundaries of a run share a schedule. The grid is a
+robustness device, not an estimate of the delays that occur in
+practice. Scores in this thesis use natural views only; the FIT set
+gives 4,824 natural views and $16\times4{,}824=77{,}184$ delayed ones. A training \emph{occurrence} is one
 FIT execution under one delivery schedule, with all of its boundaries,
 and each update of training reads 32 of them. Finally, a
 \emph{development} set is a set of executions whose scores had already
@@ -42,7 +52,10 @@ been inspected when a later analysis was defined on them
 % 근거: METHOD_BASELINES_CONTRACT_SEALED.md ("PROPHET의 한 occurrence는 한 실행의
 % 특정 전달 view이며 전체 자연 경계를 포함한다"); 구성·반복: 각 수집 계약의
 % "16구성×2반복"; 지연 view: 부록 B 옛 정의. 82,008 FIT view = 4,824 자연 + 77,184 전달.
-% TODO(사람): natural 전달 일정의 정확한 정의. [직접 기입]
+% 출처(natural·delayed 정의): sources/atlas_answers/defs.md 11번;
+%   atlas OT/AUX_MOE3_STOP198_EVALUATION_20261104/EVALUATION_EXECUTION_LOCK.md:14;
+%   LAB/DIVERSE3K_20261027/DELIVERY_PATH_ROBUST_20261101/CONTRACT_V1.md:14-16 ("관측 수신 지연의 분포 추정치가 아니다");
+%   82,008: OT/PROPHET_DUAL_ROLE_MEMORY_FIXED_20261116/CALCULATION_ERRATUM.md:7.
 
 The 18-action vocabulary covers host, directory-service and network
 enumeration, registry queries, and operations on synthetic files.
@@ -81,17 +94,18 @@ recovered from observed command paths, and the same canonical target
 can appear in several processes; an observed copy operation is given
 distinct source and destination roles. When a received END has a unique
 compatible START, it inherits the observed target relation of that
-START. An END without such a START, or any record whose target cannot
-be determined from the received evidence, is kept in the stream in an
-\emph{UNKNOWN} state: it is neither dropped nor completed from the audit
-ledger. The grouping by target is rebuilt at each boundary, and a prefix
+START. A START whose END has not yet been received carries an
+\emph{UNKNOWN} result, encoded as the status UNOBSERVED
+(Section~\ref{sec:method-baseline}); a received END without a unique
+compatible START is kept as UNMATCHED; and an event whose target cannot
+be determined uniquely from its command path is left \emph{unassigned}.
+None of these records is dropped or completed from the audit ledger. The grouping by target is rebuilt at each boundary, and a prefix
 that contains no usable file target is still mapped to 18 probabilities
 through a target-free path.
-% 근거: RECORD:51 (UNKNOWN 유지). UNKNOWN의 예: C-fold FIT의 native
-% 기록 중 END 322건은 고유 START를 결속하지 못해 UNKNOWN으로 남았다
-% (ORIG:PROPHET_SEED_INPUT_AUDIT_20261118/MECHANISM_BOUNDS_KO.md:28).
-% TODO(사람): UNKNOWN이 "결속되지 않은 END/대상 미배정 record"만 뜻하는지,
-% 아니면 END가 아직 수신되지 않은 START의 결과 상태도 포함하는지 확인해 주세요.
+% 출처: sources/atlas_answers/defs.md 14(a)번; atlas OT/REL_FACT_RULES_FIXED_20261116/CONTRACT.md:25
+% ("Missing END stays UNKNOWN"); OT/SUPCON_RUN_CLEAN_METHOD_PACKAGE_20261103/FINAL_METHOD_SPEC_KO.md:13
+% (UNMATCHED, UNOBSERVED); OT/SLOT_LOCAL_FINAL_PAPER_SECTIONS_20261115/PAPER_SECTIONS_EN.md:15 (g_i=-1).
+% MECHANISM_BOUNDS_KO.md:28의 "END 322건 UNKNOWN"은 계보 감사의 소속 미확정이라 여기 쓰지 않았다.
 
 The predictor reads observed fields: the executable, available command
 content, receipt order, elapsed time, and received exit status. Four
@@ -163,32 +177,6 @@ Table~\ref{tab:conditions} lists the conditions and the two placements
 of the file targets.
 % 근거: RECORD:34--42; PAPER_DEFINITIONS.md §1.
 
-\begin{table}[htbp]
-\centering
-\caption{Evaluation conditions and target layouts. ``C-fold FIT'' states
-whether the condition's benign work occurs in the 603 training runs of
-the C-fold (Section~\ref{sec:conditions}).}
-\label{tab:conditions}
-\begin{tabularx}{\textwidth}{@{}llX@{}}
-\toprule
-Identifier & C-fold FIT & Definition \\
-\midrule
-\texttt{ORIGINAL\_18} & seen & Original source procedure without a benign worker; all 18 actions \\
-\texttt{C\_ONLY} & unseen & Source procedure with worker C \\
-\texttt{A+C} & unseen & Source procedure with workers A and C \\
-\texttt{B+C} & unseen & Source procedure with workers B and C \\
-\midrule
-\texttt{FLAT} & --- & Four file targets \texttt{echo}, \texttt{foxtrot}, \texttt{golf}, \texttt{hotel} placed as sibling directories \\
-\texttt{NESTED} & --- & As \texttt{FLAT}, except that \texttt{foxtrot} is moved under \texttt{echo}; \texttt{echo} remains a target, and the two payloads have different search roots \\
-\bottomrule
-\end{tabularx}
-\end{table}
-% 표 기호: 본문·표의 조건 이름은 A+C FLAT, A+C NESTED, C_ONLY, B+C,
-% ORIGINAL_18로 통일한다(개요 전체 규칙). 원고의 "C-only"는 C_ONLY로 바꿨다.
-% TODO(사람): 배치 FLAT/NESTED는 A+C에서만 따로 보고됩니다. C_ONLY와 B+C
-% 실행은 어느 배치를 쓰는지, 그리고 FIT 603실행에 NESTED 배치가 들어 있는지
-% 알려 주세요. 표의 "---"를 채울 수 있습니다.
-
 All new experiments in this thesis train on the C-fold, the outer fold
 in which every variant of worker~C is withheld from the training runs.
 We call these 603 labeled runs the \emph{FIT set}. A condition is
@@ -205,13 +193,39 @@ any form. The B-fold withholds
 worker~B instead. It appears only in the older comparisons of
 Appendix~\ref{app:secondary-results} and is not used for any result in
 the main chapters.
-% 근거: RECORD:44; answers.md 7-(2). 이 정의로 05_evaluation.tex의 기존 TODO
-% ("define the B-fold and C-fold")의 fold 부분을 닫는다. 그 TODO의 natural
-% 전달 일정 정의는 [직접 기입]으로 남는다. 05장을 쓸 때 TODO를 정리해 주세요.
+% 근거: RECORD:44; answers.md 7-(2). 6회차 문장 P3-3: 표 앞으로 옮겼다.
+
+\begin{table}[htbp]
+\centering
+\caption{Evaluation conditions and target layouts. ``C-fold FIT'' states
+whether the condition's benign work, or the layout, occurs in the 603
+training runs of the C-fold.}
+\label{tab:conditions}
+\begin{tabularx}{\textwidth}{@{}llX@{}}
+\toprule
+Identifier & C-fold FIT & Definition \\
+\midrule
+\texttt{ORIGINAL\_18} & seen & Original source procedure without a benign worker; all 18 actions \\
+\texttt{C\_ONLY} & unseen & Source procedure with worker C \\
+\texttt{A+C} & unseen & Source procedure with workers A and C \\
+\texttt{B+C} & unseen & Source procedure with workers B and C \\
+\midrule
+\texttt{FLAT} & present & Four file targets \texttt{echo}, \texttt{foxtrot}, \texttt{golf}, \texttt{hotel} placed as sibling directories \\
+\texttt{NESTED} & present & As \texttt{FLAT}, except that \texttt{foxtrot} is moved under \texttt{echo}; \texttt{echo} remains a target, and the two payloads have different search roots \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 표 기호: 본문·표의 조건 이름은 A+C FLAT, A+C NESTED, C_ONLY, B+C,
+% ORIGINAL_18로 통일한다(개요 전체 규칙). 원고의 "C-only"는 C_ONLY로 바꿨다.
+% 출처: FIT 603에 FLAT·NESTED 둘 다 있음(새 FIT 64실행 = 16 공격 셀×{FLAT,NESTED}×{QUIET, A worker}):
+%   atlas OT/REL_EVIDENCE_PRESERVING_COMPARISON_20261113/EXECUTION_CONTRACT.md:3 (defs.md 14(c)).
+% TODO(사람): C_ONLY·B+C(135실행 개발 집합, v3, PAG1)가 어느 배치를 쓰는지는 atlas에 없다.
 
 The C-fold makes the difference between seen and unseen conditions
-concrete. Worker~C runs \texttt{ipconfig /all}, and the input
-represents such records as an IP hint. Of the 4,824 boundaries in the
+concrete. Worker~C runs \texttt{ipconfig /all}, and received \texttt{ipconfig}
+records carry an \emph{IP hint}, the observed-command hint
+\texttt{IP\_CONFIGURATION\_ENUMERATION\_V1} that a fixed rule derives
+from the command line; it is an observed feature, not a label. Of the 4,824 boundaries in the
 FIT set, 2,425 had received at least one IP hint. These hints came from
 658 distinct native records in 329 runs, and all 658 belong to the
 process lineage of the attack procedure. In the 60 \texttt{A+C}
@@ -224,10 +238,9 @@ unseen in training looks like; the audit does not establish it as the
 cause of any seed's success or failure.
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:9.
 % 60실행·660행 = A+C FLAT 31·341 + NESTED 29·319 (같은 파일, 135실행 개발 집합).
-% 4,824는 원 파일의 "자연 경계" 수다. natural boundary의 정의는 5장 [직접 기입].
-% TODO(사람): "IP hint"가 ipconfig 사건에서 만든 입력 표현이라는 설명이 맞는지
-% 확인해 주세요(원 파일은 FIT의 ipconfig.exe START/END 880개가 모두 공격
-% 계보라고 적는다).
+% 4,824는 원 파일의 "자연 경계" 수다.
+% 출처(IP hint): atlas OT/PROPHET_SEED_INPUT_AUDIT_20261118/FINAL_REPORT_KO.md:7;
+%   LAB/DIVERSE3K_20261027/COMMAND_REPRESENTATION_20261028/REPORT_V1.md:11 (defs.md 14(b)).
 
 \section{A recorded file-processing decision}
 \label{sec:recorded-case}

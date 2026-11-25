@@ -18,42 +18,114 @@ general encoders.
 \label{sec:method-baseline}
 
 REL\_GLOBAL maps the received prefix $X_t$ of
-Equation~\ref{eq:receipt} to a distribution over the 18 actions. Each
-admitted event is encoded as a 48-dimensional vector, and event-level
-gated recurrent units (GRUs)~\cite{cho2014gru} with a 64-dimensional
-state advance once per admitted event in receipt order. A relational
-residual adds a correction to the action scores, computed over events
-that share an observed target key, so that the result recorded for one
-target is kept apart from the results of the others. Two regularizers
-complete the model. LogitNorm~\cite{wei2022mitigating} computes the cross-entropy on
-logits divided by their $L_2$ norm and scaled by a temperature $\tau$,
-here $\tau=0.1$; it limits how far the training loss can be lowered by
-inflating the logits. Input-gradient regularization~\cite{ross2017improving} penalizes
-the gradient of the loss with respect to the input representation,
-which discourages predictions that change sharply with small changes
-to individual events. Our variant, $\mathcal{R}_{\mathrm{GLOBAL}}$,
-applies the penalty to events drawn at random from the whole prefix.
-The model has 59,882 parameters. This description stays at the level
-recorded in the round contracts. They do not document the field layout
-of the 48-dimensional event vector, the treatment of UNKNOWN records,
-the exact computation of the relational residual and of the output
-head, or how $\mathcal{R}_{\mathrm{GLOBAL}}$ selects its events, so the
-thesis does not by itself give enough detail to reimplement REL\_GLOBAL
-(Appendix~\ref{app:repro}). The in-house results of later chapters are
-accordingly restatements of the stored round reports, not experiments
-that a reader can repeat from this text.
-% TODO(사람): 위 다섯 항목과 GRU 폭 64(자체 모델)를 확인할 코드·계약 파일의 위치를
-% 알려 주세요. 확인되면 식으로 넣고 위 문장을 지웁니다.
-% 근거: RECORD:46 (48차원, 사건별 GRU, 대상 key 관계 잔차, LogitNorm τ=0.1,
-% 규제 .1, 59,882). GRU 폭 64: RECORD:157의 ADS-24 적용판 "그대로 둔 것"
-% (GRU 64). 자체 실험실 모델의 폭도 64인지는 질문 A3에서 확인 요청 중이다.
-% R_GLOBAL은 원 파일의 GLOBAL_COUNT_MATCH: "동일 선택 수의 전체 사건 무작위
-% 규제"(ORIG:PROPHET_ENV_CONSENSUS_KD_V3_20261120/PAPER_DEFINITIONS.md §4).
-% TODO(사람): 질문 A3. REL_GLOBAL의 사건 인코더, 사건별 GRU, 대상 key 관계
-% 잔차의 식을 쓰려면 원 계약이나 코드 문서가 필요합니다. "동일 선택 수"가 무엇의
-% 개수와 맞춘 것인지(worker 사건 수?), 규제가 쓰는 Rademacher trace의 역할,
-% LogitNorm 정규화가 추론 때도 적용되는지 알려 주세요. 답이 오면 관계 잔차 식을
-% 이 자리에 넣고, 그림 fig:model을 새 구조로 다시 그릴지 정합니다.
+Equation~\ref{eq:receipt} to a distribution over the 18 actions. Its
+parts are an event encoder, an event-level recurrent state, a relational
+residual, and an output head. The definitions below follow the selected
+method contract and the round contracts that extend it.
+
+\paragraph{Event encoder.} Each admitted event is first described by a
+35-dimensional vector: an 8-dimensional embedding of the image name,
+the mean of 8-dimensional embeddings of the normalized command tokens
+(a zero vector for an empty command), an 8-dimensional embedding of the
+observed-command hint (with a NONE value), a 4-dimensional START/END
+type embedding, a 4-dimensional status embedding, and three numbers,
+$\log(1+\Delta_{\mathrm{native}})$, $\log(1+\Delta_{\mathrm{receipt}})$
+and a link indicator. Here $\Delta_{\mathrm{native}}$ is the event's
+native time minus the earliest native time in the prefix and
+$\Delta_{\mathrm{receipt}}$ is the cutoff minus the event's receipt
+time, both in seconds and clipped at zero. The status vocabulary is
+UNOBSERVED, UNMATCHED, ZERO, NONZERO, STATUS\_MISSING and
+STATUS\_MALFORMED (Section~\ref{sec:receipt}). The vector is mapped to
+48 dimensions by
+\begin{equation}
+  e_i=\phi(v_i)=\mathrm{LayerNorm}\bigl(W_2\,\mathrm{GELU}(W_1 v_i)\bigr),
+  \qquad W_1\in\mathbb{R}^{64\times 35},\; W_2\in\mathbb{R}^{48\times 64}.
+  \label{eq:event-enc}
+\end{equation}
+All vocabularies are fitted on FIT data only. The command-token
+vocabulary holds at most 1,024 tokens, in order of frequency, plus
+padding and unknown entries. The vocabularies and normalizers are those
+fitted on the original 404 FIT runs and are kept fixed for every
+extension of FIT; tokens that occur only in the added runs map to the
+unknown entry. The round reports call this the 404-only preprocessor.
+
+\paragraph{Recurrent state and head.} Events enter a gated recurrent
+unit cell~\cite{cho2014gru} with a 64-dimensional state, one event per
+step in receipt order. The head is
+\begin{equation}
+  z_{\mathrm{EVENT}}=W_4\,\mathrm{GELU}\bigl(W_3[h;\,\log(1+\mathrm{age});\,r]\bigr),
+  \qquad W_3\in\mathbb{R}^{64\times 66},\; W_4\in\mathbb{R}^{18\times 64},
+  \label{eq:head}
+\end{equation}
+where $h$ is the last state, age is the time since the last receipt and
+$r$ indicates whether anything has been received. An empty prefix uses a
+learned initial state with age and $r$ set to zero.
+
+\paragraph{Relational residual.} Let $a_i$ be the target that the
+parser assigns to event $i$, and let $M_{ij}=1$ when events $i$ and $j$
+are both assigned and $a_i=a_j$ (including $i=j$). Events that match
+several target paths ambiguously or none are left unassigned. With
+shared key and value maps $W_k$ and $W_v$,
+\begin{equation}
+  P_{ij}=\operatorname*{softmax}_{j:\,M_{ij}=1}
+    \frac{(W_{\mathrm{peer}}e_i)^{\top}W_k e_j}{\sqrt{48}},\quad
+  u_i=e_i+\sum_j P_{ij}W_v e_j,\quad
+  A_i=\operatorname*{softmax}_{i}\frac{(W_q h)^{\top}W_k u_i}{\sqrt{48}},
+  \label{eq:relation-attn}
+\end{equation}
+and the logits are $z=z_{\mathrm{EVENT}}+W_o\sum_i A_iW_v u_i$, where
+the sums run over assigned events. $W_o$ is initialized to zero. When no
+event is assigned, $z=z_{\mathrm{EVENT}}$. Unassigned events and events
+whose result is UNOBSERVED or UNMATCHED stay in the recurrent path but
+do not enter the residual, so the result recorded for one target is
+read together with that target's other records and kept apart from the
+results of the others. The model has 59,882 parameters.
+
+\paragraph{Regularizers.} LogitNorm~\cite{wei2022mitigating} replaces $z$
+by $z/[\tau\max(\|z\|_2,10^{-8})]$ with $\tau=0.1$, in training and at
+inference, and the gradient flows through the denominator. It limits
+how far the training loss can be lowered by inflating the logits.
+$\mathcal{R}_{\mathrm{GLOBAL}}$ is a form of input-gradient
+regularization~\cite{ross2017improving}. For each FIT view it counts the
+$k$ worker events whose role is known and draws exactly $k$ events at
+random from all received events. For each drawn event it takes the
+squared gradient, with respect to that event's 48-dimensional vector
+$e_i$, of a single Rademacher projection of the centered 18-way logits;
+this is an unbiased estimate of the squared Frobenius norm of the
+Jacobian. The penalty is averaged over the drawn events and then over
+occurrences. The random draws are fixed by update, microbatch and seed.
+The penalty therefore discourages logits that change sharply with one
+event's representation, without singling out the worker events by
+role.
+
+The model was reached in steps. REL, the relation model of
+Section~\ref{sec:method-relation-evidence}, added the residual of
+Equation~\ref{eq:relation-attn} to the event-level predictor. Adding the
+benign-worker runs to FIT gave the 603-run C fold and 1,346 updates
+(called hard REL in the round reports); LogitNorm was then added (hard
+REL\_NORM), and finally $\mathcal{R}_{\mathrm{GLOBAL}}$ with coefficient
+0.1. The parameter count stayed at 59,882 throughout.
+Appendix~\ref{app:repro} states which code and records exist and which
+are not in the archive available to us; the thesis does not supply
+everything needed to repeat the in-house experiments
+(Section~\ref{sec:repro-code}).
+% 출처: sources/atlas_answers/repro.md 6번·7번.
+% 사건 표현 35차원·φ·head: atlas OTL/RECEIPT_BATCH_METHOD_DECISION_20261101/SELECTED_METHOD_CONTRACT.md:18;
+%   OT/EVENT_CONTEXT_READOUT_PREFIT_20261105/CURRENT_REPRESENTATION_AUDIT_KO.md:14,17.
+% status 어휘: SELECTED_METHOD_CONTRACT.md:11,18. 어휘 1,024: OTL/DIVERSE3K_20261027/COMMAND_REPRESENTATION_20261028/PRE_SPEC_V1.md:13.
+% 404-only: OT/EXPOSURE_404_VS_476_COMMON_VOCAB_FIXED_20261110/CONTRACT.md:5.
+% 미배정 -1: OT/V3_MEMORY_EXTERNAL_METHODS_FIXED_20261106/METHOD_SPEC_KO.md:9.
+% 관계 잔차 식: OT/THM_RELATION_AWARE_ATTENTION_FIXED_20261108/CONTRACT.md:14,16-19;
+%   OT/REL_PEER_HISTORY_FACTORIAL_FIXED_20261110/CONTRACT.md:3 (공유 key/value, √48, self-edge, 0 초기화).
+% 59,882: OT/EXPOSURE_404_VS_476_COMMON_VOCAB_FIXED_20261110/REPORT_KO.md:11.
+% LogitNorm 학습·추론: OT/SLOT_LOCAL_BITA_LOGITNORM_CONFIRM_20261116/CONTRACT.md:17;
+%   OT/SLOT_SERIAL_HARD_REL_NORM_FIXED_20261116/CONTRACT.md:3.
+% R_GLOBAL: OT/PROPHET_WORKER_GLOBAL_COUNT_MATCH_20261117/FINAL_REPORT_KO.md:10,11;
+%   OT/PROPHET_WORKER_INPUT_GRAD_FIXED_20261117/FINAL_REPORT_KO.md:9;
+%   OT/PROPHET_BITA_GLOBAL_COUNT_INTERACTION_20261118/FINAL_REPORT_KO.md:8 (48차원 EVENT 표현).
+% 계보: OT/REL_EVIDENCE_PRESERVING_COMPARISON_20261113/FINAL_REPORT_KO.md:26,28;
+%   OT/SLOT_SERIAL_HARD_REL_NORM_FIXED_20261116/CONTRACT.md:3; OT/PROPHET_WORKER_INPUT_GRAD_FIXED_20261117/FINAL_REPORT_KO.md:7.
+% "Δ의 정확한 단위·절단": 원 계약의 log1p((native−min_native_prefix)+/1s), log1p((cutoff−receipt)+/1s).
 
 Training uses the 603 runs of the FIT set
 (Section~\ref{sec:conditions}). The objective is
@@ -64,20 +136,27 @@ Training uses the 603 runs of the FIT set
   \label{eq:base-loss}
 \end{equation}
 where $\mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}$ is the 18-way action
-cross-entropy with each FIT run given equal weight. Each model is
-trained for 1,346 updates of 32 occurrences with AdamW~\cite{loshchilov2017decoupled}
+cross-entropy with each FIT run given equal weight. Each update draws
+32 FIT occurrences with replacement and with equal probability per run;
+an occurrence holds all natural boundaries of one run in its natural
+view together with the same boundaries under one of its 16 delayed
+schedules (Section~\ref{sec:task-rows}), the loss is averaged within the
+run, and the 32 occurrences are weighted equally. Each model is
+trained for 1,346 such updates with AdamW~\cite{loshchilov2017decoupled}
 (weight decay 0.01, gradient clipping at 2), and the learning rate
 follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
 kept; no checkpoint is selected by a validation score. All 30 seeds of
 a group share this procedure and differ only in the seed as
-defined in Chapter~\ref{ch:introduction}. The seeds of each round are a
-fixed list of integer identifiers written into its contract, not draws
-from a stated distribution; Appendix~\ref{app:repro} lists the
+defined in Chapter~\ref{ch:introduction}. The seeds of each round are
+fixed integer identifiers written into its plan before training;
+Appendix~\ref{app:repro} lists those that the archive records and the
 remaining training settings.
 % 근거: RECORD:151; PAPER_DEFINITIONS.md §2 (실행 동등 18-way CE, 계수 .1의
 % GLOBAL_COUNT_MATCH, weight decay .01, clip 2, 마지막 checkpoint).
-% 원 파일은 "404-only 전처리"도 적는다. 정의가 본문에 없어 쓰지 않았다.
-% TODO(사람): "404-only 전처리"가 무엇인지 알려 주시면 한 구절로 넣겠습니다.
+% 출처(occurrence 표집): atlas OTL/RECEIPT_BATCH_METHOD_DECISION_20261101/SELECTED_METHOD_CONTRACT.md:34;
+%   OT/AUX_MOE3_PAPER_METHOD_RESULTS_20261104/PAPER_METHOD_RESULTS_KO.md:32 (복원추출, 중복 유지);
+%   OT/EXPOSURE_404_VS_476_COMMON_VOCAB_FIXED_20261110/CONTRACT.md:4 (repro.md 6-(8)).
+%   603 계보 표집기의 구현(torch Generator인지 permutation 순환인지)은 atlas에 없다.
 
 \section{Evidence for the relational residual}
 \label{sec:method-relation-evidence}
@@ -99,6 +178,7 @@ only how many records each group held.
 % seed 11/29/47, 새 64실행·512행, 16개 보류 구성). 소속 교환 0.058365 →
 % 0.086855, FIT 436, 이미 열람한 127실행·508행, 3 seed(개요 C표의 대조).
 % 소속 교환 대조의 설명은 부록 B.3에서 한 번만 한다.
+% 계보(REL → hard REL → REL_NORM → REL_GLOBAL)는 4.1절 끝에 넣었다(repro.md 7번).
 
 These results come from a different stage of the project and are not
 comparable with the numbers in later chapters. Both models were trained
@@ -109,12 +189,6 @@ only as the reason for keeping a relational residual in the baseline.
 None of the criteria in this thesis tests that residual, and
 Appendix~\ref{app:secondary-results} gives the definitions of the
 earlier models and the full tables.
-% TODO(사람): 질문 A2. REL(FIT 476, 정상 worker 없음, 900 update)에서
-% REL_GLOBAL(C-fold 603 FIT, LogitNorm, GLOBAL_COUNT_MATCH, 1,346 update)까지
-% 무엇이 언제 더해졌는지 알려 주세요. ORIG:SLOT_LOCAL_BITA_MATCHED_20261115 표의
-% "hard REL" 열이 REL_GLOBAL의 직전 형태인지도 확인이 필요합니다. 답이 오면
-% 이 문단에 계보 문장 한 줄을 넣습니다. 지금은 "같은 대상 key 관계 경로를 쓴
-% 앞선 모델"이라고만 썼습니다.
 
 \section{Consensus distillation}
 \label{sec:method-cd}
@@ -168,13 +242,17 @@ and carries no model of the spread among teachers.
 Teachers are chosen from 30 REL\_GLOBAL seeds trained with
 Equation~\ref{eq:base-loss}. For each row of the unlabeled A+C inputs,
 the 30 models vote with their top-1 actions, and the majority action
-serves as the reference; each model's own vote is included. A model's
+serves as the reference. Each model's own vote is included, which
+adds a mechanical self-agreement term of up to one vote in 30; the
+in-house selection was not repeated with the candidate's vote left out.
+A model's
 \emph{top-1 agreement} is the fraction of rows on which its top-1
 action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
-form $J$. A tie in the majority vote goes to the action with the lower
-index in Appendix~\ref{app:actions}, and a tie in agreement to the
-lower seed identifier; Section~\ref{sec:repro-training} lists the five
+form $J$. A tie in the majority vote goes to the lower action column,
+and a tie in agreement to the lower seed identifier. The stored
+per-action tables list the columns in the order of
+Appendix~\ref{app:actions}, which is alphabetical by action identifier; Section~\ref{sec:repro-training} lists the five
 seeds selected. They are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
 the v2 and v3 rounds (Tables~\ref{tab:variants} and~\ref{tab:rounds}). Section~\ref{sec:related-underspec}
 explains how this ranking relates to the agreement estimator of Baek
@@ -189,7 +267,8 @@ not that ranking by agreement is needed or better than another choice.
 % 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
 % 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
 % 5회차 방법 리뷰 P3: 동률 규칙을 본문에 옮기고 부록 E의 seed 목록을 가리켰다.
-% TODO(사람): "낮은 행동 열 index"가 부록 A의 행동 번호 순서와 같은지 확인해 주세요.
+% 출처(열 순서): defs.md 38번; PAPER_DEFINITIONS.md:44; 행동별 표 세 곳의 순서가 부록 A와 같다.
+% TODO(사람): 모델 출력 열 index가 이 표 순서와 같은지는 코드로 확인해 주세요(atlas에 직접 진술 없음).
 
 Agreement is used to choose teachers, not to choose a deployed model.
 The single seed ranked first by agreement failed preservation on
@@ -269,7 +348,8 @@ The method was moved to two further settings with as few changes as
 possible (Table~\ref{tab:transfer}). On ADS-24, a public dataset of
 attack episodes whose host alerts come from the Wazuh security monitor
 (Chapter~\ref{ch:ads24}), the input encoder reads Wazuh alert fields, the head predicts nine tactic classes, and the
-relational residual is removed; the resulting model has 31,685
+relational residual, which the sealed contract describes as specific to
+PROPHET target keys, is removed; the resulting model has 31,685
 parameters. We call it REL\_GLOBAL-ADS to keep it apart from the
 in-house REL\_GLOBAL. The three general encoders replace the event encoder with
 an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
@@ -281,8 +361,8 @@ width and learning rate of each encoder were chosen by validation inside
 the FIT set. Appendix~\ref{app:repro} gives the architectures, the
 candidate grid, the validation split, and the selected settings.
 % 근거: RECORD:155--160, 281. ADS-24 9-way, 경보 창 512, 31,685 파라미터.
-% TODO(사람): 기록은 ADS-24 적용판에서 관계 잔차를 뺀 사실만 적고 이유는 적지
-% 않습니다. 이유(예: 대상 key에 해당하는 필드가 없음)를 한 구절 넣을지 알려 주세요.
+% 출처: atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_CONTRACT_SEALED.md:15
+% ("PROPHET 전용 대상 key 관계 잔차는 제거한다"). 다른 이유는 atlas에 없다(ads.md 29번).
 
 \begin{table}[htbp]
 \centering

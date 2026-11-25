@@ -23,11 +23,8 @@ seeds. We never average the probabilities of different student seeds:
 each student is deployed as a single model, and an average of 30
 students would be a 30-model ensemble with a different inference cost.
 Probability averages appear only for teachers, where they are labeled
-as such.
-% TODO(사람): natural 경계·natural row의 정의. [직접 기입]
-% (옛 문장: "A natural row is a decision row evaluated with the receipt order
-% recorded during collection; a delayed view replays the same boundary under a
-% permitted alternative delivery schedule ..." 이 정의가 맞는지 확인 후 기입.)
+as such. Natural rows and views are defined in
+Section~\ref{sec:task-rows}.
 % 근거: RECORD:15, 32; PAPER_DEFINITIONS.md:48 ("학생 seed 확률을 평균하지 않는다").
 
 Top-1 accuracy is a secondary metric. It measures how often the
@@ -49,15 +46,17 @@ two describe the spread it summarizes.
 % 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
 % METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
 % 구조 일반성·방법 비교 보고서: "정확도도 실행 동등". v3 보고서: "행 정확도
-% 0.798729→0.801412". TODO(사람): ADS-24 2단계 보고서의 정확도(28.4%, 31.5%)가
-% 실행 동등인지 원 보고서에 명시가 없습니다. 확인해 주세요.
+% 0.798729→0.801412". ADS-24 2단계 정확도도 실행 동등이다. 출처: atlas
+% OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE2_DIAGNOSTIC.md:5,8 ("실행 동등 정확도" 0.283592);
+% EXTERNAL_DATASET_SUITABILITY_V3.md:15 (defs.md 16번).
 
 \section{The sealed contract}
 \label{sec:eval-contract}
 
-Choices made after looking at test data are a common way for security
-evaluations of machine learning to go wrong~\cite{arp2020dos}, so each round
-followed a written contract. The contract, the seeds, and
+Arp et al.\ document common pitfalls in the evaluation of machine
+learning for security~\cite{arp2020dos}, among them the reuse of data
+that has already been inspected. To limit choices made after inspection,
+each round of this study followed a written contract. The contract, the seeds, and
 the hashes of the code, the training inputs, and the collection plan
 were sealed before any model of the round was trained and before any of
 its executions were collected. Each planned execution identifier was
@@ -85,13 +84,15 @@ empty prefix or an UNKNOWN record is not a reason for exclusion, and an
 ineligible execution is excluded whole, never trimmed to its valid rows.
 
 According to the stored reports, the eligible set of each round was
-sealed before any model predicted on it. For the v3 round and the PAG1
-collection, however, the eligibility seal and the reason codes of the
-excluded runs (three and four background runs) were not part of the
-archive available to us, so a reader cannot audit that those
-exclusions were independent of the scores; the v3 verdict is reported
-as stored and has not been audited independently
-(Appendix~\ref{app:repro}).
+sealed before any model predicted on it. The three background runs
+excluded from the v3 round are recorded with their reasons, and all
+three failed at the source collection stage (Appendix~\ref{app:repro}).
+For the four background runs excluded from PAG1, the in-house
+collection of the generality study (Section~\ref{sec:eval-rounds}),
+the reasons are kept only in a sealed file that is not in the archive
+available to us. The seed-level score files of both collections are
+not in that archive either, so the v3 verdict is reported as the
+stored report states it and could not be rescored here.
 
 A round also stops early under a
 \emph{safety stop}, a rule written into its contract that reads only
@@ -113,10 +114,9 @@ reasons for the exclusions and stops that the reports record.
 \section{Form of the pre-specified contrasts}
 \label{sec:eval-criteria}
 
-We use \emph{contrast} for any pre-specified comparison and reserve
-\emph{criterion} for a contrast fixed in a contract before the round's
-models were trained and read once on new executions
-(Section~\ref{sec:eval-rounds}). Every contrast is a one-sided reading
+We use \emph{contrast} for any pre-specified comparison; a
+\emph{sealed criterion} is the stricter kind defined in
+Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
 of a two-sided adjusted interval on a paired difference, student minus
 base model. Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
@@ -147,8 +147,10 @@ they remain contrasts.
 % 방법 리뷰 P3-1: ≤와 <를 구분해 적었다. 한도와 같은 상단 값은 없다(가장 가까운 값
 % +0.019818, +0.020741).
 
-The contracts call these limits practical limits but do not derive
-them from an operational requirement, such as a tolerable change in an
+The contracts call these limits practical limits. The in-house limit
+of $+0.020$ has been used unchanged in this project's contracts since
+10 November 2026 and the ADS-24 limit first appears in its sealed
+contract, but neither is derived from an operational requirement, such as a tolerable change in an
 analyst's decisions, or from a measured spread. We therefore report the
 upper end of every preservation interval, so that a reader can apply
 another limit, and Section~\ref{sec:disc-threats} lists the outcomes
@@ -157,8 +159,10 @@ that a different limit would reverse.
 % 근거: ARCH_GENERALITY_STAGE2_REPORT.md 주 판정(PLAIN_GRU 상단 0.019818, 나머지
 % 자체 상단 −0.015341, −0.034626; ADS −0.020109, −0.008179, −0.010914);
 % V3_REINFERENCE 상단 0.020741; v2 재확인 상단 0.053519.
-% TODO(사람): +0.020과 3% 한도를 정한 근거(운영상 허용 손실, 기존 seed 변동 등)가
-% 원 계약에 없습니다. 근거가 있으면 알려 주세요. 한 문장으로 넣겠습니다.
+% 출처: atlas OT/REL_OBSERVED_RESULT_AUX_FIXED_20261110/CONTRACT.md:20 (가장 이른 +0.020);
+%   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_CONTRACT_SEALED.md:27 (3%) (defs.md 15번).
+% TODO(사람): 한 보고서(PROPHET_ENS_BASE_KD_FIXED_20261116/FINAL_REPORT.md:34)는 +0.020을
+%   "사용자가 지정한 기준"이라 적는다. 연구자가 정한 값이라고 본문에 밝힐지 정해 주세요.
 
 Intervals come from 100,000 paired resamples. In the in-house lab a
 resample draws complete configurations and moves their repetitions
@@ -182,8 +186,11 @@ It defines no family of all 18 contrasts, and we do not claim that all
 18 hold jointly at a 5\% familywise level, which would need 99.7222\%
 intervals that were not computed. The method comparison has one family
 of the five comparison methods per dataset and statistic (99\%).
-Section~\ref{sec:app-raw} lists the six-digit values behind the
-rounded estimates and intervals of the main chapters.
+Estimates and interval ends are rounded to three decimals. A value is
+written to four where three would not separate it from a limit, from
+zero, or from a neighboring value in the same table, and a table keeps
+one rule throughout. Section~\ref{sec:app-raw} lists the six-digit
+values behind the rounded estimates and intervals of the main chapters.
 % 근거: CONTRACT_V3.md:11 (100,000회, 98.3333%); ADS24_STAGE2_REPORT.md:15;
 % ARCH_GENERALITY_STAGE2_REPORT.md:9 (98.3333% 자료별 / 99.1667% 여섯 대비);
 % METHOD_BASELINES_CONTRACT_SEALED.md:37 (99%); RECORD:446.
@@ -231,7 +238,8 @@ diagnosis, never for a claim about CD.
 % 방법 리뷰 P1-1, P1-2와 answers 2026-11-24 07:10 4번에 따라 ADS-24 2단계와 구조
 % 일반성 2단계를 개발 비교로 낮췄다. PAG1 재추론도 같은 이유(PAG1 실행이 구조
 % 일반성 1단계에서 이미 채점된 뒤 사전 등록됨, ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md)로
-% 함께 낮췄다. TODO(사람): PAG1 재추론의 분류가 맞는지 확인해 주세요.
+% 함께 낮췄다. 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:5
+%   (PAG1은 1단계에서 이미 채점된 뒤 재추론이 등록됨; defs.md 17번).
 
 Table~\ref{tab:rounds} is the ledger of every round in which the method
 was tested, including the rounds that failed. The code names
@@ -245,7 +253,8 @@ collections for the same reason and are never placed on one scale.
 
 \begin{table}[htbp]
 \centering
-\caption{Ledger of the rounds that tested consensus distillation.
+\caption{Ledger of the rounds that tested distillation toward a seed
+consensus (the 10-seed round used all 30 baseline models as teachers).
 Evaluation runs and rows are those scored in the round, not the
 unlabeled adaptation inputs. Status uses the three labels defined
 above; the criteria of a sealed contract that ended in a safety stop were never read.}
@@ -264,7 +273,7 @@ v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
 v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
   & sealed criterion & stability passed; preservation not shown; not adopted \\
 v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
-  & sealed criterion & all three criteria passed, as stored; exclusions not audited \\
+  & sealed criterion & all three criteria passed, as stored; exclusions recorded as collection failures \\
 PAG1 re-inference & 0 & 156 / 1,600
   & development comparison$^{a}$ & stability favorable; preservation not shown \\
 ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982

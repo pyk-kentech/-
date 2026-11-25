@@ -30,10 +30,10 @@ several operations fall under the same phase, and knowing that an actor
 is in discovery does not say which resource it will examine next. Attack
 Flow goes further and represents the order of and dependencies between
 adversary actions, linking actions, conditions, and relationships into
-an account of how an attack unfolds~\cite{mitreattackflow}. Both are descriptions
-written with the whole sequence in view. A forecaster has only the prefix
-received before the next action, and it must commit to a distribution
-over that action before it is observed.
+an account of how an attack unfolds~\cite{mitreattackflow}. Both
+describe relations within an attack sequence. Our forecaster receives
+only the prefix that arrived before the next action, and it must commit
+to a distribution over that action before it is observed.
 
 \section{Attack graphs and attack progression}
 \label{sec:related-graphs}
@@ -101,9 +101,7 @@ investigation~\cite{cheng2024kairos}, and ORTHRUS detects and attributes
 attacks at the level of provenance nodes~\cite{jiang2025orthrus}. Their
 outputs concern behavior that has already been observed. Chapter~\ref{ch:generality}
 runs adaptations of ORTHRUS, BiTA, and CL-AP$^{2}$ on our inputs as a
-reference point only; EFI is not adapted. We did not check the full
-texts of these works for results across random seeds, and we make no
-claim about whether they report them.
+reference point only; EFI is not adapted.
 % RECORD:477, 480의 "seed 변동 미보고" 판단은 초록 수준이라 본문 주장에서 뺐다.
 
 \section{Sequence models for logs}
@@ -142,8 +140,9 @@ one part of it: the scores we computed on the training side did not
 rank the seeds by their loss on the unseen conditions. They do not show
 that the seeds are equally good on the seen condition
 (Chapter~\ref{ch:diagnosis}), and the thesis then tries to reduce the
-spread it measures. Baek et
-al.\ observe that, when in-distribution and shifted accuracy are
+spread it measures.
+
+Baek et al.\ observe that, when in-distribution and shifted accuracy are
 linearly related across models, agreement between pairs of models on
 in-distribution and shifted data follows a closely matching line, which
 allows accuracy under shift to be estimated from unlabeled
@@ -173,8 +172,9 @@ prediction but also the spread among members~\cite{malinin2019ensemble}. The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities
 as the target, and a student with the teachers' architecture.
-Rath-Manakidis et al.\ show that ensembling reduces variance-related
-error under distribution shift~\cite{rathmanakidis2022reduction}. Their
+Rath-Manakidis et al.\ study how ensembling reduces variance-related
+error, including for out-of-distribution
+generalization~\cite{rathmanakidis2022reduction}. Their
 result concerns the error of an ensemble, not the spread among
 distilled students, so it motivated, but did not establish, our
 expectation that a student of a consensus would vary less across seeds
@@ -188,23 +188,22 @@ on stabilizing a single model or adapting it without labels. Entropy
 minimization penalizes uncertain predictions on unlabeled
 inputs~\cite{grandvalet2004semi}, and stochastic weight averaging (SWA)
 averages weights along one training
-trajectory~\cite{izmailov2018averaging}. We also run a hard-label
-control that trains on the frozen base model's own top-1 predictions
-for the unlabeled inputs; it is defined in
-Section~\ref{sec:gen-methods} by the procedure we ran, not as a
-reproduction of a published method. Distillation on unlabeled inputs
-is not new either: the transfer set of Hinton et al.\ needs no
-labels~\cite{hinton2015distilling}, and Kan et al.\ adapt malware
-detectors to drift with unlabeled data from the target environment,
-warning that training on a model's own labels can reinforce its
-errors~\cite{kan2021investigating}. Our transfer set is likewise drawn
-from the target environment. What we examine is whether a student
-distilled from a seed ensemble on that set narrows the seed standard
-deviation.
+trajectory~\cite{izmailov2018averaging}. Pseudo-labeling trains on a
+model's own confident predictions for unlabeled
+inputs~\cite{lee2013pseudo}; our hard-label control is a form of it,
+using the frozen base model's top-1 predictions without a confidence
+threshold (Section~\ref{sec:gen-methods}). Distillation on unlabeled
+inputs is not new either: the transfer set of Hinton et al.\ may
+consist of unlabeled data~\cite{hinton2015distilling}, and Kan et al.\
+investigate adapting malware detectors to drift without
+labels~\cite{kan2021investigating}. Our transfer set is likewise drawn
+from the target environment.
 % 근거: RECORD:470--475. 4회차 지시 1번: 온도 보정·확률 앙상블은 마무리 확인 묶음이라
 % 이 절에서 빼고 결론 Future Work에 계획으로만 둔다(guo2017calibration은 그곳에서 인용).
-% 4회차 지시 6번: pseudo-labeling의 출처가 확인되지 않아 선행 방법 이름 대신 이 논문이
-% 실행한 절차("hard-label control")로 썼다.
+% decisions.md 32번: lee2013pseudo로 pseudo-labeling 이름과 인용을 되살렸다.
+% 6회차 인용 P2-3: Kan 등은 제목이 받치는 범위(무라벨 drift 적응)로 낮췄다.
+% TODO(사람): Kan 등 원문에서 "자기 라벨 학습이 오류를 키울 수 있다"는 경고를 확인하면 되살릴 수 있다.
+% 6회차 문장 P2-5: 둘째 문단 끝의 되풀이 문장을 지웠다.
 
 \section{Decomposition of ensemble log loss}
 \label{sec:related-decomposition}
@@ -228,9 +227,8 @@ for the 30 seeds of one model setting on the environment inputs of this
 task and read which of the two terms CD reduced, as a post hoc analysis
 introduced after the primary experiments.
 % 근거: RECORD:308--316, 334, 469. 인용 리뷰 P2-2, P2-3, 참신성 리뷰 P2-3.
-% TODO(사람): Heskes(1997)와 Gruber·Buettner(2022) 원문의 식 번호를 대조해 KL 방향과
-% 정규화 조건이 10장의 식과 같은지 확인해 주세요. 확인되면 식 번호를 붙이겠습니다.
-% 10장의 등식 자체는 정의에서 바로 유도된다(V = -log Z).
+% Heskes 방향은 원고 그대로 맞다(decisions.md 35번): 균등 가중 정규화 기하평균에 대해
+% 모호성 항은 멤버 평균 KL(p̄‖p_i) = −log Z. 식 번호는 붙이지 않는다.
 
 \section{Summary}
 \label{sec:related-summary}
@@ -278,13 +276,13 @@ BiTA~\cite{nayeri2026bita}
  & Future alerts \\
 KAIROS~\cite{cheng2024kairos}
  & Whole-system provenance graph
- & Intrusion detection and attack reconstruction \\
+  & Intrusion detection and investigation \\
 ORTHRUS~\cite{jiang2025orthrus}
  & Whole-system provenance graph
- & Node-level detection and attribution \\
+  & Attack detection and attribution \\
 DeepLog~\cite{du2017deeplog}
  & Sequences of system log keys
- & Anomaly flag from next-key prediction \\
+  & Anomaly detection on log sequences \\
 LogBERT~\cite{guo2021logbert}
  & Sequences of system log keys
  & Anomaly score from self-supervised training \\

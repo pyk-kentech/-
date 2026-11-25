@@ -40,12 +40,11 @@ Hypothesis or attempt & Outcome \\
 \midrule
 The model predicts one step late, repeating an action whose START has
 not yet been received
-  & Stored verdict: rejected; the supporting row counts could not be
-    checked against the source files \\
-% TODO(사람): 기록(RECORD:94, 368)의 "과거 4/29행, 현재 2/13행"은 원 파일에서 확인되지
-% 않았다(개요 B′표). 13행 집합은 있으나 "2"는 찾지 못했고, 원 파일의 "4행"은 다른
-% 뜻이다(ORIG:PROPHET_ERROR_SUPPORT_AUDIT_20261118/REPORT_KO.md:7,39,43). 확인되면 행
-% 수를 넣겠다.
+    & Rejected as a general account; on \texttt{ORIGINAL\_18} the errors
+    shared by five earlier baseline seeds matched a started but
+    unreceived action in 2 of 13 rows and repeated the previous label in
+    0 of 13 \\
+% 출처: atlas OT/PROPHET_PENDING_START_AUDIT_20261118/REPORT_KO.md:5,22,39-42 (diag.md 21번).
 A fixed conditional auxiliary loss, with the full 18-action
 cross-entropy kept
   & Not adopted; no gain in a 10-fit comparison \\
@@ -63,11 +62,20 @@ A target indicator
   & Rejected; the loss is not concentrated on the rows where the
     selected target disagrees \\
 \texttt{OBSERVED\_HEAD} beats its shuffled control with three targets
-  & Not confirmed (Section~\ref{sec:diag-intervention}) \\
-% TODO(사람): 기록(RECORD:118, 378)의 "62.5% 대 65.5/69.9%"는 섞기 대조의 정확도가 아니라
-% 집합별 비율이다(THREE_TARGET 160/256, A+C FLAT 216/330, A+C NESTED 246/352;
-% ORIG:PROPHET_OBSERVED_HEAD_STAGE2_3TARGET_20261119/SHUFFLE_FEATURE_MATCH_REPORT_KO.md).
-% 개요 B′표에 따라 숫자를 뺐다. 3대상 대비의 NLL 차와 구간이 확인되면 넣겠다.
+  & Not confirmed; $-0.019$, 98.75\% interval $[-0.043, +0.006]$
+    (Section~\ref{sec:diag-intervention}) \\
+The hint-bearing actions mark the attack
+  & Does not hold on A+C; the IP hints come from the attack lineage in FIT
+    (658 of 658 records) and from benign worker~C in A+C (353 of 353)
+    (Section~\ref{sec:conditions}) \\
+The errors come from COPY positions absent from FIT
+  & Rejected; FIT also has COPY at the sixth, eighth, and tenth
+    boundaries (58, 134, and 117 rows) \\
+The last received DISCOVERY announces the COPY
+  & Rejected; it did not separate COPY from DISCOVERY \\
+A correction of the parser key
+  & Not needed; the parser already binds marker and payload by the same
+    folder key \\
 FIT inputs leave nothing to distill because the teachers agree there
   & Rejected; the top-1 actions differ on 9.7\% of FIT views
     (Section~\ref{sec:diag-agreement}) \\
@@ -80,14 +88,11 @@ The partial v2 collection contaminated the original-task data
 % 20261118/FINAL_REPORT_KO.md:3, 43), 장부 0.5785 / 경계 순번 0.3111 (ORIG:PROPHET_
 % PAYLOAD_LEDGER_20261119/REPORT_KO.md:5, 19; 장부 = 전역 "ZERO 검색 수 − COPY START 수",
 % FIT 실행 단위 보류의 조건부 NLL), 9.7% = 1 − 74,074/82,008 (개요 B표).
-% 5회차 방법 리뷰 P1-4: 근거 보고서를 atlas에서 찾지 못한 다섯 행을 표에서 뺐다.
-% 뺀 행(RECORD:366--381의 기록 표): "The hint-bearing actions mark the attack: Rejected;
-% does not hold on A+C", "The errors come from particular positions in the FIT runs:
-% Rejected", "The last DISCOVERY announces the COPY: Rejected", "A correction of the
-% parser key: Rejected", "The generic form repairs the degradation on the original
-% task: Rejected".
-% TODO(사람): 다섯 행의 근거 보고서가 있으면 경로를 알려 주세요. 확인되면 근거 수치와
-% 함께 표에 되살립니다. 없으면 이대로 둡니다(저자 확인 목록 18번).
+% 되살린 네 행의 출처(defs.md 18(b)): hint 표식 OT/PROPHET_SEED_INPUT_AUDIT_20261118/MECHANISM_BOUNDS_KO.md:9,11;
+%   FIT 위치 OT/PROPHET_COPY_SIGNAL_AUDIT_20261119/REPORT_KO.md:41,55 (FIT COPY 경계 6:58, 8:134, 10:117);
+%   마지막 DISCOVERY 같은 파일 :5,55; parser key OT/PROPHET_MARKER_TARGET_RULE_20261119/REPORT_KO.md:7,39,45.
+% "일반형이 원래 과제를 고친다 — 기각" 행은 근거가 없고 수치가 반대 방향이라(GENERIC_HEAD ORIGINAL_18
+%   .613693 < REL .630865) 뺀 채로 둔다.
 
 \section{Method candidates and their stored verdicts}
 \label{sec:rej-candidates}
@@ -103,8 +108,9 @@ scores had already been seen, and no new model was trained for the two
 extension candidates. Candidate~A replaces the teacher mean by a target
 that falls back toward the FIT action prior when few teachers agree.
 Candidate~B keeps only the directions of the hidden state that the 30
-seeds share on FIT inputs. Candidate~A differs from ensemble
-distribution distillation~\cite{malinin2019ensemble}, which keeps the
+seeds share on FIT inputs. Candidate~A is close to ensemble distillation that adapts to
+disagreement among teachers~\cite{du2020agree}, and it differs from
+ensemble distribution distillation~\cite{malinin2019ensemble}, which keeps the
 distribution of the ensemble's predictions rather than falling back to
 a prior. Candidate~B builds on comparing networks through a shared
 representation subspace~\cite{raghu2017svcca}. Candidate~A scored better than the teacher mean on ADS-24
@@ -121,9 +127,8 @@ condition of ADS-24 but raised the seen-condition loss from 1.449 to
 % 18, 20행: ORIG:METHOD_EXTENSION_DECOMPOSITION_20261123/VARIANCE_DECOMPOSITION_REPORT.md
 % :137 (24/56), :153--156 (ADS ρ=−0.800 n=4, PROPHET ρ=+0.500 n=3).
 % 19행: ADS24_STAGE1_REPORT.md:15 (ρ .127475, 순열 p .503125), 8장.
-% TODO(사람): Yang 등 DEED(CVPR Findings 2026)는 서지를 확인하지 못해 요청하지 않았다.
-% TODO(사람): Du 등(임시 key tmp_du)이 엔진에서 확인되지 않아 인용과 "close precedents"
-% 주장을 뺐다. 서지를 ref.bib에 넣어 주시면 Candidate A 문장에 되살리겠다.
+% Du 등은 du2020agree로 되살렸다. Yang 등 DEED는 서지를 확인하지 못해 인용과 '선행' 주장을 뺐다
+%   (decisions.md 33번).
 % TODO(사람): 1--15행의 옛 후보(HISTORY_MARGINAL, ROLE_WEIGHTED, OBS_TARGET, UNIT_TARGET
 % 등)에 한 줄 정의를 붙일지 정해 주세요. 원 보고서를 읽지 않고 정의를 쓰지 않았다.
 

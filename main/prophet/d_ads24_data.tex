@@ -8,29 +8,53 @@
 Table~\ref{tab:ads24-construction} traces the ADS-24
 data~\cite{nyberg2026cyber} from the episodes in the official summary to the
 132 runs of the contract. The counts in the table are our own tallies
-from the downloaded files. Each episode ships with an attack log, called
-Lore in the dataset, that lists the attacker's stages with their
-tactics; 255 runs have one. A run became usable for the task only after
-its stages were bound to the time axis of its Wazuh alerts, and this
-binding dropped 288 stages that fell outside the extraction window and
-one run whose Wazuh JSON could not be parsed. The stored records do not
-state which two timestamps the binding compares or the rule that
-attaches a stage to an alert time, so we could not verify the binding
-independently, and no sample of bindings was checked by hand. The
-ADS-24 results use the stored derived task, and a different binding
-could move segment boundaries and next-tactic labels. For this reason
-Chapter~\ref{ch:ads24} treats ADS-24 as an exploratory check on an
-unverified derived task, not as cross-dataset evidence for the in-house
-result.
-% 5회차 방법 리뷰 P1-3: 정렬 알고리즘·timezone 처리·제외 manifest·수작업 감사가 없어
-% ADS-24의 지위를 탐색적 확인으로 낮췄다. TODO(사람): 저자 확인 목록 26번, 37번. The contract population
-then excludes runs flagged with \texttt{malicious\_users} or
-\texttt{block\_blinds\_blue} and runs whose defender is unknown. Every
-ADS-24 result in this thesis concerns the resulting derived set of 132
-runs, not the dataset as distributed. Two
-label baselines, computed on the 132 runs with five folds, show how much
-the labels alone reveal. They are not the FIT prior against which Chapter~\ref{ch:ads24} compares the models
+from the downloaded files. One episode, identified by its episode
+identifier, is one run; we use \emph{run} throughout. Each episode ships
+with an attack log, called Lore in the dataset, that lists the
+attacker's stages with their tactics; 255 runs have one. A run became
+usable for the task only after its stages were placed on the time axis
+of its Wazuh alerts, and this step dropped 288 stages that fell outside
+the extraction window and one run whose Wazuh JSON could not be parsed.
+
+The stored preflight report documents how stages and alerts are placed
+on one time axis. Lore stage start times carry no time zone and are
+read as Europe/Stockholm local time, which the dataset's own utility
+code declares; Wazuh alerts are read by their UTC timestamp. The cutoff
+of a boundary is the Lore start time of the next tactic segment, and
+only alerts timestamped strictly before it enter the input, in the
+original Wazuh order. When several stages start in the same second,
+the one with the smallest action identifier is kept, and a stage with
+several tactics takes the first. Stages are not paired one-to-one with
+alerts. As a check of the common time base, the report compares, in 68
+episodes, the Lore time of a CrackMapExec action with the Wazuh time of
+the matching TCP/445 event on the defended host; the Wazuh time was
+later by a median of 11.47~s. We did not rerun this procedure, because
+its code and its per-run audit file are not in the archive available to
+us, and no binding was checked by hand. Whether the Wazuh timestamp is
+a receipt time is not established, and a different binding could move
+segment boundaries and next-tactic labels; this is one reason
+Chapter~\ref{ch:ads24} is an exploratory check.
+
+The contract population then excludes runs flagged with
+\texttt{malicious\_users} or \texttt{block\_blinds\_blue} and runs whose
+defender is unknown. These three flags leave 134 runs. The stored
+preflight report notes that this equals the number of episodes used in
+the dataset paper, which gives no list of identifiers, so the two sets
+were matched in number only. Two of the 134 runs are then dropped because one of their two
+tactic stages falls after the end of the Wazuh extraction, which leaves
+the 132 runs on which every ADS-24 result in this thesis is computed.
+Two label baselines, computed on the 132 runs with five folds, show how
+much the labels alone reveal. They are not the FIT prior against which
+Chapter~\ref{ch:ads24} compares the models
 (Table~\ref{tab:ads24-groups}).
+% 출처: sources/atlas_answers/ads.md 25·26번.
+%   atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_V3_DRAFT.md:7 (독립 단위 episode_id);
+%   ADS24_PREFLIGHT.md:19 (Europe/Stockholm, +02:00 254개), :23 (60초 이내 SMB 흔적, 일대일 결속 아님),
+%   :29-31 (제외 목록), :35 (같은 time_start는 최소 action_id), :76 (receipt 필드 미확인),
+%   :80 ("논문의 134와 숫자만 일치", 2개 빠져 132); ADS24_CONTRACT_DRAFT.md:27 (cutoff와 같은 시각 제외).
+%   68 에피소드·중앙값 11.47초: RECORD(inputs/drop)의 시각 앵커 값, 정의는 PREFLIGHT:23.
+% 134를 "the dataset paper reports"로 적은 것은 PREFLIGHT:80의 문장(논문의 134)에 기댄다.
+%   TODO(사람): nyberg2026cyber 본문에서 134 episode를 확인해 주세요(인용 리뷰 P2-5).
 
 Only alert identity, severity, host role, and timing enter the input;
 every field that names the answer or the run was removed. In particular, Wazuh rules can map an alert to
@@ -46,19 +70,12 @@ Section~\ref{sec:ads24-task} because of how often a stage repeats its
 predecessor: if stages are not
 merged, about 62.7\% of consecutive boundaries carry the same tactic as
 the stage before them, and a model could score well by copying the last
-label. Because the boundaries are placed at segment transitions of the
-labels, they are oracle boundaries: the task asks for the next tactic
-at a moment that the labels, not the alerts, determine. The alert window of 512 and the 1,346 updates were chosen by an
+label. The alert window of 512 and the 1,346 updates were chosen by an
 inner validation inside FIT, with seeds outside the contract, before
 stage~1.
 % 근거: RECORD:238--252, 254. 수치는 기록의 값을 그대로 옮기고, 기준선 NLL은 본문 규칙대로
 % 셋째 자리로 줄였다(1.8547→1.855, 1.4965→1.497).
-% TODO(사람): 시각 앵커의 "시차"가 무엇과 무엇 사이의 차이인지(예: Lore 단계 시각과
-% 대응 Wazuh 경보 시각) 기록에 적혀 있지 않아 표에서 "lag"로만 썼습니다. 확인해 주세요.
-% TODO(사람): 132실행이 자료 논문의 134실행과 같은 집합인지는 미확인이다(RECORD:246, 507).
-% 07장 위협 절에도 같은 내용이 있어 여기서는 표 주석으로만 남겼다.
-% TODO(사람): "episode"와 "run"이 자료에서 같은 단위인지 확인해 주세요. 기록은 summary에
-% 대해서만 "에피소드"라 쓰고 나머지는 "실행"이라 써서 그대로 따랐습니다.
+% 6회차 문장 P2-4: oracle boundary 정의는 8.1절에만 둔다.
 
 \begin{table}[htbp]
 \centering
@@ -81,14 +98,13 @@ Runs usable after time binding & 251 (288 stages outside the extraction
 Parsed Wazuh alerts & 2,067,288 \\
 Time offset & UTC+02:00 confirmed in 254 runs; the whole collection
   period lies within daylight saving time \\
-Time anchor & binding rule and reference timestamps not documented in
-  the stored records; not verified independently \\
-% TODO(사람): 기록의 시각 앵커(SMB 흔적 68 에피소드, 시차 중앙값 11.47초, 95분위 27.93초,
-% 범위 0.52--50.53초)는 시차가 어느 두 시각의 차이인지 확인될 때까지 표에서 뺐다
-% (answers: Lore--Wazuh 시간 기준은 지어내지 않는다; 3회차 방법 리뷰 P1-4).
-Contract population & 132 runs (flags \texttt{malicious\_users},
-  \texttt{block\_blinds\_blue}, and unknown defender excluded); identity
-  with the 134 runs described with the dataset not checked \\
+Time base & Lore start times as Europe/Stockholm local time; Wazuh UTC
+  timestamps; alerts strictly before the cutoff. Check: Wazuh TCP/445
+  time minus Lore CrackMapExec time, 68 episodes, median 11.47~s; not
+  rerun by us \\
+Contract population & 134 runs after the flags \texttt{malicious\_users},
+  \texttt{block\_blinds\_blue}, and unknown defender; 132 after two runs
+  whose second stage falls after the Wazuh extraction end \\
 Runs / boundaries by role & FIT, no users: 48 / 8,461; preservation, no
   users: 15 / 2,982; unlabeled adaptation, with users: 34 / 5,811;
   environment evaluation, with users: 35 / 5,639 \\
@@ -123,19 +139,19 @@ a label that never occurs in training. ADS-24 met every requirement:
 254 runs carry stage labels, of which 132 enter the contract, the
 simulated users can be switched on and off, and we downloaded the data
 ourselves. The reasons in Table~\ref{tab:ads24-candidates} come from
-our own inspection of each candidate's distribution and documentation,
-not from the cited papers, except where a cited paper states them.
-% TODO(사람): 후보 검토 일자와, 확인한 배포 페이지 또는 파일을 알려 주세요. "Our
-% inspection on [date]"로 넣겠습니다.
+our own inspection of each candidate's distribution and documentation
+on 20 November 2026, not from the cited papers, except where a cited
+paper states them.
+% 출처(검토일): atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/EXTERNAL_DATASET_SUITABILITY_V3.md:3;
+%   PWNJUTSU_BROWSER_V3_DRAFT.md:3 (ads.md 30번).
 % 근거: RECORD:265--275. 판정과 이유는 기록의 표를 그대로 옮겼다.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Public datasets considered for the cross-dataset evaluation.
-Reasons record our own inspection. $^{\dagger}$Not cited: the reason
-refers only to the distribution and documentation we inspected, which
-we could not tie to a citable source.}
+\caption{Public datasets considered for the exploratory cross-dataset
+check. Reasons record our own inspection on 20 November 2026; sources
+without a reference are given in the notes below the table.}
 \label{tab:ads24-candidates}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}l>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -143,7 +159,7 @@ Candidate & Decision & Reason \\
 \midrule
 ADS-24/Crate~\cite{nyberg2026cyber} & adopted & 254 runs with stage labels;
   simulated users on and off; downloaded \\
-CAM-LDS\footnote{\url{https://zenodo.org/records/18861762}.} & not used & Linux; no benign
+CAM-LDS$^{a}$ & not used & Linux; no benign
   user activity during attacks; 34 runs; with a scenario held out, 295 of
   849 boundaries have a label absent from training \\
 Windows multi-source ATT\&CK-labeled data~\cite{niloy2026multi} & not used
@@ -151,21 +167,28 @@ Windows multi-source ATT\&CK-labeled data~\cite{niloy2026multi} & not used
   of the 870 sessions or find action start times \\
 APTGen~\cite{takahashi2020aptgen} & not used & distribution site behind
   authentication; no benign background logs \\
-DARPA OpTC$^{\dagger}$ & not used & narrative ground truth for one connected
-  campaign; we found no way to split it into independent runs with stage
-  labels \\
+DARPA OpTC$^{b}$ & not used & narrative ground truth for one connected
+  red-team campaign over three days; we found no way to split it into
+  independent runs with stage labels \\
 ATLASv2~\cite{riddle2023atlasv2} & not used & ten scenarios; we found no
   per-stage occurrence times in the ground truth \\
-PWNJUTSU$^{\dagger}$ & not used & we could recover the stages of only one
-  participant \\
+PWNJUTSU$^{c}$ & not used & files behind a login; the dataset paper
+  reconstructs the campaign of one participant out of 22, in 18 stages \\
 \bottomrule
 \end{tabularx}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+$^{a}$\url{https://zenodo.org/records/18861762}; checked 20 November 2026.
+$^{b}$\url{https://github.com/FiveDirections/OpTC-data}, including its
+red-team ground-truth document; checked 20 November 2026.
+$^{c}$IEEE DataPort, DOI 10.21227/ngjr-kh92; dataset paper DOI
+10.1109/TNSM.2022.3183476; checked 20 November 2026.
+\end{minipage}
 \end{table}
 % 근거: RECORD:267--275.
-% TODO(사람): DARPA OpTC와 PWNJUTSU는 정확한 서지(자료 공개 문서 또는 논문 제목)를
-% 확신할 수 없어 인용을 달지 않았고, 출처 없는 세부 수치(사흘, 참가자 22명 중 1명,
-% 18단계; RECORD:273, 275)는 표에서 뺐습니다. 공식 자료를 알려 주시면 되살리겠습니다.
-% Wazuh 문서와 CAM-LDS는 answers 07:10 2번에 따라 각주 URL로 바꿨다.
-% TODO(사람): 두 URL의 접근일과, 수집에 쓰인 Wazuh 버전의 문서가 rule.mitre.* 필드를
-% 같은 뜻으로 적는지 확인해 주세요.
-% TODO(사람): OpTC·PWNJUTSU를 검사한 배포본의 URL·버전·접근일(answers 07:10 3번).
+% 출처(OpTC·PWNJUTSU·CAM-LDS): ads.md 30·31번; atlas V3/OPTC_ATLAS_V3_DRAFT.md:9,11 (저장소, 3일 캠페인);
+%   V3/PWNJUTSU_BROWSER_V3_DRAFT.md:3,9,10,17 (검사일, DataPort, P12 한 명 18단계, DOI);
+%   V3/PWNJUTSU_BROWSER_V3_DRAFT.md:21-22 (CAM-LDS HEAD 200). 22명은 RECORD:275.
+% 표 안 \footnote는 tabularx에서 사라질 수 있어 표 아래 주석으로 옮겼다.
+% TODO(사람): Wazuh 문서 URL 두 개의 접근일(atlas 근거 없음). 수집에 쓰인 Wazuh 버전은
+%   검사한 KTH 기록에 적혀 있지 않다.

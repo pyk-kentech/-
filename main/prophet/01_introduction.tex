@@ -77,9 +77,9 @@ three questions.
 \end{description}
 
 Our approach, \emph{consensus distillation} (CD), starts
-from two known uses of independently trained models. Their disagreement
-indicates predictive uncertainty~\cite{lakshminarayanan2016simple}, and
-where accuracy under shift tracks in-distribution accuracy across
+from two known uses of independently trained models. Ensembles of them
+provide estimates of predictive
+uncertainty~\cite{lakshminarayanan2016simple}, and where accuracy under shift tracks in-distribution accuracy across
 models, their agreement on unlabeled shifted data can be used to
 estimate that accuracy~\cite{baek2022agreement}. Consistent with
 these results, the baseline models in our in-house lab disagree on
@@ -92,9 +92,8 @@ unlabeled inputs from the environment, and train a student that follows
 the arithmetic mean of the teachers' probabilities on those inputs
 through a KL term, while keeping the usual cross-entropy on the FIT
 data. The construction is knowledge distillation toward an ensemble
-average~\cite{hinton2015distilling}, motivated by the improved
-predictive performance of averaged independent
-models~\cite{lakshminarayanan2016simple}. The CD student has the same
+average~\cite{hinton2015distilling}, which Hinton et al.\ motivate by
+the gain from averaging the predictions of several models. The CD student has the same
 architecture as REL\_GLOBAL and no additional parameters, so at
 inference it is still a single model.
 
@@ -117,14 +116,14 @@ collection. The seed standard deviation fell on both A+C layouts, on
 FLAT from about 0.056 to 0.010. On ORIGINAL\_18, the seen procedure
 without benign workers, the mean NLL moved from 0.704 to 0.643
 (difference interval $[-0.131, -0.0041]$). The intervals resample runs
-for 30 fixed checkpoints and do not cover other seeds. The reasons for
-excluding three of the 160 attempted runs were not in the archive
-available to us, so the verdict has not been audited independently
-(Section~\ref{sec:eval-contract}).
+for 30 fixed checkpoints and do not cover other seeds. The three
+excluded runs are recorded as failures during source collection, but
+the seed-level files are not in the archive available to us, so the
+verdict could not be rescored here (Section~\ref{sec:eval-contract}).
 
 The remaining evidence is weaker. On the public ADS-24 dataset, whose
-task we derived through a time alignment and a boundary rule that we
-could not verify, CD reduced the seed standard deviation from 0.163 to
+task we derived through a documented time binding that we did not
+rerun and with boundaries placed at label transitions, CD reduced the seed standard deviation from 0.163 to
 0.025 and the mean NLL from 2.276 to 2.060; this is an exploratory
 development comparison on evaluation runs that had already been
 scored. Three general encoders (an LSTM encoder in the style of
@@ -150,9 +149,10 @@ a consensus target that reduces the disagreement while keeping the
 architecture and single-model inference.
 A separate in-house diagnosis locates many errors in one file decision;
 the head we built on that diagnosis was not adopted
-(Section~\ref{sec:diag-intervention}). (c) Following the security-ML
-guidance of Arp et al.~\cite{arp2020dos}, it evaluates the method under
-contracts sealed before training and collection, and it labels every
+(Section~\ref{sec:diag-intervention}). (c) Addressing the
+data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
+evaluates the method under contracts sealed before training and
+collection, and it labels every
 result as a sealed criterion, a development comparison, or a post hoc
 analysis. Only the in-house v3 round passed all of its sealed
 criteria; the v2 recheck, an earlier sealed round

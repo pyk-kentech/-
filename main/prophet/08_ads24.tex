@@ -9,31 +9,34 @@ their occurrence time stand in for the receipt boundary of
 Section~\ref{sec:receipt}, the dataset's attack-stage labels for
 source-designated attacker actions, and a held-out condition with
 simulated users for a held-out benign worker. Under these relaxations
-we used ADS-24, a dataset of attack
-episodes in a cyber range defended by automated response agents, collected with
-simulated users switched on or off~\cite{nyberg2026cyber}. With the
-task, the time axis, the labels, and the environment all changed, this
-chapter is a cross-dataset evaluation of the method, not a replication
-of the in-house study. It also concerns a derived set, not ADS-24 as a
-whole: the 132 runs that we built from the downloaded files and
-examined, whose correspondence to the episodes described with the
-dataset we did not check, with stage labels bound to alert times by a
-stored rule that we could not validate. The results are therefore
-exploratory development results on derived labels. We report them as a
-check on whether the in-house direction appears at all on data
-collected elsewhere, not as evidence that the in-house result holds
-on another dataset.
-% 5회차 방법 리뷰 P1-3: Lore–Wazuh 정렬을 확인할 수 없어 ADS-24를 Q3의 교차 자료 근거가
-% 아니라 탐색적 확인으로 낮췄다. 장을 부록으로 옮기는 구성 변경은 저자 확인 목록 37번.
+we used ADS-24, a dataset of attack episodes in a cyber range defended
+by automated response agents and populated by simulated user
+agents~\cite{nyberg2026cyber}. In the release we inspected, each
+episode records whether the simulated users were active.\footnote{KTH
+data repository, DOI 10.71775/kth.4mh6z-zw065, distributed under CC
+BY-SA 4.0 according to the record metadata; accessed 20 November 2026.}
+
+This chapter is an exploratory cross-dataset check of the method on a
+derived task. The task, the time axis, the labels, and the environment
+all differ from the in-house study. The 132 runs are ones we built from
+the downloaded files, one per episode, and their labels come from a
+documented rule that binds attack stages to alert times, which we did
+not rerun (Appendix~\ref{app:ads24-data}). The results are development
+results on derived labels. They show whether the in-house direction
+appears at all on data collected elsewhere; they are not evidence that
+the in-house result holds on another dataset.
+% 5회차 방법 리뷰 P1-3: ADS-24를 탐색적 확인으로 낮췄다. 장 위치는 decisions.md 37번(본문 유지).
+% 6회차 문장 P2-10, aitone P3-2: 긴 문장을 나누고 범위를 긍정형으로 먼저 적었다.
+% 출처(배포·사용권·접근일): sources/atlas_answers/ads.md 28번; atlas
+%   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_V3_DRAFT.md:5,17,18 (KTH, DOI, CC BY-SA 4.0, 2026-11-20).
+%   사용권은 license 파일이 아니라 기록 API의 metadata.rights에서 읽은 것이다.
+% 사용자 on/off: 인용 리뷰 P2-5에 따라 우리가 검사한 배포본 기준으로 적었다.
 Appendix~\ref{app:ads24-data} describes how the task was built from the
 data and why six other candidates were not used.
 % 근거: RECORD:212, 236, 265--275 (선정 경위, 후보 7행 표는 부록 D).
 % ADS24_CONTRACT_SEALED.md "과제와 자료": cutoff 이전 Wazuh @timestamp 경보만
 % 입력. 이 시각이 수신 시각인지 확인되지 않아 계약은 "경보 시각 예측"이라 부른다.
-% TODO(사람): 기록(RECORD:236)은 ADS-24를 "KTH가 공개, CC BY-SA 4.0"이라 적지만
-% nyberg2026cyber 본문에서 배포 주체와 사용권을 확인하지 못했다(인용 리뷰). 내려받은
-% 자료의 공식 배포 URL과 license 파일을 알려 주시면 배포 주체·사용권 문장을 그
-% 출처와 함께 넣겠습니다.
+
 
 \section{Task and data roles}
 \label{sec:ads24-task}
@@ -53,8 +56,8 @@ These are oracle boundaries. They are placed where the labeled tactic
 sequence changes, so the evaluation takes from the labels both the next
 tactic and the moment at which to predict it, and every result in this
 chapter is conditional next-tactic classification at those transitions.
-It is not a forecast that a deployed system could issue, and it does
-not reproduce the operational setting of the in-house task.
+It is not a forecast that a deployed system could issue, and it does not reproduce the operational setting of the in-house task.
+
 The contract assigns the 132 runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
 15 further runs without users (2,982 boundaries) check preservation;
 the condition without users is therefore the seen one. The 34 runs
@@ -64,24 +67,24 @@ environment evaluation, the unseen condition. As in-house, the CD
 student reads unlabeled inputs from the unseen condition, here the 34
 adaptation runs, but never the 35 evaluation runs. The model is
 REL\_GLOBAL-ADS, the ADS-24 adaptation of
-Section~\ref{sec:method-transfer}. The two conditions also differ in
-collection period: the runs without users were collected mostly in
+Section~\ref{sec:method-transfer}.
+
+The two conditions also differ in collection period: the runs without users were collected mostly in
 early April and those with users in mid-April, so the split is
 associated with the users and with the period at once. The results
 below compare models across this combined split and do not estimate
 an effect of the simulated users alone.
-% TODO(사람): (1) 계약의 132실행과 자료 논문의 134실행의 관계, (2) episode와 run이
-% 같은 단위인지, (3) Lore 단계와 Wazuh 경보를 묶은 시각 앵커(SMB 흔적, 시차 중앙값
-% 11.47초)의 정렬식과 그것이 수신 시각인지, (4) 역할별 run ID manifest와 제외 규칙
-% 파일의 위치를 알려 주세요. 지어내지 않고 비워 두었다.
+% 132 대 134, episode=run, 시각 결속 규칙은 부록 D에 적었다(ads.md 25·26번).
+% TODO(사람): 역할별 run ID manifest(ADS24_STAGE1/ROLE_MANIFEST.json)와 실행별 제외 사유 CSV
+%   (ADS24_EPISODE_TIME_AUDIT.csv)는 atlas에 없다.
 % 근거: RECORD:214, 247, 251, 254; ADS24_CONTRACT_SEALED.md "과제와 자료",
 % "입력과 모델 이식"; ADS24_STAGE2_REPORT.md "계보" (8,461/2,982/5,811/5,639경계).
 % 연속 경계의 약 62.7%가 같은 전술이라는 수치는 개요에 따라 부록 D에 둔다.
 % 원 보고서의 REL_BASE = 이 장의 REL_GLOBAL-ADS, KD_ENV_TOP5 = CD student,
 % KD_SELF = self-distillation control.
 % RECORD:441 (OFF 4월 초, ON 4월 중순). Wazuh 문서는 answers 07:10 2번에 따라
-% 각주 URL로 바꿨다. TODO(사람): 접근일과, 수집에 쓰인 Wazuh 버전에 맞는 문서 판을
-% 확인해 주세요(지금 URL은 current 판).
+% 각주 URL로 바꿨다. 수집에 쓰인 Wazuh 버전은 우리가 검사한 KTH 기록에 적혀 있지 않다(ads.md 31번).
+% TODO(사람): Wazuh 문서 URL의 접근일(atlas 근거 없음).
 
 Two stages were run, each under its own sealed contract. Stage~1 trained 30 REL\_GLOBAL-ADS seeds on FIT and asked only whether they
 diverged enough on the environment evaluation to justify distillation;
@@ -121,9 +124,13 @@ as its own teacher, left the environment loss where it was, at 2.275
 with a seed standard deviation of 0.162. As a secondary contrast with
 individual 95\% intervals, the CD student minus the control was
 $-0.215$ $[-0.248, -0.181]$ in mean NLL and $-0.137$
-$[-0.163, -0.115]$ in seed standard deviation. The reduction is thus
-tied to the consensus of several models, not to the distillation step
-as such. Section~\ref{sec:app-raw} gives the stage-1 statistics to six
+$[-0.163, -0.115]$ in seed standard deviation. This is consistent with
+the multi-model teacher target contributing to the reduction, but the
+comparison changes several things at once: the number of teachers,
+their quality, the averaging, and the selection by agreement. No
+student of five random teachers, of all 30, or of one teacher of
+comparable quality was trained, so their separate effects are not
+identified. Section~\ref{sec:app-raw} gives the stage-1 statistics to six
 decimals.
 % 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
 % "봉인한 주 판정", "TOP5−SELF 보조 대비" (env_mean −0.214832 [−0.248399, −0.181309];
@@ -186,16 +193,20 @@ ADS-24 as well. On the preservation runs the 30 REL\_GLOBAL-ADS seeds had a
 standard deviation of 0.015; on the environment evaluation it was
 0.163, about eleven times larger. The seen condition also says little
 about which seed will hold up on the unseen one. In a post hoc
-computation the Spearman correlation between the seeds' preservation
-and environment losses was about $-0.39$, so ranking seeds by their score on
+computation from the 30 per-seed rows of the stage-1 report, the
+Spearman correlation between the seeds' preservation and environment
+losses was about $-0.39$ (no interval computed), so ranking seeds by their score on
 the condition without users would not have found the good seeds under
 simulated users, much as \texttt{ORIGINAL\_18} did not for A+C in
 Section~\ref{sec:diag-size}.
 % 근거: RECORD:231; ADS24_STAGE2_REPORT.md (REL_BASE 보존 seed SD 0.015182).
-% −0.39는 기록의 사후 계산이다. ADS24_STAGE1_REPORT.md의 30 seed 표에서 환경
-% NLL과 보존 OFF NLL의 Spearman을 다시 계산해 −0.3878을 확인했다.
+% 출처(−0.39): atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE1_REPORT.md:23-54
+%   (30 seed 표: 열 2 환경 NLL, 열 4 보존 OFF NLL). 원 보고서 수치가 아니라 이 표에서 다시 계산한
+%   값이다: ρ=−0.38776 (n=30, NLL 대 NLL, 동순위 없음), 보존 SD 0.015182 (diag.md 끝, 저자 답 4번).
 
-One in-house observation was not reproduced. In the lab, a seed's
+Choosing seeds by agreement did not carry over to ADS-24, in the
+sense that the pre-specified ADS-24 agreement diagnostic was
+unfavorable. In the lab, a seed's
 agreement with the 30-model majority on unlabeled environment inputs,
 its own vote included, ranked the seeds much as their losses did
 (Section~\ref{sec:diag-agreement}). On ADS-24 the stage-1 contract
@@ -209,27 +220,32 @@ ADS-24 diagnostic correlates a seed's agreement directly with its NLL,
 so the expected direction was negative, with the condition set at
 $\rho \le -0.50$ and a permutation $p < 0.05$. The observed correlation was $\rho = +0.127$ (two-sided
 permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
-more with the rest did not have lower loss. The leave-one-out
-agreement diagnostic thus did not reproduce the in-house association,
-and even in the lab the top-ranked seed failed preservation
+more with the rest did not have lower loss. Because the statistic is
+not the in-house S1, this is the failure of a related, pre-specified
+diagnostic rather than a repetition of the in-house analysis, and even
+in the lab the top-ranked seed failed preservation
 (Section~\ref{sec:method-teachers}). The same weakness reaches the
 teacher rule, which ranks seeds by agreement. On ADS-24 the CD student
 still reduced the spread with teachers chosen this way, but the data
 give no evidence that agreement picked good teachers.
 % 근거: RECORD:233, 260, 405; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (Spearman
 % ρ≤−.50, 100,000회 양측 순열 p<.05; 진단 조건이며 증류 관문이 아님);
-% ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125).
+% ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125); 30 seed 표(:25-54)에서 합의도(6열)–환경
+%   NLL(2열) Spearman을 다시 계산해 0.127475 확인(ads.md 39번).
+% 6회차 방법 리뷰 P2-2: "not reproduced"를 사전 지정 진단의 불리한 결과로 한정했다.
 
 Absolute performance stayed low. We compare it with the \emph{FIT
 prior}, which predicts at every boundary the tactic frequencies of the
 FIT runs, weighting each run equally, and whose top-1 choice is
 therefore the majority tactic of FIT. It is estimated from the 48 FIT
 runs alone and scored, like the models, on the 35
-environment-evaluation runs. The stored reports do not say whether the
-frequencies were smoothed, or with what coefficient, so we report the
-value as stored and do not claim it can be recomputed from this
+environment-evaluation runs. The stored ledger marks no smoothing for
+this baseline, whereas it marks add-one smoothing for the in-house FIT
+prior, but it does not say how zero counts were handled, so we report
+the value as stored and do not claim it can be recomputed from this
 description.
-% TODO(사람): FIT prior의 평활 여부·계수, zero-count 처리(방법 리뷰 P2-2).
+% 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:71,72 (ads.md 27번).
+% TODO(사람): ADS-24 FIT prior의 평활 여부와 zero-count 처리(atlas에 명시 없음).
 On the environment evaluation its NLL is 1.830, and all 30 CD seeds
 were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the

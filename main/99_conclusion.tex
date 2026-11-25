@@ -1,4 +1,5 @@
-\chapter{Conclusion and Future Work}
+\chapter{Conclusion}
+% decisions.md 3번: 안내 PDF·샘플 목차에 맞춰 장 제목을 "Conclusion"으로 했다. Future Work는 절로 둔다.
 \label{ch:conclusion}
 % 개요 12장에 따라 다시 썼다. 옛 원고의 결론(대상 소속 모델링, 16실행 개발 집합과
 % 127실행 재사용 집합의 소속 교환 대조, benign interleaving에서 event-wise history의
@@ -22,9 +23,10 @@ probabilities of five selected teachers on unlabeled inputs from the
 new workload. In the v3 round, the one test of CD under criteria sealed
 before training and collection, the stored round report records that
 all three criteria were met: the seed standard deviation narrowed on
-both A+C layouts, and \texttt{ORIGINAL\_18} was preserved. Because the
-reasons for three exclusions were not available, the verdict stands as
-stored rather than as independently audited. The exploratory check on
+both A+C layouts, and \texttt{ORIGINAL\_18} was preserved. The three
+excluded runs failed during source collection, but the seed-level files
+are not in the archive available to us, so the verdict stands as stored
+rather than as rescored here. The exploratory check on
 ADS-24 and the three encoder adaptations, all development comparisons
 on inspected runs, moved in the same direction.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
@@ -41,8 +43,9 @@ and plain-GRU encoders still had higher NLL than the FIT prior
 (1.830); only the Transformer students cleared it. Not every
 seed gained either: seeds that had scored better than the consensus
 moved toward it. The diagnosis holds for one model in one lab, and the
-agreement ranking used to pick teachers did not carry over to ADS-24, whose derived labels and oracle boundaries we could not
-verify.
+agreement ranking used to pick teachers did not carry over to ADS-24,
+whose stage-to-alert time binding we did not rerun and whose boundaries
+are oracle boundaries.
 % 근거: RECORD:419--423 (환경 이동 미해결, ADS-24 기준선 아래, Transformer만 초과),
 % 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
@@ -91,84 +94,47 @@ source.
 %  [파일]은 그 자리에 남긴 짧은 TODO 표시의 위치다. 학번·심사위원·날짜·감사문은
 %  kentech.tex의 빈칸으로 남아 있다.)
 %
+% 2026-11-24 저자 확인 목록 답(sources/atlas_answers/*.md)을 반영한 뒤, atlas에 없어 아직 답이
+% 없는 항목만 남겼다. 번호는 옛 목록 번호를 그대로 둔다.
+%
 % 행정·양식
 %  1. 학번, 졸업 연도, 심사위원장·심사위원, 심사 통과일, 감사문 [kentech.tex].
-%  2. 제목 유지 여부. 후보 3개를 kentech.tex 주석에 적었다. 바꾸면 포털에서 제목 변경 승인.
-%  3. 장 제목 "Conclusion and Future Work"가 양식상 괜찮은지, 아니면 "Conclusion"만 쓸지.
-%  4. 옛 결론 문장(대상 소속, 소속 교환 16/127실행, benign interleaving 조건)을 부록 B
-%     첫머리로 옮길지 버릴지.
+%  2. 제목 유지 여부. 후보 3개를 kentech.tex 주석에 적었다.
 %
-% 재현·감사 자료 (방법 리뷰 P1-3, P1-4)
-%  5. REL_GLOBAL 코드·계약 파일 위치, commit/hash, 실행 환경, split/run manifest, 계약별 봉인
-%     hash, v2·v3 seed 목록을 독자가 얻을 수 있는 곳 [e_reproducibility, 04_method].
-%  6. REL_GLOBAL 세부: 48차원 사건 표현 필드·어휘, UNKNOWN 처리, 대상 key 관계 잔차 식,
-%     출력 head, R_GLOBAL의 사건 선택("동일 선택 수"의 기준, Rademacher trace의 역할),
-%     LogitNorm의 추론 시 적용 여부, 자체 모델 GRU 폭 64, FIT occurrence 표집, "404-only
-%     전처리"의 뜻 [04_method, e_reproducibility].
-%  7. REL(FIT 476)에서 REL_GLOBAL까지의 계보, "hard REL" 열이 직전 형태인지 [04_method].
-%  8. v3 배경 3실행·PAG1 배경 4실행의 제외 사유와 ELIGIBILITY_SEAL.json [05, e].
-%  9. v3·ADS-24 2단계의 bootstrap RNG 값 [e_reproducibility].
+% 재현·감사 자료
+%  5. 최소 실행본(seed 127 checkpoint)을 독자에게 줄지와 그 위치; 코드 commit/hash, 계약별 봉인
+%     hash의 내용; v3의 새 30 seed 값(TRAIN_SEED_PLAN.json) [e_reproducibility].
+%  6. 603 계보 FIT occurrence 표집기의 구현(torch Generator인지 permutation 순환인지) [04_method 주석].
+%  8. PAG1 배경 4실행의 제외 ID·사유(ELIGIBILITY_SEAL.json) [05, e].
+%  9. v3 bootstrap의 생성기 seed [e_reproducibility].
 % 10. seed별 점수 파일(SCORED_RESULTS.json, STAGE2_SEED_RESULTS.csv 등): v3·PAG1에서 나아진
-%     seed 수, 조합별 "30개 중 20~30개", "가장 나쁜 CD seed가 기준 중간 seed보다 낫다"를
-%     다시 계산하려면 필요하다 [06_results, 09_generality].
+%     seed 수, v3 complete configuration 수와 complete-only 점추정·leave-one-configuration-out,
+%     seed별 분포(median/IQR), "가장 나쁜 CD seed가 기준 중간 seed보다 낫다". 기록의
+%     "30개 중 20~30개"는 "FIT 다수 기준보다 나은 기준 seed 수"(LSTM 30, Transformer 25, GRU 20)를
+%     옮긴 것일 수 있다(repro.md 10(b)) [06_results, 09_generality, e].
 %
-% 정의 ([직접 기입] 포함)
-% 11. natural 전달 일정·natural row·delayed view의 정의 [03_task, 05_evaluation, b].
-% 12. target-wise GRU의 정의와 THME0064 확률 비교의 출처 [b_supplemental_results].
-% 13. 부록 B.4의 "EVENT" 열이 EVENT GRU와 같은 모델인지 [b_supplemental_results].
-% 14. UNKNOWN 상태의 범위; "IP hint"의 정의; FLAT/NESTED 배치가 C_ONLY·B+C·FIT에 어떻게
-%     들어가는지(표 tab:conditions의 "---") [03_task].
-% 15. +0.020과 3% 보존 한도의 근거 [05_evaluation].
-% 16. ADS-24 2단계 정확도가 실행 동등인지 [05_evaluation].
-% 17. PAG1 재추론을 개발 비교로 분류한 것이 맞는지 [05_evaluation].
-% 18. 부록 C: "ρ0 초기화", "해상도 계산", "18-way margin 10.3"이 가리키는 대상; 근거가
-%     없어 5회차에 표에서 뺀 다섯 가설 행(hint 표식, FIT 위치, 마지막 DISCOVERY, parser key,
-%     일반형 원래 과제)의 근거 파일(없으면 뺀 채로 둔다); 옛 후보 1--15행에 한 줄 정의를
-%     붙일지 [c_rejected].
+% 정의
+% 14. C_ONLY·B+C(135실행 개발 집합, v3, PAG1)의 FLAT/NESTED 배치 [03_task].
+% 15. +0.020을 "사용자가 지정한 기준"으로 밝힐지(PROPHET_ENS_BASE_KD_FIXED_20261116/FINAL_REPORT.md:34)
+%     [05_evaluation].
+% 18. 부록 C: "ρ0 초기화", "seed 평균을 빠뜨린 해상도 계산", "18-way margin 10.3"이 가리키는
+%     대상(14.14 ≈ 10√2는 LogitNorm τ=0.1 아래 logit 차 상한일 수 있다는 추론만 있음); 옛 후보
+%     1--15행에 한 줄 정의를 붙일지 [c_rejected].
+% 24. 자체 실험실 FIT prior 1.412의 +1 평활 위치와 정규화 방법 [09_generality].
+% 36. 부록 B의 두 135실행을 실행 ID 수준으로 대조하는 일(ELIGIBILITY_SEAL.json 필요) [b].
+% 38. 모델 출력 열 index가 부록 A 순서와 같은지 코드로 확인 [04_method].
 %
-% 진단(6장)·분해(10장)
-% 19. 표 tab:seed-population의 C_ONLY·B+C·ORIGINAL_18 seed SD와 범위를 SEED_TABLE.csv에서
-%     다시 집계할지; S1--S3 상관의 부호 규약; FIT 보류 NLL과 A+C 손실의 seed 상관 [06].
-% 20. 손실 집중 경계 "10"(RECORD:108), 조회 규칙 뒤 seed 범위 .080--.140(RECORD:69, 110),
-%     3대상 OBSERVED_HEAD 대 SHUFFLED_HEAD의 NLL 차·구간, 개발 집합 ORIGINAL_18의
-%     OBSERVED_HEAD·GENERIC_HEAD 값 [06_diagnosis].
-% 21. "한 발 늦은 예측" 기각의 행 수(원 파일에서 "2/13"의 2를 찾지 못함) [07, c].
-% 22. 6.3--6.5절을 10장 뒤 별도 장으로 옮길지(문장 리뷰 P2-6) [06_diagnosis].
-% 23. 표 tab:decomposition 마지막 열의 LSTM 52%가 FLAT 값인지 1:1 평균(약 53%)인지 [10].
-% 24. 자체 실험실 다수 클래스 기준 1.412의 산출식 [09_generality].
-%
-% ADS-24 (방법 리뷰 P2-1--P2-3)
-% 25. 132실행과 자료 논문 134 episode의 대응, episode와 run이 같은 단위인지 [08, d].
-% 26. Lore 단계와 Wazuh 경보를 묶은 두 timestamp, timezone 처리, 허용 시간창, 다중·무후보
-%     처리, 제외 규칙; 시각 앵커 "시차"가 어느 두 시각의 차이인지 [08, d].
-% 27. FIT prior의 평활 여부·계수·zero-count 처리 [08_ads24].
-% 28. ADS-24 배포 주체·사용권(기록은 "KTH, CC BY-SA 4.0"), 공식 배포 URL과 license 파일 [08].
-% 29. ADS-24 적용판에서 관계 잔차를 뺀 이유 [04_method].
-% 30. 외부 후보 검토 일자, OpTC·PWNJUTSU 배포본의 URL·버전·접근일 [d_ads24_data].
+% ADS-24
+% 25. nyberg2026cyber 본문의 134 episode 확인(인용 리뷰 P2-5) [d_ads24_data].
+% 26. 역할별 run ID manifest, 실행별 제외 사유 CSV(ADS24_EPISODE_TIME_AUDIT.csv) [08].
+% 27. ADS-24 FIT prior의 평활 여부와 zero-count 처리 [08_ads24].
 %
 % 인용·웹 문서
-% 31. Wazuh 문서 두 URL과 CAM-LDS URL의 접근일, 수집에 쓰인 Wazuh 버전 [08, d].
-% 32. pseudo-labeling 표준 정의 문헌(Lee 2013)을 넣을지. 지금은 "hard-label control"이라는
-%     이 논문의 절차 이름만 쓴다 [02, 09].
-% 33. Du 등(NeurIPS 2020)·Yang 등 DEED(CVPR Findings 2026)·Ilichev 등(RANLP 2021)의 서지
-%     [07_discussion, c_rejected, 09_generality].
-% 34. 11.5절 Evidence availability 문단(사람이 쓴 문단): ms4688은 4688에 command line이
-%     들어갈 수 있다는 것만 받치고, 인자가 민감정보를 담을 수 있다는 주장은 Microsoft의
-%     command-line process auditing 문서가 받친다(인용 리뷰 P2-3). 그 문서를 웹 출처로
-%     더할지, 문장을 줄일지 정해 주세요. 위협과의 연결 문장을 더할지도(문장 리뷰).
-% 35. Heskes(1997)·Gruber·Buettner(2022) 원문의 식 번호와 KL 방향 대조 [02_related_work].
-% 36. 부록 B: 두 135실행이 실행 ID까지 같은 집합인지; 확률 평균·재학습 모델의 fold와 FIT
-%     실행 수 [b_supplemental_results].
+% 31. Wazuh 문서 두 URL의 접근일 [08, d].
+% 33. Yang 등 DEED·Ilichev 등의 서지(지금은 인용과 '선행' 주장을 뺐다) [07, c, 09].
+% 41. Kan 등(kan2021investigating) 원문에서 "자기 라벨 학습이 오류를 키울 수 있다"는 경고를
+%     확인하면 2.7절에 되살릴 수 있다 [02_related_work].
 %
-% 5회차에 더한 항목
-% 37. ADS-24 장(8장)의 위치. 방법 리뷰 P1-3은 정렬 규칙을 확보하지 못하면 ADS-24를 부록의
-%     탐색적 분석으로 옮기라고 제안했다. 이번에는 장을 그대로 두고 지위만 "탐색적 확인,
-%     교차 자료 근거 아님"으로 낮췄다(Q3, 초록, 서론, 결론, 8장, 부록 D). 장을 부록으로
-%     옮길지 정해 주세요. 옮기면 9장 ADS-24 절반과 10장 ADS-24 행의 참조도 바뀐다 [08, d].
-% 38. 교사 선정의 다수결 동률 규칙 "낮은 행동 열 index"가 부록 A의 행동 번호 순서와
-%     같은지 [04_method].
-% 39. ADS-24 1단계 진단의 Spearman이 합의도 값과 NLL 값의 직접 상관인지(그래서 기대
-%     방향이 음수인지). 8장은 그렇게 읽고 6장의 순위 대 순위 규약과 구분했다 [08_ads24].
-% 40. 새 제목 후보를 정할 때 ADS-24를 "교차 자료 평가"로 부르지 않도록 주의(37번과 연결)
-%     [kentech.tex].
+% 답을 받아 닫은 항목: 3, 4, 7, 11, 12, 13, 16, 17, 19--23, 28--30, 32, 34, 35, 37, 39, 40
+% (sources/atlas_answers/*.md, 2026-11-24).
 % ====================================================================

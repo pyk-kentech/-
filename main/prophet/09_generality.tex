@@ -23,7 +23,9 @@ baseline seeds on them, and only combinations whose baseline seed
 standard deviation reached 0.020 went on to stage~2, so the stage-2
 contrasts were read on the same runs that selected them. Here the
 \emph{base model} of each encoder is the encoder trained with
-cross-entropy alone. Because the
+cross-entropy alone, and the in-house contrasts use the \emph{A+C
+score}, the 1:1 mean of the \texttt{A+C FLAT} and \texttt{A+C NESTED}
+losses. Because the
 selection favored combinations with a large baseline spread, part of
 the later reduction could be regression toward the mean, which this
 design cannot rule out. The ADS-24 results reuse the 35
@@ -57,12 +59,8 @@ from 51.0\% to 87.7\%. We had expected that encoders without LogitNorm,
 which keeps logits at a fixed norm, would spread less. The opposite
 happened. The Transformer figure is driven partly by one seed whose
 \texttt{A+C FLAT} loss was 4.690. Without it, the remaining 29 seeds
-still had a standard deviation of 0.466 on the \emph{A+C score}, the
-1:1 mean of the \texttt{A+C FLAT} and \texttt{A+C NESTED} losses that
-the in-house contrasts of this chapter use, against 0.040 for their CD
-students. That score is not the \texttt{A+C FLAT} value of
-Table~\ref{tab:gen-arch}, where the 30 Transformer students also
-happen to have a standard deviation of 0.040. On ADS-24 the spread was smaller in absolute
+still had a standard deviation of 0.466 on the A+C score, against 0.040
+for their CD students. On ADS-24 the spread was smaller in absolute
 terms, but the environment evaluation again separated the seeds far
 more than the preservation runs did.
 % 근거: RECORD:287, 415 (예상 철회); ARCH_GENERALITY_STAGE2_REPORT.md "전체 성능과
@@ -176,14 +174,17 @@ LSTM and plain-GRU students, like REL\_GLOBAL-ADS in
 Chapter~\ref{ch:ads24}, remained above it with every seed, by 0.250 and
 0.300 on average. For two of the three encoders, then, the distilled
 seeds agree closely on a level that a frequency table already beats.
-% 자체 실험실 다수 기준 1.411751과의 비교는 산출 모집단·평가층이 정의되지 않아
-% 뺐다(방법 리뷰 P1-5, P2-6; answers 07:10 4번).
+In-house the corresponding prior, the run-weighted action frequencies of
+the 603 FIT runs with add-one smoothing, scored 1.412 on the new A+C
+runs, and every student of the three encoders was below it.
+% 출처(1.411751 정의): atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:72,73
+%   ("603 FIT 실행 동등 빈도 +1 평활", FLAT·NESTED 모두 1.411751); ARCH_GENERALITY_STAGE2_REPORT.md:127
+%   (KD 30/30 세 구조) (diag.md 24번).
 % 근거: RECORD:298, 423; ARCH_GENERALITY_STAGE2_REPORT.md:5, "교사 수준, 단순 기준선,
 % 민감도" (기준 1.829580; KD 0/30, 27/30, 0/30; 평균 NLL−다수 기준 KD 0.249872,
 % −0.034009, 0.300071; PROPHET 기준 1.411751, KD 30/30 세 구조 모두).
-% PROPHET 다수 기준(1.411751)의 정의는 원 파일에서 확인하지 못했다.
-% TODO(사람): 자체 실험실 다수 클래스 기준선 1.412가 무엇으로 정해졌는지(산출식, FIT
-% 모집단, 평가층, 가중법) 알려 주시면 비교 문장을 되살리겠습니다.
+% TODO(사람): 1.412의 +1을 18개 행동 개수 각각에 더했는지, 실행 동등 가중 뒤 어떻게 정규화했는지는
+%   atlas에 없다.
 
 Two in-house details qualify the result for the plain GRU. Its
 preservation interval on \texttt{ORIGINAL\_18} had an upper end of
@@ -229,18 +230,23 @@ under a sealed contract in the same lab design, but the contract fixed
 the contrasts and intervals without a pass-or-fail rule
 (Table~\ref{tab:rounds}, note~c), and the ADS-24 runs are the inspected
 environment-evaluation runs. Here the \emph{base model} is the plain
-GRU trained with cross-entropy alone. Stochastic weight averaging (SWA)
+GRU trained with cross-entropy alone.
+
+The five methods change one thing each relative to CD or to the base
+model. Two follow the model itself rather than other models. The
+\emph{hard-label control}, a form of pseudo-labeling~\cite{lee2013pseudo},
+adds a cross-entropy term toward the top-1 predictions of the same
+seed's frozen base model on the unlabeled environment inputs, with no
+confidence threshold, and entropy minimization~\cite{grandvalet2004semi}
+adds the entropy of the student's own predictions on those inputs. A
+third, stochastic weight averaging (SWA)~\cite{izmailov2018averaging},
 averages the weights of the base model's own training trajectory at
-updates 1,010, 1,122, 1,234, and 1,346~\cite{izmailov2018averaging}.
-The \emph{hard-label control} adds a cross-entropy term toward the
-top-1 predictions of the same seed's frozen base model on the unlabeled
-environment inputs, with no confidence threshold. Entropy minimization adds the entropy of the
-student's own predictions on those inputs~\cite{grandvalet2004semi}.
-FIT-input distillation follows the same five-teacher average as CD but
-on FIT inputs instead of environment inputs. Geometric-pool distillation
-follows the normalized geometric mean of the five teachers on
-environment inputs, the logarithmic opinion pool of
-Section~\ref{sec:related-decomposition}.
+updates 1,010, 1,122, 1,234, and 1,346 and uses no environment input.
+The last two keep the five teachers of CD and change one choice:
+FIT-input distillation follows their average on FIT inputs instead of
+environment inputs, and geometric-pool distillation follows their
+normalized geometric mean, the logarithmic opinion pool of
+Section~\ref{sec:related-decomposition}, on environment inputs.
 
 Every method kept the FIT loss,
 the 1,346 updates, the coefficient of 0.25 on the added term, a
@@ -263,9 +269,9 @@ protocol.
 % 원 파일 이름 대응: SWA = SWA(부록의 옛 "weight averaging"도 SWA로 통일),
 % PSEUDO = hard-label control, ENTROPY = entropy minimization, FIT_KD = FIT-input
 % distillation, GEO_KD = geometric-pool distillation, BASE = base model, KD_ENV = CD student.
-% 4회차 지시 6번: pseudo-labeling의 출처가 확인되지 않아 선행 방법 이름 대신 이 논문이
-% 실행한 절차("hard-label control")로 썼다.
-% TODO(사람): 기하평균 교사 증류의 선행 문헌 서지(개요가 지목한 Ilichev 등, RANLP 2021).
+% decisions.md 32번: lee2013pseudo가 ref.bib에 들어가 pseudo-labeling 이름과 인용을 되살렸다.
+% 6회차 aitone P3-4: 방법 정의를 변경 축(자기 예측 / 입력 / 교사 결합)으로 묶었다.
+% Ilichev 등(기하평균 교사 증류)은 서지를 확인하지 못해 인용과 '선행' 주장을 넣지 않았다(decisions.md 33번).
 
 Under this common protocol, which tuned no method on its own, only the
 two groups that follow a consensus of several models on environment
@@ -371,10 +377,13 @@ ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.08
 % 정확도 SD 차이와 최저 seed 정확도 차이는 분량 때문에 표에서 뺐다.
 % 개요 질문 A1: 이 판정 구간은 원 파일에 있으므로 본문에 썼다.
 
-Within this protocol the controls take the method apart. Following
-one's own frozen copy, softly in self-distillation or by hard labels in
-the hard-label control, either changed nothing or made the loss worse,
-so the consensus of several models mattered. Following the same
+Within this protocol the controls narrow down what matters without
+isolating it. Following one's own frozen copy, softly in
+self-distillation or by hard labels in the hard-label control, either
+changed nothing or made the loss worse. This is consistent with the
+multi-model teacher target contributing to the reduction, but the
+number of teachers, their selection, and the averaging were not varied
+separately, so their effects are not identified. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
 level, so the environment inputs mattered; why the FIT inputs did not
 help was not established (Section~\ref{sec:disc-rejected}). SWA,
@@ -382,11 +391,15 @@ which averages along a single training trajectory, stayed at the base
 model's spread on both datasets. These are statements about the methods as run
 here, with one coefficient, one exposure, and one schedule shared by
 all; they do not show that any of the algorithms is inferior when
-tuned for its own purpose. Between the arithmetic and the
+tuned for its own purpose.
+
+Between the arithmetic and the
 geometric pool of the same teachers we cannot choose. They were
 indistinguishable in the in-house lab, and the arithmetic pool was
 better on ADS-24 only in a development comparison; CD keeps the
-arithmetic mean of Section~\ref{sec:method-cd}. Entropy minimization is
+arithmetic mean of Section~\ref{sec:method-cd}.
+
+Entropy minimization is
 a warning about reading low disagreement as success. It made all 30
 seeds agree, so that every seed had the same accuracy of 80.5\% on
 \texttt{A+C FLAT}, while their loss rose to 2.702.
@@ -407,8 +420,7 @@ complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
 configurations. The comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
 SWA did not use the cyclical or constant learning-rate
-schedule of the original method. The size of the rerun variation is
-visible for SWA: the cross-entropy run from which its
+schedule of the original method. Rerun variation is visible for SWA: the cross-entropy run from which its
 weights were averaged ended with weights identical, bit for bit, to the
 stored base model for 30 of 30 seeds on ADS-24 and for none in-house.
 Finally, the plain-GRU CD student is not a substitute for REL\_GLOBAL.

@@ -75,7 +75,7 @@ descriptive share of Equation~\ref{eq:decomposition}.}
 \toprule
 Data & Encoder & Seen $V$ & Unseen $V$ & Ratio & $V$ share of unseen NLL \\
 \midrule
-In-house & LSTM (DeepLog-style)        & 0.103 & 0.339 & 3.3 & 52\% \\
+In-house & LSTM (DeepLog-style)        & 0.103 & 0.339 & 3.3 & 53\% \\
 In-house & Transformer (LogBERT-style) & 0.156 & 0.554 & 3.6 & 53\% \\
 In-house & plain GRU                   & 0.114 & 0.790 & 6.9 & 70\% \\
 In-house & REL\_GLOBAL                 & 0.067 & 0.075 & 1.1 & 50\% \\
@@ -91,10 +91,9 @@ ADS-24 & REL\_GLOBAL-ADS               & 0.043 & 0.230 & 5.3 & 10\% \\
 % "Shift of V". 자체 REL_GLOBAL 행은 원래 30-seed 계보(교사 후보 모집단)다.
 % ORIGINAL_18의 V 비중 15~28%는 같은 표의 REF 14.8%, LSTM 20.6%, GRU 23.9%,
 % Transformer 28.0%에서 왔다.
-% TODO(사람): 마지막 열은 기록(RECORD:318--327)의 정수 %를 옮겼습니다. 원 파일의 층별
-% 값은 LSTM FLAT 52.0% / NESTED 53.1%, Transformer 51.9% / 54.0%, GRU 69.9% / 69.9%,
-% REL_GLOBAL 49.6% / 51.4%입니다. LSTM의 52%가 FLAT 값인지 1:1 평균(약 52.6%)인지
-% 확인해 주세요. 평균 기준으로 통일하면 53%가 됩니다.
+% 마지막 열은 캡션대로 1:1 평균 기준이다. LSTM: V (0.3385+0.3393)/2=0.3389, seed NLL
+%   (0.6508+0.6384)/2=0.6446 → 52.6% → 53%. 기록의 52%는 FLAT 값이었다.
+% 출처: atlas OT/METHOD_EXTENSION_DECOMPOSITION_20261123/VARIANCE_DECOMPOSITION_REPORT.md:27,28,58 (diag.md 23번).
 
 $V$ tracked the instability that the earlier chapters measured with the
 seed standard deviation of NLL. Over the 28 pairs of encoder and
@@ -119,12 +118,16 @@ After distillation, $V$ fell in 27 of the 28 conditions, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
-mainly on the disagreement term. The decomposition is an identity and
+mainly on the disagreement term. The ensemble analogue of this
+reduction is studied by Rath-Manakidis et
+al.~\cite{rathmanakidis2022reduction}; here it is observed for a
+distilled single student. The decomposition is an identity and
 the change in $V$ is an observation after the fact, so the analysis
 does not show that the drop in $V$ produced the drop in seed standard
 deviation. The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}, where
-$V$ rose from 0.068 to 0.077 between the v3 baseline seeds and the
-paired KD\_ENV\_TOP5 student, distilled on the background inputs alone, and the seed standard
+$V$ rose from 0.068 to 0.077 between the v3 baseline seeds, a
+different REL\_GLOBAL population from that of
+Table~\ref{tab:decomposition}, and the paired KD\_ENV\_TOP5 student, distilled on the background inputs alone, and the seed standard
 deviation rose with it. Preservation on this condition is also the
 least settled in-house result (Section~\ref{sec:disc-mechanism}). The
 reduction of unseen-condition spread does not carry over to every
@@ -153,9 +156,8 @@ common answer is right.
 % decision". 방법 비교 군은 9.2절의 새 110실행 기준이다. ADS-24의 엔트로피 최소화는
 % V가 0.179로 0이 아니었다.
 
-Nothing in our data shows that $V$ measured before deployment predicts
-later seed instability. Across encoders, $V$ on the unlabeled
-adaptation inputs did not rank them by their evaluation seed standard
+Matching levels do not make $V$ a selection rule. Across encoders, $V$
+on the unlabeled adaptation inputs did not rank them by their evaluation seed standard
 deviation: the Spearman correlation was $-0.800$ on ADS-24 ($n=4$) and
 $+0.500$ in the in-house lab ($n=3$), too few points and inconsistent in
 sign to support a selection rule. For the in-house REL\_GLOBAL seeds

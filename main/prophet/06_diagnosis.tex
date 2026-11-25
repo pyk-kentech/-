@@ -19,8 +19,9 @@ inside the FIT set, in which each FIT run is held out in turn, and the
 checks on newly collected runs in Section~\ref{sec:diag-intervention};
 both are marked where they occur. The conclusions concern REL\_GLOBAL
 in the in-house lab. We did not study the mechanism separately on
-ADS-24 or for the encoders of Chapter~\ref{ch:generality}. Two of the
-18 actions matter most below: the synthetic file search, written
+ADS-24 or for the encoders of Chapter~\ref{ch:generality}.
+
+Two of the 18 actions matter most below: the synthetic file search, written
 DISCOVERY, and the synthetic file copy, written COPY (actions 15 and 16
 in Appendix~\ref{app:actions}).
 % 근거: RECORD:126 (적용 범위); ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/
@@ -51,20 +52,22 @@ describe the 30 seeds on one set of runs; we computed no interval for
 them, and the rows they share make them descriptive rather than
 inferential.
 
-The seeds are not alike on the seen procedure either. This development
-set gives no seed standard deviation for \texttt{ORIGINAL\_18}, but in
-the v3 round of Chapter~\ref{ch:results} it was 0.070 there against
-0.056 on \texttt{A+C FLAT}, so in absolute terms the seen procedure
-spread the seeds more widely. Relative to the mean loss, 0.704 against
-0.073, the spread was far larger under the benign workers. The
-disagreement term of Chapter~\ref{ch:decomposition} points the same
-way: for REL\_GLOBAL it barely changed between the seen and the unseen
-conditions (0.067 and 0.075), unlike for the three general encoders.
-% 5회차 참신성 리뷰 P2-1: "behave alike on the seen procedure"를 측정한 내용으로 바꿨다.
-% 0.070/0.056, 0.704/0.073: 06_results.tex (v3 FINAL_REPORT_KO.md); 0.067/0.075:
-% 10_decomposition.tex tab:decomposition (PAG1 실행).
+The seeds are not alike on the seen procedure either. Their standard
+deviation on \texttt{ORIGINAL\_18} was 0.076, close to the 0.086 on
+\texttt{A+C FLAT}, so in absolute terms the two conditions spread the
+seeds about equally. Relative to the mean loss the picture differs: the
+standard deviation was about 0.12 of the mean on \texttt{ORIGINAL\_18}
+(0.076 against 0.631) and about 0.61 of it on \texttt{A+C FLAT} (0.086
+against 0.142). The disagreement term of Chapter~\ref{ch:decomposition}
+also stays at a similar absolute level for REL\_GLOBAL on the seen and
+the unseen conditions (0.067 and 0.075, on other runs), unlike for the
+three general encoders.
+% 출처(ORIGINAL_18 SD .076415, C_ONLY .068273/.288810, B+C .052282/.193977, 최악 .763586):
+%   atlas OT/PROPHET_MARKER_HEAD_INPUT_20261119/FINAL_REPORT_KO.md:19,25-27 (같은 30 checkpoint,
+%   같은 135실행; FLAT/NESTED 값이 SEED_POPULATION:37과 일치) (diag.md 19a).
+% 0.067/0.075: 10_decomposition.tex tab:decomposition (PAG1 실행).
 
-The table also lists three selection scores, each fixed before the A+C
+Three selection scores are also listed, each fixed before the A+C
 losses of these 30 seeds were read: S1, a seed's top-1 agreement with
 the 30-model majority on the unlabeled A+C inputs, its own vote
 included; S2, its NLL on \texttt{C\_ONLY}; and S3, its cross-entropy on
@@ -83,7 +86,8 @@ per-seed NLL, execution-weighted within each seed. Bottom: Spearman
 correlation between the ranking of the seeds by a quantity and their
 ranking by NLL on A+C, so that a positive value means the seeds ranked
 first have lower A+C loss; CE is cross-entropy. S1--S3 are the
-selection scores defined before the table.}
+selection scores defined before the table. For the last three
+conditions only the worst seed is recorded, not the best.}
 \label{tab:seed-population}
 \small
 \begin{tabular}{@{}lrrrr@{}}
@@ -92,9 +96,9 @@ Condition & Runs / rows & Mean NLL & Seed SD & Range over seeds \\
 \midrule
 \texttt{A+C FLAT}     & 31 / 341 & 0.142 & 0.086 & 0.036--0.420 \\
 \texttt{A+C NESTED}   & 29 / 319 & 0.126 & 0.087 & 0.023--0.404 \\
-\texttt{C\_ONLY}      & 27 / 297 & 0.103 & ---   & --- \\
-\texttt{B+C}          & 32 / 352 & 0.059 & ---   & --- \\
-\texttt{ORIGINAL\_18} & 16 / 118 & 0.631 & ---   & --- \\
+\texttt{C\_ONLY}      & 27 / 297 & 0.103 & 0.068 & worst 0.289 \\
+\texttt{B+C}          & 32 / 352 & 0.059 & 0.052 & worst 0.194 \\
+\texttt{ORIGINAL\_18} & 16 / 118 & 0.631 & 0.076 & worst 0.764 \\
 \midrule
 Ranked by & & & with FLAT & with NESTED \\
 \midrule
@@ -109,11 +113,9 @@ S3: last FIT minibatch CE    & & & 0.160 & 0.033 \\
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:15, 35, 37, 43 (B+C 평균 .059181,
 % ORIGINAL_18 평균 .630865); C_ONLY 평균 .103086은
 % ORIG:PROPHET_MARKER_TARGET_RULE_20261119/FOLLOWUP_REPORT_KO.md:22 (같은 30 seed, 같은 집합).
-% TODO(사람): C_ONLY·B+C·ORIGINAL_18의 seed SD와 범위는 보고서 본문에 없고
-% SEED_TABLE.csv를 다시 집계해야 합니다. 집계해서 넣을지 알려 주세요("---" 칸).
-% TODO(사람): S1--S3 상관의 부호 규약 확인. 원 파일은 "선택 점수와 A+C NLL 순위
-% Spearman ρ"라고만 적습니다. 캡션은 "선택 순위와 손실 순위의 상관(양수 = 손실 낮은
-% seed를 앞에 고름)"으로 읽었습니다.
+% SD·최악 seed 세 행: MARKER_HEAD_INPUT FINAL_REPORT_KO.md:25-27 (위 주석). 최솟값은 atlas에 없다.
+% 부호 규약: 원 파일에 명시 없음. S1(합의도, 클수록 좋음)이 +.8768이고 보고서가 "강하게 연관"으로
+%   읽으므로 순위 대 순위(양수 = 손실 낮은 seed를 앞에)로 추론했다(diag.md 19b).
 
 Of the three scores, only S1 tracked A+C loss in this lab, at 0.877 on
 FLAT and 0.915 on NESTED; neither S2 nor S3 exceeded 0.160 in either
@@ -126,7 +128,8 @@ association did not reproduce on ADS-24 (Chapter~\ref{ch:ads24}).
 Section~\ref{sec:diag-agreement} returns to it.
 
 S3 is the loss on the final training batch, not an NLL on held-out FIT
-runs; the values show that the end-of-training loss carries almost no
+runs, and no held-out FIT score was computed for this population; the
+values show that the end-of-training loss carries almost no
 information about A+C, not that every score computed on FIT data would
 fail. S2 uses labels from another unseen condition and still ranks the
 seeds poorly. These results agree with the underspecification described
@@ -139,8 +142,9 @@ equally good where the training data reach.
 % 근거: SEED_POPULATION FINAL_REPORT_KO.md:19--26 (S1--S4 정의, S3 = "전체 FIT 보류
 % NLL이 아니며, 음성 대조"), :37 (S2 .1146/.1506, S3 .1604/.0331). RECORD:64.
 % S4(고정 무작위 순열)는 무작위 대조라 표와 본문에서 뺐다.
-% TODO(사람): FIT 보류 NLL과 A+C 손실의 seed 상관이 따로 계산된 적이 있는지
-% 알려 주세요. 있으면 "not that every score ... would fail" 문장을 바꿉니다.
+% 출처: atlas OT/PROPHET_SEED_INPUT_AUDIT_20261118/FINAL_REPORT_KO.md:115 ("누출 없는 FIT 내부 보류
+%   checkpoint/점수는 이 계보에서 찾지 못했다"; diag.md 19c). 앞선 5-seed 계보의 FIT 훈련 내 NLL 대
+%   A+C NLL ρ=−0.80(n=5, :126)은 다른 seed 계보라 쓰지 않았다.
 
 \section{Where the seeds disagree}
 \label{sec:diag-agreement}
@@ -149,17 +153,19 @@ The places where the seeds part can be found without labels. On 1,029 of the
 1,309 background rows all 30 seeds gave the same top-1 action, and
 every one of these unanimous answers was correct. The rows on which the
 seeds split carried between 84.2\% and 91.2\% of the NLL of the
-30-model average, depending on the condition, which is what the use of
-ensemble disagreement as an uncertainty signal would lead one to
-expect~\cite{lakshminarayanan2016simple}.
+30-model average, depending on the condition. This concentration is our
+own observation on these runs; it is consistent with the use of
+variation across an ensemble as a signal of predictive
+uncertainty~\cite{lakshminarayanan2016simple}.
 
 Unanimity is not a guarantee of
 correctness. On \texttt{ORIGINAL\_18}, 8 of the 89 unanimous rows were
 wrong, and on the background, subsets of five seeds were sometimes
-unanimous and wrong. Agreement also tracks the quality of a seed, in
-line with the model-level relation reported by Baek et
-al.~\cite{baek2022agreement}: S1 ranked the seeds much as their A+C
-losses did (Section~\ref{sec:diag-size}). On the 82,008 FIT views the
+unanimous and wrong. Agreement also tracks the quality of a seed: S1
+ranked the seeds much as their A+C losses did
+(Section~\ref{sec:diag-size}). This is a ranking of single seeds by
+their agreement with the majority, related to but not the same as the
+pairwise agreement line of Baek et al.~\cite{baek2022agreement}. On the 82,008 FIT views the
 30 models gave the same top-1 action for 90.3\% (74,074), so on FIT
 inputs the seeds mostly agree, though not on the remaining 9.7\%.
 Disagreement on unlabeled environment inputs therefore marks, without
@@ -174,8 +180,7 @@ Chapter~\ref{ch:results} tests it under a sealed contract.
 % S1 ρ .8768/.9150: SEED_POPULATION FINAL_REPORT_KO.md:37.
 % FIT view 90.3% = 74,074/82,008 (개요 B표 일치). 82,008 = 4,824 자연 경계 +
 % 77,184 전달 view (GENERIC_HEAD_CAPACITY_MATCHED FINAL_REPORT_KO.md:9, 11).
-% TODO(사람): "FIT view"는 5장 natural row/delayed view 정의([직접 기입])에 기대고
-% 있습니다. 정의가 들어가면 이 문장의 용어를 맞춰 주세요.
+% FIT view는 3.1절의 natural·delayed view 정의를 따른다.
 
 \section{What the errors look like}
 \label{sec:diag-errors}
@@ -222,7 +227,7 @@ hint-branch table, which knows nothing about targets, thus did better
 than the mean of the trained seeds (0.554 against 0.631), which leaves
 little for a change of encoder to gain there.
 
-The same table does not transfer to the background. Benign START
+Under the background workers the same table does not transfer. Benign START
 records lengthen and reorder the hint sequences, to as many as 22 in
 A+C against at most 15 in FIT, and for none of the 660 A+C rows does
 the key occur in FIT; every A+C row falls back to the global action
@@ -242,17 +247,17 @@ other than knowledge of the branches.
 \section{A lookup rule without parameters}
 \label{sec:diag-rule}
 
-The background executions also follow a fixed order of file actions,
+On the background executions the file actions follow a fixed order,
 which we read off the row features of the development set. An
 execution opens with four
 payload searches (DISCOVERY). Each target is then visited with a
 marker search (both terms are defined in Section~\ref{sec:recorded-case}), and COPY
 follows if that target's payload search succeeded, that is, ended with
 exit status zero; the source copies exactly when its observed result
-for the current target is a success. The losses of REL\_GLOBAL
-concentrate on the COPY decisions at the sixth and eighth natural
-boundaries and on the boundary just after a COPY, whose START has
-occurred but not yet been received. This order suggests a rule with no
+for the current target is a success. The errors of REL\_GLOBAL on
+COPY rows lie at the COPY decisions of the sixth, eighth and tenth
+natural boundaries, and further errors fall on the boundary just after
+a COPY, whose START has occurred but not yet been received. This order suggests a rule with no
 parameters. Let $T$ be the folder of the last received marker START.
 Predict COPY if the last received payload END in $T$ has exit status
 zero and no COPY START has been received since that marker; otherwise
@@ -279,9 +284,10 @@ probability calibrated on FIT runs does not carry over to every
 background condition.
 % 근거: RECORD:104--110. 절차 틀(처음 4개 DISCOVERY, marker 뒤 END ZERO면 COPY,
 % source 정책 observed[target]==SUCCESS): RECORD:104--107.
-% 경계 6·8: RECORD:108과 FOLLOWUP_REPORT_KO.md:27 ("두 조건 경계 6·8의 COPY").
-% TODO(사람): 기록의 "경계 10"(RECORD:108)은 135실행 손실 집중으로는 원 파일에서
-% 찾지 못했습니다(개요 B′). 확인되면 "sixth and eighth"에 "tenth"를 더해 주세요.
+% 출처(경계 6·8·10의 COPY 오답): atlas OT/PROPHET_MARKER_HEAD_INPUT_20261119/FINAL_REPORT_KO.md:42
+%   ("경계 6·8·10의 정답 COPY 평균 오답 수는 FLAT에서 REL 8.47");
+%   OT/PROPHET_MARKER_TARGET_RULE_20261119/FOLLOWUP_REPORT_KO.md:37 (diag.md 20a).
+%   경계별 "손실 비중"표는 atlas에 없어 손실 집중이 아니라 오답 위치로 썼다.
 % 규칙·620/620·476/476·1,974/2,171·1,290/1,309·배경 오답 19행(경계 7·9·11, native
 % COPY START는 cutoff 전 발생, 미수신): ORIG:PROPHET_MARKER_TARGET_RULE_20261119/
 % REPORT_KO.md:5, 13--23, 29--31.
@@ -289,8 +295,7 @@ background condition.
 % 보존, 파일 두 행동 총질량 m 유지; FLAT .141949→.091222, NESTED .125527→.054287,
 % C_ONLY .103086→.162220, B+C .059181→.062372; 개선 seed 19/30, 26/30;
 % 평균 오답 17.43→7.43, 14.70→2.83). ORIGINAL_18은 marker 0행이라 출력이 그대로다.
-% TODO(사람): 기록의 "seed 범위 .036~.420 → .080~.140"(RECORD:69, 110)은 원 파일에서
-% 찾지 못했습니다. 확인되면 이 문단 끝에 범위를 넣어 주세요.
+% 기록의 "seed 범위 .080~.140"(RECORD:69, 110)은 atlas에 없어 쓰지 않았다(diag.md 20b).
 
 \section{Giving the model the lookup}
 \label{sec:diag-intervention}
@@ -326,8 +331,9 @@ standard deviation and the worst seed improved as well. These are the
 157 runs that the 10-seed round of Chapter~\ref{ch:results} later
 reused; by then they had been inspected. The gain held against both
 models on a five-target FLAT variant. With three targets, the contrast
-against \texttt{SHUFFLED\_HEAD} was not confirmed: its interval
-included zero. Preservation of the original task was not established. On 32 new
+against \texttt{SHUFFLED\_HEAD} was not confirmed: on 32 runs and 256
+rows of \texttt{A+C FLAT} the difference was $-0.019$ with a 98.75\%
+interval of $[-0.043, +0.006]$. Preservation of the original task was not established. On 32 new
 \texttt{ORIGINAL\_18} runs \texttt{OBSERVED\_HEAD} was 0.015 worse than
 REL\_GLOBAL, inside the $+0.020$ limit, but the 95\% interval
 $[-0.017, +0.048]$ crossed it, so the model was not adopted as a
@@ -357,9 +363,9 @@ on the lookup that is general and leaves the original task intact.
 % 5대상: ORIG:PROPHET_OBSERVED_HEAD_STAGE2_FIVE_TARGET_FEASIBILITY_20261119/
 % FINAL_REPORT_KO.md:3--15 (32실행·448행, 두 대비 보정 구간 상단 < 0).
 % 3대상: 같은 파일:15 ("3대상에서 섞기 대비 구간이 0을 포함").
-% TODO(사람): 3대상의 대비 값과 구간. 개요 B′표에 따라 62.5%/65.5%/69.9%는 섞기
-% 대조의 정확도가 아니므로 쓰지 않았습니다. 3대상 보고서의 NLL 차이와 구간을 알려
-% 주시면 표에 한 행으로 넣겠습니다.
+% 출처(3대상): atlas OT/PROPHET_OBSERVED_HEAD_STAGE2_3TARGET_20261119/FINAL_REPORT_KO.md:3,7-9,21
+%   (OBSERVED−SHUFFLED −0.019314, 98.75% [−0.043177, +0.005801]; REL .171913, SHUFFLED .098368,
+%   OBSERVED .079054; 원 97.5% 구간은 오류라 정정 구간을 따른다) (diag.md 20c).
 % GENERIC_HEAD(135실행 개발 비교): ORIG:PROPHET_GENERIC_HEAD_CAPACITY_MATCHED_20261119/
 % FINAL_REPORT_KO.md:3 (일반형−특화형 +0.053672/+0.049088, 98.75% 구간
 % [+0.024236,+0.090602]/[+0.015770,+0.097816]; 일반형 섞기 대비 구간 0 포함;
@@ -374,7 +380,9 @@ over the same 30 seeds. Development: the 135-run set, development
 comparison; the lookup column is the post hoc probabilistic rule of
 Section~\ref{sec:diag-rule} applied to REL\_GLOBAL. New runs: the
 new-run check of Section~\ref{sec:diag-intervention}, collected in the
-same lab with frozen checkpoints, and its five-target FLAT variant.
+same lab with frozen checkpoints, and its five- and three-target FLAT
+variants. On \texttt{ORIGINAL\_18} the lookup changes nothing, because
+no row there has a marker.
 ``---'': not computed for that set.}
 \label{tab:diag-rule}
 \small
@@ -391,6 +399,7 @@ Set & Runs / rows & REL\_GLOBAL & + lookup (post hoc) & Shuffled & Observed
 \texttt{A+C NESTED} & 29 / 319 & 0.126 & 0.054 & 0.091 & 0.059 & 0.093 & 0.108 \\
 \texttt{C\_ONLY}    & 27 / 297 & 0.103 & 0.162 & 0.083 & 0.063 & 0.071 & 0.071 \\
 \texttt{B+C}        & 32 / 352 & 0.059 & 0.062 & 0.041 & 0.024 & 0.050 & 0.037 \\
+\texttt{ORIGINAL\_18} & 16 / 118 & 0.631 & 0.631 & 0.629 & 0.624 & 0.636 & 0.614 \\
 \midrule
 \multicolumn{8}{@{}l}{\emph{New runs, four targets}} \\
 \texttt{A+C FLAT}     & 30 / 330 & 0.056 & --- & 0.054 & 0.016 & --- & --- \\
@@ -401,6 +410,9 @@ Set & Runs / rows & REL\_GLOBAL & + lookup (post hoc) & Shuffled & Observed
 \midrule
 \multicolumn{8}{@{}l}{\emph{New runs, five targets}} \\
 \texttt{A+C FLAT}     & 32 / 448 & 0.060 & --- & 0.041 & 0.019 & --- & --- \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{New runs, three targets}} \\
+\texttt{A+C FLAT}     & 32 / 256 & 0.172 & --- & 0.098 & 0.079 & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -412,12 +424,10 @@ Set & Runs / rows & REL\_GLOBAL & + lookup (post hoc) & Shuffled & Observed
 % 새 실행 4대상: OBSERVED_HEAD_STAGE1_CONFIRM FINAL_REPORT_KO.md:19--25.
 % 새 실행 5대상: OBSERVED_HEAD_STAGE2_FIVE_TARGET FINAL_REPORT_KO.md:5--9.
 % 개발 집합과 새 실행은 다른 평가 실행이므로 칸끼리 빼거나 합치지 않는다.
-% 3대상 행은 값이 확인될 때까지 넣지 않았다(위 TODO).
-% TODO(사람): 개발 집합 ORIGINAL_18에서 OBSERVED_HEAD·GENERIC_HEAD 값이 있으면
-% 알려 주세요. GENERIC 보고서에는 ORIGINAL_18 행이 따로 있습니다
-% (ORIGINAL_18_LIMITATION_FOR_PAPER_KO.md, 아직 대조하지 않음).
+% 3대상 행: OBSERVED_HEAD_STAGE2_3TARGET FINAL_REPORT_KO.md:7-9.
+% 개발 ORIGINAL_18 행: atlas OT/PROPHET_MARKER_HEAD_INPUT_20261119/FINAL_REPORT_KO.md:27;
+%   OT/PROPHET_GENERIC_HEAD_CAPACITY_MATCHED_20261119/FINAL_REPORT_KO.md:21 (.630865/.629411/.623849/
+%   .636115/.613693). lookup 열은 marker 0행이라 REL과 같다(FOLLOWUP:29,31) (diag.md 20d).
 
 % 이 장의 질문은 결론 뒤 "저자 확인 목록"에 모았다.
-% TODO(사람): 문장 리뷰 4회차 P2-6은 6.3--6.5절(COPY/DISCOVERY 분해, 조회 규칙,
-% OBSERVED_HEAD)을 10장 뒤 별도 장으로 옮기거나 줄이자고 제안했다. 장 번호와 참조가
-% 바뀌는 구성 결정이라 옮기지 않았다. 옮길지 정해 주세요.
+% 6.3--6.5절 위치는 지금 자리에 둔다(sources/atlas_answers/decisions.md 22번).
