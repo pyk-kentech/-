@@ -303,13 +303,16 @@ Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
 measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
 % 원문: Heskes NIPS 10 (1997) §2 식 (3)(모호성 = Σ w K(p̄,p_α) = −log Z); Gruber & Buettner AISTATS 2023
 %   §3.4 Corollary 3.6, §5 "we proposed Bregman Information as uncertainty measure". 확인됨.
-Rath-Manakidis et al.\ studied the variance-related error of ensembles
-under shift~\cite{rathmanakidis2022reduction}, not distilled students;
-their ensemble result motivated our separate hypothesis that a student
-of a consensus would vary less across seeds
+Ovadia et al.\ evaluated the accuracy and calibration of ensembles
+under dataset shift~\cite{ovadia2019trust}, not distilled students;
+that ensemble result, with the variance reduction from
+averaging~\cite{gruber2022uncertainty}, motivated our separate
+hypothesis that a student of a consensus would vary less across seeds
 (Section~\ref{sec:related-distillation}).
-% 원문: Rath-Manakidis et al. (ICPRAM 2022) 초록 "In the context of data drift", 4.3절 분포 이동 시험셋에서
-%   앙상블 크기에 따른 오차·분산 감소. 학생 모델은 다루지 않음. 확인됨.
+% 원문: Ovadia et al. NeurIPS 2019 (arXiv v2) §4.2 pp.6–7 "ensembles achieve highest accuracy under distributional
+%   shift", 큰 shift 에서 ECE 도 앞섬; §5 p.9 앙상블이 "more robust to dataset shift". 학생 모델은 다루지 않음.
+%   Gruber & Buettner §3.5 식 (4)–(5) pp.6–7 앙상블 평균이 초기값에서 오는 Bregman Information 을 줄임.
+%   (옛 인용 rathmanakidis2022reduction 을 바꿈. shift 에서의 분산 관련 오차는 원문이 직접 재지 않아 정확도·보정으로 좁힘.)
 Two extensions of CD failed
 their preliminary checks (Appendix~\ref{app:rejected}). The first, the
 confidence-conditioned target (candidate~A), like the adaptive ensemble distillation of Du

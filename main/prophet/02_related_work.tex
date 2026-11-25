@@ -85,14 +85,15 @@ actor will take.
 \label{sec:related-forecasting}
 
 Learned forecasters work from observed event streams rather than from a
-configuration model. The closest task to ours is that of
-B\u{a}b\u{a}lau et al., who build alert-driven attack graphs from
+configuration model. The closest task to ours appears in a recent
+preprint by B\u{a}b\u{a}lau and Nadeem, who build alert-driven attack graphs from
 intrusion and endpoint alerts and predict the next likely attacker
 action given a sequence of observed actions~\cite{babalau2024forecasting}.
 % 원문: arXiv 2408.09888 전문. 초록 "predicting the next likely attacker action given a sequence of observed actions";
 %   3.3절(5쪽) "support endpoint alerts, e.g., from EDR systems, in addition to intrusion alerts"; 4절(6쪽) 세 자료
 %   (CPTC-2018 Suricata IDS, 상용 SOC의 Sentinel·NIDS·EDR). 예측 정확도 실험은 CPTC-2018 하나로 한다.
 %   고침: "intrusion-detection alerts"·"sequence of alerts" → "intrusion and endpoint alerts"·"sequence of observed actions".
+%   사전본 표시: arXiv v1(2024-08-19)만 있고 journal-ref 없음, UTwente 저장소 "Working paper › Preprint"(2026-11-24 확인). 저자 2명이라 "et al." 대신 이름 둘.
 Their evidence is
 intrusion and endpoint alerts already raised by detectors; ours is the raw host audit stream
 before the receipt boundary, and our output is a distribution over 18
@@ -267,15 +268,22 @@ The
 method in Chapter~\ref{ch:method} uses the simplest of these
 ingredients: the arithmetic mean of selected teachers' probabilities
 as the target, and a student with the teachers' architecture.
-Rath-Manakidis et al.\ study how ensembling reduces variance-related
-error, including for out-of-distribution
-generalization~\cite{rathmanakidis2022reduction}.
-% 원문: Rath-Manakidis et al. (ICPRAM 2022, pp.31--40) 초록 "forming ensembles ... to mitigate the
-%   effects of model variance", 3절 식 (1) 기하평균 앙상블 분해(Bias^2 + Variance), 4.3절 "the
-%   in-distribution benefit of ensembling predicts its out-of-distribution utility". 확인됨.
-Their
-result concerns the error of an ensemble, not the spread among
-distilled students, so it motivated, but did not establish, our
+Averaging members trained from different random initializations
+shrinks the part of the variance term that this randomness causes, and
+so lowers the expected
+loss~\cite{lakshminarayanan2016simple,gruber2022uncertainty}; under
+dataset shift, deep ensembles kept the highest accuracy among the
+methods compared and the lowest calibration error at larger
+shifts~\cite{ovadia2019trust}.
+% 원문: Lakshminarayanan et al. NIPS 2017 §2.4 p.4 "ensembling helps reduce the variance" (직관으로만 서술);
+%   Gruber & Buettner AISTATS 2023 §3.5 식 (4)–(5) pp.6–7: 앙상블 평균이 W 의 조건부 Bregman Information 을
+%   0 으로 보내 기대 NLL 이 줄어듦, "an ensemble always has better expected performance than a single model";
+%   Ovadia et al. NeurIPS 2019 (arXiv v2) §4.2 pp.6–7 "ensembles achieve highest accuracy under distributional shift",
+%   ECE 는 큰 shift 에서 앙상블이 앞섬. 분산 관련 오차가 shift 에서 줄어든다는 주장은 어느 원문도 직접 보이지 않아 뺐다.
+%   (옛 인용 rathmanakidis2022reduction 을 바꿈.)
+These
+results concern the error of an ensemble, not the spread among
+distilled students, so they motivated, but did not establish, our
 expectation that a student of a consensus would vary less across seeds
 than its baseline. What we test is whether a single student trained on
 unlabeled inputs from the shifted condition shows that reduction,
@@ -385,7 +393,7 @@ MulVAL~\cite{ou2005mulval}
  & Configuration facts and logic rules
  & Derived security consequences \\
 % 원문: Ou et al. 초록 Datalog(configuration description, reasoning rules), 4.5절 공격 사실 도출. 확인됨.
-B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting}
+B\u{a}b\u{a}lau and Nadeem~\cite{babalau2024forecasting} (preprint)
  & Intrusion and endpoint alerts, as alert-driven attack graphs
  & Next likely attacker action given a sequence of observed actions \\
 % 원문: arXiv 2408.09888 초록·3.3절(EDR 경보 추가). 고침: 입력 칸에 endpoint, 출력 칸 "observed actions".

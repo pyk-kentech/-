@@ -3,20 +3,27 @@
 
 During a multi-stage incident, an analyst often has to decide which
 activity to investigate before the attacker's next action is visible.
-Forecasting systems such as Tiresias~\cite{shen2018tiresias},
-EFI~\cite{zhu2024nip}, and the alert-driven attack graphs of
-B\u{a}b\u{a}lau et al.~\cite{babalau2024forecasting} support this
-decision by forecasting likely follow-up activity. B\u{a}b\u{a}lau et
-al.\ work from intrusion and endpoint alerts, whereas we work from
+Tiresias predicts the next security event on a machine from earlier
+events~\cite{shen2018tiresias}, EFI predicts the attacker's next move
+during post-exploitation from endpoint provenance~\cite{zhu2024nip},
+and DeepCASE uses the events around an alert to decide which events
+need inspection~\cite{vanede2022deepcase}; a recent preprint by
+B\u{a}b\u{a}lau and Nadeem forecasts the next attacker action from
+alerts~\cite{babalau2024forecasting}. Except for EFI, these work from
+events or alerts raised by monitoring systems, whereas we work from
 host audit records. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
 records received before its cutoff (Chapter~\ref{ch:task}).
-% 원문(6--11행, shen2018tiresias): arXiv 1905.10328 초록, "leverages Recurrent Neural Networks (RNNs) to predict future events on a machine".
-% 원문(6--11행, zhu2024nip): arXiv 2405.02826 초록, "automatically predict next move during post-exploitation".
-% 원문(6--11행, babalau2024forecasting): arXiv 2408.09888 초록·3.3절(5쪽), "predicting the next likely attacker action given a sequence of observed actions";
-%   3.3절 "support endpoint alerts, e.g., from EDR systems, in addition to intrusion alerts". 전문 대조로 확인됨.
+% 원문(6--14행, shen2018tiresias, CCS'18): 초록 "predict future events on a machine, based on previous observations",
+%   자료는 "security events collected from a commercial intrusion prevention system". 확인됨.
+% 원문(6--14행, zhu2024nip, IEEE TDSC 2024): 초록 "automatically predict next move during post-exploitation",
+%   "combined with the attack provenance graph (APG) provided by EDR"; ASG 는 "mapped to low-level system logs"(그래서 EFI 는 예외로 뺌). 확인됨.
+% 원문(6--14행, vanede2022deepcase, IEEE S&P 2022): 초록 "leverages the context around events to determine which events
+%   require further inspection"; 자료는 NSM·IDS 등 탐지기 사건(1절). 확인됨.
+% 원문(6--14행, babalau2024forecasting): arXiv 2408.09888 v1(사전본; arXiv·UTwente 저장소 모두 Preprint, 학회판 못 찾음 2026-11-24)
+%   초록 "predicting the next likely attacker action given a sequence of observed actions"; 3.3절 intrusion·endpoint 경보. 확인됨.
 
 The task, which we call PROPHET, is \textbf{next attacker action prediction} from
 Windows execution and audit records: at each prediction boundary the
