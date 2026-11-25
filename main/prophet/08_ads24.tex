@@ -45,7 +45,8 @@ At each prediction boundary the input is the sequence of Wazuh alerts
 recorded before it, read through the Wazuh rule identifier and rule
 level, \texttt{rule.id} and
 \texttt{rule.level},\footnote{Wazuh rule syntax:
-\url{https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html}.}
+\url{https://documentation.wazuh.com/current/user-manual/ruleset/ruleset-xml-syntax/rules.html},
+accessed 24 November 2026.}
 together with host role and alert timing. The target is the ATT\&CK tactic of the next attack segment, one
 of nine classes. A segment merges consecutive stages that share a
 tactic, and every segment after the first starts a boundary. We fixed

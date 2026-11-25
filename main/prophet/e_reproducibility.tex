@@ -42,10 +42,13 @@ This limits what the central result can claim. For the v3 round, the
 only round whose criteria on CD were sealed before training and all
 passed, the thesis does not include the training, run and scoring
 programs, the scored row-level outputs, or the split and source
-manifests. A reader can check that
+manifests. The minimal inference package, the training and scoring
+code and the row-level scores are not published with this thesis. The
+SHA-256 hashes, seed lists and bootstrap generator seeds given here
+allow a stored result to be matched against the files it came from. A
+reader can check that
 Tables~\ref{tab:results-v3-nll} and~\ref{tab:results-v3-criteria}
-transcribe the stored report, and that a file released later matches
-its sealed hash, but cannot recompute the means, seed standard
+transcribe the stored report, but cannot recompute the means, seed standard
 deviations, worst seeds or intervals from row-level data. The
 sampling rules of the training batches are given in
 Sections~\ref{sec:method-baseline} and~\ref{sec:method-variants}. The
@@ -54,8 +57,8 @@ recorded in that report, not as an experiment reproduced here, and it
 draws no conclusion from v3 that goes beyond what the report records.
 % 7회차 방법 P1-1: 원자료를 보충자료로 낼 수 없으므로(atlas에 없음), v3를 "저장 보고서에 기록된
 %   역사적 결과"로 한정했다. 06_results, 01_introduction, 99_conclusion에 같은 한정을 넣었다.
-% TODO(사람): 위 파일들과 해시를 학위논문 보충자료로 공개할 수 있으면, v3 주표와 판정 구간을 한 번에
-%   다시 만드는 명령을 이 절에 넣는다(저자 확인 목록 5번).
+% 저자 결정(2026-11-24, 저자 확인 목록 5번): 최소 실행본·학습·채점 코드·행 단위 점수는 공개하지 않는다.
+%   재생성 명령은 넣지 않는다. '요청 시 제공' 같은 약속 문구도 쓰지 않는다.
 % 출처: sources/atlas_answers/repro.md 5번.
 %   atlas OT/PROPHET_COPYRIGHT_SUBMISSION_20261123/package/README.md:3,7,20,23;
 %   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/PAPER_DEFINITIONS.md:16,28 (fit_v3.py 등 이름만);

@@ -199,7 +199,12 @@ threshold (Section~\ref{sec:gen-methods}). Distillation on unlabeled
 inputs is not new either: the transfer set of Hinton et al.\ may
 consist of unlabeled data~\cite{hinton2015distilling}. Labelless
 adaptation to drift has also been studied for malware
-detection~\cite{kan2021investigating}. CD likewise uses unlabeled inputs
+detection, where a detector that updates on its own pseudo-labels can
+degrade quickly by poisoning itself~\cite{kan2021investigating}.
+% 출처: Kan et al. (AISec 2021) 초록 "a rapid onset of performance degradation as the model poisons
+%   itself", "negative feedback loops and self-poisoning" (저자 연구실 PDF s2lab.org/downloads/aisec47-kanA.pdf,
+%   2026-11-24 확인; 저자 확인 목록 41번 해결).
+CD likewise uses unlabeled inputs
 from the target environment, but what we measure is the spread across
 seeds of one predictor on a forecasting task, not detection accuracy
 under drift.

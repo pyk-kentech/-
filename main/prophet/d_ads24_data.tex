@@ -61,7 +61,11 @@ Only alert identity, severity, host role, and timing enter the input;
 every field that names the answer or the run was removed. In particular, Wazuh rules can map an alert to
 ATT\&CK techniques and tactics through the \texttt{rule.mitre.*}
 fields,\footnote{Wazuh documentation on the MITRE ATT\&CK mapping of
-rules: \url{https://documentation.wazuh.com/current/user-manual/ruleset/mitre.html}.}
+rules: \url{https://documentation.wazuh.com/current/user-manual/ruleset/mitre.html},
+accessed 24 November 2026.}
+% 2026-11-24 확인(저자 확인 목록 31번): 두 문서 모두 열림. 규칙 문서는 rule 의 id·level 속성을, MITRE 문서는
+%   규칙에 ATT&CK ID 를 달면 경보 JSON 의 rule.mitre 아래 id·tactic·technique 가 붙는 예를 보인다.
+%   'current' 경로라 판 번호는 고정되지 않는다(예시 OVA 는 4.14.10). 수집에 쓰인 Wazuh 판은 기록에 없다.
 which would name the answer. In our parse of
 the data these fields are present on 1,252,951 alerts, and they were
 removed.
@@ -173,8 +177,9 @@ DARPA OpTC$^{b}$ & not used & narrative ground truth for one connected
   independent runs with stage labels \\
 ATLASv2~\cite{riddle2023atlasv2} & not used & ten scenarios; we found no
   per-stage occurrence times in the ground truth \\
-PWNJUTSU$^{c}$~\cite{berady2022pwnjutsu} & not used & the authors' site timed out from our host, and the
-  IEEE DataPort file list we read showed no time-stamped stage labels for
+PWNJUTSU$^{c}$~\cite{berady2022pwnjutsu} & not used & the authors' site was unreachable from our host
+  (20 and 24 November 2026), the IEEE DataPort files require a DataPort
+  subscription, and the file list we read showed no time-stamped stage labels for
   all participants; the dataset paper
   reconstructs the campaign of one participant out of 22, in 18 stages \\
 \bottomrule
