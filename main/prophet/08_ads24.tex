@@ -73,10 +73,14 @@ The two conditions also differ in collection period: the runs without users were
 early April and those with users in mid-April, so the split is
 associated with the users and with the period at once. The results
 below compare models across this combined split and do not estimate
-an effect of the simulated users alone.
+an effect of the simulated users alone. A role manifest lists the run
+identifiers of each role, and a per-run audit file records the time
+and label exclusions.
 % 132 대 134, episode=run, 시각 결속 규칙은 부록 D에 적었다(ads.md 25·26번).
-% TODO(사람): 역할별 run ID manifest(ADS24_STAGE1/ROLE_MANIFEST.json)와 실행별 제외 사유 CSV
-%   (ADS24_EPISODE_TIME_AUDIT.csv)는 atlas에 없다.
+% 출처(역할 manifest): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE1/ROLE_MANIFEST.json:583
+%   (roles: FIT_OFF 48, PRESERVE_OFF 15, ADAPT_ON 34, EVAL_ON 35 — 본문 48/15/34/35와 같다).
+% 출처(실행별 감사): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_EPISODE_TIME_AUDIT.csv:1
+%   (label_exclusion, time_exclusion, error 열).
 % 근거: RECORD:214, 247, 251, 254; ADS24_CONTRACT_SEALED.md "과제와 자료",
 % "입력과 모델 이식"; ADS24_STAGE2_REPORT.md "계보" (8,461/2,982/5,811/5,639경계).
 % 연속 경계의 약 62.7%가 같은 전술이라는 수치는 개요에 따라 부록 D에 둔다.
@@ -242,13 +246,12 @@ prior}, which predicts at every boundary the tactic frequencies of the
 FIT runs, weighting each run equally, and whose top-1 choice is
 therefore the majority tactic of FIT. It is estimated from the 48 FIT
 runs alone and scored, like the models, on the 35
-environment-evaluation runs. The stored ledger marks no smoothing for
-this baseline, whereas it marks add-one smoothing for the in-house FIT
-prior, but it does not say how zero counts were handled, so we report
-the value as stored and do not claim it can be recomputed from this
-description.
+environment-evaluation runs. The per-run tactic proportions are summed
+over the FIT runs and one is added to each tactic before normalizing,
+so a tactic never seen in FIT still has nonzero probability.
 % 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:71,72 (ads.md 27번).
-% TODO(사람): ADS-24 FIT prior의 평활 여부와 zero-count 처리(atlas에 명시 없음).
+% 출처(+1 평활): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/ads24_stage1.py:574
+%   (p=(counts+1)/(counts.sum()+len(LABELS))). 옛 원고의 "원장에 평활 표시 없음"은 코드와 달라 고쳤다.
 On the environment evaluation its NLL is 1.830, and all 30 CD seeds
 were worse than it. The CD mean exceeded it by $+0.231$, against $+0.446$ for
 REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the

@@ -111,38 +111,23 @@ source.
 %  2. 제목 유지 여부. 후보 3개를 kentech.tex 주석에 적었다.
 %
 % 재현·감사 자료
-%  5. 최소 실행본(seed 127 checkpoint)을 독자에게 줄지와 그 위치; 코드 commit/hash, 계약별 봉인
-%     hash의 내용; v3의 새 30 seed 값(TRAIN_SEED_PLAN.json) [e_reproducibility].
-%     (7회차 방법 P1-1) v3의 학습·실행·채점 코드와 commit, seed plan, 행 단위 채점 출력
-%     (SCORED_RESULTS.json, SEED_RESULTS.csv), split/source manifest·eligibility seal, bootstrap
-%     재생성 정보를 학위논문 보충자료로 공개할 수 있는가? 공개하면 v3 주표·판정 구간을 한 번에 다시
-%     만드는 명령을 부록 E에 넣는다. 지금 원고는 v3를 "저장 보고서에 기록된 역사적 결과"로만 쓴다.
-%  6. 603 계보 FIT occurrence 표집기의 구현(torch Generator인지 permutation 순환인지) [04_method 주석].
-%  8. PAG1 배경 4실행의 제외 ID·사유(ELIGIBILITY_SEAL.json) [05, e].
-%  9. v3 bootstrap의 생성기 seed [e_reproducibility].
-% 10. seed별 점수 파일(SCORED_RESULTS.json, STAGE2_SEED_RESULTS.csv 등): v3·PAG1에서 나아진
-%     seed 수, v3 complete configuration 수와 complete-only 점추정·leave-one-configuration-out,
-%     seed별 분포(median/IQR), "가장 나쁜 CD seed가 기준 중간 seed보다 낫다". 기록의
-%     "30개 중 20~30개"는 "FIT 다수 기준보다 나은 기준 seed 수"(LSTM 30, Transformer 25, GRU 20)를
-%     옮긴 것일 수 있다(repro.md 10(b)) [06_results, 09_generality, e].
+%  5. (공개 결정만 남음) 최소 실행본(seed 127 checkpoint)과 v3의 학습·실행·채점 코드, 행 단위 채점
+%     출력(SCORED_RESULTS.json, SEED_RESULTS.csv), split/source manifest·eligibility seal을 학위논문
+%     보충자료로 공개할지와 그 위치. 공개하면 v3 주표·판정 구간을 한 번에 다시 만드는 명령을 부록 E에
+%     넣는다. (commit 없음·봉인 SHA-256·v3 30 seed는 원래 PC 답으로 부록 E에 넣었다.) [e_reproducibility]
+% 10. (남은 부분) PAG1 재추론에서 KD_ALL이 같은 seed의 REL_GLOBAL보다 나아진 seed 수 [06_results].
+%     v3 우세 seed 수·complete 구성 수·LOO, "가장 나쁜 CD seed" 문장(못 본 조건에 한정)은 닫았다.
 %
 % 정의
-% 14. C_ONLY·B+C(135실행 개발 집합, v3, PAG1)의 FLAT/NESTED 배치 [03_task].
 % 18. 부록 C 옛 후보 1--15행에 한 줄 정의를 붙일지, 그 후보들의 계약·결과 파일이 남아 있는지
 %     (7회차 방법 P3-1; 지금은 "정의가 보존되지 않은 연구 이력"으로 분리했다) [c_rejected].
 %     ρ0·해상도·margin 세 줄은 저자 답(정의 묶음 18(a))으로 닫고 표 아래 각주로 옮겼다.
 %     15번(+0.020 한도)도 저자 답 6번으로 닫았다.
-% 24. 자체 실험실 FIT prior 1.412의 +1 평활 위치와 정규화 방법 [09_generality].
-% 36. 부록 B의 두 135실행을 실행 ID 수준으로 대조하는 일(ELIGIBILITY_SEAL.json 필요) [b].
-% 38. 모델 출력 열 index가 부록 A 순서와 같은지 코드로 확인 [04_method]. 9회차 방법 P3-1에 따라
-%     본문은 "lower stored action-column index"로만 쓰고 부록 A 대응은 단정하지 않는다.
-% 43. (9회차 방법 P2-1) fit_v3.py의 무라벨 32행 추출: A:B(119:48) 정수 배분, 행 균등/실행 균등,
-%     복원 여부, RNG와 순환 규칙. atlas에는 비율만 있다(CONTRACT_V3.md:7) [04_method, e].
+% 36. 부록 B의 두 135실행(조건부 평균 평가와 같은 seed 재학습)을 실행 ID 수준으로 대조하는 일 [b].
+%     원래 PC 답은 135실행 개발 집합과 v3 적응 입력(A 119 + 원래 16)을 비교했을 뿐이라 이 항목은
+%     닫지 않았다. 첫 135실행의 ID는 b_supplemental_results 주석에 적었다.
 %
-% ADS-24
 % (25번은 7회차 인용 리뷰가 원 논문에서 134 episode를 확인해 닫았다.)
-% 26. 역할별 run ID manifest, 실행별 제외 사유 CSV(ADS24_EPISODE_TIME_AUDIT.csv) [08].
-% 27. ADS-24 FIT prior의 평활 여부와 zero-count 처리 [08_ads24].
 %
 % 인용·웹 문서
 % 31. Wazuh 문서 두 URL의 접근일 [08, d].
@@ -154,5 +139,6 @@ source.
 %     확인하면 2.7절에 되살릴 수 있다 [02_related_work].
 %
 % 답을 받아 닫은 항목: 3, 4, 7, 11, 12, 13, 16, 17, 19--23, 28--30, 32, 34, 35, 37, 39, 40
-% (sources/atlas_answers/*.md, 2026-11-24).
+% (sources/atlas_answers/*.md, 2026-11-24); 6, 8, 9, 14, 24, 26, 27, 38, 43, 10(PAG1 seed 수 빼고),
+% 5(공개 결정 빼고) (sources/atlas_answers/codex_original_machine.md, 원래 실험 PC 답, 2026-11-24).
 % ====================================================================

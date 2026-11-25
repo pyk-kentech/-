@@ -47,7 +47,12 @@ Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition}.}
 % 두 135실행은 같은 봉인 적격 집합으로 읽힌다: 조건별 실행·행이 같고, 재학습·seed 모집단 보고서가
 %   "기존 적격 135실행"을 쓴다(atlas OT/PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/FINAL_REPORT_KO.md:19;
 %   OT/PROPHET_FOUR_MODEL_NEW_SEEDS_20261117/RUN_STATE.md:5; diag.md 36a).
-% TODO(사람): 실행 ID 수준 대조에는 원 ELIGIBILITY_SEAL.json이 필요하다(atlas에 없음).
+% 첫 135실행(조건부 평균 평가)은 원래 PC: PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/ELIGIBILITY_SEAL.json:1
+%   의 개발 집합이다: PBFMCB0001–0128 중 0030·0050·0054·0058·0102·0106·0122·0124·0127 을 뺀 배경 119 +
+%   PBFMCO0001–0016 원래 16 (144 시도, 135 적격과 맞는다).
+% TODO(사람): 원래 PC 답의 "두 135실행 비교: 같음"은 이 개발 집합과 v3 적응 입력(A 119 + 기존 원래 16)을
+%   비교한 것이다. 부록 B의 두 번째 135실행(같은 평가 실행을 다시 쓴 재학습, PROPHET_FOUR_MODEL_NEW_SEEDS_20261117)이
+%   같은 ID 집합인지는 아직 ID 수준으로 대조되지 않았다(저자 확인 목록 36번).
 \begin{tabularx}{\textwidth}{@{}Xrr@{}}
 \toprule
 Condition and use & Executions & Rows \\

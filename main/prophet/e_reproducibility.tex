@@ -18,9 +18,10 @@ inference code, the fitted preprocessor, and one checkpoint, the C-fold
 REL\_GLOBAL model of seed 127. It requires Python 3.10 or later and
 PyTorch 2.5.1 on CPU, and it states that the material needed to
 reproduce the whole study is outside its scope. The training, run and
-scoring programs of the v3 round are named in its records but are not
-in the archive available to us, and no version-control commit is
-recorded for them. Training ran on a host with 251~GiB of memory and
+scoring programs of the v3 round remain on the original experiment
+machine and are not in the archive available to us. That work was not
+a Git repository, so no commit exists; the seals record SHA-256 hashes
+of files instead (Table~\ref{tab:repro-hashes}). Training ran on a host with 251~GiB of memory and
 128 CPUs, with an 8~GiB memory limit per process; v3 predictions were
 generated with two CPU threads. The exact Python and PyTorch versions
 used during the study were not recorded.
@@ -32,26 +33,22 @@ seals (for example \texttt{TRAIN\_SEED\_PLAN.json},
 \texttt{SPLIT.json}, and \texttt{ELIGIBILITY\_SEAL.json}), as well as
 the seed-level score files that the reports cite
 (\texttt{SCORED\_RESULTS.json}, \texttt{SEED\_RESULTS.csv}). Their
-contents are not in the archive available to us. Seed-level results,
-complete-configuration counts and resampling indices of the in-house
-rounds therefore cannot be recomputed here.
+contents are not in the archive available to us. The seeds, generator
+seeds, exclusion reasons and seed-level counts given in this appendix
+and in Chapter~\ref{ch:results} were read or computed from these files
+on the original machine, without new training or inference.
 
 This limits what the central result can claim. For the v3 round, the
 only round whose criteria on CD were sealed before training and all
-passed, the archive lacks the training, run and scoring programs and
-their commit, the seed plan with the 30 new seeds, the scored row-level
-outputs, the split and source manifests with the eligibility seal, the
-complete-configuration data and resampling indices, and the seed of the
-bootstrap generator. A reader can therefore check that
+passed, the thesis does not include the training, run and scoring
+programs, the scored row-level outputs, or the split and source
+manifests. A reader can check that
 Tables~\ref{tab:results-v3-nll} and~\ref{tab:results-v3-criteria}
-transcribe the stored report, but cannot recompute the means, seed
-standard deviations, worst seeds or intervals from row-level data, or
-check the exclusions, the execution weighting, and the bootstrap. Nor
-can the training batches of the CD student be rebuilt exactly: the
-contract fixes the 119:48 ratio of the unlabeled rows
-(Section~\ref{sec:method-variants}), but the integer split per update,
-the sampling unit, replacement, and the sampling generator are not in
-the archive. The
+transcribe the stored report, and that a file released later matches
+its sealed hash, but cannot recompute the means, seed standard
+deviations, worst seeds or intervals from row-level data. The
+sampling rules of the training batches are given in
+Sections~\ref{sec:method-baseline} and~\ref{sec:method-variants}. The
 thesis accordingly presents the v3 verdicts as a historical result
 recorded in that report, not as an experiment reproduced here, and it
 draws no conclusion from v3 that goes beyond what the report records.
@@ -67,8 +64,33 @@ draws no conclusion from v3 that goes beyond what the report records.
 %   OT/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:13 (해시 봉인);
 %   PROPHET_RESEARCH_TRIAL_ATLAS/FILE_INVENTORY.csv.gz (원본에만 있는 파일).
 %   8 GiB 상한: repro.md 5번(학습 호스트).
-% TODO(사람): 최소 실행본(seed 127 checkpoint)을 독자에게 줄지(공개 위치 또는 "요청 시 제공"),
-%   코드 commit/hash를 줄 수 있는지 정해 주세요. 지어내지 않았다.
+% 출처(commit 없음): 원래 PC 의 작업 폴더와 /home/yonggamman/prophet-e4 에서 git rev-parse HEAD 가
+%   "not a git repository"; 봉인 파일에도 commit 항목 없음(codex_original_machine.md 저장값 2–4).
+% TODO(사람): 최소 실행본(seed 127 checkpoint)과 코드를 독자에게 줄지(공개 위치 또는 "요청 시 제공")
+%   정해 주세요(저자 확인 목록 5번).
+
+\begin{table}[htbp]
+\centering
+\caption{SHA-256 hashes recorded in the seals. The 135-run development
+set seals its two plan files rather than one contract file.}
+\label{tab:repro-hashes}
+\scriptsize
+\begin{tabular}{@{}lll@{}}
+\toprule
+Round & File & SHA-256 \\
+\midrule
+v3 & \texttt{CONTRACT\_V3.md} & \texttt{26cdaa793fc8074f90329229d2c5304d5f51145c135c9e5f6b56ccfc1200f56d} \\
+v3 & \texttt{fit\_v3.py} & \texttt{e5c51cd6ccb2b6f778f5e8c9b0f0e04aa5fb1d5326f2fedad45615afc526adc3} \\
+PAG1 & \texttt{ARCH\_GENERALITY\_CONTRACT\_SEALED.md} & \texttt{a2a7f3ff8071c0e1f15a3e240d6e843d56b84ead17b33e4846c0eb14fdf94b4d} \\
+ADS-24 & \texttt{ADS24\_CONTRACT\_SEALED.md} & \texttt{f93d4ea6b9221ce38c39dc1f290dea189206ac57764f4a44ebeb3bb0048b5af8} \\
+135-run set & \texttt{BG\_MAIN\_PLAN.json} & \texttt{5be722717e56710c25e178e9c83c84093a92f1fa7ad3255e7aac8c18505f0929} \\
+135-run set & \texttt{ORIGINAL\_MAIN\_PLAN.json} & \texttt{fbddf9ede43483267a0faa468e8903f98c02d321cb5e0bc2a607fea7e1458ca2} \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 출처: 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SEAL.json:1153 (v3 두 행);
+%   원래 PC: ARCH_GENERALITY_STAGE1_20261122/SEAL.json:701 (PAG1); 원래 PC: ADS24_STAGE1/SEAL.json:10 (ADS-24);
+%   원래 PC: 135실행 차수의 SEAL.json:1 (두 계획 파일; 계약 파일 하나의 hash는 없다).
 
 \section{Training settings and seeds}
 \label{sec:repro-training}
@@ -94,9 +116,12 @@ The 30 REL\_GLOBAL seeds of the teacher population are 3674, 12050, 15301, 16635
 61616, 64832, 68498, 69205, 71526, 71556, 76939, 79043, 90835, 91513,
 95246, 97386, and 99609. The 30 seeds of the v2 round were drawn without
 replacement from 1,000,000--1,999,999 with PCG64 seeded by 2026111909
-and sorted; the values themselves, and the 30 new seeds of the v3 round,
-are recorded only in the rounds' seed plans, which are not in the
-archive. The ADS-24 baseline seeds are 301001 to 301030. The five in-house teachers are the REL\_GLOBAL seeds 50572,
+and sorted; the values themselves are recorded only in the round's seed
+plan, which is not in the archive. The 30 new seeds of the v3 round are
+2004673, 2067898, 2069477, 2077173, 2112904, 2122696, 2331561, 2339652,
+2356542, 2361613, 2363065, 2400243, 2422305, 2446238, 2474153, 2482862,
+2515409, 2574712, 2587606, 2613239, 2627292, 2672261, 2680405, 2751475,
+2764668, 2855487, 2874630, 2877233, 2898425, and 2958656. The ADS-24 baseline seeds are 301001 to 301030. The five in-house teachers are the REL\_GLOBAL seeds 50572,
 91513, 71556, 68498, and 37406; the five ADS-24 teachers are the
 REL\_GLOBAL-ADS seeds 301030, 301026, 301025, 301003, and 301022. The
 generality study and the method comparison use the seeds 4500001 to
@@ -113,8 +138,8 @@ seed. SWA averages the weights at updates 1,010, 1,122,
 % 출처(seed 목록): OT/PROPHET_INDEPENDENT_CONFIRM_CONTRACT_DRAFT_20261118/CONTRACT_DRAFT_KO.md:15 (30 seed);
 %   OT/PROPHET_ENV_CONSENSUS_KD_V2_20261119/CONTRACT_V2.md:21 (PCG64 2026111909);
 %   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_CONTRACT_SEALED.md:33 (301001–301030);
-%   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/RUN_STATE.md:4 (v3 새 30 seed, 값 없음).
-% TODO(사람): v3의 새 30 seed 값(TRAIN_SEED_PLAN.json)은 atlas에 없다.
+%   OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/RUN_STATE.md:4 (v3 새 30 seed).
+% 출처(v3 30 seed 값): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/TRAIN_SEED_PLAN.json:3.
 
 \section{General encoders}
 \label{sec:repro-encoders}
@@ -213,7 +238,9 @@ v3 round & 160 & 160 & 157 / 1,611
     SOURCE\_ACTION\_START missing (\texttt{PEKD4B0087}), and a source
     service-health timeout (\texttt{PEKD4B0112}) \\
 PAG1 & 160 & 160 & 156 / 1,600
-  & four background runs; reason codes not in the available archive$^{*}$ \\
+  & four background runs whose source action START (\texttt{PAG1B0023},
+    \texttt{PAG1B0037}, \texttt{PAG1B0061}) or STOP (\texttt{PAG1B0097})
+    record was not found$^{*}$ \\
 Method comparison & 160 & 119 & 110 / 1,119
   & five source failures; four runs with an unbound source START or STOP;
     stopped after three consecutive source failures (agent or forwarder
@@ -222,11 +249,9 @@ Method comparison & 160 & 119 & 110 / 1,119
 \end{tabularx}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-$^{*}$The stored report states that the reasons are recorded in the
-contract's sealed eligibility file, which we could not inspect, so for
-PAG1 we could not verify that the exclusions were independent of the
-scores. The three v3 exclusions are all failures at the source
-collection stage, before any prediction was made.
+$^{*}$Reasons as recorded in the sealed eligibility file. The four PAG1
+and the three v3 exclusions are all failures at the source collection
+stage, before any prediction was made, and none depends on a score.
 \end{minipage}
 \end{table}
 % 근거: OBSERVED_HEAD_STAGE1_CONFIRM FINAL_REPORT_KO.md:11 (POHCB0005 COPY START,
@@ -239,7 +264,8 @@ collection stage, before any prediction was made.
 % "실행과 재현" (SOURCE_FAILED 5, SOURCE_ACTION_START_NOT_FOUND 3, STOP_NOT_FOUND 1,
 % NOT_ATTEMPTED 41) 및 TECHNICAL_LEDGER.md (AGENT_OR_FORWARDER_NOT_READY 세 번 연속).
 % 안전 중지 규칙: CONTRACT_V2.md:15; ARCH_GENERALITY_CONTRACT_SEALED.md "새 PROPHET 수집".
-% TODO(사람): PAG1 배경 4실행의 제외 ID·사유는 ELIGIBILITY_SEAL.json(원본)에만 있고 atlas에 없다.
+% 출처(PAG1 제외): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/ELIGIBILITY_SEAL.json:19
+%   (ValueError: SOURCE_ACTION_START_NOT_FOUND:11/10/9, SOURCE_ACTION_STOP_NOT_FOUND:12).
 
 \section{Resampling}
 \label{sec:repro-resampling}
@@ -256,30 +282,34 @@ PAG1 re-inference, 2026112303 and 2026112304 for the method
 comparison on ADS-24 and in-house, and 2026112003 for the second stage
 of Chapter~\ref{ch:ads24}, where the three main contrasts share one set
 of indices. The v3 contract specifies 100,000 configuration-paired
-resamples and a Bonferroni level of 98.3333\% but no generator seed.
+resamples and a Bonferroni level of 98.3333\%; its scoring code seeds
+the generator with 2026112021 for \texttt{A+C FLAT}, 2026112022 for
+\texttt{A+C NESTED}, and 2026112023 for \texttt{ORIGINAL\_18}.
 % 근거: ARCH_GENERALITY_CONTRACT_SEALED.md "blind 채점과 2단계 관문";
 % ARCH_GENERALITY_STAGE2_PREFIT_SEAL.md; METHOD_BASELINES_CONTRACT_SEALED.md "주 평가와 결정".
 % 출처: atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE2_REPORT.md:15 (PCG64 2026112003);
-%   CONTRACT_V3.md:11 (v3, seed 값 없음) (repro.md 9번).
+%   CONTRACT_V3.md:11 (v3) (repro.md 9번).
+% 출처(v3 생성기 seed): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/score_v3.py:33, SEAL.json:1104
+%   (numpy PCG64, 100,000회; 보조 C_ONLY 2026112024, B_PLUS_C 2026112025는 본문에 넣지 않았다).
 
 \section{Point estimates on complete configurations}
 \label{sec:repro-complete}
 
-In-house point estimates use every eligible run, whereas intervals use
-the configurations whose repetitions are all eligible, so the two
-summarize slightly different populations.
+In the generality study, in-house point estimates use every eligible
+run, whereas intervals use the configurations whose repetitions are all
+eligible, so the two summarize slightly different populations.
 Table~\ref{tab:repro-complete} gives both point estimates for the A+C
 layouts of the generality study. The two differ by at most 0.011, and
-the direction of every contrast is the same under either. For the v3
-round the gap is bounded but not measured. Its three exclusions are
-background runs, so at most three of the 64 background configurations
-(16 per condition, two repetitions each) lost a repetition, and the
-seen-condition configurations are all complete. The v3 report keeps
-the complete-configuration counts and the complete-only estimates in
-its seed-level file, which is not in the archive, and no
-leave-one-configuration-out analysis was run.
-% TODO(사람): v3 각 대비의 complete configuration 수·complete-only 점추정(SCORED_RESULTS.json)은
-%   atlas에 없다(방법 리뷰 6회차 P2-1).
+the direction of every contrast is the same under either. In the v3
+round the three exclusions are background runs, so at most three of the
+64 background configurations (16 per condition, two repetitions each)
+lost a repetition, and the seen-condition configurations are all
+complete. Its three criteria rest on 15, 16 and 8 complete
+configurations; their complete-only estimates equal the stored ones,
+and the leave-one-configuration-out ranges are given in
+Section~\ref{sec:results-v3}.
+% 출처: 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SCORED_RESULTS.json:1, :1191; score_v3.py:84;
+%   evaluate_v3.py:134 (codex_original_machine.md 저장값 5). 구성별 LOO 값은 원 답 파일에만 둔다.
 
 \begin{table}[htbp]
 \centering

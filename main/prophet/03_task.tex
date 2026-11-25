@@ -227,15 +227,19 @@ Identifier & C-fold FIT & Definition \\
 % ORIGINAL_18로 통일한다(개요 전체 규칙). 원고의 "C-only"는 C_ONLY로 바꿨다.
 % 출처: FIT 603에 FLAT·NESTED 둘 다 있음(새 FIT 64실행 = 16 공격 셀×{FLAT,NESTED}×{QUIET, A worker}):
 %   atlas OT/REL_EVIDENCE_PRESERVING_COMPARISON_20261113/EXECUTION_CONTRACT.md:3 (defs.md 14(c)).
-% TODO(사람): C_ONLY·B+C(135실행 개발 집합, v3, PAG1)가 어느 배치를 쓰는지는 atlas에 없다.
 
 An \emph{evaluation set} is one condition scored as one group of runs.
-\texttt{A+C} is scored separately under each layout, so the in-house
+\texttt{C\_ONLY} and \texttt{B+C} use the \texttt{FLAT} layout in the
+135-run development set, in v3 and in PAG1. \texttt{A+C} is scored separately under each layout, so the in-house
 chapters use five evaluation sets: \texttt{A+C FLAT},
 \texttt{A+C NESTED}, \texttt{C\_ONLY}, \texttt{B+C}, and
 \texttt{ORIGINAL\_18}.
-% 8회차 문장 P2-2: 조건(condition)과 평가 묶음(evaluation set)을 나눴다. C_ONLY·B+C의 배치는
-% 단정하지 않는다(저자 확인 목록 14번).
+% 8회차 문장 P2-2: 조건(condition)과 평가 묶음(evaluation set)을 나눴다.
+% 출처(C_ONLY·B+C = FLAT, manifest layout 필드, 기본값 없음):
+%   원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/BG_MAIN_PLAN.json:2530 (v3);
+%   원래 PC: ARCH_GENERALITY_STAGE1_20261122/BG_MAIN_PLAN.json:3778 (PAG1);
+%   원래 PC: PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/make_plan.py:38 (135실행 개발 집합);
+%   원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/run_background_once.py:97 (layout=row['layout']; assert layout in AGENTS).
 
 The C-fold makes the difference between seen and unseen conditions
 concrete. Worker~C runs \texttt{ipconfig /all}, and received \texttt{ipconfig}

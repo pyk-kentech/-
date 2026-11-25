@@ -105,7 +105,9 @@ squared gradient, with respect to that event's 48-dimensional vector
 $e_i$, of a single Rademacher projection of the centered 18-way logits;
 this is an unbiased estimate of the squared Frobenius norm of the
 Jacobian. The penalty is averaged over the drawn events and then over
-occurrences. The random draws are fixed by update, microbatch and seed.
+occurrences. These event draws are fixed by update, microbatch and seed;
+the FIT occurrences themselves are chosen by a separate generator
+(below).
 The penalty therefore discourages logits that change sharply with one
 event's representation, without singling out the worker events by
 role.
@@ -149,12 +151,16 @@ Training uses the 603 runs of the FIT set
   \label{eq:base-loss}
 \end{equation}
 where $\mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}$ is the 18-way action
-cross-entropy with each FIT run given equal weight. Each update draws
-32 FIT occurrences with replacement and with equal probability per run;
-an occurrence holds all natural boundaries of one run in its natural
-view together with the same boundaries under one of its 16 delayed
-schedules (Section~\ref{sec:task-rows}), the loss is averaged within the
-run, and the 32 occurrences are weighted equally. Each model is
+cross-entropy with each FIT run given equal weight. Each update takes
+32 FIT occurrences from a running sequence of random permutations of
+the 603 runs: no run repeats within a permutation, and a new permutation
+starts when one is used up. The generator is seeded once per seed, with
+the seed plus 99237. An occurrence holds all natural boundaries of one
+run in its natural view together with the same boundaries under one of
+its 16 delayed schedules (Section~\ref{sec:task-rows}); the schedule
+index is the number of times that run has been drawn, modulo 16. The
+loss is averaged within the run, and the 32 occurrences are weighted
+equally. Each model is
 trained for 1,346 such updates with AdamW~\cite{loshchilov2017decoupled}
 (weight decay 0.01, gradient clipping at 2), and the learning rate
 follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
@@ -169,7 +175,9 @@ remaining training settings.
 % 출처(occurrence 표집): atlas OTL/RECEIPT_BATCH_METHOD_DECISION_20261101/SELECTED_METHOD_CONTRACT.md:34;
 %   OT/AUX_MOE3_PAPER_METHOD_RESULTS_20261104/PAPER_METHOD_RESULTS_KO.md:32 (복원추출, 중복 유지);
 %   OT/EXPOSURE_404_VS_476_COMMON_VOCAB_FIXED_20261110/CONTRACT.md:4 (repro.md 6-(8)).
-%   603 계보 표집기의 구현(torch Generator인지 permutation 순환인지)은 atlas에 없다.
+% 출처(표집기 구현, 위 atlas 계약의 "복원추출"을 대신함): 원래 PC: REL_EVIDENCE_PRESERVING_COMPARISON_20261113/fit_data.py:67
+%   (torch.randperm(len(runs),generator=gen); manual_seed(seed+99237); 일정 index = 뽑힌 횟수 mod 16);
+%   원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/fit_v3.py:53 (REL_GLOBAL 이후 계보도 이 trace를 쓴다).
 
 \section{Evidence for the relational residual}
 \label{sec:method-relation-evidence}
@@ -268,9 +276,13 @@ action equals that majority, computed within each run and then averaged
 over runs with equal weight. The five models with the highest agreement
 form $J$. A tie in the majority vote goes to the lower stored
 action-column index, and a tie in agreement to the lower seed
-identifier. Whether that column index follows the action order of
-Appendix~\ref{app:actions} is not recorded.
-% TODO(사람): 저장 확률표의 행동 열 index가 부록 A 순서와 같은지(저자 확인 목록 38번).
+identifier. The columns follow the candidate-action list stored with
+the preprocessor, which is in alphabetical order of action ID, as in
+Appendix~\ref{app:actions}.
+% 출처(열 순서): 원래 PC: INDEPENDENT_POLICY_LAB_20261026/RECEIPT_BATCH_METHOD_DECISION_20261101/run_receipt_atomic_v2.py:70
+%   (labels = checkpoint["candidate_actions"]); 같은 폴더 receipt_atomic_model_v2.py:55;
+%   같은 폴더 PREPROCESSOR_V2.json:280 (저장된 18열, 행동 ID 알파벳순).
+% 출처(다수결 동률): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/predict_stage1.py:232 (majority = votes.argmax(0)).
 Section~\ref{sec:repro-training} lists the five seeds selected. They are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
 the v2 and v3 rounds (Tables~\ref{tab:variants} and~\ref{tab:rounds}). Section~\ref{sec:related-underspec}
 explains how this ranking relates to the agreement estimator of Baek
@@ -287,7 +299,6 @@ not that ranking by agreement is needed or better than another choice.
 % 다수결 동률은 낮은 행동 열 index, 순위 동률은 낮은 seed. 후보 자신의 표 포함.
 % 5회차 방법 리뷰 P3: 동률 규칙을 본문에 옮기고 부록 E의 seed 목록을 가리켰다.
 % 출처(열 순서): defs.md 38번; PAPER_DEFINITIONS.md:44; 행동별 표 세 곳의 순서가 부록 A와 같다.
-% TODO(사람): 모델 출력 열 index가 이 표 순서와 같은지는 코드로 확인해 주세요(atlas에 직접 진술 없음).
 
 Agreement is used to choose teachers, not to choose a deployed model.
 The single seed ranked first by agreement failed preservation on
@@ -320,19 +331,18 @@ in the teacher set and in the unlabeled inputs of the KL term. The
 background inputs are 119 runs (1,309 rows) under background conditions.
 KD\_ALL adds 48 runs (354 rows) of the seen condition to them and
 draws the 32 unlabeled rows of each update from the two sources in
-the ratio of their run counts, 119:48. The contract fixes only this
-ratio. The records available to us do not state how the 32 rows are
-split into whole numbers per update, whether rows are drawn uniformly
-within a source or runs are drawn first, whether drawing is with
-replacement, or which generator and cycling rule produce the draws
-(Section~\ref{sec:repro-code}). The choice matters, because the two
-sources hold 1,309 and 354 rows and row-uniform and run-uniform draws
-weight the KL term differently. The labels and the source and
+the ratio of their run counts, 119:48. Each of the 32 slots draws one
+of the 167 runs uniformly and then one row uniformly within it, with
+replacement and with no fixed whole-number split per update; the
+generator is PCG64 seeded with 2026112014 plus the seed. The choice
+matters, because the two sources hold 1,309 and 354 rows: the draw is
+run-uniform, not row-uniform, so the seen-condition rows weigh more in
+the KL term than their share of rows. The labels and the source and
 worker roles of the seen-condition rows are not used. KD\_ALL is the
 final student of Chapter~\ref{ch:results}.
 % 출처(119:48): atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/CONTRACT_V3.md:7.
-% TODO(사람): fit_v3.py의 무라벨 32행 추출 규칙(A:B 정수 배분, 행/실행 단위, 복원 여부,
-%   RNG·순환 규칙). atlas에는 비율만 있고 코드가 없다.
+% 출처(무라벨 32행 추출): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/fit_v3.py:75 (표집 코드),
+%   :94 (A 119·B 48 실행); runs_all=runs_a+runs_b, PCG64(2026112014+seed), (1346,4,8) 난수를 미리 만든다.
 % 근거: RECORD:142--149; PAPER_DEFINITIONS.md §2 군 표. 원래 입력 B는 기존
 % 16실행·118행 + 1단계 32실행·236행 = 48실행·354행.
 

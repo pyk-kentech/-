@@ -22,9 +22,9 @@ the 98.3333\% Bonferroni level were fixed before training and
 collection (Section~\ref{sec:eval-criteria}), so every criterion below
 is a sealed criterion in the sense of Section~\ref{sec:eval-rounds}.
 The values are those of the stored round report. The three
-exclusions are recorded as failures during source collection, but the
-seed-level files needed to rescore the round are not in the archive
-available to us (Section~\ref{sec:eval-contract}). The chapter
+exclusions are recorded as failures during source collection, and the
+seed-level score files stay on the original experiment machine
+(Section~\ref{sec:eval-contract}). The chapter
 therefore reports the v3 verdicts as the historical outcome recorded in
 that report. A reader can check that the tables transcribe the report,
 but not that they follow from the row-level scores, the exclusions,
@@ -96,22 +96,30 @@ seed standard deviation on \texttt{ORIGINAL\_18}, which was not a
 criterion, fell from 0.070 to 0.039. These figures describe the spread
 of 30 fixed checkpoints on resampled runs; they say nothing about seeds
 outside those 30 (Section~\ref{sec:eval-criteria}). The intervals
-resample complete configurations only, while the point estimates use
-every eligible run; at most three of the 64 background configurations
-lost a repetition, and the complete-only estimates are not in the
-archive available to us (Section~\ref{sec:repro-complete}).
+resample complete configurations, 15 on \texttt{A+C FLAT}, 16 on
+\texttt{A+C NESTED} and 8 on \texttt{ORIGINAL\_18}, and the stored
+estimates of the three criteria equal the complete-only estimates
+recomputed from the seed-level scores. Leaving out any one configuration
+kept the sign of all three: the estimates ranged over
+$[-0.049, -0.041]$, $[-0.054, -0.047]$ and $[-0.075, -0.039]$
+(Section~\ref{sec:repro-complete}).
 % 근거: RECORD:176--183; v3 FINAL_REPORT_KO.md "사전 주 가족" (점추정 −0.045624,
 % −0.050396, −0.060741) 및 "결과 해석의 경계" (SD FLAT .055591→.009508, NESTED
 % .056335→.005939; 최악 seed FLAT .226493→.066464, NESTED .203222→.045990).
 % FLAT은 개요·기록의 근사값("약 .056→.010, .23→.07")이고, NESTED는 원 파일 값을
 % 셋째·둘째 자리로 줄였다.
+% 출처(완전 구성·LOO): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/score_v3.py:84 (채점식),
+%   SCORED_RESULTS.json:1191 (저장 주 결과), evaluate_v3.py:134 (구성 정의). complete-only 점추정
+%   −.045624231, −.050396215, −.060741308 = 저장 주 점추정. LOO 범위 FLAT −.048923290~−.041186240,
+%   NESTED −.053739580~−.047413103, ORIGINAL_18 −.075417058~−.038573681. 구성별 값은 본문에 넣지 않았다
+%   (codex_original_machine.md 저장값 5).
 
 \begin{table}[htbp]
 \centering
 \caption{The three sealed criteria of the v3 round, KD\_ALL minus
 REL\_GLOBAL, with two-sided Bonferroni-adjusted 98.3333\% intervals from
-100,000 configuration resamples (sealed criterion). Point estimates use
-every eligible run.}
+100,000 configuration resamples (sealed criterion). Point estimates
+are those of the complete configurations.}
 \label{tab:results-v3-criteria}
 \small
 \begin{tabular}{@{}llrll@{}}
@@ -249,9 +257,11 @@ Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL \\
 A narrower spread is not the same as an improvement of every seed. The
 tables report seed means and seed standard deviations, and part of a
 smaller spread can come from seeds that had been better than the
-consensus being pulled back toward it. How many v3 seeds improved is
-not in the tables, and Chapter~\ref{ch:generality} gives cases in which
-some did not.
+consensus being pulled back toward it. In v3, KD\_ALL had lower NLL
+than REL\_GLOBAL of the same seed for 22 of 30 seeds on \texttt{A+C FLAT},
+26 on \texttt{A+C NESTED}, 19 on \texttt{C\_ONLY}, 25 on \texttt{B+C}
+and 25 on \texttt{ORIGINAL\_18}; Chapter~\ref{ch:generality} gives
+further cases in which some seeds did not improve.
 
 The new runs also repeat the lab, the benign workers, and the
 configuration design of the runs used for development
@@ -264,6 +274,6 @@ retraining would draw. Chapter~\ref{ch:ads24} moves the method, unchanged,
 to a public dataset collected elsewhere.
 % 근거: RECORD:297, 424 (모든 seed가 좋아지지는 않음), 443 (같은 lab 반복);
 % v3 FINAL_REPORT_KO.md "한계와 선행".
-% TODO(사람): v3와 PAG1에서 KD_ALL이 같은 seed의 REL_GLOBAL보다 나아진 seed 수
-% (30개 중 몇 개인지)가 기록에 없습니다. seed별 CSV(SCORED_RESULTS.json)에서
-% 확인되면 이 문단에 "v3에서는 30개 중 n개" 한 구절을 넣겠습니다.
+% 출처(v3 우세 seed 수): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SCORED_RESULTS.json:1
+%   (seed별 실행 동등 NLL에서 KD_ALL < REL_GLOBAL; codex_original_machine.md 저장값 5).
+% TODO(사람): PAG1 재추론에서 KD_ALL이 같은 seed의 REL_GLOBAL보다 나아진 seed 수(저자 확인 목록 10번).

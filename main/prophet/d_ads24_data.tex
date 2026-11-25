@@ -29,8 +29,9 @@ alerts. As a check of the common time base, the report compares, in 68
 episodes, the Lore time of a CrackMapExec action with the Wazuh time of
 the matching TCP/445 event on the defended host; the Wazuh time was
 later by a median of 11.47~s. We did not rerun this procedure, because
-its code and its per-run audit file are not in the archive available to
-us, and no binding was checked by hand. Whether the Wazuh timestamp is
+its code and its per-run audit file stay on the original experiment
+machine (Section~\ref{sec:ads24-task}), and no binding was checked by
+hand. Whether the Wazuh timestamp is
 a receipt time is not established, and a different binding could move
 segment boundaries and next-tactic labels; this is one reason
 Chapter~\ref{ch:ads24} is an exploratory check.

@@ -87,12 +87,16 @@ According to the stored reports, the eligible set of each round was
 sealed before any model predicted on it. The three background runs
 excluded from the v3 round are recorded with their reasons, and all
 three failed at the source collection stage (Appendix~\ref{app:repro}).
-For the four background runs excluded from PAG1, the in-house
+The four background runs excluded from PAG1, the in-house
 collection of the generality study (Section~\ref{sec:eval-rounds}),
-the reasons are kept only in a sealed file that is not in the archive
-available to us. The seed-level score files of both collections are
-not in that archive either, so the v3 verdict is reported as the
-stored report states it and could not be rescored here.
+failed at the same stage: in each, the START or STOP record of a
+source action was not found. No exclusion in either round depends on a
+score. The seed-level score files of both collections stay on the
+original experiment machine; the per-seed figures taken from them were
+computed there from the stored scores, without new inference.
+% 출처(PAG1 제외 4실행): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/ELIGIBILITY_SEAL.json:19
+%   (PAG1B0023·0037·0061 SOURCE_ACTION_START_NOT_FOUND, PAG1B0097 SOURCE_ACTION_STOP_NOT_FOUND).
+% 출처(seed별 파생값): codex_original_machine.md 저장값 5 (SCORED_RESULTS.json, STAGE2_SEED_RESULTS.csv에서 계산).
 
 A round also stops early under a
 \emph{safety stop}, a rule written into its contract that reads only

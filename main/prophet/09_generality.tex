@@ -141,9 +141,15 @@ narrowly, as discussed below.
 % ADS LOGBERT SD −0.099170 [−0.127209, −0.075001]; ADS PLAIN_GRU 평균 −0.091707
 % [−0.112726, −0.071334]; 여섯 조합 모두 Y·Y·Y). PROPHET 대비는 A+C FLAT/NESTED 1:1
 % 평균이다(같은 파일 :76).
-% TODO(사람): "가장 나쁜 CD seed가 기준 모델의 중간 seed보다 낫다"(RECORD:279)는
-% seed별 CSV(STAGE2_SEED_RESULTS.csv)가 atlas에 없어 원 파일에서 대조하지 못해
-% 본문에서 뺐다(answers 4번, 07:10 4번). 원자료를 주시면 다시 계산해 넣겠습니다.
+
+On the unseen conditions (the ADS-24 environment evaluation and A+C
+FLAT and NESTED), the worst CD seed of every encoder had a lower NLL
+than the median base-model seed. On the ADS-24 preservation runs and on
+\texttt{ORIGINAL\_18} this held for none of the three encoders.
+% 출처: 원래 PC: ARCH_GENERALITY_STAGE2_20261122/STAGE2_SEED_RESULTS.csv:1 (같은 평가 층 30 seed로
+%   max(KD_ENV NLL) < median(REL_BASE NLL) 계산; 예: ADS-24 EVAL_ON LSTM 2.168570 / 2.270959,
+%   A+C FLAT GRU .294912 / 1.025930). PRESERVE_OFF·ORIGINAL_18은 세 구조 모두 거짓
+%   (codex_original_machine.md 저장값 5). 기록의 "30개 중 20~30개"는 쓰지 않는다.
 
 Not every seed improved. Seeds that had been better than the consensus
 of their teachers moved toward it and gave up part of their advantage,
@@ -174,17 +180,21 @@ LSTM and plain-GRU students, like REL\_GLOBAL-ADS in
 Chapter~\ref{ch:ads24}, remained above it with every seed, by 0.250 and
 0.300 on average. For two of the three encoders, then, the distilled
 seeds agree closely on a level that a frequency table already beats.
-In-house the corresponding prior, the run-weighted action frequencies of
-the 603 FIT runs with add-one smoothing, scored 1.412 on the new A+C
-runs, and every student of the three encoders was below it.
+In-house the corresponding prior sums the per-run action proportions of
+the 603 FIT runs and adds one to each action,
+$p(a) = \bigl(1 + \sum_{r} n_{r,a}/n_r\bigr)/(603 + 18)$, where
+$n_{r,a}$ counts the boundaries of run $r$ with action $a$ and $n_r$
+all boundaries of $r$. It scored 1.412 on the new A+C runs, and every
+student of the three encoders was below it.
 % 출처(1.411751 정의): atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:72,73
 %   ("603 FIT 실행 동등 빈도 +1 평활", FLAT·NESTED 모두 1.411751); ARCH_GENERALITY_STAGE2_REPORT.md:127
 %   (KD 30/30 세 구조) (diag.md 24번).
 % 근거: RECORD:298, 423; ARCH_GENERALITY_STAGE2_REPORT.md:5, "교사 수준, 단순 기준선,
 % 민감도" (기준 1.829580; KD 0/30, 27/30, 0/30; 평균 NLL−다수 기준 KD 0.249872,
 % −0.034009, 0.300071; PROPHET 기준 1.411751, KD 30/30 세 구조 모두).
-% TODO(사람): 1.412의 +1을 18개 행동 개수 각각에 더했는지, 실행 동등 가중 뒤 어떻게 정규화했는지는
-%   atlas에 없다.
+% 출처(식): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/score_stage1.py:220
+%   (fit_counts += bincount(...)/len(y); (fit_counts+1)/(fit_counts.sum()+18));
+%   원래 PC: ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:72 (저장 점수 1.411751).
 
 Two in-house details qualify the result for the plain GRU. Its
 preservation interval on \texttt{ORIGINAL\_18} had an upper end of
