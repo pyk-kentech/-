@@ -260,8 +260,11 @@ smaller spread can come from seeds that had been better than the
 consensus being pulled back toward it. In v3, KD\_ALL had lower NLL
 than REL\_GLOBAL of the same seed for 22 of 30 seeds on \texttt{A+C FLAT},
 26 on \texttt{A+C NESTED}, 19 on \texttt{C\_ONLY}, 25 on \texttt{B+C}
-and 25 on \texttt{ORIGINAL\_18}; Chapter~\ref{ch:generality} gives
-further cases in which some seeds did not improve.
+and 25 on \texttt{ORIGINAL\_18}. In the PAG1 re-inference the counts
+were 25, 24, 15, 24 and 27 for KD\_ALL and 20, 23, 15, 25 and 15 for
+KD\_ENV\_TOP5; on \texttt{C\_ONLY} only half of the seeds improved.
+Chapter~\ref{ch:generality} gives further cases in which some seeds did
+not improve.
 
 The new runs also repeat the lab, the benign workers, and the
 configuration design of the runs used for development
@@ -276,4 +279,6 @@ to a public dataset collected elsewhere.
 % v3 FINAL_REPORT_KO.md "한계와 선행".
 % 출처(v3 우세 seed 수): 원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/SCORED_RESULTS.json:1
 %   (seed별 실행 동등 NLL에서 KD_ALL < REL_GLOBAL; codex_original_machine.md 저장값 5).
-% TODO(사람): PAG1 재추론에서 KD_ALL이 같은 seed의 REL_GLOBAL보다 나아진 seed 수(저자 확인 목록 10번).
+% 출처(PAG1 우세 seed 수, 순서 FLAT·NESTED·C_ONLY·B+C·ORIGINAL_18): 원래 PC:
+%   ARCH_GENERALITY_STAGE2_20261122/V3_REINFERENCE_SEED_RESULTS.csv (같은 seed 의 REL_GLOBAL 보다 낮은
+%   실행 동등 NLL; 평균·실행·행 수가 tab:results-pag1 15칸과 같음; codex_original_machine.md '추가 답').

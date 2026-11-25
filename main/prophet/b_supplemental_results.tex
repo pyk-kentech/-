@@ -50,9 +50,11 @@ Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition}.}
 % 첫 135실행(조건부 평균 평가)은 원래 PC: PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117/ELIGIBILITY_SEAL.json:1
 %   의 개발 집합이다: PBFMCB0001–0128 중 0030·0050·0054·0058·0102·0106·0122·0124·0127 을 뺀 배경 119 +
 %   PBFMCO0001–0016 원래 16 (144 시도, 135 적격과 맞는다).
-% TODO(사람): 원래 PC 답의 "두 135실행 비교: 같음"은 이 개발 집합과 v3 적응 입력(A 119 + 기존 원래 16)을
-%   비교한 것이다. 부록 B의 두 번째 135실행(같은 평가 실행을 다시 쓴 재학습, PROPHET_FOUR_MODEL_NEW_SEEDS_20261117)이
-%   같은 ID 집합인지는 아직 ID 수준으로 대조되지 않았다(저자 확인 목록 36번).
+% 두 135실행(조건부 평균 평가 PROPHET_BASE_FULL_MIX_NEW_CONFIRM_20261117, 같은 seed 재학습
+%   PROPHET_FOUR_MODEL_NEW_SEEDS_20261117)은 실행 ID 와 (실행 ID, 경계 seq) 1,427쌍까지 같다. 재학습 쪽
+%   run.py 가 앞 폴더의 ELIGIBILITY_SEAL.json 과 행 파일을 그대로 읽는다. 조건별 실행/행: FLAT 31/341,
+%   NESTED 29/319, C_ONLY 27/297, B+C 32/352, ORIGINAL_18 16/118 (원래 PC 답, codex_original_machine.md '추가 답';
+%   저자 확인 목록 36번 해결).
 \begin{tabularx}{\textwidth}{@{}Xrr@{}}
 \toprule
 Condition and use & Executions & Rows \\
