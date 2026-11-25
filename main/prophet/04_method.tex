@@ -51,7 +51,9 @@ unknown entry. The round reports call this the 404-only preprocessor.
 
 \paragraph{Recurrent state and head.} Events enter a gated recurrent
 unit cell~\cite{cho2014gru} with a 64-dimensional state, one event per
-step in receipt order. The head is
+step in receipt order.
+% 원문: Cho et al. (EMNLP 2014) §2.3 p.3, reset·update 게이트를 가진 "new type of hidden unit".
+ The head is
 \begin{equation}
   z_{\mathrm{EVENT}}=W_4\,\mathrm{GELU}\bigl(W_3[h;\,\log(1+\mathrm{age});\,r]\bigr),
   \qquad W_3\in\mathbb{R}^{64\times 66},\; W_4\in\mathbb{R}^{18\times 64},
@@ -86,6 +88,7 @@ results of the others. The model has 59,882 parameters.
 \paragraph{LogitNorm.} Wei et al.\ define LogitNorm as a training
 loss: the cross-entropy is computed on logits normalized to a fixed
 norm~\cite{wei2022mitigating}. We use a variant inspired by it that
+% 원문: Wei et al. (ICML 2022) §3.2 식 (3)–(4) p.3 "the logit vector is normalized to be a unit vector with a constant magnitude".
 applies the same normalization in training and at inference, replacing
 $z$ by $z/[\tau\max(\|z\|_2,10^{-8})]$ with $\tau=0.1$, with the gradient
 flowing through the denominator; applying it at inference is our
@@ -99,6 +102,7 @@ inspired by input-gradient regularization~\cite{ross2017improving}:
 Ross and Doshi-Velez penalize the gradient with respect to the model
 input, whereas $\mathcal{R}_{\mathrm{GLOBAL}}$ differentiates with
 respect to the internal 48-dimensional event representations. For each FIT view it counts the
+% 원문: Ross & Doshi-Velez (AAAI 2018) 'Input Gradient Regularization' 절 식 (6) p.3, 목적함수 H(y, y_hat) + lambda * ||grad_x H(y, y_hat)||_2^2.
 $k$ worker events whose role is known and draws exactly $k$ events at
 random from all received events. For each drawn event it takes the
 squared gradient, with respect to that event's 48-dimensional vector
@@ -164,6 +168,7 @@ equally. Each model is
 trained for 1,346 such updates with AdamW~\cite{loshchilov2017decoupled}
 (weight decay 0.01, gradient clipping at 2), and the learning rate
 follows a cosine schedule from 0.002 to 0.0002. The last checkpoint is
+% 원문: Loshchilov & Hutter (ICLR 2019) §2 p.3 "our variant of Adam with decoupled weight decay (AdamW)" (Algorithm 2).
 kept; no checkpoint is selected by a validation score. All 30 seeds of
 a group share this procedure and differ only in the seed as
 defined in Chapter~\ref{ch:introduction}. The seeds of each round are
@@ -257,6 +262,9 @@ knowledge distillation toward the average of several
 models~\cite{hinton2015distilling}. Unlike ensemble distribution
 distillation~\cite{malinin2019ensemble}, the target is the plain mean
 and carries no model of the spread among teachers.
+% 원문: Hinton et al. arXiv:1503.02531 §2 "arithmetic or geometric mean of their individual predictive
+%   distributions as the soft targets"; Malinin et al. arXiv:1905.00076 초록 "distilling the distribution
+%   of the predictions from an ensemble, rather than just the average prediction". 확인됨.
 % 근거: RECORD:130--139, 153; PAPER_DEFINITIONS.md §2 (q_J 식, KL 방향 교사‖학생,
 % 구현 F.kl_div(log_softmax(student), teacher_prob).sum(-1).mean(), 계수 .25,
 % update당 무라벨 32행, "LogitNorm 0.1은 증류 온도 1과 별개").
@@ -287,6 +295,7 @@ Section~\ref{sec:repro-training} lists the five seeds selected. They are the tea
 the v2 and v3 rounds (Tables~\ref{tab:variants} and~\ref{tab:rounds}). Section~\ref{sec:related-underspec}
 explains how this ranking relates to the agreement estimator of Baek
 et al.~\cite{baek2022agreement}.
+% 원문: Baek et al. NeurIPS 2022 §4 ALine-S/ALine-D(짝별 일치도 선). 본문은 관계 설명만 넘긴다. 확인됨.
 
 The rule uses no labels, but it was fixed while we were studying development
 runs that had already been inspected, so the teacher choice is not
@@ -394,6 +403,9 @@ in-house REL\_GLOBAL. The three general encoders replace the event encoder with
 an LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 a Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert},
 or a plain GRU. They are encoder adaptations to our supervised task, not
+% 원문: LSTM 은 원문 못 구함(초록 기준, 구조 이름만). Transformer encoder 는 Vaswani et al. §3.1 p.3 "The encoder is composed of a stack of N = 6 identical layers."
+% 원문(du2017deeplog, guo2021logbert): DeepLog 3.1.2절 LSTM 다음 키 모델, LogBERT 3.1절 "leverages the Transformer encoder".
+%   "-style"은 그 인코더 구조만 빌린다는 뜻이고 원고도 재현이 아니라고 밝힌다. 확인됨.
 reproductions of DeepLog or LogBERT. LogitNorm, the
 representation-gradient penalty, and the relational residual are all
 removed, and the

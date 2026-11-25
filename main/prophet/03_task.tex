@@ -90,7 +90,11 @@ availability from the model's unit of computation.
 Windows Security event 4688 records process creation and, with
 command-line auditing enabled, can include the command
 line~\cite{ms4688}. Event 4689 records termination and includes an
-application-specific exit status~\cite{ms4689}. We write START and END
+application-specific exit status~\cite{ms4689}.
+% 원문: Microsoft Learn 4688 "Process Command Line", "By default Process Command Line field is empty"
+%   (정책 "Include command line in process creation events" 필요). 확인됨.
+% 원문: Microsoft Learn 4689 "Exit Status", "This exit code is unique for every application". 확인됨.
+We write START and END
 for received 4688 and 4689 records. A START may be received before
 its END, and at such a boundary the result of that process remains
 unobserved. For target-aware processing, target identities are

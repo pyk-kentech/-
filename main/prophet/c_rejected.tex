@@ -118,12 +118,21 @@ Candidate~B keeps only the directions of the hidden state that the 30
 seeds share on FIT inputs. Like the adaptive ensemble distillation of
 Du et al.~\cite{du2020agree}, Candidate~A responds to disagreement among
 teachers, but it does so by interpolating the probability target toward
-$\pi$ rather than by weighting teachers in gradient space. It also
+$\pi$ rather than by weighting teachers in gradient space.
+% 원문: Du et al. NeurIPS 2020 초록 "a tolerance parameter to accommodate disagreement among teachers",
+%   "a dynamic weighting method for each teacher" (§3.1 gradient 공간 다목적 최적화). 확인됨.
+It also
 differs from
 ensemble distribution distillation~\cite{malinin2019ensemble}, which keeps the
 distribution of the ensemble's predictions rather than falling back to
-fixed frequencies. Candidate~B builds on comparing networks through a shared
-representation subspace~\cite{raghu2017svcca}. Candidate~A scored better than the teacher mean on ADS-24
+fixed frequencies.
+% 원문: Malinin et al. arXiv:1905.00076 초록 "distilling the distribution of the predictions from an
+%   ensemble, rather than just the average prediction". 확인됨.
+Candidate~B builds on comparing networks through a shared
+representation subspace~\cite{raghu2017svcca}.
+% 원문: Raghu et al. NIPS 2017 초록 "comparing two representations ... invariant to affine transform"; §2
+%   SVD 뒤 CCA 로 두 층 부분공간 정렬. 확인됨.
+Candidate~A scored better than the teacher mean on ADS-24
 but worse in-house. Candidate~B narrowed the spread on the unseen
 condition of ADS-24 but raised the loss on its preservation runs from 1.449 to
 1.882. Neither was carried forward to a fit.

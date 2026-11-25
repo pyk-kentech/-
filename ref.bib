@@ -1,8 +1,8 @@
 @misc{ms4688,
   author = {{Microsoft}},
   title = {{4688(S)} A New Process Has Been Created},
-  howpublished = {\href{https://learn.microsoft.com/windows/security/threat-protection/auditing/event-4688}{Microsoft Learn}},
-  year = {2021}
+  howpublished = {\href{https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4688}{Microsoft Learn}},
+  year = {2022}
 }
 
 @misc{ms4689,
@@ -19,6 +19,9 @@
            for Statistical Machine Translation},
   booktitle = {Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing},
   pages = {1724--1734},
+  address = {Doha, Qatar},
+  publisher = {Association for Computational Linguistics},
+  doi = {10.3115/v1/D14-1179},
   year = {2014}
 }
 
@@ -27,6 +30,7 @@
   title = {{Tiresias}: Predicting Security Events Through Deep Learning},
   booktitle = {Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security},
   pages = {592--605},
+  doi = {10.1145/3243734.3243811},
   year = {2018}
 }
 
@@ -36,6 +40,8 @@
             Kruegel, Christopher and Vigna, Giovanni},
   title = {{DeepCASE}: Semi-Supervised Contextual Analysis of Security Events},
   booktitle = {2022 IEEE Symposium on Security and Privacy},
+  pages = {522--539},
+  doi = {10.1109/SP46214.2022.9833671},
   year = {2022}
 }
 
@@ -45,6 +51,7 @@
   journal = {Journal of Network and Computer Applications},
   volume = {230},
   pages = {103963},
+  doi = {10.1016/j.jnca.2024.103963},
   year = {2024}
 }
 
@@ -54,6 +61,7 @@
   title = {{ORTHRUS}: Achieving High Quality of Attribution in Provenance-Based
            Intrusion Detection Systems},
   booktitle = {34th USENIX Security Symposium},
+  pages = {7173--7192},
   year = {2025}
 }
 
@@ -68,8 +76,9 @@
 
 @misc{mitreintro,
   author = {{MITRE}},
-  title = {Getting Started with {Enterprise ATT\&CK}},
-  howpublished = {\url{https://attack.mitre.org/resources/enterprise-introduction/}}
+  title = {Get Started},
+  howpublished = {\url{https://attack.mitre.org/resources/}},
+  note = {MITRE ATT\&CK, accessed 2026-11-24}
 }
 
 @misc{mitrewindows,
@@ -90,6 +99,7 @@
   title = {Automated Generation and Analysis of Attack Graphs},
   booktitle = {2002 IEEE Symposium on Security and Privacy},
   pages = {273--284},
+  doi = {10.1109/SECPRI.2002.1004377},
   year = {2002}
 }
 
@@ -97,6 +107,7 @@
   author = {Ou, Xinming and Govindavajhala, Sudhakar and Appel, Andrew W.},
   title = {{MulVAL}: A Logic-Based Network Security Analyzer},
   booktitle = {14th USENIX Security Symposium},
+  pages = {113--128},
   year = {2005}
 }
 
@@ -104,6 +115,7 @@
   author = {Du, Min and Li, Feifei and Zheng, Guineng and Srikumar, Vivek},
   title = {{DeepLog}: Anomaly Detection and Diagnosis from System Logs through Deep Learning},
   booktitle = {2017 ACM SIGSAC Conference on Computer and Communications Security},
+  doi = {10.1145/3133956.3134015},
   year = {2017}
 }
 
@@ -112,6 +124,8 @@
             and Sun, Degang and Pasquier, Thomas and Han, Xueyuan},
   title = {{KAIROS}: Practical Intrusion Detection and Investigation Using Whole-System Provenance},
   booktitle = {2024 IEEE Symposium on Security and Privacy},
+  pages = {3533--3551},
+  doi = {10.1109/SP54263.2024.00005},
   year = {2024}
 }
 
@@ -135,6 +149,8 @@
 
 % Claude 가 넣음(2026-11-24, 저자 확인 목록 32·33번). 학술 검색 API 로는 확인되지 않은 워크숍·학회 논문이라
 % 저자가 서지를 한 번 확인할 것.
+% 원문 대조(D 묶음, 2026-11-24): 저자가 Kaggle 포럼에 올린 원고 PDF 의 제목·저자(Dong-Hyun Lee)와 일치,
+%   본문에 "ICML 2013 Challenges in Representation Learning" 이 적혀 있음. 권·쪽(흔히 '3, 896')은 원문에서 확인 못 해 넣지 않음.
 @inproceedings{lee2013pseudo,
   title = {{Pseudo-Label: The Simple and Efficient Semi-Supervised Learning Method for Deep Neural Networks}},
   author = {Dong-Hyun Lee},
@@ -142,11 +158,14 @@
   year = {2013}
 }
 
+% 원문 대조(C 묶음, 2026-11-24): 저자·순서·권은 NeurIPS 2020 proceedings 의 공식 bibtex 와 같다. 쪽·URL 을 더했다.
 @inproceedings{du2020agree,
   title = {{Agree to Disagree: Adaptive Ensemble Knowledge Distillation in Gradient Space}},
   author = {Shangchen Du and Shan You and Xiaojie Li and Jianlong Wu and Fei Wang and Chen Qian and Changshui Zhang},
   booktitle = {Advances in Neural Information Processing Systems},
   volume = {33},
+  pages = {12345--12355},
+  url = {https://proceedings.neurips.cc/paper_files/paper/2020/file/91c77393975889bd08f301c9e13a44b7-Paper.pdf},
   year = {2020}
 }
 
@@ -200,10 +219,11 @@
   url = {https://arxiv.org/abs/1503.02531}
 }
 
-@misc{lakshminarayanan2016simple,
+@inproceedings{lakshminarayanan2016simple,
   title = {{Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles}},
   author = {Balaji Lakshminarayanan and Alexander Pritzel and Charles Blundell},
-  year = {2016},
+  year = {2017},
+  booktitle = {Advances in Neural Information Processing Systems 30 (NIPS 2017)},
   eprint = {1612.01474},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/1612.01474}
@@ -218,10 +238,11 @@
   url = {https://doi.org/10.1162/neco.1997.9.8.1735}
 }
 
-@misc{vaswani2017attention,
+@inproceedings{vaswani2017attention,
   title = {{Attention Is All You Need}},
   author = {Ashish Vaswani and Noam Shazeer and Niki Parmar and Jakob Uszkoreit and Llion Jones and Aidan N. Gomez and Lukasz Kaiser and Illia Polosukhin},
   year = {2017},
+  booktitle = {Advances in Neural Information Processing Systems 30 (NIPS 2017)},
   eprint = {1706.03762},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/1706.03762}
@@ -238,10 +259,11 @@
   url = {https://arxiv.org/abs/2103.04475}
 }
 
-@misc{baek2022agreement,
+@inproceedings{baek2022agreement,
   title = {{Agreement-on-the-Line: Predicting the Performance of Neural Networks under Distribution Shift}},
   author = {Christina Baek and Yiding Jiang and Aditi Raghunathan and Zico Kolter},
   year = {2022},
+  booktitle = {Advances in Neural Information Processing Systems 35 (NeurIPS 2022)},
   eprint = {2206.13089},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/2206.13089}
@@ -278,49 +300,51 @@
   url = {https://arxiv.org/abs/1706.04599}
 }
 
-@misc{heskes1997selecting,
+@inproceedings{heskes1997selecting,
   title = {{Selecting Weighting Factors in Logarithmic Opinion Pools}},
-  author = {T. Heskes},
+  author = {Tom Heskes},
   year = {1997},
-  howpublished = {Neural Information Processing Systems},
+  booktitle = {Advances in Neural Information Processing Systems 10 (NIPS 1997)},
   url = {https://www.semanticscholar.org/paper/d919e2bf6e87607ea7de4cde1da6c77f0ea46fa3}
 }
 
-@misc{gruber2022uncertainty,
+@inproceedings{gruber2022uncertainty,
   title = {{Uncertainty Estimates of Predictions via a General Bias-Variance Decomposition}},
   author = {Sebastian G. Gruber and Florian Buettner},
-  year = {2022},
+  year = {2023},
+  booktitle = {Proceedings of the 26th International Conference on Artificial Intelligence and Statistics (AISTATS 2023)},
   eprint = {2210.12256},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/2210.12256}
 }
 
-@misc{wei2022mitigating,
+@inproceedings{wei2022mitigating,
   title = {{Mitigating Neural Network Overconfidence with Logit Normalization}},
   author = {Hongxin Wei and Renchunzi Xie and Hao Cheng and Lei Feng and Bo An and Yixuan Li},
   year = {2022},
-  howpublished = {International Conference on Machine Learning},
+  booktitle = {Proceedings of the 39th International Conference on Machine Learning (ICML 2022), PMLR 162},
   eprint = {2205.09310},
   archivePrefix = {arXiv},
   doi = {10.48550/arxiv.2205.09310},
   url = {https://arxiv.org/abs/2205.09310}
 }
 
-@misc{ross2017improving,
+@inproceedings{ross2017improving,
   title = {{Improving the Adversarial Robustness and Interpretability of Deep Neural Networks by Regularizing their Input Gradients}},
   author = {Andrew Slavin Ross and Finale Doshi-Velez},
-  year = {2017},
-  howpublished = {AAAI Conference on Artificial Intelligence},
+  year = {2018},
+  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence (AAAI 2018)},
   eprint = {1711.09404},
   archivePrefix = {arXiv},
   doi = {10.48550/arxiv.1711.09404},
   url = {https://arxiv.org/abs/1711.09404}
 }
 
-@misc{loshchilov2017decoupled,
+@inproceedings{loshchilov2017decoupled,
   title = {{Decoupled Weight Decay Regularization}},
   author = {Ilya Loshchilov and Frank Hutter},
-  year = {2017},
+  year = {2019},
+  booktitle = {International Conference on Learning Representations (ICLR 2019)},
   eprint = {1711.05101},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/1711.05101}
@@ -328,9 +352,9 @@
 
 @inproceedings{rathmanakidis2022reduction,
   title = {{Reduction of Variance-related Error through Ensembling: Deep Double Descent and Out-of-Distribution Generalization}},
-  author = {Pavlos Rath-Manakidis and Hlynur Hlynsson and Laurenz Wiskott},
+  author = {Pavlos Rath-Manakidis and Hlynur Davíð Hlynsson and Laurenz Wiskott},
   year = {2022},
-  booktitle = {Proceedings of the 11th International Conference on Pattern Recognition Applications and Methods},
+  booktitle = {Proceedings of the 11th International Conference on Pattern Recognition Applications and Methods (ICPRAM 2022)},
   doi = {10.5220/0010821300003122},
   url = {https://doi.org/10.5220/0010821300003122}
 }
@@ -355,11 +379,11 @@
   url = {https://arxiv.org/abs/2606.18190}
 }
 
-@misc{grandvalet2004semi,
+@inproceedings{grandvalet2004semi,
   title = {{Semi-supervised Learning by Entropy Minimization}},
   author = {Yves Grandvalet and Yoshua Bengio},
   year = {2004},
-  howpublished = {Conférence francophone sur l'apprentissage automatique},
+  booktitle = {Advances in Neural Information Processing Systems 17 (NIPS 2004)},
   url = {https://www.semanticscholar.org/paper/ad67ccee45b801b0138016e2f44a566344e77320}
 }
 
@@ -372,31 +396,32 @@
   url = {https://doi.org/10.1145/3474369.3486873}
 }
 
-@misc{arp2020dos,
+@inproceedings{arp2020dos,
   title = {{Dos and Don'ts of Machine Learning in Computer Security}},
   author = {Daniel Arp and Erwin Quiring and Feargus Pendlebury and Alexander Warnecke and Fabio Pierazzi and Christian Wressnegger and Lorenzo Cavallaro and Konrad Rieck},
-  year = {2020},
-  howpublished = {USENIX Security Symposium},
+  year = {2022},
+  booktitle = {31st USENIX Security Symposium (USENIX Security 22)},
   eprint = {2010.09470},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/2010.09470}
 }
 
-@misc{raghu2017svcca,
+@inproceedings{raghu2017svcca,
   title = {{SVCCA: Singular Vector Canonical Correlation Analysis for Deep Learning Dynamics and Interpretability}},
   author = {Maithra Raghu and Justin Gilmer and Jason Yosinski and Jascha Sohl-Dickstein},
   year = {2017},
+  booktitle = {Advances in Neural Information Processing Systems 30 (NIPS 2017)},
   eprint = {1706.05806},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/1706.05806}
 }
 
-@misc{takahashi2020aptgen,
+@inproceedings{takahashi2020aptgen,
   title = {{APTGen: An Approach towards Generating Practical Dataset Labelled with Targeted Attack Sequences}},
   author = {Yusuke Takahashi and Shigeyoshi Shima and Rui Tanabe and Katsunari Yoshioka},
   year = {2020},
-  howpublished = {CSET @ USENIX Security Symposium},
-  url = {https://www.semanticscholar.org/paper/72d5add923e7bd19469f160a6377074a33a247ee}
+  booktitle = {13th USENIX Workshop on Cyber Security Experimentation and Test (CSET 20)},
+  url = {https://www.usenix.org/conference/cset20/presentation/takahashi}
 }
 
 @misc{riddle2023atlasv2,
@@ -412,7 +437,7 @@
 
 @article{berady2022pwnjutsu,
   title = {{PWNJUTSU: A Dataset and a Semantics-Driven Approach to Retrace Attack Campaigns}},
-  author = {Aimad Berady and Mathieu Jaume and Valerie Viet Triem Tong and Gilles Guette},
+  author = {Aimad Berady and Mathieu Jaume and Valérie Viet Triem Tong and Gilles Guette},
   year = {2022},
   journal = {IEEE Transactions on Network and Service Management},
   doi = {10.1109/tnsm.2022.3183476},

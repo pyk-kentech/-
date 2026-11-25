@@ -35,6 +35,9 @@ The three encoders are the
 LSTM encoder (DeepLog-style)~\cite{hochreiter1997long, du2017deeplog},
 the Transformer encoder (LogBERT-style)~\cite{vaswani2017attention, guo2021logbert}, and the plain GRU~\cite{cho2014gru}, in the encoder
 adaptations of Section~\ref{sec:method-transfer}. In stage~1 we trained 30 base-model seeds of
+% 원문: LSTM 은 원문 못 구함(초록 기준, 구조 이름만). Transformer encoder 는 Vaswani et al. §3.1 p.3; GRU 는 Cho et al. §2.3 p.3 "new type of hidden unit".
+% 원문(du2017deeplog, guo2021logbert): DeepLog 3.1.2절 LSTM 다음 키 모델, LogBERT 3.1절 "leverages the Transformer encoder".
+%   "-style"은 그 인코더 구조만 빌린다는 뜻이고 원고도 재현이 아니라고 밝힌다. 확인됨.
 each encoder on each dataset (180 fits). In stage~2, with the
 computation sealed in stage~1, we trained a CD student for every seed
 of the six encoder--dataset combinations, using five teachers chosen
@@ -209,8 +212,11 @@ the instability in place.
 For context, we also ran our own adaptations
 of ORTHRUS~\cite{jiang2025orthrus}, BiTA~\cite{nayeri2026bita}, and
 CL-AP$^{2}$~\cite{liu2024clap2} with three seeds each on the same new
-inputs. Each adaptation keeps one encoder component of the original and
-drops the rest of its pipeline (Appendix~\ref{sec:app-security-adapt}),
+inputs.
+% 원문: 세 인용은 원래 시스템을 가리키기만 한다(ORTHRUS USENIX Sec 2025 4.3절 인코더, BiTA
+%   arXiv:2604.22781 식 (1)--(9)·Algorithm 1, CL-AP2 JNCA 2024 예측 단계). 확인됨.
+Each adaptation keeps one encoder component of the original and
+drops the rest of its pipeline (Appendix~\ref{sec:app-local}),
 so the figures describe these encoders on our task, not the original
 systems. In these runs the ORTHRUS
 and BiTA adaptations reached an A+C NLL of 0.133 to 0.159 across the
@@ -254,15 +260,21 @@ pseudo-labeling~\cite{lee2013pseudo}, follows the model itself: it adds
 a cross-entropy term toward the top-1 predictions of the same seed's
 frozen base model on the unlabeled environment inputs, with no
 confidence threshold. Entropy minimization~\cite{grandvalet2004semi}
+% 원문: Lee (2013) §2.3 식 (10) p.2 "pick up the class that has maximum network output" (문턱 없음).
 also involves no other model; it adds the entropy of the student's own
 predictions on those inputs.
+% 원문: Grandvalet & Bengio (NIPS 2004) §2.3 식 (6) p.4, 모델 자신의 예측 엔트로피를 무라벨 입력에서 더한다.
 
 The other side of the comparison keeps the five teachers of CD and
 changes one choice. FIT-input distillation follows their average on
 FIT inputs instead of environment inputs, and geometric-pool
 distillation follows their normalized geometric mean, the logarithmic
 opinion pool of Section~\ref{sec:related-decomposition}, on environment
-inputs. Stochastic weight averaging (SWA)~\cite{izmailov2018averaging}
+inputs.
+% 원문: Izmailov et al. arXiv:1803.05407 초록 "averaging of multiple points along the trajectory of SGD,
+%   with a cyclical or constant learning rate". 원 SWA 는 평균 구간에 주기·고정 학습률을 쓴다; 여기 적은
+%   네 update 의 평균이 그 학습률 일정을 따랐는지는 이 문장이 말하지 않는다(기록 확인 필요).
+Stochastic weight averaging (SWA)~\cite{izmailov2018averaging}
 stands apart as a baseline without environment inputs: it averages the
 weights of the base model's own training trajectory at updates 1,010,
 1,122, 1,234, and 1,346.

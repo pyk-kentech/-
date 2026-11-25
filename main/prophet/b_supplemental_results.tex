@@ -73,6 +73,7 @@ Original action task for the hint-branch table (Section~\ref{sec:app-mix})$^{*}$
 
 Four predictors were compared. EVENT GRU encodes each admitted START or
 END as a vector $e_i$ and runs a GRU~\cite{cho2014gru} over the events in
+% 원문: Cho et al. (EMNLP 2014) §2.3 p.3 "propose a new type of hidden unit" (reset·update 게이트).
 receipt order,
 \begin{equation}
   h_i = \operatorname{GRU}(e_i,h_{i-1}),
@@ -249,7 +250,11 @@ Benign workload & Training fold & EVENT GRU & Local History & Final History \\
 
 A further collection compared Local History with task adaptations of
 three prior architectures: BiTA~\cite{nayeri2026bita},
-ORTHRUS~\cite{jiang2025orthrus}, and CL-AP$^2$~\cite{liu2024clap2}. The
+ORTHRUS~\cite{jiang2025orthrus}, and CL-AP$^2$~\cite{liu2024clap2}.
+% 원문: 세 인용은 원래 시스템을 가리킨다. 아래 BiTA 설명의 식 (1)--(9)(메시지 생성·시간순 정렬·BiGRU·
+%   Transformer·평균 readout)과 Algorithm 1 은 arXiv:2604.22781v1 8--9쪽과 맞는다. ORTHRUS 는 공개 코드를
+%   밝히고(USENIX 본 "The source code is publicly" available), 주의 기반 GNN 인코더(4.3절)를 쓴다. 확인됨.
+The
 adaptations use this thesis's inputs, labels, and receipt boundary and
 are not reproductions of the original systems; each keeps one encoder
 component and drops the rest of its pipeline. The BiTA adaptation keeps

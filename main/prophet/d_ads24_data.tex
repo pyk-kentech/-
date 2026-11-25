@@ -7,7 +7,9 @@
 
 Table~\ref{tab:ads24-construction} traces the ADS-24
 data~\cite{nyberg2026cyber} from the episodes in the official summary to the
-132 runs of the contract. The counts in the table are our own tallies
+132 runs of the contract.
+% 원문(nyberg2026cyber): VI절(7쪽) "All logs that we gathered can be accessed via the KTH Data Repository". 확인됨.
+The counts in the table are our own tallies
 from the downloaded files. One episode, identified by its episode
 identifier, is one run; we use \emph{run} throughout. Each episode ships
 with an attack log, called Lore in the dataset, that lists the
@@ -41,7 +43,11 @@ The contract population then excludes runs flagged with
 defender is unknown. These three flags leave 134 runs, the same number
 as the 134 episodes on which the dataset paper bases its
 results~\cite{nyberg2026cyber}. We did not find a list of episode
-identifiers in that paper, so the two sets were matched in number only. Two of the 134 runs are then dropped because one of their two
+identifiers in that paper, so the two sets were matched in number only.
+% 원문(nyberg2026cyber): arXiv 2609.16541v2 전문 VI절 Results(7쪽) "Our results are based on data gathered from
+%   134 episodes", "≈ 30 episodes per agent type". 10회차의 '확인 불가'는 초록만 본 판정이라 전문으로 확인됨.
+%   episode 식별자 목록은 전문에도 없다(로그는 KTH Data Repository [28]로 안내).
+Two of the 134 runs are then dropped because one of their two
 tactic stages falls after the end of the Wazuh extraction, which leaves
 the 132 runs on which every ADS-24 result in this thesis is computed.
 Two label baselines, computed on the 132 runs with five folds, show how
@@ -170,18 +176,28 @@ CAM-LDS$^{a}$ & not used & Linux; no benign
 Windows multi-source ATT\&CK-labeled data~\cite{niloy2026multi} & not used
   & we could not confirm a public location and license for the raw data
   of the 870 sessions or find action start times \\
+% 원문(niloy2026multi): arXiv 2606.18190v1 초록 "870 sessions (70 attack, 800 benign)", "on Windows endpoints";
+%   전문에 자료 배포 URL·라이선스가 없다(검사: 본문·참고문헌의 URL). 확인됨.
 APTGen~\cite{takahashi2020aptgen} & not used & distribution site behind
   authentication; no benign background logs \\
+% 원문(takahashi2020aptgen): USENIX CSET'20 PDF 7.1절(7쪽) "do not contain logs related to benign background
+%   activity". 배포처는 참고문헌 [3] ipsr.ynu.ac.jp/aptgen. 인증 여부는 우리 점검. 확인됨.
 DARPA OpTC$^{b}$ & not used & narrative ground truth for one connected
   red-team campaign over three days; we found no way to split it into
   independent runs with stage labels \\
 ATLASv2~\cite{riddle2023atlasv2} & not used & ten scenarios; we found no
   per-stage occurrence times in the ground truth \\
+% 원문(riddle2023atlasv2): arXiv 2401.01341v1 1절 "replicates the ten attack scenarios"; 표 2(2쪽)는 공격 창과
+%   "Initial Attack Step" 시각만 주고 단계별 시각은 없다. 확인됨.
 PWNJUTSU$^{c}$~\cite{berady2022pwnjutsu} & not used & the authors' site was unreachable from our host
   (20 and 24 November 2026), the IEEE DataPort files require a DataPort
   subscription, and the file list we read showed no time-stamped stage labels for
-  all participants; the dataset paper
-  reconstructs the campaign of one participant out of 22, in 18 stages \\
+  all participants; the dataset paper describes 22 red teamers, and
+  the authors' slides$^{d}$ retrace the campaign of one of them in 18 steps \\
+% 원문(berady2022pwnjutsu): 논문 전문은 HAL(hal-03694719)이 봇 차단 화면만 내줘 못 읽음. 초록(Semantic Scholar)
+%   "22 Red Teamers attacked the vulnerable infrastructure". 한 참가자·18단계는 공저자 Viet Triem Tong의 공개
+%   발표 자료(Supsec Winter Workshop 2023) 28쪽 "The complete attack campaign of Player 12", "18 steps"로만
+%   확인되어, 귀속을 논문에서 발표 자료로 고치고 "stages"를 원문 낱말 "steps"로 바꿨다.
 \bottomrule
 \end{tabularx}
 \par\smallskip
@@ -191,6 +207,8 @@ $^{b}$\url{https://github.com/FiveDirections/OpTC-data}, including its
 red-team ground-truth document; checked 20 November 2026.
 $^{c}$IEEE DataPort, DOI 10.21227/ngjr-kh92; dataset paper DOI
 10.1109/TNSM.2022.3183476; checked 20 November 2026.
+$^{d}$\url{https://supsec-winter-workshop.github.io/supsec-winter-workshop/20230125-supsec-10h00-Valerie-Viet-Triem-Tong.pdf},
+slide 28; checked 24 November 2026.
 \end{minipage}
 \end{table}
 % 근거: RECORD:267--275.

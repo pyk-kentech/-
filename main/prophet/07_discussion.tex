@@ -181,7 +181,10 @@ this thesis and is not a complete record of the PROPHET project.
 \textbf{Data.}
 Arp et al.\ list lab-only evaluation and the reuse of inspected data
 among the pitfalls of machine learning in security~\cite{arp2020dos},
-and both apply here. ADS-24 is the only external dataset, and it has
+and both apply here.
+% 원문(arp2020dos): arXiv 2010.09470 2.4절 P9 "Lab-Only Evaluation"(6쪽), "solely evaluated in a laboratory setting";
+%   2.2절 P3 Data Snooping(3쪽)의 test snooping. 확인됨.
+ADS-24 is the only external dataset, and it has
 confounds of its own. Runs without simulated users were collected
 mostly in early April and runs with users in mid-April, so the split
 between seen and unseen conditions is also a split by collection
@@ -271,6 +274,7 @@ category can remain ambiguous from indirect audit evidence.
 Event 4688 can record the command line~\cite{ms4688}, and in
 deployment its arguments may be sensitive, so handling and retention of
 the input need care.
+% 원문: Microsoft Learn 4688 "Process Command Line ... contains the name of executable and arguments". 확인됨.
 % 사람이 쓴 문단. decisions.md 34번에 따라 마지막 문장만 ms4688이 받치는 범위로 줄였다.
 
 \textbf{Field evaluation.}
@@ -287,25 +291,38 @@ boundary.
 
 None of the computational parts is new. The distillation loss is
 distillation toward an ensemble average~\cite{hinton2015distilling}
-added to the regularizers already in REL\_GLOBAL. Ranking teachers by
+added to the regularizers already in REL\_GLOBAL.
+% 원문: Hinton et al. arXiv:1503.02531 §2 앙상블의 "arithmetic or geometric mean ... as the soft targets". 확인됨.
+Ranking teachers by
 unlabeled agreement takes its motivation from Baek et
-al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}). The
+al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}).
+% 원문: Baek et al. NeurIPS 2022 §3.4 "agreement can be estimated with just unlabeled data". 동기로만 인용, 확인됨.
+The
 decomposition of Chapter~\ref{ch:decomposition} is that of
 Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
 measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
+% 원문: Heskes NIPS 10 (1997) §2 식 (3)(모호성 = Σ w K(p̄,p_α) = −log Z); Gruber & Buettner AISTATS 2023
+%   §3.4 Corollary 3.6, §5 "we proposed Bregman Information as uncertainty measure". 확인됨.
 Rath-Manakidis et al.\ studied the variance-related error of ensembles
 under shift~\cite{rathmanakidis2022reduction}, not distilled students;
 their ensemble result motivated our separate hypothesis that a student
 of a consensus would vary less across seeds
-(Section~\ref{sec:related-distillation}). Two extensions of CD failed
+(Section~\ref{sec:related-distillation}).
+% 원문: Rath-Manakidis et al. (ICPRAM 2022) 초록 "In the context of data drift", 4.3절 분포 이동 시험셋에서
+%   앙상블 크기에 따른 오차·분산 감소. 학생 모델은 다루지 않음. 확인됨.
+Two extensions of CD failed
 their preliminary checks (Appendix~\ref{app:rejected}). The first, the
 confidence-conditioned target (candidate~A), like the adaptive ensemble distillation of Du
 et al.~\cite{du2020agree}, responds to disagreement among teachers, but
 it does so by interpolating the target toward the boundary-weighted FIT
 action frequencies rather than by weighting teachers in gradient space.
+% 원문: Du et al. NeurIPS 2020 (vol. 33, pp. 12345--12355) 초록 "a dynamic weighting method for each teacher",
+%   "a tolerance parameter to accommodate disagreement among teachers" (§3.1 gradient 공간). 확인됨.
 The second, the shared-subspace projection (candidate~B), builds on
 comparing networks through the subspace their representations
 share~\cite{raghu2017svcca}.
+% 원문: Raghu et al. NIPS 2017 초록 "a tool for quickly comparing two representations"; §2 SVD 로 각 층의
+%   부분공간을 줄인 뒤 CCA 로 두 부분공간의 상관을 최대화. 확인됨.
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를
 % 메커니즘 차이(목표 보간 대 gradient 공간 교사 가중)까지 적어 좁혔다.
 
@@ -327,6 +344,7 @@ contracts and the status label on every result respond to the warning
 of Arp et al.\ about reusing inspected data~\cite{arp2020dos}; they are
 our own procedure, and lab-only evaluation remains a limitation
 (Section~\ref{sec:disc-threats}).
+% 원문(arp2020dos): arXiv 2010.09470 2.2절 P3(3쪽) test snooping, 2.4절 P9 Lab-Only Evaluation(6쪽). 확인됨.
 % 근거: RECORD:28, 455--459; idea.md "기여" 셋째 항. 확장 후보 A(신뢰 조건부 합의
 % 목표)와 B(seed 공통 표현 투영)의 선행: RECORD 관련 연구 표 (Du 등, Yang 등 DEED;
 % Raghu 등 SVCCA).

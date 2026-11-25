@@ -13,6 +13,10 @@ on evidence the defender actually held at the time: an audit record has
 an occurrence time, but it can inform a prediction only after the
 collector has received it, so every forecast in this thesis uses only
 records received before its cutoff (Chapter~\ref{ch:task}).
+% 원문(6--11행, shen2018tiresias): arXiv 1905.10328 초록, "leverages Recurrent Neural Networks (RNNs) to predict future events on a machine".
+% 원문(6--11행, zhu2024nip): arXiv 2405.02826 초록, "automatically predict next move during post-exploitation".
+% 원문(6--11행, babalau2024forecasting): arXiv 2408.09888 초록·3.3절(5쪽), "predicting the next likely attacker action given a sequence of observed actions";
+%   3.3절 "support endpoint alerts, e.g., from EDR systems, in addition to intrusion alerts". 전문 대조로 확인됨.
 
 The task, which we call PROPHET, is \textbf{next attacker action prediction} from
 Windows execution and audit records: at each prediction boundary the
@@ -59,7 +63,10 @@ name \emph{underspecification} (Section~\ref{sec:related-underspec}),
 but it does not establish underspecification: that notion starts from
 models that are equally good on held-out data of the training domain,
 and our seeds are not equally good on the seen condition
-(Chapter~\ref{ch:diagnosis}). What we show is that the scores available
+(Chapter~\ref{ch:diagnosis}).
+% 원문: D'Amour et al. arXiv:2011.03395 v2 §2.1 "We say that an ML pipeline is underspecified if
+%   there are many predictors f ... with similar predictive risk" (훈련 분포 기준 동등함이 출발점, 확인됨).
+What we show is that the scores available
 before deployment did not identify the seeds that hold up under the new
 workload. For attack prediction the unseen data are
 not exotic. A new benign job on a monitored host is enough to move the
@@ -82,7 +89,11 @@ from two known uses of independently trained models. Ensembles of them
 provide estimates of predictive
 uncertainty~\cite{lakshminarayanan2016simple}, and where accuracy under shift tracks in-distribution accuracy across
 models, their agreement on unlabeled shifted data can be used to
-estimate that accuracy~\cite{baek2022agreement}. Consistent with
+estimate that accuracy~\cite{baek2022agreement}.
+% 원문: Lakshminarayanan et al. NIPS 2017 초록 "our method produces well-calibrated uncertainty
+%   estimates" (§2.4 무작위 초기화로 독립 학습). Baek et al. NeurIPS 2022 초록 "whenever
+%   accuracy-on-the-line holds" ... "we can predict the OOD accuracy of classifiers" (§3.4, §4). 확인됨.
+Consistent with
 these results, the rows of unlabeled in-house inputs on which the
 baseline models' top-1 predictions differ carry most of the NLL of
 their 30-model probability average (Chapter~\ref{ch:diagnosis}); we
@@ -94,7 +105,11 @@ the arithmetic mean of the teachers' probabilities on those inputs
 through a KL term, while keeping the usual cross-entropy on the FIT
 data. The construction is knowledge distillation toward an ensemble
 average~\cite{hinton2015distilling}, which Hinton et al.\ motivate by
-the gain from averaging the predictions of several models. The CD student has the same
+the gain from averaging the predictions of several models.
+% 원문: Hinton et al. arXiv:1503.02531 §1 "train many different models on the same data and then to
+%   average their predictions"; §2 "an arithmetic or geometric mean of their individual predictive
+%   distributions as the soft targets". 확인됨.
+The CD student has the same
 architecture as REL\_GLOBAL and no additional parameters, so at
 inference it is still a single model.
 
@@ -161,7 +176,10 @@ data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
 result as a sealed criterion, a development comparison, or a post hoc
-analysis. Only the in-house v3 round passed all of its sealed
+analysis.
+% 원문(arp2020dos): arXiv 2010.09470 전문, 2.2절 P3 "Data Snooping"(3쪽); test snooping은
+%   "the test set is used for experiments before the final evaluation". 확인됨.
+Only the in-house v3 round passed all of its sealed
 criteria, as its stored report records; the v2 recheck, an earlier sealed round
 (Table~\ref{tab:rounds}), passed stability but did not show
 preservation. The

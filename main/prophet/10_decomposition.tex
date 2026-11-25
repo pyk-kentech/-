@@ -31,7 +31,13 @@ It is the logarithmic-opinion-pool decomposition analyzed by
 Heskes~\cite{heskes1997selecting}, and its use as a label-free
 uncertainty measure follows Gruber and
 Buettner~\cite{gruber2022uncertainty}; Section~\ref{sec:related-decomposition}
-states what our computation adds. Like NLL, $V$ is averaged over
+states what our computation adds.
+% 원문: Heskes NIPS 10 (1997) §2 식 (3): K(q,p̄)=Σ_α w_α K(q,p_α) − Σ_α w_α K(p̄,p_α), K(q,p)=∫q log(q/p),
+%   둘째 항은 "minus the logarithm of the normalization constant Z(x)". w_α=1/S, q=정답 한 점으로 두면
+%   위 식이 된다. V 의 KL 방향(풀‖seed)은 원문과 같다. Gruber & Buettner AISTATS 2023 §3.4 Corollary 3.6 의
+%   B_LSE[ẑ]=E[LSE(ẑ)]−LSE(E[ẑ]) 는 seed logit 에 대해 바로 −log Z(x)=V(x) 이고, §4.2 가 이를 drift 아래
+%   OOD 탐지용 불확실성 척도로 쓴다. 확인됨.
+Like NLL, $V$ is averaged over
 the natural boundaries of a run and then over runs with equal weight.
 Recomputed from the saved probabilities, the two sides of
 Equation~\ref{eq:decomposition} differed by at most about $10^{-15}$.
@@ -126,7 +132,10 @@ for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
 mainly on the disagreement term. The ensemble analogue of this
 reduction is studied by Rath-Manakidis et
-al.~\cite{rathmanakidis2022reduction}. Part of the drop is expected
+al.~\cite{rathmanakidis2022reduction}.
+% 원문: Rath-Manakidis et al. (ICPRAM 2022) 3절 식 (1) 교차 엔트로피 = 비가약 + Bias^2 + Variance
+%   (Variance = 기하평균 혼합에 대한 KL 기대값), 앙상블로 이 분산 관련 오차를 줄임. 확인됨.
+Part of the drop is expected
 from distillation toward one fixed teacher set
 (Section~\ref{sec:disc-novelty}); the measurement adds its size on these
 runs and the one pair where it did not occur. The decomposition is an identity and
