@@ -138,11 +138,8 @@ CD lowered both the spread and the mean in all six combinations. For
 each kind of contrast (stability, mean improvement, preservation), the
 contract forms one family of the six encoder--dataset contrasts, with
 99.1667\% intervals (Section~\ref{sec:eval-criteria}). Every one of the
-18 intervals fell on the favorable side of its threshold. Since every
-run had been inspected, these intervals describe the uncertainty of a
-development comparison and do not amount to confirmation. No joint
-family of all 18 contrasts was defined either, so the result is not a
-claim that all 18 hold together at a 5\% familywise level. The
+18 intervals fell on the favorable side of its threshold, on runs that
+had already been inspected. The
 stability interval nearest to zero was that of the ADS-24 Transformer
 encoder, with a seed standard deviation difference of $-0.099$
 $[-0.127, -0.075]$; the mean interval nearest to zero was that of the
@@ -323,9 +320,7 @@ Section~\ref{sec:gen-arch}. The five comparison methods were thus
 trained in a later run than the checkpoints they are compared with,
 and no cross-entropy control was retrained alongside them, so in-house
 a contrast can include rerun variation as well as the effect of the
-method (see the limits at the end of this section). We
-draw no conclusion about the methods beyond this common, untuned
-protocol.
+method (see the limits at the end of this section).
 % 근거: RECORD:338, 452; ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md:3
 % (ADS-24 ON35 = 이미 열람한 실행의 사후 방법 비교, PROPHET = 같은 실험실 설계의
 % 새 실행); METHOD_BASELINES_CONTRACT_SEALED.md:7 (다섯 기준선, 300 fit), :15
@@ -350,13 +345,11 @@ and 0.030, against 0.174 to 0.490 for the others. Some of the other
 groups were also below the base model as point estimates: entropy
 minimization at 0.324 against 0.693 in-house, and four-checkpoint
 weight averaging at 0.681 and
-0.174 against 0.693 and 0.180. We do not test those differences from
-the base model here, and the table gives no interval for them.
+0.174 against 0.693 and 0.180, differences without intervals.
 
 Table~\ref{tab:gen-methods-contrast} gives the paired contrasts against
-CD. In-house, CD and the base model were reused while the other methods
-were trained later, so these intervals compare stored models and include
-rerun variation; they are not a test of the algorithms. In the in-house lab CD had a lower mean NLL than four-checkpoint
+CD. In-house these intervals compare stored models and can include
+rerun variation. In the in-house lab CD had a lower mean NLL than four-checkpoint
 weight averaging, the
 hard-label control, entropy minimization, and FIT-input distillation,
 with every interval above zero. Against geometric-pool distillation the
@@ -621,8 +614,7 @@ spread that would follow from retraining them together with the
 teachers was not measured. The in-house contrasts compare new students
 with a stored CD student and can include rerun variation. And the
 agreement rule was favorable on one dataset and unfavorable on the
-other, so we read it as a design choice that worked in the lab, not as
-a rule that picks the best teachers in general. One random set's
+other. One random set's
 preservation interval in-house crossed the limit
 (Table~\ref{tab:gen-teachers}).
 % 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/ABLATION_REPORT.md:9--15, 21--27 (PLAIN_GRU 교사 구성·입력량,

@@ -24,9 +24,8 @@ all differ from the in-house study. The 132 runs are ones we built from
 the downloaded files, one per episode, and their labels come from a
 documented rule that binds attack stages to alert times, which we did
 not rerun (Appendix~\ref{app:ads24-data}). The results are development
-results on derived labels. They show whether the in-house direction
-appears at all on data collected elsewhere; they are not evidence that
-the in-house result holds on another dataset.
+results on derived labels and show whether the in-house direction
+appears at all on data collected elsewhere.
 % 5회차 방법 리뷰 P1-3: ADS-24를 탐색적 확인으로 낮췄다. 장 위치는 decisions.md 37번(본문 유지).
 % 6회차 문장 P2-10, aitone P3-2: 긴 문장을 나누고 범위를 긍정형으로 먼저 적었다.
 % 출처(배포·사용권·접근일): sources/atlas_answers/ads.md 28번; atlas
@@ -59,7 +58,6 @@ These are oracle boundaries. They are placed where the labeled tactic
 sequence changes, so the evaluation takes from the labels both the next
 tactic and the moment at which to predict it, and every result in this
 chapter is conditional next-tactic classification at those transitions.
-It is not a forecast that a deployed system could issue.
 
 The contract assigns the 132 runs to four roles. FIT uses 48 runs without simulated users (8,461 boundaries), and
 15 further runs without users (2,982 boundaries) check preservation;
@@ -106,8 +104,7 @@ REL\_GLOBAL-ADS on the 35 environment-evaluation runs, the stage-2
 contrasts were fixed before the students were trained but after those
 runs had been inspected and used to decide that stage~2 should run.
 Stage~2 is therefore a development comparison on previously inspected
-runs (Table~\ref{tab:rounds}, note~a), and its intervals are not an
-external test on unseen data.
+runs (Table~\ref{tab:rounds}, note~a).
 % 근거: RECORD:256--261; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (관문 SD≥.050,
 % 10,000회 95% 구간 하단≥.020), "2단계 예정 계약" (교사: ADAPT_ON34에서만,
 % 자기 포함 30모델 다수결; KD_SELF는 같은 seed의 동결 REL_BASE);
@@ -202,9 +199,8 @@ Spearman correlation between the seeds' preservation and environment
 losses was about $-0.39$ (no interval computed): seeds that scored
 better without users tended to score worse with them, so ranking seeds
 by that score would not have found the good seeds under simulated
-users. The sign is the one a trade between the two conditions would
-give (Section~\ref{sec:diag-size}; in-house $-0.131$), but the figure
-is post hoc on 30 seeds and we draw no conclusion from it.
+users. In-house the corresponding value was $-0.131$
+(Section~\ref{sec:diag-size}).
 % 근거: RECORD:231; ADS24_STAGE2_REPORT.md (REL_BASE 보존 seed SD 0.015182).
 % 출처(−0.39): atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE1_REPORT.md:23-54
 %   (30 seed 표: 열 2 환경 NLL, 열 4 보존 OFF NLL). 원 보고서 수치가 아니라 이 표에서 다시 계산한
@@ -227,13 +223,9 @@ $\rho \le -0.50$ and a permutation $p < 0.05$.
 
 That diagnostic gave $\rho = +0.127$ (two-sided
 permutation $p = 0.503$ over 100,000 permutations): seeds that agreed
-more with the rest did not have lower loss. Because the statistic is
-not the in-house S1, this is an unfavorable result for a related,
-pre-specified diagnostic, not a failed repetition of the in-house
-analysis, and it does not show that agreement-based teacher selection
-fails in general. The CD student still reduced the spread with
-teachers chosen by agreement, but the data give no evidence that
-agreement picked good teachers.
+more with the rest did not have lower loss. The CD student still
+reduced the spread with teachers chosen by agreement, but on ADS-24
+agreement did not pick the better teachers (Section~\ref{sec:gen-teachers}).
 % 근거: RECORD:233, 260, 405; ADS24_CONTRACT_SEALED.md "내부 선택과 1단계" (Spearman
 % ρ≤−.50, 100,000회 양측 순열 p<.05; 진단 조건이며 증류 관문이 아님);
 % ADS24_STAGE1_REPORT.md:15 (ρ .127475, p .503125); 30 seed 표(:25-54)에서 합의도(6열)–환경

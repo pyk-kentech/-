@@ -146,8 +146,8 @@ supports KD\_ALL against REL\_GLOBAL; it does not show that the 48
 seen-condition runs account for the part of the gain that
 KD\_ENV\_TOP5 lacks. Pooling the three collections on which these
 checkpoints were later scored gives $-0.058$ $[-0.101, -0.020]$
-(Section~\ref{sec:results-pfc2}), a post hoc summary rather than a
-test. Nor did the student reach its teachers.
+(post hoc, Section~\ref{sec:results-pfc2}). Nor did the student reach
+its teachers.
 On every condition the probability average of the five teachers had
 lower NLL than KD\_ALL, for example 0.023 against 0.028 on
 \texttt{A+C FLAT}. The teachers are five models at inference and the
@@ -210,9 +210,8 @@ $[-0.082, -0.038]$. Preservation on \texttt{ORIGINAL\_18} was not
 shown. For
 KD\_ALL the NLL difference was $-0.050$ with interval
 $[-0.141, +0.0207]$, whose upper end lies just above the limit, and for
-KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$. An interval that
-crosses the limit leaves preservation undecided; it does not show that
-the student is worse. On \texttt{ORIGINAL\_18} REL\_GLOBAL scored
+KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$, so preservation
+was undecided for both. On \texttt{ORIGINAL\_18} REL\_GLOBAL scored
 0.467 here and 0.704 in v3, so the two tables are read separately.
 % 근거: RECORD:196, 198--208; ORIG:ARCH_GENERALITY_STAGE2_20261122/
 % V3_REINFERENCE_TABLE.md ("구조 일반성 주 판정 밖에 사전 등록한 별도 확인",
@@ -305,8 +304,7 @@ $[-0.098, -0.021]$. For KD\_ENV\_TOP5 the \texttt{ORIGINAL\_18}
 difference was $+0.0009$ $[-0.0075, +0.0106]$. Across these
 collections, then, the seen-condition inputs of KD\_ALL went with a
 lower seen-condition loss, while the background inputs alone left it
-unchanged. These are summaries of collections already seen, not a
-further confirmation.
+unchanged.
 % 출처: inputs/data/FINAL_CHECKS_20261125/UNIFIED_REANALYSIS_20261125/UNIFIED_REANALYSIS.md:45--57 (사후, 차수 동일 가중,
 %   RNG 2026112501); COLLECTION_INTEGRATED.csv (KD_ALL 원래 −0.057112 [−0.098146, −0.020694], A+C NLL
 %   −0.048539 [−0.056869, −0.040555], SD −0.051618 [−0.060340, −0.044470]; KD_ENV_TOP5 원래 +0.000932

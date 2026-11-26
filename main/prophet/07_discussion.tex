@@ -47,8 +47,7 @@ simulated users, and the student inherits it. For the same reason, where
 the consensus is wrong the student is wrong in a stable way. A small
 $V$ means that the seeds agree, not that they are right, as entropy
 minimization and the plain GRU on ADS-24 show
-(Chapter~\ref{ch:decomposition}). The student is not a model that
-knows more about the environment.
+(Chapter~\ref{ch:decomposition}).
 % 근거: RECORD:419--422 (환경 이동 미해결, 합의가 틀리면 안정적으로 틀림),
 % 331--332 (V 27/28 감소, 엔트로피 최소화 V≈0·합의 2.7), 423 (ADS-24 기준선).
 % "판정한 모든 차수": v2 재확인, v3, PAG1, ADS-24 2단계, 구조 일반성 2단계
@@ -133,9 +132,8 @@ three collections, KD\_ALL lowered the seen-condition loss and
 KD\_ENV\_TOP5 left it unchanged (Section~\ref{sec:results-pfc2}). The
 gain was in probabilities, with accuracy almost unchanged, and
 \texttt{ORIGINAL\_18} was the single evaluation set on which $V$ rose
-after distillation, for REL\_GLOBAL. We read preservation as holding in
-one sealed round and one new-run check of the same lab, not as a
-property of the method.
+after distillation, for REL\_GLOBAL. Preservation has so far held in
+one sealed round and one new-run check, both in the same lab.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
 % 효과 미분리, 정확도 79.87%→80.14%). 6장 sec:diag-intervention (GENERIC_HEAD 실패,
@@ -186,8 +184,7 @@ REL\_GLOBAL was also wrong. They varied more: in-house, the accuracy of
 the plain-GRU seeds varied widely (Section~\ref{sec:gen-arch}). Appendix~\ref{app:rejected} lists the hypotheses of
 the diagnostic phase, the method candidates with their stored outcomes,
 three withdrawn claims, and three calculations corrected during the
-analysis. The ledger covers the line of work reported in
-this thesis and is not a complete record of the PROPHET project.
+analysis.
 % 근거: RECORD:360--362 (원장의 범위), 385--406 (방법 후보 20행), 410--415 (철회한
 % 주장 6개: 10-seed 평균 관문, "일반 구조는 LogitNorm이 없어 덜 흔들릴 것").
 % 51.0--87.7%: 9장 tab:gen-arch (RECORD:287).
