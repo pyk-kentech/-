@@ -1,5 +1,5 @@
 % !TeX program = xelatex
-\documentclass[bachelor,english,draft,pdfdoc]{kentech-ucs}
+\documentclass[bachelor,english,final,pdfdoc]{kentech-ucs}
 
 \usepackage{amsmath,amssymb,booktabs,tabularx}
 \usepackage{tikz}
@@ -60,27 +60,25 @@
 \advisor[coopr]{임티아즈 카림}{Imtiaz Karim}{nosign}
 % TODO(사람): 학번을 넣을 것.
 \studentid{}
-% TODO(사람): 졸업 연도를 넣을 것(앞표지 맨 아래에 찍힌다).
-\gradyear{}
+% 학사팀 최종본 필수 수정사항(2026-11): 연도는 2027(앞표지 맨 아래, 초록 머리글).
+\gradyear{2027}
 % TODO(사람): 심사위원장(\referee[1])과 심사위원(\referee[2])을 넣을 것.
 % 안내 PDF: 심사위원장은 본교 논문지도교수 1인, 심사위원은 대학이 선임하는
 % 본교 교원 1인.
 \referee[1]{}
 \referee[2]{}
-% TODO(사람): 심사 통과일을 넣을 것. 인자는 {연}{월}{일}이며 인준서에
-% "November 20, 2025" 형식으로 찍힌다. 비워 두면 인준서에
-% "[Examination date]"가 나온다.
-% \refereedate{}{}{}
+% 학사팀 최종본 필수 수정사항(2026-11): 인준서 날짜 DECEMBER 9, 2026. 인자는 {연}{월}{일}이며
+% 클래스가 대문자 월 이름으로 찍는다.
+\refereedate{2026}{12}{9}
 \hypersetup{
   pdftitle={Predicting the Next Attacker Action from Windows Audit Logs},
   pdfauthor={Yoonkeun Park}
 }
 
-% 제출 전 할 일: 위 빈칸을 채우고, 클래스 선택지를 draft에서 final로 바꾼 뒤
-% 아래의 \makefrontcover·\makeinnercover·\makeapproval 세 줄을 지울 것(final 모드에서는
-% 클래스가 \begin{document}에서 세 쪽을 자동으로 만든다).
+% 최종본(final): 클래스가 \begin{document}에서 앞표지 1장과 인준서를 만든다(학사팀 2026-11 안내: 앞표지 1장).
+% 남은 빈칸: 학번(\studentid, 초록 머리글에 [Student ID]/[학번]으로 찍힘), 심사위원 이름(서명란).
 %
-% 문서 순서는 작성 안내 PDF를 따른다: 앞표지 → 속표지 → 인준서 → Abstract → 국문초록
+% 문서 순서는 작성 안내 PDF를 따른다: 앞표지 → 인준서 → Abstract → 국문초록
 % → 목차(표목차·그림목차 포함) → 본문 → 참고문헌 → 감사문.
 % 안내 PDF는 부록의 자리를 따로 정하지 않는다. 참고문헌과 감사문이 이어지도록
 % 부록을 본문 뒤, 참고문헌 앞에 둔다. 이 클래스의 참고문헌은 \chapter*로
@@ -91,11 +89,6 @@
 % 배경 장이 들어와 장이 13개가 되면서 VIII-1, XIII-1 같은 절 번호가 목차의 2.8em 칸을 넘어 칸만 넓힌다.
 \makeatletter\renewcommand*\l@section{\@dottedtocline{0}{0em}{3.5em}}\makeatother
 \begin{document}
-\hypersetup{pageanchor=false}
-\makefrontcover
-\makeinnercover
-\makeapproval
-\hypersetup{pageanchor=true}
 \input{main/00_abstract}
 \makecontents
 

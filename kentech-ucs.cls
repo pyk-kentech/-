@@ -115,10 +115,10 @@
     colorlinks=true,%
     linkcolor=black,      %black
     anchorcolor=black,      %black
-    citecolor=blue,        %green
-    filecolor=darkmagenta,      %magenta
-    menucolor=darkred,      %red
-    urlcolor=darkcyan,          %cyan
+    citecolor=black,          % 학사팀 최종본: 글자 검정
+    filecolor=black,          % 학사팀 최종본: 글자 검정
+    menucolor=black,          % 학사팀 최종본: 글자 검정
+    urlcolor=black,          % 학사팀 최종본: 글자 검정
     ]{hyperref}
 \else
     \RequirePackage[final,unicode,%
@@ -128,10 +128,10 @@
     colorlinks=true,    %remove square
     linkcolor=black,      %black
     anchorcolor=black,      %black
-    citecolor=blue,        %green
-    filecolor=darkmagenta,      %magenta
-    menucolor=darkred,      %red
-    urlcolor=darkcyan,          %cyan
+    citecolor=black,          % 학사팀 최종본: 글자 검정
+    filecolor=black,          % 학사팀 최종본: 글자 검정
+    menucolor=black,          % 학사팀 최종본: 글자 검정
+    urlcolor=black,          % 학사팀 최종본: 글자 검정
     ]{hyperref}
 \fi
 
@@ -144,9 +144,11 @@
 \AtBeginDocument{%
     \if@isFinal
         \checkparameters
+        % 학사팀 최종본 필수 수정사항(2026-11): 앞표지는 1장. 샘플의 "앞표지/속표지"는 같은 한 쪽이다.
+        \hypersetup{pageanchor=false}%
         \makefrontcover
-        \makeinnercover
         \makeapproval
+        \hypersetup{pageanchor=true}%
     \fi
     \renewcommand\thesection{\thechapter-\arabic{section}}%
 }
@@ -507,7 +509,7 @@
         % Date
         \fontsize{14pt}{14pt}\selectfont
         \@ifundefined{@refereeYear}{[Examination date]}{%
-            \@dateUSenglish{\@refereeYear}{\@refereeMonth}{\@refereeDay}} \\
+            \@dateUSupper{\@refereeYear}{\@refereeMonth}{\@refereeDay}} \\
         \vspace*{4cm}
 
         % Committee table
@@ -611,13 +613,27 @@
 \newcommand{\@lastRomanPage}{\pageref{paperlastromanpagelabel}} % 총 로마자 페이지 수 계산용
 
 
+% 초록 머리글. 쪽수는 PDF 장수가 아니라 본문에 찍힌 마지막 아라비아 숫자(문서 끝 label)다.
+\newcommand{\@studentIDtext}[1]{\if\relax\detokenize\expandafter{\@studentID}\relax #1\else \@studentID\fi}
+\newcommand{\@abstractheader}{%
+  {\noindent\fontsize{11pt}{15pt}\selectfont
+   BS/EE \@authorEng, \@titleFull\par
+   \noindent\@studentIDtext{[Student ID]}, \@parentDeptNameEng, \@gradYear, \pageref*{paperlastpagelabel}p.\par
+   \noindent Advisor: \@advisorMajorEng\ifdefined\@advisorCooprEng, Co-Advisor: \@advisorCooprEng\fi\par}}
+\newcommand{\@korabstractheader}{%
+  {\noindent\fontsize{11pt}{15pt}\selectfont
+   BS/EE \@authorKorFN\@authorKorGN, \@titleKor\par
+   \noindent\@studentIDtext{[학번]}, \@parentDeptNameKor, \@gradYear, \pageref*{paperlastpagelabel}p.\par
+   \noindent 지도교수: \@advisorMajorKor\ifdefined\@advisorCooprKor, 공동지도교수: \@advisorCooprKor\fi\par}}
+
 \renewenvironment{abstract}{%
   \linespread{1.0}
   \clearpage
   \pagenumbering{roman}
   \setcounter{page}{1}
   \thispagestyle{plain}
-  \vspace*{32pt}
+  \@abstractheader
+  \vspace*{16pt}
   \begin{center}
     \fontsize{16pt}{16pt}\selectfont \textbf{\abstractname}
     \if@PDFdoc\phantomsection\fi\addcontentsline{toc}{content}{\abstractname} % 목차(TOC)에 추가
@@ -641,7 +657,8 @@
   \linespread{1.0}
     \clearpage
     \thispagestyle{plain}
-    \vspace*{32pt}
+    \@korabstractheader
+    \vspace*{16pt}
     \begin{center}
         \fontsize{16pt}{32pt}\selectfont \textbf{\korabstractname} \\
         \if@PDFdoc\phantomsection\fi\addcontentsline{toc}{content}{\korabstractname} % 목차(TOC)에 추가
@@ -938,7 +955,7 @@
 		\renewcommand{\listtablename}{
 			List of Tables}
 		\renewcommand{\bibname}{%
-			References}% 작성 안내: 참고문헌(References)
+			Reference}% 학사팀 최종본 안내·샘플 목차: Reference
 		\renewcommand{\abstractname}{
 			Abstract}
 		\renewcommand{\figurename}{
@@ -1154,6 +1171,13 @@
 		\@day, \@year
 	}
     
+	\newcommand{\@dateUSupper}[3]{%  % 인준서 날짜: 대문자 월 이름(DECEMBER 9, 2026)
+		\ifcase#2 \or
+		JANUARY\or FEBRUARY\or MARCH\or APRIL\or MAY\or JUNE\or
+		JULY\or AUGUST\or SEPTEMBER\or OCTOBER\or NOVEMBER\or DECEMBER\fi
+		\ #3, #1%
+	}
+
 	\newcommand{\@dateBRenglish}[3]{%  % 영국식 날짜 표기
 		\newcommand{\@year}{#1}%
 		\newcommand{\@month}{#2}%
