@@ -1,0 +1,41 @@
+% 그림: CD 흐름(5.3–5.5절). 2026-11-25 추가. 숫자는 5.3절 eq:cd-loss, 5.4절 교사 선정, 5.5절 tab:variants 와 같다.
+% 교차 검토 1차 반영: 자체 실험실 KD_ALL 의 경우로 범위를 밝히고, 적응 입력(배경 119 + seen 48), 교사도 같은 행을 봄,
+%   FIT 쪽은 CE 와 R_GLOBAL, 식 줄바꿈. A+C 개발 실행은 배경 입력 119실행 안에 있다(04_method sec:method-teachers, 4.6절).
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}[>=Stealth,node distance=5mm and 9mm,
+  box/.style={draw,rounded corners=2pt,align=center,font=\footnotesize,
+    minimum height=12mm,inner sep=3pt},
+  data/.style={box,fill=black!4},
+  model/.style={box,fill=blue!6},
+  stud/.style={box,fill=green!7},
+  lab/.style={font=\footnotesize,align=center}]
+  \node[data,text width=21mm] (fit) {FIT\\603 labeled runs};
+  \node[model,text width=23mm,right=of fit] (base) {30 REL\_GLOBAL\\baselines\\(seeds)};
+  \node[model,text width=27mm,right=of base] (rank) {Rank by top-1\\agreement with the\\30-model majority};
+  \node[model,text width=20mm,right=of rank] (teach) {5 teachers\\(frozen)};
+  \node[data,text width=33mm,below=13mm of base,xshift=4mm] (env)
+    {Unlabeled adaptation inputs:\\119 background runs\\$+$ 48 seen-condition runs};
+  \node[stud,text width=40mm,below=13mm of teach,xshift=-8mm] (stu)
+    {Student, same architecture:\\$\mathcal{L}^{\mathrm{FIT}}_{\mathrm{CE}}+0.1\,\mathcal{R}_{\mathrm{GLOBAL}}$\\$+\,0.25\,\mathrm{KL}(\bar p_J\,\|\,p_\theta)_{\mathrm{env}}$};
+  \node[box,text width=28mm,minimum height=8mm,below=7mm of stu,xshift=7mm] (dep) {Deployed: one model,\\one forward pass};
+  \draw[->] (fit) -- (base);
+  \draw[->] (base) -- (rank);
+  \draw[->] (rank) -- node[lab,above,yshift=1mm]{top 5} (teach);
+  \draw[->] ([xshift=-6mm]env.north) |- ([xshift=-8mm,yshift=-4mm]rank.south) -- node[lab,right,pos=0.2]{A+C rows (ranking)} ([xshift=-8mm]rank.south);
+  \draw[->] ([xshift=8mm]env.north) |- node[lab,below,pos=0.75]{same KL rows (teacher targets)} ([xshift=3mm,yshift=-9mm]teach.south west) -- ([xshift=3mm]teach.south west);
+  \draw[->] (teach.south) -- node[lab,right]{mean $\bar p_J$} (teach.south |- stu.north);
+  \draw[->] (env.east) -- node[lab,below]{KL rows} (env.east -| stu.west);
+  \draw[->] (fit.south) -- ++(0,-33mm) -| node[lab,below,pos=0.25]{labeled FIT rows (CE and $\mathcal{R}_{\mathrm{GLOBAL}}$)} ([xshift=-14mm]stu.south);
+  \draw[->] ([xshift=7mm]stu.south) -- (dep.north);
+\end{tikzpicture}
+\caption{Consensus distillation as run in-house for KD\_ALL. Thirty baselines
+are trained on FIT and ranked by their agreement, own vote included, with the
+30-model majority on unlabeled A+C rows; the five most agreeing become frozen
+teachers. The student keeps the baseline loss on FIT and follows the
+teachers' mean probability on the same unlabeled adaptation rows. At
+inference it is one model of the baseline's size. On ADS-24 and for the
+general encoders the teachers are chosen again in each setting
+(Section~\ref{sec:method-transfer}).}
+\label{fig:cd}
+\end{figure}

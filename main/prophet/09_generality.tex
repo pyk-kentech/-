@@ -54,7 +54,7 @@ self-distillation control for the in-house plain GRU (210 fits).
 % REL_BASE = baseline, KD_ENV = CD student, KD_SELF = self-distillation control.
 
 All three encoders varied across seeds on the conditions absent from
-the labeled FIT runs (Table~\ref{tab:gen-arch}). On \texttt{A+C FLAT} the seed standard
+the labeled FIT runs (Table~\ref{tab:gen-arch}, Figure~\ref{fig:gen-sd}). On \texttt{A+C FLAT} the seed standard
 deviation of NLL was 0.216 for the LSTM encoder, 0.833 for the
 Transformer encoder, and 0.579 for the plain GRU, against 0.080 for
 REL\_GLOBAL on the same runs, and the accuracy of plain-GRU seeds ranged
@@ -62,9 +62,10 @@ from 51.0\% to 87.7\%. We had expected that encoders without LogitNorm,
 which keeps logits at a fixed norm, would spread less. The opposite
 happened. The Transformer figure is driven partly by one seed whose
 \texttt{A+C FLAT} loss was 4.690. Without it, the remaining 29 seeds
-still had a standard deviation of 0.466 on the A+C score, against 0.040
-for their CD students. On ADS-24 the spread was smaller in absolute
-terms, but the environment evaluation again separated the seeds far
+still had a standard deviation of 0.466 on the A+C score (the mean of
+\texttt{FLAT} and \texttt{NESTED}), against 0.040 for their CD students. On ADS-24 the spread was smaller in absolute
+terms for the Transformer and the plain GRU but not for the LSTM
+encoder, and the environment evaluation again separated the seeds far
 more than the preservation runs did.
 % 근거: RECORD:287, 415 (예상 철회); ARCH_GENERALITY_STAGE2_REPORT.md "전체 성능과
 % 정확도" (PLAIN_GRU FLAT 정확도 0.510264–0.876833; LOGBERT FLAT 최악 seed
@@ -75,7 +76,7 @@ more than the preservation runs did.
 \begin{table}[htbp]
 \centering
 \caption{Base model and CD student for the three general encoders
-(30 seeds each). In-house values are on \texttt{A+C FLAT} of the new
+(30 seeds each). In-house values are on \texttt{A+C FLAT} of the
 PAG1 runs (31 runs, 341 rows); ADS-24 values are on the 35
 environment-evaluation runs (5,639 rows). Both halves are development
 comparisons.
@@ -119,6 +120,8 @@ ADS-24 & REL\_GLOBAL-ADS (reference)
 \bottomrule
 \end{tabular}
 \end{table}
+
+\input{main/prophet/fig_gen_sd}
 % 근거: RECORD:283--292; ARCH_GENERALITY_STAGE2_REPORT.md "전체 성능과 정확도"
 % (EVAL_ON, A_PLUS_C_FLAT 행), "별도 확인: 동결된 v3 30 seed를 PAG1 새 156실행에
 % 재추론" (REL_GLOBAL 0.133967/0.080252 [0.891496–1.000000], KD_ALL 0.078413/0.024293

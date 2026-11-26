@@ -20,8 +20,11 @@ general encoders.
 REL\_GLOBAL maps the received prefix $X_t$ of
 Equation~\ref{eq:receipt} to a distribution over the 18 actions. Its
 parts are an event encoder, an event-level recurrent state, a relational
-residual, and an output head. The definitions below follow the selected
-method contract and the round contracts that extend it.
+residual, and an output head (Figure~\ref{fig:relglobal}). The
+definitions below follow the selected method contract and the round
+contracts that extend it.
+
+\input{main/prophet/fig_relglobal}
 
 \paragraph{Event encoder.} Each admitted event is first described by a
 35-dimensional vector: an 8-dimensional embedding of the image name,
@@ -46,7 +49,8 @@ All vocabularies are fitted on FIT data only. The command-token
 vocabulary holds at most 1,024 tokens, in order of frequency, plus
 padding and unknown entries.
 % 출처: inputs/data/original_reports/lab/DIVERSE3K_20261027/COMMAND_REPRESENTATION_20261028/PRE_SPEC_V1.md:13
-%   ("train 정규화 명령에서만 빈도순 … 최대 1,024개 … PAD/UNK"; sources/atlas_answers/repro.md:77). The vocabularies and normalizers are those
+%   ("train 정규화 명령에서만 빈도순 … 최대 1,024개 … PAD/UNK"; sources/atlas_answers/repro.md:77).
+The vocabularies and normalizers are those
 fitted on the original 404 FIT runs and are kept fixed for every
 extension of FIT; tokens that occur only in the added runs map to the
 unknown entry. The round reports call this the 404-only preprocessor.
@@ -229,7 +233,7 @@ earlier models and the full tables.
 
 A CD student has the architecture of REL\_GLOBAL and no additional
 parameters, so at inference it is the same single model. What changes
-is the training loss. Let $J$ be a fixed set of \emph{teachers},
+is the training loss; Figure~\ref{fig:cd} shows the whole procedure. Let $J$ be a fixed set of \emph{teachers},
 trained REL\_GLOBAL models whose weights are frozen, and let $p_j$ be
 the predicted distribution of teacher $j$ at temperature~1. On an
 unlabeled input $x$ from the target environment, the target is the
@@ -272,6 +276,8 @@ and carries no model of the spread among teachers.
 % 근거: RECORD:130--139, 153; PAPER_DEFINITIONS.md §2 (q_J 식, KL 방향 교사‖학생,
 % 구현 F.kl_div(log_softmax(student), teacher_prob).sum(-1).mean(), 계수 .25,
 % update당 무라벨 32행, "LogitNorm 0.1은 증류 온도 1과 별개").
+
+\input{main/prophet/fig_cd}
 
 \section{Teacher selection}
 \label{sec:method-teachers}

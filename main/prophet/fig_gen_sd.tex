@@ -1,0 +1,55 @@
+% 그림: 표 tab:gen-arch 의 seed SD 열을 그대로 그린 것(새 집계 없음). 2026-11-25 추가.
+% 교차 검토 1차 반영: 참고 행(REL_GLOBAL 계열)은 회색 다른 모양, 화살촉 대신 선, 로그 축과 판정 척도 차이를 캡션에.
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}
+\begin{semilogxaxis}[
+  width=0.82\textwidth, height=6.2cm,
+  xmin=0.01, xmax=1.2,
+  ymin=0.4, ymax=8.6,
+  ytick={1,...,8},
+  yticklabels={
+    {ADS-24, REL\_GLOBAL-ADS (ref.)},
+    {ADS-24, plain GRU},
+    {ADS-24, Transformer},
+    {ADS-24, LSTM},
+    {In-house, REL\_GLOBAL (ref.)},
+    {In-house, plain GRU},
+    {In-house, Transformer},
+    {In-house, LSTM}},
+  yticklabel style={font=\footnotesize},
+  xticklabel style={font=\footnotesize},
+  tick pos=left,
+  xlabel={Seed standard deviation of NLL (log scale)},
+  xlabel style={font=\footnotesize},
+  xmajorgrids, grid style={black!12},
+  legend style={font=\footnotesize,at={(0.5,-0.24)},anchor=north,draw=black!30,legend columns=2,
+    /tikz/every even column/.append style={column sep=8pt}},
+  legend cell align=left,
+]
+\foreach \b/\c/\y in {0.180/0.026/2,0.126/0.027/3,0.352/0.038/4,
+                      0.579/0.015/6,0.833/0.040/7,0.216/0.050/8,
+                      0.163/0.025/1,0.080/0.024/5}{
+  \edef\temp{\noexpand\draw[black!35] (axis cs:\b,\y) -- (axis cs:\c,\y);}
+  \temp
+}
+\addplot[only marks,mark=o,mark size=2.4pt,black!75] coordinates {
+  (0.180,2) (0.126,3) (0.352,4) (0.579,6) (0.833,7) (0.216,8)};
+\addplot[only marks,mark=*,mark size=2.4pt,blue!60!black] coordinates {
+  (0.026,2) (0.027,3) (0.038,4) (0.015,6) (0.040,7) (0.050,8)};
+\addplot[only marks,mark=square,mark size=2.2pt,black!45] coordinates {(0.163,1) (0.080,5)};
+\addplot[only marks,mark=square*,mark size=2.2pt,black!45] coordinates {(0.025,1) (0.024,5)};
+\legend{Base model (cross-entropy only), CD student, Reference baseline, Reference student}
+\draw[black!25] (axis cs:0.01,4.5) -- (axis cs:1.2,4.5);
+\end{semilogxaxis}
+\end{tikzpicture}
+\caption{Seed standard deviation of NLL over 30 seeds before and after CD, from
+Table~\ref{tab:gen-arch} (in-house \texttt{A+C FLAT} of the PAG1 runs; ADS-24
+environment evaluation). Circles are the three general encoders; squares are
+the reference rows of that table (REL\_GLOBAL $\to$ KD\_ALL, frozen v3
+checkpoints; REL\_GLOBAL-ADS $\to$ its CD student), which are not part of the
+six-combination families. The axis is logarithmic, whereas the contract
+contrasts use absolute differences (Section~\ref{sec:eval-criteria}). All
+points are development comparisons.}
+\label{fig:gen-sd}
+\end{figure}

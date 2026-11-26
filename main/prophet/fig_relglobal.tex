@@ -1,0 +1,40 @@
+% 그림: REL_GLOBAL 구조(5.1절). 2026-11-25 추가. 수치는 5.1절 식 eq:event-enc, eq:head, eq:relation-attn 과 같다.
+% 교차 검토 1차(독립 에이전트) 반영: 캡션 범위, 관계 잔차 두 단계, 벌점은 e_i 에, age·r 출처, 라벨 크기.
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}[>=Stealth,node distance=4mm and 6mm,
+  box/.style={draw,rounded corners=2pt,align=center,font=\footnotesize,
+    minimum height=11mm,inner sep=3pt,fill=white},
+  main/.style={box,fill=blue!6},
+  aux/.style={box,fill=orange!8,draw=orange!60!black,dashed},
+  lab/.style={font=\footnotesize,align=center}]
+  \node[box,text width=19mm] (in) {Received prefix $X_t$,\\events in\\receipt order};
+  \node[main,text width=20mm,right=of in] (enc) {Event encoder $\phi$\\$35\to64\to48$\\(Eq.~\ref{eq:event-enc})};
+  \node[main,text width=18mm,right=9mm of enc] (gru) {GRU cell,\\64-dim state};
+  \node[main,text width=21mm,right=of gru] (head) {Head on\\$[h;\log(1{+}\mathrm{age});r]$};
+  \node[circle,draw,inner sep=1pt,font=\footnotesize,right=10mm of head] (plus) {$+$};
+  \node[main,text width=17mm,right=6mm of plus] (ln) {LogitNorm\\($\tau=0.1$), softmax\\$p(a\mid X_t)$ over\\18 actions};
+  \node[main,text width=34mm,below=11mm of gru,xshift=4mm] (rel)
+    {Relational residual:\\peer attention within each\\target group $\to u_i$;\\query $h$ over all assigned $u_i$};
+  \node[aux,text width=25mm,below=11mm of in,xshift=-4mm] (pen)
+    {Training only:\\$\mathcal{R}_{\mathrm{GLOBAL}}$ penalizes\\$\partial\,$logits$/\partial e_i$};
+  \draw[->] (in) -- (enc);
+  \draw[->] (enc) -- coordinate[pos=0.35] (ei) node[lab,above,pos=0.6]{$e_i$} (gru);
+  \draw[->] (gru) -- node[lab,above]{$h$} (head);
+  \draw[->] (head) -- node[lab,above]{$z_{\mathrm{EVENT}}$} (plus);
+  \draw[->] (plus) -- node[lab,above]{$z$} (ln);
+  \draw[->] (ei) |- node[lab,left,pos=0.25,text width=15mm]{$e_i$ of\\assigned\\events} (rel.west);
+  \draw[->] ([xshift=-2mm]gru.south) -- node[lab,right]{$h$} ([xshift=-2mm]gru.south |- rel.north);
+  \draw[->] (rel.east) -| node[lab,below,pos=0.3]{$W_o\sum_i A_i W_v u_i$} (plus.south);
+  \draw[->,dashed,orange!70!black] (pen.east) -| ([xshift=2mm]ei);
+  \draw[->] (in.north) -- ++(0,4mm) -| node[lab,above,pos=0.25]{age, $r$ (from receipt times)} (head.north);
+\end{tikzpicture}
+\caption{REL\_GLOBAL, the baseline predictor and the architecture of every
+in-house CD student; the students of Chapter~\ref{ch:generality} keep their
+own encoders. Solid arrows are the inference path. The dashed box and arrow
+mark the representation-gradient penalty on the event vectors $e_i$, used
+only in training. Events without an assigned target stay in the recurrent
+path but not in the relational residual, and an empty prefix uses a learned
+initial state.}
+\label{fig:relglobal}
+\end{figure}
