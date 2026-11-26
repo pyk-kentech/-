@@ -3,452 +3,224 @@
 % 2026-11-25 새 장: 지도교수 요청(배경·관련연구 분량을 본문의 약 25%로). 옛 2장의 ATT&CK 절
 % (sec:related-attack)을 이리로 옮겨 넓혔다. 새 인용의 원문 사본은 sources/papers/<key>.pdf,
 % 초고와 인용 표는 sources/expand/{sec,mlbg}.md (저장소에 올리지 않음).
+% 2026-11-26 지도교수 지시(본문 40~50쪽, 배경·관련연구는 비율 유지로 12쪽 안팎): 7쪽을 4쪽으로 줄였다.
+%   줄이기 전 판은 git 기록(커밋 3303d09)에 있다. 남긴 문장의 원문 대조 주석은 그대로 두었다.
 
 This chapter collects the general concepts that the later chapters
-assume. Sections~\ref{sec:bg-audit} and~\ref{sec:related-attack}
-describe the evidence, Windows audit records of process creation and
-termination, and the vocabularies that security practice uses to
-describe adversary behavior. Sections~\ref{sec:bg-scoring}
-to~\ref{sec:bg-shift} cover the machine-learning side: how a
-probabilistic prediction is scored, why models trained with different
-seeds differ, how ensembles and distillation combine models, and what
-changes when the test distribution departs from the training one. The
-concrete definitions of this thesis, its task, receipt boundary,
-conditions, model, and metrics, are given in
-Chapters~\ref{ch:task} to~\ref{ch:evaluation}. This chapter refers to
-them where they specialize a general concept and does not repeat them.
+assume: the evidence, Windows audit records of process creation and
+termination, and the vocabularies of adversary behavior
+(Sections~\ref{sec:bg-audit} and~\ref{sec:related-attack}), and on the
+machine-learning side the scoring of probabilistic forecasts, seed
+randomness, ensembles and distillation, and distribution shift
+(Sections~\ref{sec:bg-scoring} to~\ref{sec:bg-shift}). The definitions
+of this thesis itself are given in Chapters~\ref{ch:task}
+to~\ref{ch:evaluation}.
 
 \section{Windows host auditing}
 \label{sec:bg-audit}
 
 Windows records security-relevant activity in the Security event log
-when the corresponding audit policy is enabled. Two subcategories under
-Detailed Tracking matter for this thesis. Audit Process Creation
+when the corresponding audit policy is enabled. Audit Process Creation
 generates event 4688 each time a new process
 starts~\cite{msauditprocesscreation,ms4688}, and Audit Process
 Termination generates event 4689 each time a process
 exits~\cite{ms4689}.
-% 원문: Microsoft Learn "Audit Process Creation"(2022-03-16) 첫 문단 "determines whether the operating
-%   system generates audit events when a process is created (starts)". 확인됨.
 % 원문: Microsoft Learn 4688 "Subcategory: Audit Process Creation", "This event generates every time a new
 %   process starts."; 4689 "Subcategory: Audit Process Termination", "every time a process has exited". 확인됨.
-
-An event 4688 record has several groups of fields~\cite{ms4688}. The
-\emph{Creator Subject} identifies the account under which the creating
-process ran, with a logon identifier that can be correlated with other
-events of the same logon. A \emph{Target Subject}, added in a later
-event version, names the principal of the new process when it differs
-from the creator's context. The process fields give the new process
-identifier and the full path of its executable (\emph{New Process
-Name}), the identifier and path of the process that created it
-(\emph{Creator Process ID} and \emph{Creator Process Name}), the token
-elevation type, which distinguishes a full, an elevated, and a limited
-token under User Account Control, the mandatory integrity label, and
-the \emph{Process Command Line}.
-% 원문: Microsoft Learn 4688 필드 설명: Creator Subject "Logon ID ... can help you correlate this event with
-%   recent events that might contain the same Logon ID"; Target Subject [Version 2] "we will also include the
-%   target principal when the creator and target do not share the same logon"; "New Process Name ... full path
-%   and the name of the executable"; "Creator Process ID ... Process ID of the process which ran the new process";
-%   Token Elevation Type %%1936 "full token", %%1937 "elevated token", %%1938 "limited token"; "Mandatory Label
-%   ... SID of integrity label". 확인됨.
-The command line is not recorded by
-default. It is filled only when the policy \emph{Include command line
-in process creation events} is enabled in addition to Audit Process
-Creation; otherwise the field is empty~\cite{ms4688,mscmdline}. With
-the policy enabled, the command line of every process is written in
-plain text to the Security log~\cite{mscmdline}.
-% 원문: Microsoft Learn 4688 "Process Command Line ... You must enable ... 'Include command line in process
-%   creation events' group policy", "By default Process Command Line field is empty." 확인됨.
-% 원문: Microsoft Learn "Command line process auditing"(2025-05-12) "This setting only applies when the Audit
-%   Process Creation policy is enabled", "the command line information for every process will be logged in
-%   plain text in the security event log". 확인됨.
-An event 4689 record is shorter. It names the account, the identifier
-and executable path of the exited process, and a hexadecimal exit
-status whose meaning is defined by each application~\cite{ms4689}.
-% 원문: Microsoft Learn 4689 "Process ID ... of the ended/terminated process", "Process Name ... full path and the
-%   executable name", "Exit Status [Type = HexInt32]", "This exit code is unique for every application". 확인됨.
-
-Process lineage follows from these fields. The Creator Process ID of a
-4688 record can be matched with the New Process ID of the record that
-started the creator, and the Process ID of a 4689 record with the New
-Process ID of a 4688 record on the same computer~\cite{ms4688,ms4689}.
-% 원문: Microsoft Learn 4688 "You can also correlate this process ID with a process ID in other events, for
-%   example, '4688 ...' Process Information\New Process ID."; 4689 "correlate this process ID with ... '4688(S)'
-%   New Process ID on this computer." 확인됨.
-Chaining such links yields a tree of processes rooted at a logon or a
-service, and the command lines along a branch show what each process
-was asked to do. The link is a matter of correlation by the analyst or
-the collector; the records themselves are independent log entries.
-Chapter~\ref{ch:task} states how this thesis pairs creation and
-termination records and what it does with records it cannot pair.
+An event 4688 record names the account under which the creating
+process ran, with a logon identifier, the identifier and full path of
+the new process (\emph{New Process Name}), the identifier and path of
+its creator, the token elevation type, the integrity label, and the
+\emph{Process Command Line}~\cite{ms4688}. The command line is filled
+only when the policy \emph{Include command line in process creation
+events} is also enabled, and is then written in plain
+text~\cite{ms4688,mscmdline}. An event 4689 record names the account,
+the identifier and path of the exited process, and an
+application-defined exit status~\cite{ms4689}.
+% 원문: Microsoft Learn 4688 필드 설명(Creator Subject Logon ID, New Process Name, Creator Process ID,
+%   Token Elevation Type, Mandatory Label); "By default Process Command Line field is empty."; "Command line
+%   process auditing" "logged in plain text"; 4689 "Exit Status ... unique for every application". 확인됨.
+Matching the Creator Process ID of a 4688 record with the New Process
+ID of another, and the Process ID of a 4689 record with a New Process
+ID on the same computer, yields a tree of
+processes~\cite{ms4688,ms4689}. The link is made by the analyst or the
+collector; the records are independent log entries.
 
 Records leave the host through a collection path. Windows Event
-Forwarding (WEF) reads operational or administrative events logged on a
-device and forwards selected events to a Windows Event Collector (WEC)
-server according to subscriptions, which can be source-initiated (push)
-or collector-initiated (pull)~\cite{mswef}.
-% 원문: Microsoft Learn "Use Windows Event Forwarding to help with intrusion detection"(2025-08-18) "WEF reads
-%   any operational or administrative event logged on a device ... and forwards the events you choose to a Windows
-%   Event Collector (WEC) server"; "A WEF subscription can be configured to be pushed or pulled, but not both". 확인됨.
-Delivery is batched. In the
-built-in options, \emph{Normal} pulls batches of five items with a
-15-minute batch timeout, and \emph{Minimize Latency} pushes with a
-30-second batch timeout~\cite{mswef}. The local event log acts as the
-buffer while the collector is unreachable, and the backlog is sent when
-the connection returns; if the local log overwrites events before
-then, the collector receives no notice of the loss or of the gap in the
-stream~\cite{mswef}.
-% 원문: 같은 쪽 FAQ "uses pull delivery mode, batches 5 items at a time and sets a batch timeout of 15 minutes";
-%   Minimize Latency "uses push delivery mode and sets a batch timeout of 30 seconds"; "The WEF client machines
-%   local event log is the buffer for WEF"; "reconnect and send any accumulated backlog"; "there's no notification
-%   sent to the WEF collector that events are lost ... Neither is there an indicator that there was a gap". 확인됨.
-Whatever the path, the time
-at which a collector holds a record is set by batching, buffering, and
-connectivity, not only by the time the event occurred on the host.
-Chapter~\ref{ch:task} turns this distinction into the input definition
-of the prediction task.
-%   기준 구독 질의에 4688 이 들어 있음("Process Create (4688)"), 4689 는 그 질의에 없음 — 그래서 본문에서 구독 내용은 말하지 않았다.
-
-Host audit records have long served intrusion analysis in research.
-BackTracker logs operating-system objects and events, such as processes,
-files, and the system calls that make one object affect another, and,
-starting from a single detection point, reconstructs the chain of events
-that could have led to it as a dependency graph~\cite{king2003backtracking}.
-% 원문: King & Chen (SOSP 2003) 초록 p.223 "Starting with a single detection point (e.g., a suspicious file),
-%   BackTracker identifies files and processes that could have affected that detection point"; §2 "observing
-%   OS-level objects (e.g., files, filenames, processes) and events (e.g., system calls)"; §2.2.1 프로세스 생성이
-%   process/process 의존. 확인됨.
-King and Chen place this level between application logs, which are
-semantically rich but can be disabled by a privileged attacker, and
-machine-level logs, which are hard to disable but hard to
-interpret~\cite{king2003backtracking}.
-% 원문: King & Chen §2 p.224 "This level is a compromise between the application level (semantically rich but
-%   easily disabled) and the machine level (difficult to disable but semantically poor)." 확인됨.
-SLEUTH builds a main-memory dependency graph from commodity audit data
-and uses it to detect attacks and reconstruct attack scenarios in real
-time on Windows, FreeBSD, and Linux hosts~\cite{hossain2017sleuth}.
-% 원문: Hossain et al. (USENIX Security 2017) 초록 p.487 "a platform-neutral, main-memory based, dependency graph
-%   abstraction of audit-log data", "detect and reconstruct the details of the red team's attacks on hosts running
-%   Windows, FreeBSD and Linux". 확인됨.
-Later provenance systems continue this line
-(Section~\ref{sec:related-provenance}). In this body of work the audit
-trail is read after the fact or as it streams, to explain or detect
-behavior that has occurred. This thesis reads the same kind of record
-to forecast the operation that has not yet started.
+Forwarding sends selected events to a collector in batches, every 15
+minutes in its built-in \emph{Normal} option and every 30 seconds with
+\emph{Minimize Latency}, and buffers them in the local log while the
+collector is unreachable; events overwritten before then are lost
+without notice~\cite{mswef}.
+% 원문: Microsoft Learn "Use Windows Event Forwarding to help with intrusion detection"(2025-08-18) FAQ
+%   "batch timeout of 15 minutes", "batch timeout of 30 seconds", "local event log is the buffer",
+%   "there's no notification sent to the WEF collector that events are lost". 확인됨.
+The time at which a collector holds a record is therefore set by
+batching, buffering, and connectivity, not only by the time the event
+occurred; Chapter~\ref{ch:task} builds its input definition on this.
+In research, host audit records have mainly served to explain or
+detect behavior after it has occurred
+(Section~\ref{sec:related-provenance}); this thesis reads them to
+forecast an operation that has not yet started.
 
 \section{Adversary behavior models}
 \label{sec:related-attack}
 
 MITRE ATT\&CK organizes observed adversary behavior into tactics, the
 objectives an activity serves, and techniques and sub-techniques, the
-ways an objective is pursued~\cite{mitreintro}; the Windows matrix lists
-the techniques that apply to that platform~\cite{mitrewindows}.
-% 원문: MITRE ATT&CK "Get Started"(attack.mitre.org/resources/, 2026-11-24 열람) Key Concepts:
-%   Tactics "the reason an adversary is performing an action", Techniques "how adversaries achieve
-%   tactical goals", Sub-techniques "a more specific or lower-level description". 확인됨.
-%   bib 의 옛 주소 /resources/enterprise-introduction/ 은 /resources 로 넘어가서 주소를 고쳤다.
-% 원문: Windows 행렬(attack.mitre.org/matrices/enterprise/windows/, v20) "tactics and techniques
-%   representing the MITRE ATT&CK® Windows platform". 확인됨.
-Its design document describes ATT\&CK as a curated knowledge base and
-model of adversary behavior that began as a project to categorize
-post-compromise tactics, techniques, and procedures against Windows
-systems in order to improve detection~\cite{strom2018mitre}.
-% 원문: Strom et al. (MITRE MP180360R1, 2018, rev. 2020) §1 p.1 "a curated knowledge base and model for cyber
-%   adversary behavior"; "document and categorize post-compromise adversary tactics, techniques and procedures
-%   (TTPs) against Microsoft Windows systems to improve detection of malicious behavior". 확인됨.
-The authors state that
-ATT\&CK is not an exhaustive enumeration of attack vectors, and that,
-because many groups use the same techniques, activity should not be
-attributed to a group from its techniques alone~\cite{strom2018mitre}.
-% 원문: Strom et al. §1 p.1 "ATT&CK is not an exhaustive
-%   enumeration of attack vectors"; §2 p.2 "it is not recommended to attribute activity solely based on the ATT&CK
-%   techniques used". 확인됨.
-Procedures are the specific implementations that adversaries have used
-for a technique, and one procedure can span several techniques; the
-authors give credential dumping through PowerShell injection into the
-LSASS process as an example that involves three distinct
-behaviors~\cite{strom2018mitre}.
-% 원문: Strom et al. §3.4.1 p.9 "procedures are the specific implementation adversaries have used for techniques
-%   or sub-techniques", "a procedure can span multiple techniques and sub-techniques" (PowerShell, Process
-%   Injection, LSASS Memory). 확인됨.
-We use
-this vocabulary to situate the behaviors in our data, but the 18
-prediction labels (Appendix~\ref{app:actions}) are finer than ATT\&CK
-techniques. They name operations at the level of the controlled
+ways an objective is pursued~\cite{mitreintro,mitrewindows}. It began
+as a categorization of post-compromise behavior against Windows
+systems to improve detection, and its authors state that it is not an
+exhaustive enumeration of attack vectors; procedures are the specific
+implementations of a technique, and one procedure can span several
+techniques~\cite{strom2018mitre}.
+% 원문: MITRE ATT&CK "Get Started"(2026-11-24 열람) Tactics/Techniques/Sub-techniques; Strom et al. (2018,
+%   rev. 2020) §1 p.1 "categorize post-compromise ... against Microsoft Windows systems to improve detection",
+%   "not an exhaustive enumeration of attack vectors"; §3.4.1 p.9 "a procedure can span multiple techniques". 확인됨.
+Our 18 prediction labels (Appendix~\ref{app:actions}) are finer than
+ATT\&CK techniques and name operations at the level of the controlled
 procedures. A system information enumeration and a registry query are
-both discovery activity, and they relate to System Information Discovery
-and Query Registry respectively; merging them into one output would erase
-exactly the distinction the classifier is asked to make. Conversely,
-different command lines that implement the same operation share a label.
-The label is the operation designated by the procedure and verified
-against the actual process start, not an ATT\&CK identifier.
+both discovery activity, related to System Information Discovery and
+Query Registry respectively; merging them would erase the distinction
+the classifier is asked to make. The label is the operation designated
+by the procedure and verified against the actual process start, not an
+ATT\&CK identifier.
 
-The intrusion kill chain of Hutchins et al.\ describes an intrusion as
-a sequence of phases so that defenders can reason about where a
-mitigation can break the chain~\cite{hutchins2011killchain}.
-% 원문: Hutchins et al. (Lockheed Martin 백서) 초록 "Using a kill chain model to describe phases of
-%   intrusions", 1절 "just one mitigation disrupts the chain and the adversary". 원문은 캠페인이 아니라
-%   침입(intrusion)을 단계로 나누고, 캠페인은 여러 침입을 묶은 것이라 "groups a campaign into phases"를 고쳤다.
-Its seven phases are reconnaissance, weaponization, delivery,
-exploitation, installation, command and control, and actions on
-objectives, and each phase is mapped to defensive courses of action
-such as detection and denial~\cite{hutchins2011killchain}.
-% 원문: Hutchins et al. §3.2 p.4 "The intrusion kill chain is defined as reconnaissance, weaponization, delivery,
-%   exploitation, installation, command and control (C2), and actions on objectives."; §3.3 Courses of Action
-%   행렬(Detect, Deny, Disrupt, Degrade, Deceive, Destroy). 확인됨.
-The operations in our vocabulary are all carried out on a host where
-the procedure is already running.
-At a single host decision, however,
-several operations fall under the same phase or ATT\&CK tactic, and
-knowing that an actor is at the Discovery tactic does not say which
-resource it will examine next.
-% 원문 대조(묶음 B): discovery 는 킬체인 단계가 아니라 ATT&CK 전술이라 'phase or ATT&CK tactic' 으로 고쳤다.
-The ATT\&CK authors draw a similar line: high-level lifecycle models such
-as the kill chain are useful for adversary goals but do not convey
-individual actions, how one action relates to another, or how sequences
-of actions relate to tactical objectives~\cite{strom2018mitre}.
-% 원문: Strom et al. §4.1.3 p.22 "these models are not effective at conveying what individual actions adversaries
-%   make, how one action relates to another, how sequences of actions relate to tactical adversary objectives". 확인됨.
-
-The Diamond Model of intrusion analysis takes the event as its atomic
-element. Each event has four core features, adversary, capability,
-infrastructure, and victim, and meta-features that include a timestamp,
-a phase, and a result~\cite{caltagirone2013diamond}.
-% 원문: Caltagirone, Pendergast & Betz (2013, DTIC ADA586960) §4 p.8 "The core features of an event are: adversary,
-%   capability, infrastructure, and victim." "The meta-features are: timestamp (both start and end), phase, result". 확인됨.
-The model does not fix a set of phases and can use any phased
-description, such as the kill chain~\cite{caltagirone2013diamond}.
-% 원문: Caltagirone et al. §4.5.2 p.16 "Our model can utilize any phased model of adversary operations";
-%   같은 곳 "no consensus or evidence that there exists a set of phases satisfying the characterization of all
-%   malicious activity". 확인됨.
-Events against one victim are linked into an \emph{activity thread}, a
-directed phase-ordered graph whose arcs mark causal relations between
-events and are labeled, among other things, as actual or
-hypothesized~\cite{caltagirone2013diamond}.
-% 원문: Caltagirone et al. §8 p.30 "An activity thread is a directed phase-ordered graph where each vertex is an event
-%   and the arcs ... identify causal relationships"; arc 라벨 "whether the arc is actual or hypothesized";
-%   "each thread is specific to one adversary-victim pair". 확인됨.
-The authors contrast activity threads with traditional attack graphs:
-threads record knowledge of attack paths that actually occurred, rather
-than exhaustively listing possible ones, and are meant to inform the
-likelihood of particular paths~\cite{caltagirone2013diamond}.
-% 원문: Caltagirone et al. §8 p.34 "unlike traditional attack graphs which attempt to exhaustively list all possible
-%   paths, activity threads model knowledge of actual attack paths"; "informed by observations of actual events to
-%   predict likelihood and adversary preference for particular paths". 확인됨.
-%   'predict'를 그대로 쓰지 않았다: 원문은 모델의 의도를 말할 뿐 예측 실험은 없다.
-Attack
-Flow goes further and describes how adversaries combine and sequence
-techniques, linking actions, conditions, and relationships into a
-connected flow~\cite{mitreattackflow}.
-% 원문: CTID Attack Flow 프로젝트 쪽(ctid.mitre.org/projects/attack-flow/) "actions, conditions, and
-%   relationships as a connected flow"; 문서 v4.0(center-for-threat-informed-defense.github.io/attack-flow/)
-%   "combine and sequence various offensive techniques". 열람한 쪽에 "dependencies" 표현이 없어
-%   "order of and dependencies between"을 원문 표현으로 고쳤다.
-
-These models share two properties that matter here. They describe
-relations within an attack sequence, and they are written by an analyst
-from activity that is already known, in whole or in part. Their units
-are also coarser than a single host operation: a phase, a tactic, a
-technique, or a Diamond event described by its adversary, capability,
-infrastructure, and victim. This
-thesis keeps the sequence view but changes both properties. Our
-forecaster receives
-only the prefix that arrived before the next action, and it must commit
-to a distribution over that action before it is observed. Its unit is
-the operation named by the controlled procedure, and ATT\&CK serves
-only to describe what those operations are.
+The intrusion kill chain divides an intrusion into seven phases, from
+reconnaissance to actions on objectives, so that defenders can reason
+about where a mitigation breaks the chain~\cite{hutchins2011killchain}.
+% 원문: Hutchins et al. §3.2 p.4 일곱 단계 정의, 1절 "just one mitigation disrupts the chain". 확인됨.
+The Diamond Model links the events against one victim into activity
+threads, phase-ordered graphs of attack paths that actually
+occurred~\cite{caltagirone2013diamond}, and Attack Flow links actions,
+conditions, and relationships into a connected flow of
+techniques~\cite{mitreattackflow}.
+% 원문: Caltagirone et al. §8 p.30 "An activity thread is a directed phase-ordered graph", p.34 "activity threads
+%   model knowledge of actual attack paths"; CTID Attack Flow "actions, conditions, and relationships as a
+%   connected flow". 확인됨.
+These models describe relations within an attack sequence, are written
+by an analyst from activity already known, and use units coarser than
+one host operation: a phase, a tactic, a technique, or a Diamond event.
+At a single host decision several of our operations fall under the
+same phase or tactic, and the ATT\&CK authors likewise note that
+lifecycle models do not convey individual actions or how one relates
+to another~\cite{strom2018mitre}.
+% 원문: Strom et al. §4.1.3 p.22 "not effective at conveying what individual actions adversaries make, how one
+%   action relates to another". 확인됨.
+This thesis keeps the sequence view, but its forecaster receives only
+the prefix that arrived before the next action and must commit to a
+distribution over that action before it is observed.
 
 \section{Probabilistic next-action prediction and its scoring}
 \label{sec:bg-scoring}
 
 A probabilistic classifier over $K$ classes maps an input $x$ to a
-distribution $p(\cdot\mid x)$ on $\{1,\dots,K\}$. In this thesis the
-classes are the $K=18$ actions and the input is the record received up
-to a prediction boundary; Chapter~\ref{ch:task} defines both. A neural
-classifier computes a vector of logits $z(x)\in\mathbb{R}^K$ and turns
-it into probabilities with the softmax at temperature $T>0$,
+distribution $p(\cdot\mid x)$; here the classes are the $K=18$ actions
+and the input is the record received up to a prediction boundary
+(Chapter~\ref{ch:task}). A neural classifier computes logits
+$z(x)\in\mathbb{R}^K$ and applies the softmax at temperature $T>0$,
 \begin{equation}
   p_T(a\mid x)=\frac{\exp\bigl(z_a(x)/T\bigr)}
-                    {\sum_{b=1}^{K}\exp\bigl(z_b(x)/T\bigr)} .
+                    {\sum_{b=1}^{K}\exp\bigl(z_b(x)/T\bigr)} ,
   \label{eq:bg-softmax}
 \end{equation}
-The ordinary softmax is $T=1$. A larger $T$ gives a softer
-distribution, a smaller one a sharper distribution, and the ranking of
-the classes does not depend on $T$.
+where $T=1$ is the ordinary softmax and $T$ does not change the
+ranking of the classes.
 
-A scoring rule assigns a number to a forecast and the outcome that
-occurs. Gneiting and Raftery call a scoring rule proper if a forecaster
-whose belief is $q$ obtains the best expected score by issuing $q$, and
-strictly proper if $q$ is the only forecast that does
-so~\cite{gneiting2007strictly}.
-% 원문: Gneiting & Raftery (JASA 2007) 초록 p.359 "proper if the forecaster maximizes the expected score";
-%   "It is strictly proper if the maximum is unique". 확인됨.
-Written as losses, so that lower is better, the two classical
-strictly proper rules for a categorical outcome $y$ are the logarithmic
-loss and the quadratic or Brier loss,
+A scoring rule is proper if a forecaster whose belief is $q$ obtains
+the best expected score by issuing $q$, and strictly proper if $q$ is
+the only such forecast~\cite{gneiting2007strictly}. Written as losses,
+the two classical strictly proper rules for a categorical outcome $y$
+are the logarithmic and the Brier loss,
 \begin{equation}
   \ell_{\log}(p,y)=-\log p(y\mid x),
   \qquad
   \ell_{\mathrm{B}}(p,y)=\sum_{a=1}^{K}\bigl(p(a\mid x)-\indicator[a=y]\bigr)^2 .
   \label{eq:bg-scores}
 \end{equation}
-% 원문: Gneiting & Raftery (JASA 2007) §3.1 p.363 Example 1 "quadratic score or Brier score",
-%   Example 3 "logarithmic score, S(p,i)=log p_i"; "The scoring rules in Examples 1–3 are strictly proper". 확인됨.
-%   손실 방향(부호 뒤집기)은 우리가 쓴 표기이고 원문은 점수(클수록 좋음) 방향이다.
-For the logarithmic loss the gap between the expected loss of a forecast
-$p$ and that of the true distribution $q$ is the Kullback--Leibler
-divergence $\mathrm{KL}(q\,\|\,p)$~\cite{gneiting2007strictly}. The
-expected loss is therefore lowest only at $p=q$, and the excess grows
-with the divergence. The logarithmic loss depends only on the
-probability given to the outcome that occurred, and it is unbounded: a
-forecast that gives the observed outcome a probability near zero incurs
-a very large loss. This unboundedness has been criticized, and it is
-also why a few confident errors can dominate a mean log loss.
-% 원문: Gneiting & Raftery (JASA 2007) §3.1 p.363 Example 3 "The associated Bregman distance is the
-%   Kullback–Leibler divergence"; 같은 곳 "criticized for its unboundedness". 확인됨.
-%   "몇 개의 확신 오류가 평균을 지배할 수 있다"는 무한성에서 나오는 일반 사실로, 원문의 주장으로 쓰지 않았다.
+% 원문: Gneiting & Raftery (JASA 2007) 초록 p.359 proper/strictly proper; §3.1 p.363 Examples 1–3 strictly proper,
+%   Example 3 Bregman distance = KL, "criticized for its unboundedness"; Example 4 zero–one "proper but not
+%   strictly proper". 확인됨. 손실 방향(부호 뒤집기)은 우리가 쓴 표기다.
+For the logarithmic loss the excess expected loss of $p$ over the true
+distribution $q$ is $\mathrm{KL}(q\,\|\,p)$~\cite{gneiting2007strictly}.
+The loss is unbounded, so a few confident errors can dominate a mean.
 Negative log-likelihood (NLL) is the mean of $\ell_{\log}$ over
-evaluation rows. Our NLL weights each execution equally
-(Equation~\ref{eq:nll} in Section~\ref{sec:eval-metrics}).
-
-Top-1 accuracy scores only whether the highest-probability class is the
-observed one. As a scoring rule, this zero--one score is proper but not
-strictly proper~\cite{gneiting2007strictly}: forecasts with the same
-mode receive the same score however differently they spread the rest
-of their probability. Two models can thus agree in accuracy and differ
-in NLL. Guo et al.\ observed this disconnect in training: their
-networks could overfit to NLL without overfitting to the zero--one
-loss~\cite{guo2017calibration}.
-% 원문: Gneiting & Raftery (JASA 2007) §3.1 p.363 "The score in Example 4 is proper but not strictly proper";
-%   Example 4 "Zero–one score ... rewards a probabilistic forecast if the mode ... materializes". 확인됨.
-% 원문: Guo et al. (ICML 2017, PMLR 70) §3 p.4 "neural networks can overfit to NLL without overfitting to the 0/1 loss". 확인됨.
+evaluation rows; ours weights each execution equally
+(Equation~\ref{eq:nll}). Top-1 accuracy, the zero--one score, is proper
+but not strictly proper~\cite{gneiting2007strictly}: forecasts with the
+same mode score the same however they spread the rest of their
+probability, so two models can agree in accuracy and differ in NLL.
 
 Calibration asks whether stated confidence matches observed frequency.
-With $\hat{Y}$ the predicted class and $\hat{P}$ its probability, a
-model is perfectly calibrated if
-$\Pr(\hat{Y}=Y\mid \hat{P}=c)=c$ for every $c$. The expected
-calibration error (ECE) estimates the departure from this by sorting
-$n$ predictions into $M$ equal-width confidence bins $B_m$,
-\begin{equation}
-  \mathrm{ECE}=\sum_{m=1}^{M}\frac{|B_m|}{n}
-  \bigl|\mathrm{acc}(B_m)-\mathrm{conf}(B_m)\bigr| ,
-  \label{eq:bg-ece}
-\end{equation}
-where $\mathrm{acc}$ and $\mathrm{conf}$ are the accuracy and mean
-confidence in a bin~\cite{guo2017calibration}. Guo et al.\ found modern
-neural networks poorly calibrated and proposed temperature scaling:
-a single $T$ in Equation~\ref{eq:bg-softmax} fitted to validation NLL
-after training. Because $T$ does not change the largest logit, the
-predicted class and hence the accuracy stay the
-same~\cite{guo2017calibration}.
-% 원문: Guo et al. (ICML 2017) §2 pp.2–3 식 (2)–(3), ECE "partitioning predictions into M equally-spaced bins";
-%   초록 p.1 "modern neural networks, unlike those from a decade ago, are poorly calibrated";
-%   §4.2 p.6 "T is optimized with respect to NLL on the validation set", "does not affect the model's accuracy". 확인됨.
-NLL rewards calibration and sharpness together, while ECE isolates the
-first and ignores the probabilities given to classes other than the
-top one. This thesis scores models by NLL and accuracy
-(Section~\ref{sec:eval-metrics}); ECE is not one of its criteria, and
-post hoc temperature scaling enters only as a comparison arm of the
-final checks (Section~\ref{sec:gen-methods}). The temperature
-$\tau$ of LogitNorm in our training loss is a different quantity: it
-rescales normalized logits during training and inference
+Guo et al.\ found modern neural networks poorly calibrated and fitted a
+single $T$ in Equation~\ref{eq:bg-softmax} to validation NLL after
+training, which leaves the predicted class and the accuracy
+unchanged~\cite{guo2017calibration}.
+% 원문: Guo et al. (ICML 2017) 초록 p.1 "poorly calibrated"; §4.2 p.6 "T is optimized with respect to NLL on the
+%   validation set", "does not affect the model's accuracy". 확인됨.
+NLL rewards calibration and sharpness together. This thesis scores
+models by NLL and accuracy (Section~\ref{sec:eval-metrics}); post hoc
+temperature scaling enters only as a comparison arm
+(Section~\ref{sec:gen-methods}), and the temperature $\tau$ of
+LogitNorm in our training loss is a different quantity
 (Section~\ref{sec:method-baseline}).
-% 근거: 05_evaluation.tex sec:eval-metrics 의 지표 목록(NLL 1차, 정확도 2차, seed 안정성 통계).
-%   02_related_work.tex 주석 "온도 보정 ... 결론 Future Work에 계획으로만 둔다".
 
 \section{Training randomness and underspecification}
 \label{sec:bg-seeds}
 
-Training a neural network is a randomized procedure. Summers and
-Dinneen list its sources of nondeterminism: random parameter
-initialization, the shuffling of training data into minibatches, data
-augmentation, stochastic regularization such as dropout, and low-level
-library operations that run nondeterministically for
-speed~\cite{summers2021nondeterminism}. The last of these cannot be
-controlled by a seed, only switched on or off.
-% 원문: Summers & Dinneen (ICML 2021, PMLR 139) §3 p.2 목록 Parameter Initialization, Data Shuffling,
-%   Data Augmentation, Stochastic Regularization ("such as Dropout"), Low-level Operations;
-%   "it is not possible to 'seed' this; it is only possible to turn it on or off". 확인됨.
-Bouthillier et al.\ name a similar list of sources inside the learning
-procedure (data sampling, augmentation, initialization, dropout, and
-the order in which data are visited), add the choice of
-hyperparameters, and treat a benchmark's performance as a random
-variable~\cite{bouthillier2021accounting}.
-% 원문: Bouthillier et al. (MLSys 2021) §2 p.2 "This performance value should be considered the realization
-%   of a random variable"; §2.2 p.3 "i) the data sampling, ii) data augmentation procedures, iii) model
-%   initialization, iv) dropout, and v) data visit order". 확인됨.
+Training a neural network is a randomized procedure. Its sources of
+nondeterminism include parameter initialization, the shuffling of data
+into minibatches, augmentation, stochastic regularization such as
+dropout, and low-level library operations, which a seed cannot control
+but only switch on or
+off~\cite{summers2021nondeterminism,bouthillier2021accounting}.
+% 원문: Summers & Dinneen (ICML 2021) §3 p.2 목록, "it is not possible to 'seed' this"; Bouthillier et al.
+%   (MLSys 2021) §2.2 p.3 다섯 변동원. 확인됨.
 In this thesis a seed fixes the initial weights together with the
-random draws of training traces and regularization noise
-(Chapter~\ref{ch:introduction}). The 30 seeds of a group share the
-data, hyperparameters and training procedure and differ only in the
-seed (Section~\ref{sec:method-baseline}).
-% 근거: 04_method.tex sec:method-baseline "All 30 seeds of a group share this procedure and differ only in the seed".
-%   GPU 저수준 비결정성을 껐는지는 원고에 없어 "seed 만이 유일한 변동원"이라고 쓰지 않았다.
+random draws of training traces and regularization noise, and the 30
+seeds of a group differ only in the seed
+(Section~\ref{sec:method-baseline}).
 
-Write the training procedure as a map $\theta_s=\mathcal{A}(D,s)$ from a
-fixed dataset $D$ and a seed $s$ to weights. Any evaluation score of
+Write the training procedure as $\theta_s=\mathcal{A}(D,s)$ from a
+fixed dataset $D$ and seed $s$ to weights. An evaluation score of
 $\theta_s$, such as its NLL $L_s$ on one condition, is then a random
-variable over seeds. With $S$ seeds one estimates its mean and its
-spread by
+variable over seeds, estimated from $S$ seeds by
 \begin{equation}
   \hat{\mu}=\frac{1}{S}\sum_{s=1}^{S}L_s,
   \qquad
   \hat{\sigma}=\Bigl(\frac{1}{S-1}\sum_{s=1}^{S}\bigl(L_s-\hat{\mu}\bigr)^2\Bigr)^{1/2} .
   \label{eq:bg-seed-moments}
 \end{equation}
-The two answer different questions. $\hat{\mu}$ describes the
-procedure on average, while $\hat{\sigma}$ describes how far one
-trained model, the thing that is deployed, can fall from that average.
-The standard error $\hat{\sigma}/\sqrt{S}$ measures the uncertainty of
-$\hat{\mu}$ and shrinks with more seeds; $\hat{\sigma}$ itself does
-not. Koh et al.\ make the same distinction when they report the
-standard deviation across replicates in the WILDS
-tables~\cite{koh2021wilds}.
-% 원문: Koh et al. (ICML 2021, PMLR 139) §5 Table 1 캡션 p.7 "standard deviation across 3+ replicates,
-%   which measures the variability between replicates", "higher than the standard error of the mean". 확인됨.
-Bouthillier et al.\ recommend randomizing as many sources of
-variation as possible when comparing learning pipelines, because a
-result obtained under one fixed instance of these choices does not
-generalize~\cite{bouthillier2021accounting}. Our group score $L$ is
-$\hat{\mu}$ over 30 seeds, and the seed standard deviation is
+$\hat{\mu}$ describes the procedure on average and $\hat{\sigma}$ how
+far one trained model, the thing that is deployed, can fall from it.
+The standard error $\hat{\sigma}/\sqrt{S}$ shrinks with more seeds;
+$\hat{\sigma}$ does not, which is why WILDS reports the standard
+deviation across replicates~\cite{koh2021wilds}. Our group score is
+$\hat{\mu}$ over 30 seeds and the seed standard deviation is
 $\hat{\sigma}$ (Section~\ref{sec:eval-metrics}).
-% 원문: Bouthillier et al. (MLSys 2021) §5 p.9 "Randomize as many sources of variations as possible";
-%   "a speciﬁc instance of these choices will not give an evaluation that generalize". 확인됨.
+% 원문: Koh et al. Table 1 캡션 p.7 "standard deviation across 3+ replicates"; Bouthillier et al. §2 p.2
+%   "realization of a random variable", §5 p.9 "Randomize as many sources of variations as possible". 확인됨.
 
-The spread can be large even when the sources are small. Summers and
-Dinneen found that each source of nondeterminism had a similar effect
-on the variability of the trained models, and that changing a single
-bit of one initial weight led to models that differed widely in
-accuracy after a few epochs; they attribute both findings to the
-instability of training~\cite{summers2021nondeterminism}.
-% 원문: Summers & Dinneen (ICML 2021) 초록 p.1 "all sources of nondeterminism have similar effects on measures
-%   of model diversity"; "even one-bit changes in initial parameters result in models converging to vastly
-%   different values"; §4.1 p.5 세 epoch 뒤 정확도 차 10.42%. 확인됨.
-One of their measures of diversity is the disagreement between the
-top-1 predictions of pairs of models~\cite{summers2021nondeterminism}.
-Two seeds can have similar scores and still predict differently on
-individual inputs. Underspecification names the case where a training
-pipeline returns many predictors with equivalent held-out performance
-in the training domain that behave differently under deployment
-conditions~\cite{damour2020underspecification}.
-% 원문: Summers & Dinneen (ICML 2021) §3.1 p.3 "the average disagreement between pairs of models";
-%   "considers only the argmax of a model's predictions". 확인됨.
-% 원문: D'Amour et al. arXiv:2011.03395 v2 초록 "many predictors with equivalently strong held-out
-%   performance in the training domain". 확인됨(관련연구 장 sec:related-underspec 와 같은 원문).
-The held-out score
-cannot then tell these predictors apart, so the choice among them is
-left to the seed. Section~\ref{sec:related-underspec} discusses this
-work and how our observations relate to it.
+The spread can be large even when the sources are small: Summers and
+Dinneen found that changing a single bit of one initial weight gave
+models that differed widely in accuracy after a few epochs, and that
+pairs of models disagreed on individual top-1
+predictions~\cite{summers2021nondeterminism}. Underspecification names
+the case where a pipeline returns many predictors with equivalent
+held-out performance in the training domain that behave differently
+under deployment conditions~\cite{damour2020underspecification}. The
+held-out score cannot tell them apart, so the choice among them is
+left to the seed (Section~\ref{sec:related-underspec}).
+% 원문: Summers & Dinneen 초록 p.1 "one-bit changes in initial parameters", §3.1 p.3 disagreement;
+%   D'Amour et al. 초록 "many predictors with equivalently strong held-out performance in the training domain". 확인됨.
 
 \section{Ensembles and knowledge distillation}
 \label{sec:bg-distill}
 
-An ensemble combines $M$ trained members $p_1,\dots,p_M$. The usual
-combination for classification is the arithmetic mean of their
-probabilities, the linear pool, as in deep
-ensembles~\cite{lakshminarayanan2016simple}. The alternative for the
-logarithmic loss is the logarithmic opinion pool, the normalized
-geometric mean~\cite{heskes1997selecting}:
+An ensemble combines $M$ trained members $p_1,\dots,p_M$, usually by the
+arithmetic mean of their probabilities, as in deep
+ensembles~\cite{lakshminarayanan2016simple}, or by the normalized
+geometric mean, the logarithmic opinion pool~\cite{heskes1997selecting}:
 \begin{equation}
   \bar{p}(a\mid x)=\frac{1}{M}\sum_{m=1}^{M}p_m(a\mid x),
   \qquad
@@ -456,44 +228,24 @@ geometric mean~\cite{heskes1997selecting}:
   \exp\Bigl(\frac{1}{M}\sum_{m=1}^{M}\log p_m(a\mid x)\Bigr) .
   \label{eq:bg-pools}
 \end{equation}
-% 원문: Lakshminarayanan et al. (NIPS 2017) §2.4 p.4 "uniformly-weighted mixture model",
-%   "For classiﬁcation, this corresponds to averaging the predicted probabilities". 확인됨.
-% 원문: Heskes (NIPS 10, 1997) §2 식 (1)–(2): 가중 정규화 기하평균 풀. 확인됨(관련연구 장 주석과 같은 원문).
-The two pools answer one question in two directions. The arithmetic
-mean $\bar{p}$ is the distribution $q$ that minimizes
-$\sum_m\mathrm{KL}(p_m\,\|\,q)$, and the geometric pool $\tilde{p}$ is
-the one that minimizes $\sum_m\mathrm{KL}(q\,\|\,p_m)$; Hinton et al.\
-note that the solution of their combination problem is one or the
-other depending on the direction of the
-divergence~\cite{hinton2015distilling}. Our method uses $\bar{p}$ as its
-target (Equation~\ref{eq:cd-target}), and our post hoc analysis uses
-$\tilde{p}$ (Equation~\ref{eq:decomposition}).
-% 원문: Hinton et al. arXiv:1503.02531 §5.4 식 (5) 아래 pp.6–7 "the solution is either the arithmetic or
-%   geometric mean, depending on whether we use KL(p, q) or KL(q, p)". 확인됨.
-%   어느 방향이 어느 평균인지는 원문이 짝짓지 않아, 짝짓기는 우리가 정의에서 바로 적었다(인용 주장 아님).
-Lakshminarayanan et al.\ found that random initialization of the
-network parameters together with random shuffling of the data was
-enough to give members that made a good ensemble in their
-experiments~\cite{lakshminarayanan2016simple}, so the members of a
-deep ensemble differ, as our seeds do, only in their training
-randomness.
-% 원문: Lakshminarayanan et al. (NIPS 2017) §2.4 p.4 "random initialization of the NN parameters, along with
-%   random shufﬂing of the data points, was sufﬁcient for obtaining good performance in practice". 확인됨.
+$\bar{p}$ minimizes $\sum_m\mathrm{KL}(p_m\,\|\,q)$ and $\tilde{p}$
+minimizes $\sum_m\mathrm{KL}(q\,\|\,p_m)$~\cite{hinton2015distilling}.
+Our method uses $\bar{p}$ as its target (Equation~\ref{eq:cd-target})
+and our post hoc analysis uses $\tilde{p}$
+(Equation~\ref{eq:decomposition}). Random initialization and data
+shuffling alone gave members that made a good deep
+ensemble~\cite{lakshminarayanan2016simple}, so those members differ,
+as our seeds do, only in training randomness.
+% 원문: Lakshminarayanan et al. (NIPS 2017) §2.4 p.4 "averaging the predicted probabilities", "random
+%   initialization ... along with random shufﬂing ... was sufﬁcient"; Hinton et al. §5.4 pp.6–7 "either the
+%   arithmetic or geometric mean, depending on whether we use KL(p, q) or KL(q, p)". 확인됨.
 
-An ensemble of $M$ networks costs $M$ forward passes at inference.
-Bucilu\v{a} et al.\ addressed this cost by model compression: they used
-a large ensemble to label a large unlabeled data set and trained a
-single neural network on the ensemble's labels, which then predicted
-much like the ensemble~\cite{bucilua2006model}. When enough unlabeled
-data were not available, they generated synthetic inputs close to the
-training distribution.
-% 원문: Buciluǎ et al. (KDD 2006) §1 p.535 "we use the ensemble to label a large unlabeled data set and then
-%   train the neural net on this much larger, ensemble labeled, data set"; 같은 쪽 MUNGE 합성 사례. 확인됨.
-Hinton et al.\ generalized this into knowledge distillation. The
-student is trained to match the teacher's softened distribution
-$p^{\mathrm{t}}_T$ at a raised temperature $T$
-(Equation~\ref{eq:bg-softmax}), usually together with the ordinary
-cross-entropy on the true labels:
+An ensemble of $M$ networks costs $M$ forward passes. Bucilu\v{a} et
+al.\ used an ensemble to label a large unlabeled set and trained one
+network on those labels~\cite{bucilua2006model}, and Hinton et al.\
+generalized this into knowledge distillation, in which the student
+matches the teacher's softened distribution $p^{\mathrm{t}}_T$,
+usually together with the cross-entropy on the true labels:
 \begin{equation}
   \mathcal{L}_{\mathrm{KD}}
   = \lambda_{\mathrm{hard}}\bigl[-\log p_{\theta,1}(y\mid x)\bigr]
@@ -501,119 +253,56 @@ cross-entropy on the true labels:
     \mathrm{KL}\bigl(p^{\mathrm{t}}_T(\cdot\mid x)\,\|\,p_{\theta,T}(\cdot\mid x)\bigr) .
   \label{eq:bg-kd}
 \end{equation}
-The KL term equals the soft-target cross-entropy minus the teacher's
-entropy, which does not depend on the student. The factor $T^2$
-compensates for the $1/T^2$ scaling of the soft-target gradients, so
-that the relative contributions of the two terms stay roughly unchanged
-as $T$ changes~\cite{hinton2015distilling}. The teacher may be an ensemble, whose
-arithmetic or geometric mean serves as the soft target, and the
-transfer set on which the soft term is computed may consist entirely
-of unlabeled data~\cite{hinton2015distilling}.
-% 원문: Hinton et al. arXiv:1503.02531 §2 pp.2–3 "raise the temperature of the final softmax";
-%   "magnitudes of the gradients produced by the soft targets scale as 1/T^2"; 앙상블은
-%   "arithmetic or geometric mean ... as the soft targets"; "could consist entirely of unlabeled data". 확인됨.
-%   원문은 두 목적함수의 가중 평균(soft 는 교차 엔트로피)으로 쓴다. KL 형은 교사 엔트로피 상수만큼 다른 같은 기울기다.
-Our consensus distillation is this loss at $T=1$, with the
-soft term computed only on unlabeled environment inputs and the
-labeled term replaced by our base objective
-(Equation~\ref{eq:cd-loss}).
-
-Distillation need not compress. Furlanello et al.\ trained students
-parameterized identically to their teachers; each new student was
-initialized from a different random seed and trained under the
-supervision of the previous generation. These born-again networks
-outperformed their teachers on their image and language-modeling
-benchmarks~\cite{furlanello2018born}.
-% 원문: Furlanello et al. (ICML 2018, PMLR 80) 초록 p.1607 "we train students parameterized identically to their
-%   teachers", "outperform their teachers"; Figure 1 캡션 p.1608 "a new identical model is initialized from a
-%   different random seed". 확인됨. 원문의 "significantly"는 옮기지 않았다.
-A CD student likewise shares its teachers'
-architecture and differs from them only in its seed and training
-loss. What we ask of it is different: not a lower mean loss than its
-teachers but a smaller spread across student seeds than the baseline
-on conditions absent from the labeled data.
-Section~\ref{sec:related-distillation} reviews the distillation and
-ensemble work closest to ours.
+The factor $T^2$ keeps the two terms in proportion as $T$ changes; the
+teacher may be an ensemble, and the transfer set of the soft term may
+consist entirely of unlabeled data~\cite{hinton2015distilling}.
+% 원문: Buciluǎ et al. (KDD 2006) §1 p.535; Hinton et al. §2 pp.2–3 "scale as 1/T^2", "arithmetic or geometric
+%   mean ... as the soft targets", "could consist entirely of unlabeled data". 확인됨.
+Our consensus distillation is this loss at $T=1$, with the soft term
+computed only on unlabeled environment inputs and the labeled term
+replaced by our base objective (Equation~\ref{eq:cd-loss}). Distillation
+need not compress: born-again networks, students identical to their
+teachers but initialized from a different seed, outperformed those
+teachers~\cite{furlanello2018born}. A CD student likewise differs from
+its teachers only in its seed and loss, but what we ask of it is a
+smaller spread across student seeds on conditions absent from the
+labeled data (Section~\ref{sec:related-distillation}).
+% 원문: Furlanello et al. (ICML 2018) 초록 p.1607 "parameterized identically", "outperform their teachers";
+%   Figure 1 캡션 "initialized from a different random seed". 확인됨.
 
 \section{Distribution shift}
 \label{sec:bg-shift}
 
-Standard learning theory assumes that training and test examples are
-drawn from the same distribution. Under distribution shift the
-training (source) distribution $P_S(x,y)$ and the test (target)
-distribution $P_T(x,y)$ differ. Two restricted forms are common.
-Under covariate shift the input distribution changes while the
-conditional distribution of the output given the input stays
-fixed~\cite{sugiyama2007covariate}; under label shift the label
-marginal changes while the class-conditional input distribution stays
-fixed~\cite{lipton2018detecting}:
+Under distribution shift the training (source) distribution
+$P_S(x,y)$ and the test (target) distribution $P_T(x,y)$ differ. Under
+covariate shift the input distribution changes while $P(y\mid x)$ stays
+fixed~\cite{sugiyama2007covariate}; under label shift the label marginal
+changes while $P(x\mid y)$ stays fixed~\cite{lipton2018detecting}:
 \begin{equation}
   \text{covariate shift: } P_T(x,y)=P_T(x)\,P_S(y\mid x),
   \qquad
   \text{label shift: } P_T(x,y)=P_T(y)\,P_S(x\mid y) .
   \label{eq:bg-shift-types}
 \end{equation}
-% 원문: Sugiyama, Krauledat & Müller (JMLR 2007) 초록 p.985 "training input points and test input points follow
-%   different distributions while the conditional distribution of output values given input points is unchanged
-%   is called the covariate shift". 확인됨.
-% 원문: Lipton, Wang & Smola (ICML 2018, PMLR 80) 초록 p.3122 "label shift, where the label marginal p(y) changes
-%   but the conditional p(x|y) does not"; §1 "q(y,x)=q(y)p(x|y)", "q(y,x)=q(x)p(y|x)". 확인됨.
-Under covariate shift, ordinary empirical risk minimization is in
-general no longer consistent for a misspecified model, while weighting
-each training loss by the importance $P_T(x)/P_S(x)$ restores
-consistency; the weighted estimator can, however, be
-unstable~\cite{sugiyama2007covariate}. Sugiyama et al.\ build on this
-importance-weighted risk to select models under covariate shift.
-% 원문: Sugiyama et al. (JMLR 2007) §2.2 pp.987–988 "under the covariate shift ... ERM is not generally consistent
-%   anymore"(각주 3: 모형이 맞으면 여전히 일치), IWERM "is consistent", "not efﬁcient and can be rather unstable". 확인됨.
-%   원문은 이 결과들을 Shimodaira (2000)에 돌린다. Shimodaira 원문은 공개 사본을 못 구해 직접 인용하지 않았다.
-
-Domain adaptation studies when a model trained on labeled source data
-can be expected to work on a target domain with few or no labels.
-Ben-David et al.\ bound the target error $\epsilon_T(h)$ of a
-classifier $h$ in a hypothesis class $\mathcal{H}$ by
-\begin{equation}
-  \epsilon_T(h)\le \epsilon_S(h)
-  +\tfrac{1}{2}\,d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
-  +\lambda ,
-  \label{eq:bg-da-bound}
-\end{equation}
-where $d_{\mathcal{H}\Delta\mathcal{H}}$ is a divergence between the
-source and target input distributions induced by the class, and
-$\lambda$ is the combined source and target error of the best single
-hypothesis in $\mathcal{H}$~\cite{bendavid2010theory}. The divergence
-can be estimated from finite unlabeled samples of the two domains,
-while $\lambda$ cannot be computed without target labels; when it is
-large, no classifier trained on the source can be expected to do well
-on the target.
-% 원문: Ben-David et al. (Machine Learning 79, 2010) §4.2 Definition 2 p.156 λ = ε_S(h*)+ε_T(h*);
-%   Theorem 2 증명 p.158 "= ϵS(h) + 1/2 dHΔH(DS, DT) + λ"(모집단 형; 정리 자체는 표본 형);
-%   p.152 "divergence measure that can be estimated from ﬁnite, unlabeled samples from the domains";
-%   p.157 "When this hypothesis performs poorly, we cannot expect to learn a good target classiﬁer". 확인됨.
-The bound explains why unlabeled target inputs carry information about
-the shift. It is a bound on error under a fixed hypothesis class, not a
-statement about the spread across seeds of one training procedure.
-
-WILDS collects ten datasets with shifts that arise in real
-applications, such as across hospitals and across camera traps, and
-separates two settings: domain generalization, where training and test
-domains are disjoint, and subpopulation shift, where the domains
-overlap in different proportions. On each dataset standard training
-gave substantially lower out-of-distribution than in-distribution
-performance~\cite{koh2021wilds}. Unlabeled target data, as in
-unsupervised domain adaptation, is outside its main evaluation
-settings and discussed separately~\cite{koh2021wilds}.
-% 원문: Koh et al. (ICML 2021) 초록 p.5637 "a curated benchmark of 10 datasets", "shifts across hospitals",
-%   "standard training yields substantially lower out-of-distribution than in-distribution performance";
-%   Figure 1 캡션 p.5637 "In domain generalization, we train and test on disjoint sets of domains",
-%   "In subpopulation shift, the training and test domains overlap"; §7 p.5645 "unlabeled test data in
-%   unsupervised domain adaptation" 는 Appendix D 에서 다룬다. 확인됨.
-%   (PMLR 쪽 번호 5637–5664, PDF p.k 는 5636+k.)
+% 원문: Sugiyama et al. (JMLR 2007) 초록 p.985; Lipton et al. (ICML 2018) 초록 p.3122, §1 두 분해식. 확인됨.
+Under covariate shift, weighting each training loss by $P_T(x)/P_S(x)$
+restores consistency for a misspecified model, at the price of
+instability~\cite{sugiyama2007covariate}. Domain adaptation theory
+bounds the target error of a classifier by its source error, a
+divergence between the source and target input distributions that can
+be estimated from unlabeled samples, and the error of the best joint
+hypothesis, which needs target labels~\cite{bendavid2010theory}; this is
+why unlabeled target inputs carry information about the shift. WILDS
+collects ten datasets with real shifts, such as across hospitals, and
+found standard training substantially worse out of distribution than in
+distribution~\cite{koh2021wilds}.
+% 원문: Sugiyama et al. §2.2 pp.987–988 IWERM "is consistent", "can be rather unstable"; Ben-David et al.
+%   (2010) Theorem 2 p.158, p.152 "estimated from ﬁnite, unlabeled samples"; Koh et al. 초록 p.5637. 확인됨.
 
 In this thesis the unseen conditions are executions of the same source
-procedure with a benign worker running alongside it, a worker that no
+procedure with a benign worker running alongside, a worker that no
 labeled training run contains (Section~\ref{sec:conditions}); we do not
-assume that this change is a pure covariate or label shift. The CD
-student reads unlabeled inputs from these conditions during training,
-so our setting is closer to adaptation with unlabeled target inputs
-than to domain generalization.
+assume a pure covariate or label shift. The CD student reads unlabeled
+inputs from these conditions during training, so our setting is closer
+to adaptation with unlabeled target inputs than to domain
+generalization.

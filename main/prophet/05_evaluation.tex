@@ -16,36 +16,20 @@ execution,
   \qquad L = \frac{1}{|S|}\sum_{s\in S} L_s .
   \label{eq:nll}
 \end{equation}
-Every natural boundary of an execution enters its inner mean, so a long
-execution counts no more than a short one. The group score $L$ is the
-arithmetic mean of the per-seed scores over the fixed set $S$ of 30
-seeds. We never average the probabilities of different student seeds:
-each student is deployed as a single model, and an average of 30
-students would be a 30-model ensemble with a different inference cost.
-Probability averages appear only for teachers, where they are labeled
-as such. Natural rows and views are defined in
-Section~\ref{sec:task-rows}.
+A long execution thus counts no more than a short one, and the group
+score $L$ is the mean over the fixed set $S$ of 30 seeds. We never
+average the probabilities of different student seeds, since each
+student is deployed as a single model; probability averages appear only
+for teachers.
 % 근거: RECORD:15, 32; PAPER_DEFINITIONS.md:48 ("학생 seed 확률을 평균하지 않는다").
 
-Top-1 accuracy is a secondary metric. It measures how often the
-highest-probability action matches the observed label. Unless it is
-called \emph{row accuracy}, accuracy is aggregated like NLL: averaged
-within each execution, then over executions with equal weight, then
-over seeds. Row accuracy gives each natural row equal weight; it is
-used only for the v3 accuracy on \texttt{ORIGINAL\_18} in
-Chapter~\ref{ch:results}, as in the report of that round. Accuracy can stay
-constant while NLL changes, because the probability assigned to the
-observed label can move without changing the highest-scoring action.
-Because the problem studied here is variation across training runs, we
-also report seed-stability statistics where the stored reports give
-them: the sample standard deviation of the 30 values $L_s$ (the
-\emph{seed standard deviation}), the largest $L_s$ (the \emph{worst
-seed}), and, for the encoders of Chapter~\ref{ch:generality}, the range
-of per-seed accuracy. The seed standard deviation
-is the statistic of the v3 stability criteria; the other
-two describe the spread it summarizes. For the v3 round they come
-from per-seed scores recomputed after the round from the saved
-probabilities (Section~\ref{sec:repro-code}).
+Top-1 accuracy is a secondary metric, aggregated like NLL unless it is
+called \emph{row accuracy}, which weights each natural row equally and
+is used only for the v3 accuracy on \texttt{ORIGINAL\_18}. We also
+report the sample standard deviation of the 30 values $L_s$ (the
+\emph{seed standard deviation}), the statistic of the v3 stability
+criteria, and, where the stored reports give them, the largest $L_s$
+(the \emph{worst seed}) and the range of per-seed accuracy.
 % 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
 % METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
 % 구조 일반성·방법 비교 보고서: "정확도도 실행 동등". v3 보고서: "행 정확도
@@ -62,60 +46,33 @@ that has already been inspected.
 % 원문(arp2020dos): arXiv 2010.09470(USENIX Security 2022) 2.2절 P3 Data Snooping(3쪽), test snooping
 %   "the test set is used for experiments before the final evaluation"; P5(4쪽)도 그 특수형. 확인됨.
 To limit choices made after inspection,
-each round of this study followed a written contract. The contract, the seeds, and
-the hashes of the code, the training inputs, and the collection plan
-were sealed before any model of the round was trained and, in rounds
-that collected new executions, before any of them were collected.
-Stages that reused executions scored earlier were specified before
-fitting, on evaluation runs already observed, and count as development
-comparisons (below). Each planned execution identifier was
-attempted once; executions that failed collection or the eligibility
-checks were recorded with their reason and not replaced. After
-collection, every model wrote its probabilities over all actions for
-every row to disk before the labels were joined, and the hashes of these
-files were fixed. Scoring then recomputed NLL independently from the
-stored log-probabilities and checked it against a reload of each saved
-checkpoint, along with row, column, and execution alignment and
-normalization. Criteria, limits, coefficients, and seeds were not
-changed after scores were seen. When a round failed, it was reported
-as failed and the next round was sealed as a new contract.
+each round of this study followed a written contract. The contract, the
+seeds, and the hashes of the code, the training inputs, and the
+collection plan were sealed before any model of the round was trained
+and, in rounds that collected new executions, before any of them were
+collected. Each planned execution was attempted once and failures were
+recorded, not replaced. Every model wrote its probabilities for every
+row to disk before the labels were joined, and scoring recomputed NLL
+independently from them. Criteria, limits, coefficients, and seeds were
+not changed after scores were seen, and a failed round was reported as
+failed and followed by a new contract.
 
-An execution is \emph{eligible} if it passes a fixed set of collection
-checks, all of which read the collection records and none of which
-reads a model output or a score. The source procedure must have
-completed exactly once, and the benign workers, the receiver, and the
-cleanup after the run must have been confirmed. Every planned natural
-boundary must be present, and every source REQUEST must be bound to the
-START and END records of its action. Admission must respect the strict
-rule $r(e)<t$ and the atomic receipt batches of
-Section~\ref{sec:receipt}, and no record identifier may occur twice. An
-empty prefix or a record with status UNOBSERVED is not a reason for exclusion, and an
-ineligible execution is excluded whole, never trimmed to its valid rows.
-
-According to the stored reports, the eligible set of each round was
-sealed before any model predicted on it. The three background runs
-excluded from the v3 round are recorded with their reasons, and all
-three failed at the source collection stage (Appendix~\ref{app:repro}).
-The four background runs excluded from PAG1, the in-house
-collection of the generality study (Section~\ref{sec:eval-rounds}),
-failed at the same stage: in each, the START or STOP record of a
-source action was not found. The five background runs excluded from
-PFC2 failed in the same way (Appendix~\ref{app:repro}). No exclusion in
-any of these collections depends on a score. The seed-level score files of both collections stay on the
-original experiment machine; the per-seed figures taken from them were
-computed there from the stored scores, without new inference.
+An execution is \emph{eligible} if it passes fixed collection checks
+that read only the collection records, never a model output: the source
+procedure completed once, the workers, receiver, and cleanup were
+confirmed, every planned boundary is present and bound to its START and
+END records, and admission respects $r(e)<t$ and the atomic receipt
+batches of Section~\ref{sec:receipt}. An ineligible execution is
+excluded whole. The eligible set of each round was sealed before any
+model predicted on it, and every exclusion in v3, PAG1, and PFC2
+failed at the source collection stage (Section~\ref{sec:repro-eligibility}).
 % 출처(PAG1 제외 4실행): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/ELIGIBILITY_SEAL.json:19
 %   (PAG1B0023·0037·0061 SOURCE_ACTION_START_NOT_FOUND, PAG1B0097 SOURCE_ACTION_STOP_NOT_FOUND).
 % 출처(seed별 파생값): codex_original_machine.md 저장값 5 (SCORED_RESULTS.json, STAGE2_SEED_RESULTS.csv에서 계산).
 
-A round also stops early under a
-\emph{safety stop}, a rule written into its contract that reads only
-the state of the collection: three consecutive source failures, a
-source completion rate below a set fraction after a set number of
-attempts, a disk, memory, or time limit, or an uncertain cleanup. A
-stopped round leaves its remaining identifiers unattempted and does not
-resume. Appendix~\ref{app:repro} gives the per-round counts and the
-reasons for the exclusions and stops that the reports record.
+A round also stops early under a \emph{safety stop}, a contract rule
+that reads only the state of the collection, such as three consecutive
+source failures; a stopped round does not resume.
 % 근거: CONTRACT_V2.md:15 (적격성: source 완료, worker/receiver, cleanup, 전체 필수
 % 자연 경계, REQUEST–START/END 결속, strict receipt<cutoff, 원자 수신 입장, 중복 ID
 % 없음, 모델 예측 전 봉인; 빈 입력·UNKNOWN은 제외 사유 아님; 안전 중지 규칙);
@@ -128,57 +85,38 @@ reasons for the exclusions and stops that the reports record.
 \section{Form of the pre-specified contrasts}
 \label{sec:eval-criteria}
 
-We use \emph{contrast} for a paired difference, student minus
-baseline, read from an adjusted interval; whether it counts as a sealed
-criterion, a development comparison, or a post hoc quantity is set by
-the rules of Section~\ref{sec:eval-rounds}. Each is a one-sided reading
-of a two-sided adjusted interval, and the baseline is REL\_GLOBAL or
-REL\_GLOBAL-ADS. Stability holds on an unseen condition if the upper end of
+A \emph{contrast} is a paired difference, student minus baseline
+(REL\_GLOBAL or REL\_GLOBAL-ADS), read one-sidedly from a two-sided
+adjusted interval; its status is set in Section~\ref{sec:eval-rounds}. Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
 zero. Where the contract includes it, mean improvement holds if the
 upper end for the difference in $L$ lies below zero. Preservation holds
 on the seen condition if the upper end for the difference in $L$ lies
 below a fixed limit: $+0.020$ on \texttt{ORIGINAL\_18} and, on ADS-24,
 3\% of the baseline's mean NLL on the preservation runs, about
-$+0.043$. The in-house contracts require the upper end to lie strictly
-below the threshold; the ADS-24 contract writes its mean and
-preservation contrasts with $\le$. No reported upper end equals its
-threshold, so the two readings give the same outcomes.
+$+0.043$. No reported upper end equals its threshold, so strict and non-strict
+readings agree.
 
 The families differ by round. In the v3 round the family has three
 contrasts, the seed standard deviation on \texttt{A+C FLAT} and on
 \texttt{A+C NESTED} and preservation on \texttt{ORIGINAL\_18}; an upper
-end below zero on the last also counts as improvement there. These
-three form the only sealed family on CD in which every criterion
-passed; the v2
-contracts that preceded them are listed with their outcomes in
-Table~\ref{tab:rounds}. On ADS-24 and
-in the generality rounds the pre-specified contrasts are stability,
-mean improvement, and preservation, read in the same way; because those
-rounds are development comparisons (Section~\ref{sec:eval-rounds}),
-they are reported as contrasts, not as sealed criteria.
+end below zero on the last also counts as improvement there. On ADS-24 and in the generality rounds the pre-specified contrasts are
+stability, mean improvement, and preservation, read in the same way but
+reported as development comparisons.
 % 근거: CONTRACT_V3.md:11; ADS24_CONTRACT_SEALED.md:27 (한도 3%, (b)(c)는 "상단 ≤");
 % ADS24_STAGE2_REPORT.md:21 (한도 +0.043482);
 % ARCH_GENERALITY_STAGE2_REPORT.md:9 (ADS 3%, PROPHET +0.020).
 % 방법 리뷰 P3-1: ≤와 <를 구분해 적었다. 한도와 같은 상단 값은 없다(가장 가까운 값
 % +0.019818, +0.020741).
 
-The contracts call these limits practical limits; the thesis calls
-them \emph{preservation limits}. The in-house limit
-of $+0.020$ has been used unchanged in this project's contracts since
-10 November 2026 and the ADS-24 limit first appears in its sealed
-contract, but neither is derived from an operational requirement, such as a tolerable change in an
-analyst's decisions, or from a measured spread. Both were set by the
-author and fixed in the contracts before the results they judge were
-seen. In size, an NLL increase of $0.020$ lowers the geometric mean of
-the probability given to the observed action by about 2\%
-($e^{-0.020} \approx 0.980$); on ADS-24, 3\% of the baseline's
-preservation NLL of 1.449 is about $0.043$. The ADS-24 preservation
-difference, $-0.019$ with interval $[-0.024, -0.015]$
-(Chapter~\ref{ch:ads24}), passes under any positive limit. We therefore report the
-upper end of every preservation interval, so that a reader can apply
-another limit, and Section~\ref{sec:disc-threats} lists the outcomes
-that a different limit would reverse.
+These \emph{preservation limits} were set by the author and fixed in
+the contracts before the results they judge were seen; neither is
+derived from an operational requirement. An NLL increase of $0.020$
+lowers the geometric mean of the probability given to the observed
+action by about 2\%. We report the upper end of every preservation
+interval so that a reader can apply another limit, and
+Section~\ref{sec:disc-threats} lists the outcomes that a different
+limit would reverse.
 % 한도 근처 값의 비교(+0.0198, +0.0207 등)는 문장 리뷰 P2-6에 따라 11.5절로 옮겼다.
 % 근거: ARCH_GENERALITY_STAGE2_REPORT.md 주 판정(PLAIN_GRU 상단 0.019818, 나머지
 % 자체 상단 −0.015341, −0.034626; ADS −0.020109, −0.008179, −0.010914);
@@ -189,42 +127,27 @@ that a different limit would reverse.
 %   (e^−.020 ≈ .980, 1.449의 3% ≈ .043)과 ADS-24 보존 −.019 [−.024, −.015]를 더했다. 한도가 판정을
 %   가른 사례(v2 재확인 +.0203, 단순 GRU +.0198)는 6.3절과 11.5절에 있다. 해결된 TODO는 지웠다.
 
-Intervals of the contrasts come from 100,000 paired resamples; the
-stage-1 gate of the ADS-24 study used 10,000 (Section~\ref{sec:ads24-task}). In the in-house lab a
-resample draws complete configurations and moves their repetitions
-together; on ADS-24 it draws executions within scenarios. The same
-resample indices are applied to every group, so differences are paired
-by execution and by seed. A point estimate in a table may use every
-eligible execution even when the interval uses complete configurations
-only; the tables mark the distinction, and Appendix~\ref{app:repro}
-gives both point estimates for the generality study. The 30 seeds are
-held fixed and are never resampled. Each interval therefore describes
-these 30 checkpoints on resampled executions and contains no
-uncertainty about the population of seeds from which they were drawn,
-and every conclusion about seed spread in this thesis is a statement
-about these checkpoints. The intervals also rest on few independent
-units, 6 to 16 complete configurations per in-house condition, so their
-percentile endpoints are imprecise; for v3, leaving out any one
-configuration kept the sign of every criterion
+Intervals come from 100,000 paired resamples
+(Section~\ref{sec:repro-resampling}): in-house a resample draws
+complete configurations with their repetitions, and on ADS-24
+executions within scenarios, with the same indices for every group.
+The 30 seeds are held fixed and never resampled, so each interval
+describes these 30 checkpoints on resampled executions, and every
+conclusion about seed spread is a statement about them. The intervals
+rest on 6 to 16 complete configurations per in-house condition; for
+v3, leaving out any one kept the sign of every criterion
 (Section~\ref{sec:repro-complete}).
 
-Each family is Bonferroni adjusted. The v3 round and the ADS-24 second
-stage each have one family of three contrasts (98.3333\%). In the
-generality study the contract defines, for each of the three kinds of
-contrast, a family of the six encoder--dataset contrasts (99.1667\%).
-It defines no family of all 18 contrasts, and we do not claim that all
-18 hold jointly at a 5\% familywise level, which would need 99.7222\%
-intervals that were not computed. The method comparison has one family
-of the five comparison methods per dataset and statistic (99\%). The
-final checks keep the families of the original studies when they score
-frozen checkpoints on PFC2, add the temperature-scaled base model to
-the method family (six arms, 99.1667\%), and give their added
-comparisons one family of 12 per dataset and statistic (99.5833\%).
-Estimates and interval ends are rounded to three decimals. A value is
-written to four where three would not separate it from a limit, from
-zero, or from a neighboring value in the same table, and a table keeps
-one rule throughout. Section~\ref{sec:app-raw} lists the six-digit
-values behind the rounded estimates and intervals of the main chapters.
+Each family is Bonferroni adjusted: three contrasts in v3 and in the
+ADS-24 second stage (98.3333\%), the six encoder--dataset contrasts of
+each kind in the generality study (99.1667\%; no joint family of all
+18 was computed), and the comparison methods per dataset and statistic
+in the method comparison (five, 99\%; six with temperature scaling in
+the final checks, 99.1667\%), with one family of 12 for the added
+comparisons of the final checks (99.5833\%). Values are rounded to
+three decimals, or four where three would not separate them from a
+limit or a neighbor; Section~\ref{sec:app-raw} lists six-digit
+values.
 % 근거: CONTRACT_V3.md:11 (100,000회, 98.3333%); ADS24_STAGE2_REPORT.md:15;
 % ARCH_GENERALITY_STAGE2_REPORT.md:9 (98.3333% 자료별 / 99.1667% 여섯 대비);
 % METHOD_BASELINES_CONTRACT_SEALED.md:37 (99%); RECORD:446.
@@ -236,8 +159,7 @@ values behind the rounded estimates and intervals of the main chapters.
 \section{Rounds and the status of evidence}
 \label{sec:eval-rounds}
 
-Every result in the following chapters carries one of three labels,
-and an intermediate kind of check is named at the end of this section. A
+Every result in the following chapters carries one of three labels. A
 \emph{sealed criterion} is a contrast whose form, limit, and interval
 level were fixed in a contract before the round's models were trained
 and its executions collected, and which was then read once on those
@@ -245,10 +167,9 @@ executions. A \emph{development comparison} is any contrast computed on
 executions that had already been inspected, or one that was not fixed
 in advance. A \emph{post hoc analysis} is a quantity defined after the
 primary experiments, such as the decomposition of
-Chapter~\ref{ch:decomposition}; it supports interpretation and was used
-in no criterion. A sealed criterion on new in-house executions is
-still a repetition within one laboratory and one configuration design,
-not a test on another organization's hosts.
+Chapter~\ref{ch:decomposition}, used in no criterion. A sealed
+criterion on new in-house executions is still a repetition within one
+laboratory, not a test on another organization's hosts.
 
 Development comparisons include the 135-run development set used for
 the diagnosis of Chapter~\ref{ch:diagnosis} and every contrast whose
@@ -257,13 +178,10 @@ earlier stage. PAG1 names the in-house collection of the generality
 study (Chapter~\ref{ch:generality}); the \emph{PAG1 re-inference}
 applies the frozen v3 checkpoints to those runs. It belongs to this
 group, together with the second stage of the ADS-24 study and the
-second stage of the generality study on both datasets. A contract
-sealed before the models of such a stage were trained still fixes what
-is compared, but the runs had already informed the decision to run the
-stage, so its outcome is not a confirmation. The method comparison of
-Section~\ref{sec:gen-methods} is a development comparison as well: its
-contract fixed no pass rule, and its in-house contrasts may include
-rerun variation.
+second stage of the generality study on both datasets. Their runs had already informed the decision to run the stage, so
+the outcome is not a confirmation. The method comparison of
+Section~\ref{sec:gen-methods} is one as well, since its contract fixed
+no pass rule.
 
 One kind of check falls between the first two labels. A \emph{new-run check} is fixed before its runs are collected
 but after its models were trained, so the runs are new while the
@@ -272,14 +190,11 @@ Section~\ref{sec:diag-intervention} is one, used only for the
 diagnosis. The \emph{final checks} are the other. Their collection,
 PFC2, was sealed after a first attempt, PFC1, had ended in a safety
 stop; all 160 planned PFC2 runs were attempted once, and eligibility
-was sealed before any model predicted on them. On these runs we scored
-the frozen checkpoints of v3, of the generality study, and of the
-method comparison, together with added comparisons whose groups,
-seeds, and settings were fixed before training
-(Section~\ref{sec:gen-teachers}); the stage report states that no
-group, seed, or coefficient was changed after scores were seen. The
-ADS-24 parts of the final checks reuse the inspected
-environment-evaluation runs and remain development comparisons.
+was sealed before any model predicted on them. On these runs we scored the frozen checkpoints of v3, of the
+generality study, and of the method comparison, together with added
+comparisons fixed before training (Section~\ref{sec:gen-teachers}).
+The ADS-24 parts of the final checks reuse inspected runs and remain
+development comparisons.
 % 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:3,7,9,244
 %   (PFC1 안전 중지 보존, PFC2 계획 160·시도 160·적격 155·1,589행, 예측 전 적격 봉인, 점수 보고 바꾼 것 없음);
 %   ABLATION_REPORT.md:38 ("열람한 점수로 군·seed·계수를 바꾸지 않았다"). 봉인 계약 원문은 받은 자료에 없다.
@@ -290,10 +205,9 @@ environment-evaluation runs and remain development comparisons.
 % 함께 낮췄다. 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:5
 %   (PAG1은 1단계에서 이미 채점된 뒤 재추론이 등록됨; defs.md 17번).
 
-Table~\ref{tab:rounds} is the ledger of every round in which the method
-was tested, including the rounds that failed. The code names
-\texttt{PEKD2}--\texttt{PEKD4} appear only in the table, and the text
-uses the round names in its first column. The in-house loss level
+Table~\ref{tab:rounds} in Appendix~\ref{sec:repro-ledger} is the ledger
+of every round in which the method was tested, including the rounds
+that failed. The in-house loss level
 of \texttt{ORIGINAL\_18} differs widely between collections: the same v3
 REL\_GLOBAL checkpoints scored 0.704 on the v3 runs and 0.467 on the
 PAG1 runs (Section~\ref{sec:results-pag1}). We did not analyze the
@@ -303,85 +217,6 @@ baselines of Chapter~\ref{ch:generality} come from different
 collections for the same reason and are never placed on one scale.
 % 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
 
-% 표와 주가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
-{\small\setstretch{1}\setlength{\tabcolsep}{4pt}% 표는 1배수(작성 안내)
-\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedleft\arraybackslash}p{0.11\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X@{}}
-\caption[Ledger of the rounds that tested distillation toward a seed consensus]{Ledger of the rounds that tested distillation toward a seed
-consensus (the 10-seed round used all 30 baseline models as teachers).
-Evaluation runs and rows are those scored in the round, not the
-unlabeled adaptation inputs. Status uses the three labels defined
-above, with two additions: ``sealed contract, not adjudicated'' marks a
-sealed contract that ended in a safety stop, whose criteria were never
-read, and ``sealed / development'' marks a stage that is sealed for some
-of its runs and a development comparison for the rest (note~b).}
-\label{tab:rounds}\\
-\toprule
-Round & New fits & Evaluation runs / rows & Status & Outcome \\
-\midrule
-\endfirsthead
-\multicolumn{5}{@{}l}{\emph{Table~\ref{tab:rounds}, continued}}\\
-\toprule
-Round & New fits & Evaluation runs / rows & Status & Outcome \\
-\midrule
-\endhead
-\bottomrule
-\endlastfoot
-10-seed development & 30 & 157 / 1,611, already inspected
-  & development comparison & no interval excluded zero; extension gate$^{d}$ failed \\
-\quad target-count variants & 0 & 32 / 256 (3 targets), 32 / 448 (5 targets)
-  & development comparison & no interval upper end below zero \\
-v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
-  & sealed contract, not adjudicated & safety stop \\
-v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
-  & sealed criterion & stability passed; preservation undecided (interval crosses limit); not adopted \\
-v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
-  & sealed criterion & all three criteria passed (scores later recomputed); exclusions recorded as collection failures \\
-PAG1 re-inference & 0 & 156 / 1,600
-  & development comparison$^{a}$ & stability favorable; preservation undecided \\
-ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982
-  & sealed criterion & instability gate$^{e}$ passed \\
-ADS-24, stage 2 & 60 & as stage 1
-  & development comparison$^{a}$ & all three contrasts favorable \\
-Generality, stage 1 & 180 (+24 pilot) & 156 / 1,600; ADS-24 as stage 1
-  & sealed / development$^{b}$ & base models measured \\
-Generality, stage 2 & 210 & as stage 1
-  & development comparison$^{a}$ & contrasts favorable in all six combinations \\
-Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
-  & development comparison$^{c}$ & reported contrasts; no pass rule \\
-Final checks, first (PFC1) & --- & none eligible
-  & sealed contract, not adjudicated & safety stop \\
-Final checks, frozen checkpoints (PFC2) & 0 & 155 / 1,589
-  & new-run check & spread narrowed for all four CD lines; their preservation within limit \\
-Final checks, added comparisons & 720 & PFC2 A+C; ADS-24 35 / 5,639
-  & new-run check / development$^{f}$ & reported contrasts \\
-\end{xltabular}}
-\vspace{-\medskipamount}
-\noindent\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
-$^{a}$The contract was sealed before the stage's models were trained or
-run, but after its evaluation runs had been scored in an earlier stage:
-the 35 ADS-24 environment-evaluation runs in ADS-24 stage~1, and the
-156 PAG1 runs in generality stage~1, whose baseline spreads also
-decided which combinations entered stage~2.
-$^{b}$Sealed for the new in-house runs; a development comparison for
-ADS-24, whose evaluation runs had been inspected in earlier stages.
-$^{c}$The contract fixed the contrasts and their intervals but no
-pass-or-fail rule. Its in-house runs were new, but its contrasts may
-include rerun variation (Section~\ref{sec:gen-methods}), so both halves
-are development comparisons.
-$^{d}$The pre-specified condition for extending the round from 10 to
-30 seeds, which required among other things that the six adjusted A+C
-mean-NLL contrasts favor KD\_ENV (Section~\ref{sec:results-failed}).
-$^{e}$The condition for running stage~2: a baseline seed standard
-deviation of at least 0.050 whose 95\% interval has a lower end of at
-least 0.020 (Section~\ref{sec:ads24-task}).
-$^{f}$A new-run check on the PFC2 runs and a development comparison on
-ADS-24, whose environment-evaluation runs had been inspected
-(Section~\ref{sec:gen-teachers}).
-The 10-seed round reused the 157 runs first collected, as new runs, for
-the \texttt{OBSERVED\_HEAD} check of Section~\ref{sec:diag-intervention};
-they are not the runs of the v3 round.
-\end{minipage}
-\medskip
 % 근거: PAPER_DEFINITIONS.md:52--56 (10-seed 157/1,611 = FLAT 30/330, NESTED
 % 32/352, C_ONLY 32/352, B+C 31/341, 원래 32/236; PEKD2 계획160·시도117·적격116;
 % PEKD3 159/1,633; PEKD4 157/1,611); RECORD:196 (PAG1 156/1,600);

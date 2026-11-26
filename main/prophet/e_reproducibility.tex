@@ -10,6 +10,90 @@ complete reproduction package, and the in-house results of the thesis
 are restatements of the stored round reports rather than experiments
 that a reader can repeat from this text alone.
 
+\section{Ledger of the rounds}
+\label{sec:repro-ledger}
+% 2026-11-26: 6장 VI-4 의 원장 표를 옮겼다(본문 분량).
+
+% 표와 주가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
+{\small\setstretch{1}\setlength{\tabcolsep}{4pt}% 표는 1배수(작성 안내)
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedleft\arraybackslash}p{0.11\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X@{}}
+\caption[Ledger of the rounds that tested distillation toward a seed consensus]{Ledger of the rounds that tested distillation toward a seed
+consensus (the 10-seed round used all 30 baseline models as teachers).
+Evaluation runs and rows are those scored in the round, not the
+unlabeled adaptation inputs. Status uses the three labels defined
+above, with two additions: ``sealed contract, not adjudicated'' marks a
+sealed contract that ended in a safety stop, whose criteria were never
+read, and ``sealed / development'' marks a stage that is sealed for some
+of its runs and a development comparison for the rest (note~b).}
+\label{tab:rounds}\\
+\toprule
+Round & New fits & Evaluation runs / rows & Status & Outcome \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\emph{Table~\ref{tab:rounds}, continued}}\\
+\toprule
+Round & New fits & Evaluation runs / rows & Status & Outcome \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+10-seed development & 30 & 157 / 1,611, already inspected
+  & development comparison & no interval excluded zero; extension gate$^{d}$ failed \\
+\quad target-count variants & 0 & 32 / 256 (3 targets), 32 / 448 (5 targets)
+  & development comparison & no interval upper end below zero \\
+v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
+  & sealed contract, not adjudicated & safety stop \\
+v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
+  & sealed criterion & stability passed; preservation undecided (interval crosses limit); not adopted \\
+v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
+  & sealed criterion & all three criteria passed (scores later recomputed); exclusions recorded as collection failures \\
+PAG1 re-inference & 0 & 156 / 1,600
+  & development comparison$^{a}$ & stability favorable; preservation undecided \\
+ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982
+  & sealed criterion & instability gate$^{e}$ passed \\
+ADS-24, stage 2 & 60 & as stage 1
+  & development comparison$^{a}$ & all three contrasts favorable \\
+Generality, stage 1 & 180 (+24 pilot) & 156 / 1,600; ADS-24 as stage 1
+  & sealed / development$^{b}$ & base models measured \\
+Generality, stage 2 & 210 & as stage 1
+  & development comparison$^{a}$ & contrasts favorable in all six combinations \\
+Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
+  & development comparison$^{c}$ & reported contrasts; no pass rule \\
+Final checks, first (PFC1) & --- & none eligible
+  & sealed contract, not adjudicated & safety stop \\
+Final checks, frozen checkpoints (PFC2) & 0 & 155 / 1,589
+  & new-run check & spread narrowed for all four CD lines; their preservation within limit \\
+Final checks, added comparisons & 720 & PFC2 A+C; ADS-24 35 / 5,639
+  & new-run check / development$^{f}$ & reported contrasts \\
+\end{xltabular}}
+\vspace{-\medskipamount}
+\noindent\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
+$^{a}$The contract was sealed before the stage's models were trained or
+run, but after its evaluation runs had been scored in an earlier stage:
+the 35 ADS-24 environment-evaluation runs in ADS-24 stage~1, and the
+156 PAG1 runs in generality stage~1, whose baseline spreads also
+decided which combinations entered stage~2.
+$^{b}$Sealed for the new in-house runs; a development comparison for
+ADS-24, whose evaluation runs had been inspected in earlier stages.
+$^{c}$The contract fixed the contrasts and their intervals but no
+pass-or-fail rule. Its in-house runs were new, but its contrasts may
+include rerun variation (Section~\ref{sec:gen-methods}), so both halves
+are development comparisons.
+$^{d}$The pre-specified condition for extending the round from 10 to
+30 seeds, which required among other things that the six adjusted A+C
+mean-NLL contrasts favor KD\_ENV (Section~\ref{sec:results-failed}).
+$^{e}$The condition for running stage~2: a baseline seed standard
+deviation of at least 0.050 whose 95\% interval has a lower end of at
+least 0.020 (Section~\ref{sec:ads24-task}).
+$^{f}$A new-run check on the PFC2 runs and a development comparison on
+ADS-24, whose environment-evaluation runs had been inspected
+(Section~\ref{sec:gen-teachers}).
+The 10-seed round reused the 157 runs first collected, as new runs, for
+the \texttt{OBSERVED\_HEAD} check of Section~\ref{sec:diag-intervention};
+they are not the runs of the v3 round.
+\end{minipage}
+\medskip
+
 \section{Code, environment, and what the archive lacks}
 \label{sec:repro-code}
 
@@ -130,6 +214,23 @@ the relational residual; their settings are given in
 Section~\ref{sec:repro-encoders}.
 % 8회차 방법 P2-1: 범위를 REL_GLOBAL 계열로 한정하고 일반 인코더는 E.3절로 가리켰다.
 
+The FIT occurrences come from a running sequence of random
+permutations of the 603 runs: no run repeats within a permutation, and
+a new permutation starts when one is used up. The generator is seeded
+once per seed, with the seed plus 99237, and the delayed schedule of an
+occurrence is the number of times its run has been drawn, modulo 16.
+The draws of the representation-gradient penalty are fixed by update,
+microbatch, and seed. In teacher selection a tie in the majority vote
+goes to the lower stored action-column index, whose order is the
+alphabetical order of action ID in Appendix~\ref{app:actions}, and a
+tie in agreement to the lower seed identifier; each candidate's own
+vote counts, adding a self-agreement term of up to one vote in 30, and
+the selection was not repeated without it. The unlabeled rows of
+KD\_ALL are drawn with replacement, with no fixed whole-number split
+between the two sources per update, by PCG64 seeded with 2026112014
+plus the seed.
+% 2026-11-26 본문 분량: 4.1·4.4·4.5절의 난수·동률 세부를 여기로 옮겼다(출처 주석은 04_method.tex 에 남아 있다).
+
 The 30 REL\_GLOBAL seeds of the teacher population are 3674, 12050, 15301, 16635, 16893, 20436, 28035,
 28756, 29771, 33674, 36720, 37406, 43142, 48192, 49208, 50572, 50836,
 61616, 64832, 68498, 69205, 71526, 71556, 76939, 79043, 90835, 91513,
@@ -149,7 +250,8 @@ method comparison, the one row per occurrence that receives the KL term
 is drawn in advance with PCG64 seeded by 2026112305 plus the training
 seed. Four-checkpoint weight averaging takes the mean of the weights at
 updates 1,010, 1,122, 1,234, and 1,346 of the cross-entropy trajectory,
-under the unchanged cosine schedule. The added comparisons of the final
+four snapshots 112 updates apart that end with the final update, under
+the unchanged cosine schedule. The added comparisons of the final
 checks reuse the seeds 4500001 to 4500030, the initial tensors, and the
 FIT traces of the plain GRU and Transformer encoder; their random
 teacher sets and input subsets were drawn before training and are
@@ -168,6 +270,32 @@ available to us.
 
 \section{General encoders}
 \label{sec:repro-encoders}
+
+\begin{table}[htbp]
+\centering
+\caption[Changes for ADS-24 and for the three general encoders]{What was changed and what was kept when the method was applied to
+ADS-24 and to the three general encoders.}
+\label{tab:transfer}
+\small
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+Application & Changed & Kept \\
+\midrule
+ADS-24, REL\_GLOBAL-ADS
+  & input encoder over Wazuh alert fields; 9-way head; relational residual
+    removed; alert window 512; 31,685 parameters
+  & 64-dimensional GRU; LogitNorm ($\tau=0.1$); representation-gradient
+    penalty (0.1); 1,346 updates; all distillation settings \\
+Three general encoders
+  & event representation kept, recurrent state replaced by LSTM, Transformer, or GRU; LogitNorm,
+    representation-gradient penalty, and relational residual removed; width and learning
+    rate chosen by FIT-internal validation
+  & 1,346 updates; run-weighted cross-entropy; AdamW with cosine schedule;
+    all distillation settings \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 
 Like REL\_GLOBAL, the three general encoders read the receipt-bounded
 prefix, with the 48-dimensional event representation and the age

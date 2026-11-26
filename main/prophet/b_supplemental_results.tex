@@ -7,7 +7,7 @@
 % 파일의 TODO 주석은 06장을 다시 열 때 지워 주세요(이 파일만 고치라는 지시).
 
 The relational residual of REL\_GLOBAL was carried over from an earlier
-stage of the project (Section~\ref{sec:method-relation-evidence}). The
+stage of the project (Section~\ref{sec:method-baseline}). The
 results of that stage are gathered here, followed by the six-digit
 values behind the rounded numbers of the main chapters. Most earlier
 models were trained on different data from the FIT set: an extended set of 476
@@ -40,7 +40,7 @@ Section~\ref{sec:task-rows}.
 \centering
 \caption[Evaluation cohorts of the earlier stage]{Evaluation cohorts of the earlier stage. Repeated evaluations on
 the same saved executions are grouped in one row. Cohorts marked
-$^{*}$ are reused in the main chapters (Sections~\ref{sec:method-relation-evidence},
+$^{*}$ are reused in the main chapters (Sections~\ref{sec:method-baseline},
 \ref{sec:diag-errors}, and~\ref{sec:diag-size}); the scores of the
 earlier models below are not comparable with those of
 Chapters~\ref{ch:diagnosis}--\ref{ch:decomposition}.}
@@ -448,6 +448,28 @@ exclude log receipt, preprocessing, and model loading.
 \section{Raw values for the main results}
 \label{sec:app-raw}
 
+% 2026-11-26 본문 분량: 8장 VIII-3 의 PAG1 평균 표를 옮겼다.
+\begin{table}[htbp]
+\centering
+\caption[Mean NLL of the frozen v3 checkpoints on the PAG1 runs]{Mean NLL of the frozen v3 checkpoints on the runs of the
+PAG1 re-inference (development comparison; no new fits). Values are 30-seed
+means as in Table~\ref{tab:results-v3-nll}. The runs differ from those
+of the v3 round, and the two tables are not compared cell by cell.}
+\label{tab:results-pag1}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL \\
+\midrule
+\texttt{A+C FLAT}     & 31 / 341 & 0.134 & 0.074 & 0.078 \\
+\texttt{A+C NESTED}   & 30 / 330 & 0.116 & 0.063 & 0.066 \\
+\texttt{C\_ONLY}      & 31 / 341 & 0.074 & 0.055 & 0.057 \\
+\texttt{B+C}          & 32 / 352 & 0.121 & 0.061 & 0.066 \\
+\texttt{ORIGINAL\_18} & 32 / 236 & 0.467 & 0.476 & 0.418 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 Table~\ref{tab:app-raw} lists, to six decimals, the contrasts and gate
 statistics that the main chapters report to three or four. The evidence
 status of each block is that given where the result is reported: the v3
@@ -526,3 +548,109 @@ Geometric-pool distillation, mean NLL & 0.107978 & $[0.082388, 0.133180]$ \\
 % 기준선 − KD_ENV"(원 파일의 KD_ENV = CD student). 원 파일 이름 대응은 9.2절 주석과 같다.
 % 원 파일의 정확도 SD·최저 정확도 차이와 본 조건 보존 열은 9장 표에 반올림 값이 없어
 % 이 표에 넣지 않았다.
+
+\section{Tables of the method comparison}
+\label{sec:app-method-tables}
+% 2026-11-26: 10장 X-2 의 표 두 개를 옮겼다(본문 분량). 본문은 표 번호로 가리킨다.
+
+Table~\ref{tab:gen-methods} gives the point estimates of the method
+comparison of Section~\ref{sec:gen-methods},
+Table~\ref{tab:gen-methods-contrast} its paired contrasts against CD,
+and Table~\ref{tab:gen-logbert} the contrasts of its repeat on the
+Transformer encoder.
+
+\begin{table}[htbp]
+\centering
+\caption[Point estimates for the method comparison on the plain GRU]{Point estimates for the method comparison on the plain GRU
+(30 seeds per method). In-house columns are \texttt{A+C FLAT} of the
+new runs of this comparison (21 runs, 231 rows); ADS-24 columns are the
+35 environment-evaluation runs (5,639 rows), a development comparison.
+The in-house runs differ from those of Table~\ref{tab:gen-arch}, so the
+base-model and CD values of the two tables are not compared with each
+other. The self-distillation control was not part of the ADS-24 comparison.}
+\label{tab:gen-methods}
+\small
+\begin{tabular}{@{}lrrcrr@{}}
+\toprule
+ & \multicolumn{3}{c}{In-house \texttt{A+C FLAT}}
+ & \multicolumn{2}{c}{ADS-24} \\
+\cmidrule(lr){2-4}\cmidrule(l){5-6}
+Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
+\midrule
+Base model                    & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
+CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
+Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
+Four-checkpoint weight averaging & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
+FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
+Self-distillation control     & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
+Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
+Entropy minimization          & 2.702 & 0.324 & 80.5 (all seeds) & 6.873 & 0.490 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption[Method repeat on the Transformer encoder]{Paired contrasts of the method repeat on the Transformer encoder,
+each method minus that encoder's CD student, with two-sided Bonferroni
+intervals at 99.5833\% over the 12 comparisons of the final checks per
+dataset. In-house values are the 1:1 average of \texttt{A+C FLAT} and
+\texttt{A+C NESTED} on the PFC2 runs (new-run check); ADS-24 values are
+on the 35 environment-evaluation runs (development comparison).
+Positive values favor CD. The last column states whether the method's
+preservation interval against the base model lies below the limit.}
+\label{tab:gen-logbert}
+\small
+\begin{tabular}{@{}llrlrlc@{}}
+\toprule
+Data & Method & \multicolumn{2}{c}{Seed SD difference}
+ & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
+\midrule
+In-house & Four-checkpoint weight averaging & 0.702 & $[0.664, 0.750]$ & 0.515 & $[0.474, 0.549]$ & yes \\
+In-house & Hard-label control     & 1.007 & $[0.944, 1.068]$ & 1.012 & $[0.915, 1.092]$ & no \\
+In-house & Entropy minimization   & 0.108 & $[0.065, 0.149]$ & 1.665 & $[1.047, 2.236]$ & no \\
+In-house & FIT-input distillation & 0.756 & $[0.705, 0.807]$ & 0.565 & $[0.496, 0.622]$ & yes \\
+In-house & Geometric-pool distillation & 0.016 & $[0.006, 0.026]$ & 0.014 & $[-0.026, 0.056]$ & yes \\
+\midrule
+ADS-24 & Four-checkpoint weight averaging & 0.094 & $[0.068, 0.125]$ & 0.315 & $[0.242, 0.386]$ & yes \\
+ADS-24 & Hard-label control     & 0.201 & $[0.164, 0.241]$ & 1.172 & $[0.956, 1.369]$ & no \\
+ADS-24 & Entropy minimization   & 0.336 & $[0.289, 0.400]$ & 4.904 & $[4.225, 5.526]$ & no \\
+ADS-24 & FIT-input distillation & 0.082 & $[0.061, 0.107]$ & 0.309 & $[0.235, 0.379]$ & yes \\
+ADS-24 & Geometric-pool distillation & 0.012 & $[0.005, 0.019]$ & 0.096 & $[0.067, 0.124]$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption[Paired contrasts of the method comparison]{Paired contrasts of the method comparison, each method minus
+the CD student, with two-sided Bonferroni intervals at 99\% for the
+five methods of each dataset. Positive values favor CD. The in-house
+score here is the 1:1 average of \texttt{A+C FLAT} and
+\texttt{A+C NESTED}, not the \texttt{A+C FLAT} value of
+Table~\ref{tab:gen-methods}; point estimates use all eligible runs, and
+intervals resample the configurations with both repeats complete. The
+last column states whether the upper end of the method's preservation
+interval against the base model lies below the limit ($+0.020$ in-house,
+$+0.043$ on ADS-24).}
+\label{tab:gen-methods-contrast}
+\small
+\begin{tabular}{@{}llrlrlc@{}}
+\toprule
+Data & Method & \multicolumn{2}{c}{Seed SD difference}
+ & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
+\midrule
+In-house & Four-checkpoint weight averaging & 0.664 & $[0.593, 0.745]$ & 0.985 & $[0.875, 1.085]$ & yes \\
+In-house & Hard-label control     & 1.194 & $[1.103, 1.329]$ & 1.789 & $[1.602, 1.973]$ & no \\
+In-house & Entropy minimization   & 0.291 & $[0.207, 0.444]$ & 2.374 & $[1.703, 3.408]$ & no \\
+In-house & FIT-input distillation & 0.802 & $[0.730, 0.883]$ & 1.065 & $[0.921, 1.206]$ & yes \\
+In-house & Geometric-pool distillation & 0.003 & $[-0.003, 0.018]$ & $-0.011$ & $[-0.067, 0.027]$ & yes \\
+\midrule
+ADS-24 & Four-checkpoint weight averaging & 0.148 & $[0.116, 0.180]$ & 0.071 & $[0.054, 0.089]$ & yes \\
+ADS-24 & Hard-label control     & 0.412 & $[0.345, 0.482]$ & 1.225 & $[1.004, 1.437]$ & no \\
+ADS-24 & Entropy minimization   & 0.463 & $[0.394, 0.541]$ & 4.743 & $[4.088, 5.347]$ & no \\
+ADS-24 & FIT-input distillation & 0.166 & $[0.131, 0.200]$ & 0.097 & $[0.075, 0.120]$ & yes \\
+ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.082, 0.133]$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table}

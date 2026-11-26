@@ -20,31 +20,28 @@ disagreement term $V$ fell in 27 of the 28 baseline--student pairs. For
 REL\_GLOBAL and its KD\_ENV\_TOP5 students on \texttt{ORIGINAL\_18}, by
 contrast, $V$ rose.
 
-Two of these rounds were sealed (Table~\ref{tab:rounds}): the v2
-recheck passed stability without showing preservation, and v3 passed
-all three criteria. A later new-run check on the frozen checkpoints of
-v3 and of the three general encoders narrowed the spread for all four
-and kept every preservation interval within the limit
-(Sections~\ref{sec:results-pfc2} and~\ref{sec:gen-arch}). All of these
-hold the seeds fixed
-(Section~\ref{sec:disc-threats}). Part of the narrowing is also expected from
+Two of these rounds were sealed: the v2 recheck passed stability
+without showing preservation, and v3 passed all three criteria. A later
+new-run check on the frozen checkpoints of v3 and of the three general
+encoders narrowed the spread for all four and kept every preservation
+interval within the limit (Sections~\ref{sec:results-pfc2}
+and~\ref{sec:gen-arch}). Part of the narrowing is also expected from
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
 distillation itself, since all students of a group follow one fixed
 teacher set (Section~\ref{sec:disc-novelty}).
 
-What CD did not do is close the gap to a frequency baseline on ADS-24.
-Every CD seed of REL\_GLOBAL-ADS stayed worse than the FIT prior there,
+What CD did not do is close the gap to a frequency baseline on ADS-24:
+every CD seed of REL\_GLOBAL-ADS stayed worse than the FIT prior there,
 and among the general encoders only the Transformer students beat it.
-
-The decomposition suggests a reason, although as a post hoc reading it is
-an interpretation and not a test. Mean seed loss is the loss of the
+The post hoc decomposition suggests a reason, as an interpretation and
+not a test. Mean seed loss is the loss of the
 seeds' consensus plus $V$, and the KL term of
 Equation~\ref{eq:cd-loss} pulls the student toward a consensus computed
 from the teachers alone. It gives the student no information about the
-environment that the teachers lacked. Teachers fitted only on FIT runs
-share whatever they collectively miss about a new benign worker or
-simulated users, and the student inherits it. For the same reason, where
-the consensus is wrong the student is wrong in a stable way. A small
+environment that the teachers lacked. Teachers fitted only on FIT runs share whatever they collectively
+miss about a new benign worker or simulated users, the student inherits
+it, and where the consensus is wrong the student is wrong in a stable
+way. A small
 $V$ means that the seeds agree, not that they are right, as entropy
 minimization and the plain GRU on ADS-24 show
 (Chapter~\ref{ch:decomposition}).
@@ -66,21 +63,14 @@ probability average of the five teachers scored 0.023 on
 encoder--dataset combinations of Chapter~\ref{ch:generality} the
 student's NLL on the unseen condition exceeded that of its teachers by
 0.009 to 0.050. If loss were all that mattered, the ensemble would be
-the better choice. It is not free at inference, however: a probability
-ensemble runs five models for the selected teachers and thirty for the
-full average, whereas the CD student is one model with the
-architecture and parameter count of REL\_GLOBAL. On ADS-24 the gap
-widens with the size of the ensemble, since in a post hoc computation
-the average of all 30 seeds scored 1.945, against 2.038 for the five
-teachers and 2.060 for the student.
+the better choice, but it runs five or thirty models at inference,
+whereas the CD student is one model of the size of REL\_GLOBAL. On
+ADS-24, in a post hoc computation, the average of all 30 seeds scored
+1.945, against 2.038 for the five teachers and 2.060 for the student.
 
-Training is expensive on either path. CD as tested trains 30 baselines, ranks them by agreement to keep
+CD as tested trains 30 baselines, ranks them by agreement to keep
 five, and only then trains the student, so it costs more to train than
-the five-teacher ensemble it imitates. The final checks show what the
-extra cost buys and what it does not (Section~\ref{sec:gen-teachers}):
-in the lab the five most agreeing teachers gave clearly better students
-than random teachers or all 30, on ADS-24 they did not, and a quarter of
-the unlabeled input served about as well as all of it. On the new PFC2
+the five-teacher ensemble it imitates. On the new PFC2
 runs the plain-GRU student, at 0.213 on \texttt{A+C FLAT}, was close to
 its five-teacher ensemble at 0.204 and well below the ensemble of all 30
 base models at 0.439, and the KD\_ALL student of v3, at 0.017, was below
@@ -101,14 +91,10 @@ of what the ensemble gains, not a cheaper route to the ensemble's loss.
 \section{Mechanism and scope}
 \label{sec:disc-mechanism}
 
-The account of where the seeds diverge rests on one lab and one model.
-The lookup of Chapter~\ref{ch:diagnosis}, which ties the COPY decision
-to the observed result for the current target, was identified for
-REL\_GLOBAL on the 135-run development set, and the head that receives
-the lookup held on new runs from the same lab, except for the
-three-target contrast against its shuffled control; its generic form
-did not keep the gain, and the head was not adopted. CD
-does not use this lookup. It rests on the separate observation that the
+The account of where the seeds diverge rests on one lab and one model:
+the file-decision diagnosis of Chapter~\ref{ch:diagnosis} was made for
+REL\_GLOBAL in-house, and CD does not use it. CD rests on the separate
+observation that the
 NLL of the 30-model probability average concentrates on the
 rows where the seeds' top-1 predictions differ, rows that can be found
 without labels, and it reduced the
@@ -116,12 +102,11 @@ spread on ADS-24 without any matching diagnosis there.
 Whether the general encoders and the ADS-24 models diverge for a
 comparable reason is unknown.
 
-The agreement observation behind teacher selection is narrower still. Agreement
-ranked the REL\_GLOBAL seeds by loss in the lab; the related ADS-24
-diagnostic was unfavorable (Section~\ref{sec:ads24-results}). On ADS-24
-the average of all 30 seeds also scored better than the five most
-agreeing ones. For the plain GRU the final checks found the same split
-between the datasets (Section~\ref{sec:gen-teachers}).
+The agreement observation behind teacher selection is narrower still:
+agreement ranked the REL\_GLOBAL seeds by loss in the lab but not on
+ADS-24 (Section~\ref{sec:ads24-results}), and for the plain GRU the
+final checks found the same split between the datasets
+(Section~\ref{sec:gen-teachers}).
 
 Preservation on the seen condition is the result that moved most with
 the collection. On \texttt{ORIGINAL\_18} it was undecided in the v2
@@ -134,60 +119,14 @@ gain was in probabilities, with accuracy almost unchanged, and
 \texttt{ORIGINAL\_18} was the single evaluation set on which $V$ rose
 after distillation, for REL\_GLOBAL. Preservation has so far held in
 one sealed round and one new-run check, both in the same lab.
+Section~\ref{sec:disc-rejected} in Appendix~\ref{app:rejected} gives
+the explanations that were tested and rejected along the way.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
 % 효과 미분리, 정확도 79.87%→80.14%). 6장 sec:diag-intervention (GENERIC_HEAD 실패,
 % OBSERVED_HEAD는 같은 실험실 새 실행에서만 확인). 8장 (ρ=+0.127, p=0.503).
 % ORIGINAL_18 V 0.068→0.077: 10장. 기제 규명을 ADS-24와 일반 구조로 넓히는 일은
 % 결론의 Future Work 항목이다.
-
-\section{Rejected alternatives}
-\label{sec:disc-rejected}
-
-Several explanations that a reader might propose were tested and
-rejected during the study. A natural suspicion is that the seeds take
-the benign \texttt{ipconfig} records of worker~C for reconnaissance and
-predict IP configuration enumeration. Every A+C error of the 30 seeds
-chose between COPY and DISCOVERY instead (Section~\ref{sec:diag-errors}),
-so the seeds misjudge one file decision, not the kind of activity under
-way.
-
-It might also seem that FIT inputs leave a distillation nothing to
-transfer because the models already agree there. For REL\_GLOBAL the
-30 seeds mostly agreed on FIT views but gave different top-1 actions on
-9.7\% of them (Section~\ref{sec:diag-agreement}). The FIT-input
-distillation of Section~\ref{sec:gen-methods} was run on the plain
-GRU, whose FIT agreement we did not measure, and it left the spread
-where it was; why it did was not established.
-
-A model that predicts one step late, repeating an action whose START
-has not yet been received, would also produce some of the errors we
-saw. It explains few of them. On \texttt{ORIGINAL\_18}, the errors
-shared by five earlier baseline seeds matched an action that had started
-but was not yet received in 2 of 13 rows, and repeated the previous
-label in none of them (Appendix~\ref{app:rejected}).
-% 근거: RECORD:366--381 (원인 탐색 가설 표: ipconfig 오인 기각, FIT 교사 동일 기각
-% "FIT view 9.7%가 불일치", 한 발 늦은 예측 기각). 9.7% = 1 − 74,074/82,008
-% (개요 B 대조 일치; 6장 sec:diag-agreement의 90.3%).
-% 출처(2/13, 0/13): atlas OT/PROPHET_PENDING_START_AUDIT_20261118/REPORT_KO.md:42; 공통 오답은 BASE 5 seed
-%   (127/149/163/181/199)의 동일 오답, :22 (diag.md 21번).
-% 9장의 충돌 구절(because on FIT the teachers largely agree)은 지웠다.
-
-Some claims were withdrawn rather than tested to rejection. The 10-seed
-development round gated its extension on mean NLL, although the method
-was meant to narrow the spread across seeds; the gate failed, the
-failure stands in the ledger (Section~\ref{sec:results-failed}), and
-every later contract made the seed standard deviation primary. Our
-expectation that the general encoders, which lack LogitNorm and the
-representation-gradient penalty, would vary less across seeds than
-REL\_GLOBAL was also wrong. They varied more: in-house, the accuracy of
-the plain-GRU seeds varied widely (Section~\ref{sec:gen-arch}). Appendix~\ref{app:rejected} lists the hypotheses of
-the diagnostic phase, the method candidates with their stored outcomes,
-three withdrawn claims, and three calculations corrected during the
-analysis.
-% 근거: RECORD:360--362 (원장의 범위), 385--406 (방법 후보 20행), 410--415 (철회한
-% 주장 6개: 10-seed 평균 관문, "일반 구조는 LogitNorm이 없어 덜 흔들릴 것").
-% 51.0--87.7%: 9장 tab:gen-arch (RECORD:287).
 
 \section{Threats to validity}
 \label{sec:disc-threats}
@@ -230,22 +169,16 @@ and arbitrary benign work remains an empirical question.
 % Arp 등의 함정 목록 중 "lab-only evaluation", "data snooping"에 해당한다.
 
 \textbf{Intervals and comparisons.}
-Every interval in the thesis resamples run configurations while the 30
-seeds stay fixed. The seeds are fixed lists of integers in each
-contract, not draws from a stated distribution, so the intervals
-express uncertainty about the runs for these seeds and say nothing
-about how another set of 30 seeds would have scored. The conclusions on
-seed spread are therefore conclusions about these 30 checkpoints per
-group; a hierarchical resampling of seeds and runs together would be
-needed to speak about retraining in general. The narrower spread of
-the CD students is also conditional on one fixed teacher set per
-setting. The final checks varied the teacher set while keeping the 30
-baselines, and the spread stayed small with every set
-(Section~\ref{sec:gen-teachers}); we did not measure the spread of the
-whole pipeline, in which the 30 baselines, the teacher selection, and
-the student are all retrained. The correlations
-between seed rankings, such as those of agreement with loss, are
-descriptive statistics without intervals.
+The intervals resample runs while the 30 seeds stay fixed
+(Section~\ref{sec:eval-criteria}), so they say nothing about how
+another set of 30 seeds would have scored; a hierarchical resampling of
+seeds and runs would be needed to speak about retraining in general.
+The narrower spread of the CD students is also conditional on the
+30 baselines: the final checks varied the teacher set and the spread
+stayed small with every set (Section~\ref{sec:gen-teachers}), but we
+did not measure the spread of the whole pipeline, in which baselines,
+teacher selection, and student are all retrained. Correlations between
+seed rankings are descriptive statistics without intervals.
 
 The preservation limits of
 $+0.020$ and 3\% were not derived from an operational need, and two
@@ -262,16 +195,12 @@ limit of $+0.010$ would have reversed two of them.
 
 \textbf{Encoders and methods.}
 The three general encoder adaptations differ from REL\_GLOBAL in
-training recipe and size at once, so the study cannot attribute the
-differences between them to any one component. The adaptations of
-ORTHRUS, BiTA, and CL-AP$^{2}$ were trained with three seeds each and
-only in-house, too few to estimate their spread. The method comparison
-did not tune any method on its own, so it ranks the methods only under
-that common protocol, and its in-house contrasts may include rerun
-variation between the reused and the new fits. Its first in-house
-collection stopped at 110 eligible runs; the final checks repeated it on
-the 155 PFC2 runs and, for four methods and the geometric pool, on the
-Transformer encoder (Section~\ref{sec:gen-methods}).
+training recipe and size at once, so the differences cannot be
+attributed to one component. The adaptations of ORTHRUS, BiTA, and
+CL-AP$^{2}$ were trained with three seeds each, too few to estimate
+their spread. The method comparison tuned no method on its own, so it
+ranks the methods only under that common protocol, and its in-house
+contrasts may include rerun variation.
 % 근거: RECORD:446--452 (seed 모집단 불확실성 미포함, 인코더 적용판, 학습식·크기
 % 동시 차이, 보안 선행 적용판 3 seed·자체 실험실만, 방법 비교 한 구조·미조정,
 % 110실행), RECORD:507. seed까지 재표집한 구간은 결론의 Future Work 계획이다.
@@ -311,9 +240,9 @@ boundary.
 \section{Relation to existing techniques}
 \label{sec:disc-novelty}
 
-None of the computational parts is new. The distillation loss is
-distillation toward an ensemble average~\cite{hinton2015distilling}
-added to the regularizers already in REL\_GLOBAL.
+None of the computational parts is new. The loss is distillation
+toward an ensemble average~\cite{hinton2015distilling} added to the
+regularizers of REL\_GLOBAL.
 % 원문: Hinton et al. arXiv:1503.02531 §2 앙상블의 "arithmetic or geometric mean ... as the soft targets". 확인됨.
 Ranking teachers by
 unlabeled agreement takes its motivation from Baek et
@@ -321,11 +250,9 @@ al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}),
 and, for agreement among runs of one architecture, from Jiang et
 al.~\cite{jiang2022assessing}. Baek et al.'s premise, that accuracy
 under shift tracks in-distribution accuracy across models, did not hold
-for these seeds: their seen-condition and A+C FLAT losses correlated at
-$-0.131$ (Chapter~\ref{ch:diagnosis}). The rule therefore rests on the
-in-house S1 correlation (0.877 and 0.915), not on their result. S1 was
-not computed on ADS-24, where a related leave-one-out diagnostic was
-unfavorable (Section~\ref{sec:ads24-results}).
+for these seeds (their seen-condition and A+C FLAT losses correlated
+at $-0.131$), so the rule rests on the in-house S1 correlation (0.877
+and 0.915; Chapter~\ref{ch:diagnosis}), not on their result.
 % 2026-11-26 패널 7회차 문체 P1-2: "S1 상관이 ADS-24 에서 되풀이되지 않았다"는 틀렸다(S1 은 ADS-24 에서 계산하지 않음).
 % 원문: Baek et al. NeurIPS 2022 §3.4 "agreement can be estimated with just unlabeled data". 동기로만 인용, 확인됨.
 % 2026-11-25 패널 6회차 참신성 P2-1: Baek 등의 전제가 이 seed들에서 서지 않았다는 점과 규칙의 실제 근거(S1)를 적었다.
@@ -335,22 +262,14 @@ Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
 measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
 % 원문: Heskes NIPS 10 (1997) §2 식 (3)(모호성 = Σ w K(p̄,p_α) = −log Z); Gruber & Buettner AISTATS 2023
 %   §3.4 Corollary 3.6, §5 "we proposed Bregman Information as uncertainty measure". 확인됨.
-Ovadia et al.\ evaluated the accuracy and calibration of ensembles
-under dataset shift~\cite{ovadia2019trust}, not distilled students;
-that ensemble result, with the variance reduction from
-averaging~\cite{gruber2022uncertainty}, motivated our separate
-hypothesis that a student of a consensus would vary less across seeds
-(Section~\ref{sec:related-distillation}).
 % 원문: Ovadia et al. NeurIPS 2019 (arXiv v2) §4.2 pp.6–7 "ensembles achieve highest accuracy under distributional
 %   shift", 큰 shift 에서 ECE 도 앞섬; §5 p.9 앙상블이 "more robust to dataset shift". 학생 모델은 다루지 않음.
 %   Gruber & Buettner §3.5 식 (4)–(5) pp.6–7 앙상블 평균이 초기값에서 오는 Bregman Information 을 줄임.
 %   (옛 인용 rathmanakidis2022reduction 을 바꿈. shift 에서의 분산 관련 오차는 원문이 직접 재지 않아 정확도·보정으로 좁힘.)
-Two extensions of CD, the confidence-conditioned target (candidate~A)
-and the shared-subspace projection (candidate~B), failed their
-preliminary checks. Section~\ref{sec:rej-candidates} describes them and
-how they relate to adaptive ensemble
-distillation~\cite{du2020agree} and to the comparison of networks
-through a shared subspace~\cite{raghu2017svcca}.
+Two extensions of CD failed their preliminary checks; they relate to
+adaptive ensemble distillation~\cite{du2020agree} and to comparison
+through a shared subspace~\cite{raghu2017svcca}
+(Section~\ref{sec:rej-candidates}).
 % 원문: Du et al. NeurIPS 2020 (vol. 33, pp. 12345--12355) 초록 "a dynamic weighting method for each teacher",
 %   "a tolerance parameter to accommodate disagreement among teachers" (§3.1 gradient 공간). 확인됨.
 % 원문: Raghu et al. NIPS 2017 초록 "a tool for quickly comparing two representations"; §2 SVD 로 각 층의
@@ -358,14 +277,11 @@ through a shared subspace~\cite{raghu2017svcca}.
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를
 % 메커니즘 차이(목표 보간 대 gradient 공간 교사 가중)까지 적어 좁혔다.
 
-Students that follow one fixed teacher set on unlabeled inputs from
-the environment are expected to agree with one another there; that much
-follows from distillation itself, and following other models' average
-to reduce retraining churn was shown for
-codistillation~\cite{anil2018large}. CD differs in using fixed teachers
-trained from other seeds, unlabeled inputs from the target environment,
-and the NLL seed spread on unseen conditions as the measure; we did not
-compare it with codistillation.
+Students that follow one fixed teacher set on unlabeled inputs are
+expected to agree with one another there; that much follows from
+distillation itself, and following other models' average to reduce
+retraining churn was shown for codistillation~\cite{anil2018large},
+with which we did not compare CD.
 
 What the thesis adds is evidence on
 one security task: the measured instability, the unlabeled
@@ -379,16 +295,11 @@ following a geometric pool of the same teachers narrowed it about as
 much (Section~\ref{sec:gen-methods}). The final checks add that the
 narrowing did not depend on which teachers were averaged, while the
 level the students reached did and followed the teachers' own level
-(Section~\ref{sec:gen-teachers}). A single teacher shared by all
-students was not tried, so the role of averaging several models, beyond
-sharing one fixed target, is open. The FIT-input control was run
-on the plain GRU in-house and on ADS-24, and the self-distillation
-control on the in-house plain GRU and on REL\_GLOBAL-ADS; both are
-development comparisons. The sealed
-contracts and the status label on every result respond to the warning
-of Arp et al.\ about reusing inspected data~\cite{arp2020dos}; they are
-our own procedure, and lab-only evaluation remains a limitation
-(Section~\ref{sec:disc-threats}).
+(Section~\ref{sec:gen-teachers}). A single teacher shared by all students was not tried, so the role of
+averaging several models, beyond sharing one fixed target, is open. The
+sealed contracts and status labels respond to the warning of Arp et
+al.\ about reusing inspected data~\cite{arp2020dos}; lab-only
+evaluation remains a limitation.
 % 원문(arp2020dos): arXiv 2010.09470 2.2절 P3(3쪽) test snooping, 2.4절 P9 Lab-Only Evaluation(6쪽). 확인됨.
 % 근거: RECORD:28, 455--459; idea.md "기여" 셋째 항. 확장 후보 A(신뢰 조건부 합의
 % 목표)와 B(seed 공통 표현 투영)의 선행: RECORD 관련 연구 표 (Du 등, Yang 등 DEED;

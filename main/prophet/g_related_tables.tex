@@ -1,0 +1,203 @@
+\chapter{Related-Work Comparison Tables}
+\label{app:related-tables}
+% 2026-11-26: 3장 III-9 의 두 비교표를 옮겼다(본문 분량).
+
+The two tables restate, in the order of Chapter~\ref{ch:related}, what
+the sections of that chapter cite. They compare tasks only.
+
+% 2026-11-25: 표를 xltabular 로 바꿔 쪽을 넘기게 했다(행이 늘어 한 쪽을 넘음).
+{\small\setstretch{1}% 표는 1배수(작성 안내)
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\caption[Evidence and outputs of the security and log-modeling work]{Evidence and outputs of the security and log-modeling work
+discussed in this chapter, in the order of the sections.}
+\label{tab:related-tasks}\\
+\toprule
+Work & Evidence & Original output \\
+\midrule
+\endfirsthead
+\toprule
+Work & Evidence & Original output \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\multicolumn{3}{@{}l}{\emph{Forecasting attacker actions and security events (Section~\ref{sec:related-forecasting})}} \\
+Soska and Christin~\cite{soska2014automatically}
+ & Features extracted automatically from website content
+ & Whether a website not yet compromised will become malicious \\
+Liu et al.~\cite{liu2015cloudy}
+ & Externally measured mismanagement symptoms and malicious-activity time series
+ & Whether an organization will suffer an incident \\
+Sabottke et al.~\cite{sabottke2015vulnerability}
+ & Twitter posts about disclosed vulnerabilities
+ & Whether a vulnerability is exploited in the real world \\
+B\u{a}b\u{a}l\u{a}u and Nadeem~\cite{babalau2024forecasting} (preprint)
+ & Intrusion and endpoint alerts, as alert-driven attack graphs
+ & Next likely attacker action given a sequence of observed actions \\
+% 원문: arXiv 2408.09888 초록·3.3절(EDR 경보 추가). 고침: 입력 칸에 endpoint, 출력 칸 "observed actions".
+Tiresias~\cite{shen2018tiresias}
+ & Security event histories from intrusion-prevention telemetry
+ & Next security event \\
+ATTACK2VEC~\cite{shen2019attack2vec}
+ & Intrusion-prevention events
+ & Temporal embeddings of attack steps and how their use evolves \\
+DeepCASE~\cite{vanede2022deepcase}
+ & Sequences of security events
+ & Event contexts grouped for analyst triage \\
+% 원문: Tiresias 초록(침입 방지 시스템 사건, 다음 사건 예측); DeepCASE 3절(문맥·attention·군집을 운영자가 분류). 확인됨.
+CL-AP$^{2}$~\cite{liu2024clap2}
+ & System logs, as a time-aware attack knowledge graph with a tactic-level portrait
+ & Next attack technique \\
+% 원문: Liu & Guo 초록 "generates a Temporal Attack Knowledge Graph (TAKG) from real-time system logs".
+%   지식 그래프는 입력이 아니라 로그에서 만든 중간 표현이라 증거 칸을 고쳤다.
+EFI~\cite{zhu2024nip}
+ & Threat intelligence reports and endpoint provenance
+ & Forecast interaction graph with technique-level interpretation \\
+% 원문: EFI 초록(CTI 보고서의 ASG, EDR의 APG, AFG, technique-level interpretation). 확인됨.
+BiTA~\cite{nayeri2026bita}
+ & Temporal graph of network alerts
+ & Future alerts \\
+% 원문: Nayeri & Rezvani 3.1절 미래 간선 발생과 그 범주 예측(실제 경보 데이터). 확인됨.
+Niloy et al.~\cite{niloy2026multi}
+ & Multi-source logs of attack and benign sessions with ATT\&CK labels
+ & Labels for observed events (small-language-model evaluation) \\
+% 원문: Niloy et al. 초록(70 attack·800 benign session, chunk 분류·technique 식별). 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Attack graphs (Section~\ref{sec:related-graphs})}} \\
+Phillips and Swiler~\cite{phillips1998graph}
+ & Attack templates, network configuration and topology, attacker profile
+ & Attack graph; paths most likely to succeed \\
+Sheyner et al.~\cite{sheyner2002graphs}
+ & System model of hosts, vulnerabilities, and attacker
+ & Attack graph of possible paths \\
+% 원문: Sheyner et al. 1절 "1. Model the network." "2. Produce an attack graph." 확인됨.
+Ammann et al.~\cite{ammann2002scalable}
+ & Exploits whose preconditions are never invalidated (monotonicity)
+ & Compact representation of attack paths \\
+MulVAL~\cite{ou2005mulval}
+ & Configuration facts and logic rules
+ & Derived security consequences \\
+% 원문: Ou et al. 초록 Datalog(configuration description, reasoning rules), 4.5절 공격 사실 도출. 확인됨.
+Poolsappasit et al.~\cite{poolsappasit2012dynamic}
+ & CVSS metrics, administrator priors, observed incidents as evidence
+ & Probability that each network state is compromised \\
+SAGE~\cite{nadeem2022alert}
+ & Intrusion alerts
+ & Attack graphs per victim and objective \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Sequence models for log anomaly detection (Section~\ref{sec:related-sequence})}} \\
+Xu et al.~\cite{xu2009detecting}
+ & Console logs parsed with the help of source code
+ & Normal or abnormal decision per group of messages \\
+DeepLog~\cite{du2017deeplog}
+ & Sequences of system log keys
+  & Anomaly detection on log sequences \\
+LogAnomaly~\cite{meng2019loganomaly}
+ & Log templates represented as semantic vectors
+ & Sequential and quantitative anomalies \\
+LogBERT~\cite{guo2021logbert}
+ & Sequences of system log keys
+ & Anomaly score from self-supervised training \\
+% 원문: DeepLog 3절 이상 탐지(로그 키·매개변수); LogBERT 3.3절 "derive the anomalous score of a log sequence". 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Host provenance and intrusion detection (Section~\ref{sec:related-provenance})}} \\
+BackTracker~\cite{king2003backtracking}
+ & Operating-system objects and events, from a detection point
+ & Dependency graph of events that could have led to it \\
+SLEUTH~\cite{hossain2017sleuth}
+ & Audit data as a main-memory dependency graph
+ & Real-time attack detection and scenario reconstruction \\
+HOLMES~\cite{milajerdi2019holmes}
+ & Host audit data matched to tactics, techniques, and procedures
+ & High-level scenario graph of a campaign \\
+UNICORN~\cite{han2020unicorn}
+ & Sketches of long-running whole-system provenance graphs
+ & Anomaly-based intrusion detection \\
+ProvDetector~\cite{wang2020you}
+ & Rare causal paths in a process's provenance graph
+ & Detection of stealthy malware \\
+NodLink~\cite{li2024nodlink}
+ & Provenance graphs, online
+ & Detection with concise attack-related graphs \\
+KAIROS~\cite{cheng2024kairos}
+ & Whole-system provenance graph
+  & Intrusion detection and investigation \\
+ORTHRUS~\cite{jiang2025orthrus}
+ & Whole-system provenance graph
+  & Attack detection and attribution \\
+% 원문: KAIROS 초록 탐지 + "reconstructs attack footprints"; ORTHRUS 초록 노드 수준 탐지 + 공격 경로 재구성. 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Performance when the data at use differ from the training data (Section~\ref{sec:related-provenance})}} \\
+Transcend~\cite{jordaney2017transcend}
+ & Malware samples at deployment compared with training samples
+ & Credibility and confidence of each decision \\
+TESSERACT~\cite{pendlebury2019tesseract}
+ & Android applications spanning three years
+ & Evaluation free of spatial and temporal bias; AUT metric \\
+\midrule
+PROPHET (this thesis)
+ & Windows audit records received before a known boundary
+ & Distribution over 18 next attacker actions \\
+\end{xltabular}}
+% 원문 근거: 각 행은 위 절의 % 원문 주석과 같은 원문(sources/expand/{sec,sys}.md 표).
+% seed 변동 열은 원문 전체를 확인하지 않은 판단이라 뺐다(인용·참신성 리뷰).
+
+{\small\setstretch{1}% 표는 1배수(작성 안내)
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.2\textwidth}>{\raggedright\arraybackslash}X@{}}
+\caption[Models, unlabeled data, and object of study in the machine-learning work]{Models, data without labels, and object of study in the
+machine-learning work discussed in this chapter. A dash means that the
+work, as cited here, uses no unlabeled data beyond its training and
+test sets.}
+\label{tab:related-ml}\\
+\toprule
+Work & Models involved & Data without labels & Object of study \\
+\midrule
+\endfirsthead
+\toprule
+Work & Models involved & Data without labels & Object of study \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+D'Amour et al.~\cite{damour2020underspecification}
+ & Predictors returned by one pipeline & --- & Behavior in deployment domains \\
+Marx et al.~\cite{marx2020predictive}
+ & Classifiers within an error tolerance & --- & Conflicting predictions \\
+Summers and Dinneen~\cite{summers2021nondeterminism}
+ & Runs differing in one source of nondeterminism & --- & Variability across runs \\
+Jiang et al.~\cite{jiang2022assessing}
+ & Two SGD runs of one architecture & Test inputs & Test error from disagreement \\
+Baek et al.~\cite{baek2022agreement}
+ & Pairs of trained models & Shifted inputs & Accuracy under shift \\
+\midrule
+Hinton et al.~\cite{hinton2015distilling}
+ & Teacher or ensemble, and a student & Transfer set may be unlabeled & Matching soft targets \\
+Anil et al.~\cite{anil2018large}
+ & Copies of a model trained in parallel & --- & Prediction churn between retrains \\
+Tarvainen and Valpola~\cite{tarvainen2017mean}
+ & Student and its weight-averaged teacher & Unlabeled examples & Consistency between the two \\
+Grandvalet and Bengio~\cite{grandvalet2004semi}
+ & One model & Unlabeled inputs & Entropy of predictions \\
+Lee~\cite{lee2013pseudo}
+ & One model & Unlabeled inputs & Training on its own top-1 labels \\
+Ganin et al.~\cite{ganin2016domain}
+ & One model & Target-domain inputs & Features indiscriminate between domains \\
+Liang et al.~\cite{liang2020do}
+ & Trained source model only & Target-domain inputs & Adapted feature extractor \\
+Wang et al.~\cite{wang2021tent}
+ & One model at test time & Test batches & Entropy of predictions \\
+Kan et al.~\cite{kan2021investigating}
+ & One malware detector & Samples under drift & Updating on its own pseudo-labels \\
+\midrule
+Ovadia et al.~\cite{ovadia2019trust}
+ & Uncertainty methods, including ensembles & --- & Calibration and accuracy under shift \\
+Gruber and Buettner~\cite{gruber2022uncertainty}
+ & Ensemble members & Inputs under drift & Bregman Information as uncertainty \\
+\midrule
+CD (this thesis)
+ & Five frozen teachers and one student of the same architecture
+ & Inputs of the unseen environment conditions
+ & Spread of NLL across 30 student seeds \\
+\end{xltabular}}
+% 원문 근거: sec:related-underspec·sec:related-distillation·sec:related-uncertainty·sec:related-decomposition
+%   의 % 원문 주석(sources/expand/mlrel.md 표). Gruber "inputs under drift" = §4.2·§5 OOD 탐지 under domain drift.
