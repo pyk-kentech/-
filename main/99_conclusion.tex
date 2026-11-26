@@ -59,21 +59,22 @@ amount of unlabeled input, on a second encoder for the method
 comparison, on temperature scaling~\cite{guo2017calibration} and
 probability ensembles, on a completed in-house collection, and on the
 ADS-24 runs outside the contract, were run and are reported above.
-Three questions remain. The spread of the whole pipeline, with the 30
+Four questions remain. The spread of the whole pipeline, with the 30
 baselines, the teacher selection, and the student all retrained, was
-not measured; only the teacher set was varied. Every main interval
+not measured; only the teacher set was varied. A single teacher shared
+by all students would show whether averaging several teachers matters
+beyond giving every student the same fixed target. Every main interval
 holds the 30 seeds fixed, so intervals that resample seeds together with
 runs would let a verdict speak for retraining in general. And every
-in-house run comes from one lab and one source procedure, so
-collections with other hosts, benign workloads, and attack procedures,
-and a defined trigger for the forecast, are needed before the result can
-be read as more than a finding in this lab.
+in-house run comes from one lab and one source procedure, so other
+hosts, benign workloads, and attack procedures are needed before the
+result can be read beyond this lab.
 % 원문: Guo et al. ICML 2017 (PMLR 70) arXiv:1706.04599 §4.2 "Temperature scaling ... uses a single scalar
 %   parameter T > 0 for all classes". 방법 이름 인용, 확인됨.
 Whether the ADS-24 and general-encoder models also split on one
-decision, as REL\_GLOBAL did in the lab, is open as well.
+decision is open as well.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
-% 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
+% 덮지 않는다). 2026-11-26: 마무리 확인 결과는 answers.md 2026-11-26 01:40 지시에 따라 본문에 쓴다.
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라
 % 9장에서 결과를 지우고 이 절에 계획으로만 적었다(RECORD:358, 498).
 % 근거: RECORD:430--437, 6장 첫 문단 ("We did not study the mechanism separately on

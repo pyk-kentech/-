@@ -117,10 +117,11 @@ through a target-free path.
 
 The predictor reads observed fields: the executable, available command
 content, receipt order, elapsed time, and received exit status. Four
-kinds of information are excluded from inference input and used only
-for labeling and audit: the label itself, the execution identifier,
+kinds of information are excluded from inference input: the label itself, the execution identifier,
 whether a record belongs to the source procedure or to a benign worker,
-and any record received at or after the boundary. Process and record
+and any record received at or after the boundary. Worker membership
+also sets the count $k$ of the training-only penalty
+(Section~\ref{sec:method-baseline}). Process and record
 identifiers are used to link START and END records and to audit the
 collection.
 % 근거: RECORD:50.

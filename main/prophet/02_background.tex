@@ -348,7 +348,8 @@ NLL rewards calibration and sharpness together, while ECE isolates the
 first and ignores the probabilities given to classes other than the
 top one. This thesis scores models by NLL and accuracy
 (Section~\ref{sec:eval-metrics}); ECE is not one of its criteria, and
-post hoc temperature scaling is left to future work. The temperature
+post hoc temperature scaling enters only as a comparison arm of the
+final checks (Section~\ref{sec:gen-methods}). The temperature
 $\tau$ of LogitNorm in our training loss is a different quantity: it
 rescales normalized logits during training and inference
 (Section~\ref{sec:method-baseline}).

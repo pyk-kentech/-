@@ -326,8 +326,10 @@ al.~\cite{jiang2022assessing}. Baek et al.'s premise, that accuracy
 under shift tracks in-distribution accuracy across models, did not hold
 for these seeds: their seen-condition and A+C FLAT losses correlated at
 $-0.131$ (Chapter~\ref{ch:diagnosis}). The rule therefore rests on the
-in-house S1 correlation (0.877 and 0.915), not on their result, and
-that correlation did not recur on ADS-24 (Chapter~\ref{ch:ads24}).
+in-house S1 correlation (0.877 and 0.915), not on their result. S1 was
+not computed on ADS-24, where a related leave-one-out diagnostic was
+unfavorable (Section~\ref{sec:ads24-results}).
+% 2026-11-26 패널 7회차 문체 P1-2: "S1 상관이 ADS-24 에서 되풀이되지 않았다"는 틀렸다(S1 은 ADS-24 에서 계산하지 않음).
 % 원문: Baek et al. NeurIPS 2022 §3.4 "agreement can be estimated with just unlabeled data". 동기로만 인용, 확인됨.
 % 2026-11-25 패널 6회차 참신성 P2-1: Baek 등의 전제가 이 seed들에서 서지 않았다는 점과 규칙의 실제 근거(S1)를 적었다.
 The
@@ -380,7 +382,9 @@ following a geometric pool of the same teachers narrowed it about as
 much (Section~\ref{sec:gen-methods}). The final checks add that the
 narrowing did not depend on which teachers were averaged, while the
 level the students reached did and followed the teachers' own level
-(Section~\ref{sec:gen-teachers}). The FIT-input control was run
+(Section~\ref{sec:gen-teachers}). A single teacher shared by all
+students was not tried, so the role of averaging several models, beyond
+sharing one fixed target, is open. The FIT-input control was run
 on the plain GRU in-house and on ADS-24, and the self-distillation
 control on the in-house plain GRU and on REL\_GLOBAL-ADS; both are
 development comparisons. The sealed

@@ -450,10 +450,13 @@ ADS-24 & Geometric-pool distillation & 0.004 & $[0.002, 0.006]$ & 0.108 & $[0.08
 Within this protocol the controls narrow down what matters without
 isolating it. Following one's own frozen copy, softly in
 self-distillation or by hard labels in the hard-label control, either
-changed nothing or made the loss worse. This is consistent with the
-multi-model teacher target contributing to the reduction, but the
-number of teachers, their selection, and the averaging were not varied
-separately, so their effects are not identified. Following the same
+changed nothing or made the loss worse. Beside the number of teachers,
+these controls differ from CD in that each student follows its own
+single teacher, whereas the CD students all follow one shared target.
+Section~\ref{sec:gen-teachers} varies the teacher set; a single teacher
+shared by all students was not tried, so whether averaging several
+models matters, beyond sharing one fixed target, is not identified.
+% 2026-11-26 패널 7회차 참신성 P2-1: "다수 모델 목표" 해석을 공유 고정 목표와 구분했다. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
 level. Because the base models it is compared with were reused from an
 earlier run, this does not isolate an effect of the environment inputs.
@@ -536,9 +539,11 @@ as 160 attempts, and a sealed safety stop ended it after 119, leaving
 110 eligible runs and 1,119 rows; the 41 runs not attempted were neither
 retried nor replaced. The \texttt{A+C} intervals therefore rest on six
 complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
-configurations. The final checks scored the same frozen checkpoints on
-the 155 PFC2 runs, with 14 complete configurations per A+C layout, and
-added a seventh arm, the base model with a single temperature fitted on
+configurations.
+
+On the PFC2 runs the final checks scored the same frozen checkpoints,
+with 14 complete configurations per A+C layout, and added a sixth
+comparison arm, the base model with a single temperature fitted on
 FIT~\cite{guo2017calibration}. Against CD, at 99.1667\% over the six
 arms, every arm except the geometric pool again had a larger seed
 standard deviation and a higher mean NLL, by 0.264 to 1.210 and by

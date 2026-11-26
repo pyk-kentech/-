@@ -2,13 +2,15 @@
 PROPHET predicts which of 18 attacker actions comes next from the
 Windows audit records received before a cutoff. Under a benign workload
 absent from the labeled training runs, models trained on the same data
-with different seeds diverged, and neither their training loss nor
-their loss on the seen condition told which seed would hold up. In
+with different seeds diverged, and neither the loss on their final
+training minibatch nor their loss on the seen condition told which seed
+would hold up. In
 consensus distillation (CD), a standard ensemble-distillation setup, one
 student of the same architecture follows the mean prediction of five
 baseline models on unlabeled inputs from the new workload and the seen
-condition. Under a contract sealed before training and collection, CD
-cut the seed standard deviation of the log loss on an unseen
+condition. Under a contract sealed before training and collection, and
+over 30 fixed checkpoints per group, CD cut the seed standard deviation
+of the log loss on an unseen
 two-worker condition from 0.056 to 0.010 and lowered the loss on the
 seen condition. On new runs, with three general log encoders, and on
 public ADS-24 data, it narrowed the spread again. It did not remove the
@@ -45,7 +47,7 @@ Consensus distillation, Unlabeled adaptation, Windows audit logs
 \begin{korabstract}
 본 연구는 예측 시점 전에 수신된 윈도우 감사 로그만으로 공격자의 다음
 행동을 18개 범주 중에서 예측한다. 학습 실행에 없던 정상 작업 조건에서는 같은
-자료로 학습한 모델도 시드마다 크게 갈렸고, 학습 손실이나 학습에 있던 조건의
+자료로 학습한 모델도 시드마다 크게 갈렸고, 마지막 학습 미니배치의 손실이나 학습에 있던 조건의
 손실로는 어느 시드가 버틸지 알 수 없었다. 이를 줄이기 위해 기존의 앙상블 증류
 방식을 적용하여, 새 작업 조건과 학습에 있던 조건의 정답 없는 입력에서 기준 모델
 다섯 개의 평균 예측을 구조가 같은 단일 학생 모델이 따르게 했다(합의 증류).

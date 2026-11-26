@@ -128,11 +128,11 @@ self-distillation control left the environment loss where it was, at 2.275
 with a seed standard deviation of 0.162. As a secondary contrast with
 individual 95\% intervals, the CD student minus the control was
 $-0.215$ $[-0.248, -0.181]$ in mean NLL and $-0.137$
-$[-0.163, -0.115]$ in seed standard deviation. This is consistent with
-the multi-model teacher target contributing to the reduction, but the
-comparison changes several things at once: the number of teachers,
-their quality, the averaging, and the selection by agreement, whose
-separate effects were not tested (Section~\ref{sec:future}). Section~\ref{sec:app-raw} gives the stage-1 statistics to six
+$[-0.163, -0.115]$ in seed standard deviation. The comparison changes
+several things at once: the number of teachers, their quality, the
+averaging, the selection by agreement, and whether all students share
+one target. For REL\_GLOBAL-ADS these were not varied separately; for
+the plain GRU, Section~\ref{sec:gen-teachers} varies the teacher set. Section~\ref{sec:app-raw} gives the stage-1 statistics to six
 decimals.
 \looseness=-1 % 끝줄 한 낱말을 당긴다
 % 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
