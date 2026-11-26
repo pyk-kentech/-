@@ -22,7 +22,11 @@ contrast, $V$ rose.
 
 Two of these rounds were sealed (Table~\ref{tab:rounds}): the v2
 recheck passed stability without showing preservation, and v3 passed
-all three criteria. Both hold the seeds fixed
+all three criteria. A later new-run check on the frozen checkpoints of
+v3 and of the three general encoders narrowed the spread for all four
+and kept every preservation interval within the limit
+(Sections~\ref{sec:results-pfc2} and~\ref{sec:gen-arch}). All of these
+hold the seeds fixed
 (Section~\ref{sec:disc-threats}). Part of the narrowing is also expected from
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
 distillation itself, since all students of a group follow one fixed
@@ -73,9 +77,19 @@ teachers and 2.060 for the student.
 
 Training is expensive on either path. CD as tested trains 30 baselines, ranks them by agreement to keep
 five, and only then trains the student, so it costs more to train than
-the five-teacher ensemble it imitates. Whether fewer teachers, or five
-chosen at random, would serve as well was not tested, and the amount of
-unlabeled environment input that the KL term needs was not measured.
+the five-teacher ensemble it imitates. The final checks show what the
+extra cost buys and what it does not (Section~\ref{sec:gen-teachers}):
+in the lab the five most agreeing teachers gave clearly better students
+than random teachers or all 30, on ADS-24 they did not, and a quarter of
+the unlabeled input served about as well as all of it. On the new PFC2
+runs the plain-GRU student, at 0.213 on \texttt{A+C FLAT}, was close to
+its five-teacher ensemble at 0.204 and well below the ensemble of all 30
+base models at 0.439, and the KD\_ALL student of v3, at 0.017, was below
+the ensemble of all 30 REL\_GLOBAL seeds at 0.035. A single temperature
+fitted on FIT did not bring the spread of any base model near that of
+its CD student.
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:132--192 (앙상블·FIT 전용 온도,
+%   PFC2; 온도 SD LSTM 0.318, LogBERT 0.766, PLAIN_GRU 0.716, REL 0.083 — 각 CD 학생 0.073/0.029/0.019/0.004 와 거리가 멀다).
 CD is thus a way to keep single-model inference while recovering part
 of what the ensemble gains, not a cheaper route to the ensemble's loss.
 % 근거: RECORD:185 주변 v3 보조 비교 (TOP5 교사 0.0228 대 KD_ALL 0.0276; 7장 표);
@@ -107,15 +121,20 @@ The agreement observation behind teacher selection is narrower still. Agreement
 ranked the REL\_GLOBAL seeds by loss in the lab; the related ADS-24
 diagnostic was unfavorable (Section~\ref{sec:ads24-results}). On ADS-24
 the average of all 30 seeds also scored better than the five most
-agreeing ones.
+agreeing ones. For the plain GRU the final checks found the same split
+between the datasets (Section~\ref{sec:gen-teachers}).
 
-Preservation on the seen condition is the least settled result. On \texttt{ORIGINAL\_18} it was undecided in
-the v2 recheck, passed in v3, and was undecided in the PAG1
-re-inference, and it was the single evaluation set on which $V$ rose
-after distillation, for REL\_GLOBAL. The v3 gain there was in probabilities, with
-accuracy almost unchanged, and the contribution of the
-seen-condition inputs of KD\_ALL was not isolated. We read the
-in-house preservation result as holding in one sealed round, not as a
+Preservation on the seen condition is the result that moved most with
+the collection. On \texttt{ORIGINAL\_18} it was undecided in the v2
+recheck, passed in v3, was undecided in the PAG1 re-inference, and held
+for both v3 students on the new PFC2 runs, with upper ends of $+0.012$
+for KD\_ALL and $+0.0066$ for KD\_ENV\_TOP5. Pooled post hoc over the
+three collections, KD\_ALL lowered the seen-condition loss and
+KD\_ENV\_TOP5 left it unchanged (Section~\ref{sec:results-pfc2}). The
+gain was in probabilities, with accuracy almost unchanged, and
+\texttt{ORIGINAL\_18} was the single evaluation set on which $V$ rose
+after distillation, for REL\_GLOBAL. We read preservation as holding in
+one sealed round and one new-run check of the same lab, not as a
 property of the method.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
@@ -223,9 +242,11 @@ seed spread are therefore conclusions about these 30 checkpoints per
 group; a hierarchical resampling of seeds and runs together would be
 needed to speak about retraining in general. The narrower spread of
 the CD students is also conditional on one fixed teacher set per
-setting. We did not measure the spread of the whole pipeline, in which
-the 30 baselines, the teacher selection, and the student are all
-retrained. The correlations
+setting. The final checks varied the teacher set while keeping the 30
+baselines, and the spread stayed small with every set
+(Section~\ref{sec:gen-teachers}); we did not measure the spread of the
+whole pipeline, in which the 30 baselines, the teacher selection, and
+the student are all retrained. The correlations
 between seed rankings, such as those of agreement with loss, are
 descriptive statistics without intervals.
 
@@ -237,7 +258,10 @@ $+0.0207$ for KD\_ALL in the PAG1 re-inference, which did not. A limit
 of $+0.015$ would have reversed the first and a limit of $+0.025$ the
 second. KD\_ENV\_TOP5, with upper ends of $+0.039$ in PAG1 and
 $+0.054$ in the v2 recheck, fails any limit up to about $+0.039$, and
-the v3 upper end of $-0.0041$ meets any non-negative limit.
+the v3 upper end of $-0.0041$ meets any non-negative limit. On the new
+PFC2 runs the upper ends were $+0.012$ for KD\_ALL, $+0.0066$ for
+KD\_ENV\_TOP5, and at most $+0.0146$ for the three general encoders; a
+limit of $+0.010$ would have reversed two of them.
 
 \textbf{Encoders and methods.}
 The three general encoder adaptations differ from REL\_GLOBAL in
@@ -245,10 +269,12 @@ training recipe and size at once, so the study cannot attribute the
 differences between them to any one component. The adaptations of
 ORTHRUS, BiTA, and CL-AP$^{2}$ were trained with three seeds each and
 only in-house, too few to estimate their spread. The method comparison
-used one encoder and did not tune any method on its own, so it ranks
-the methods only under that common protocol; its in-house contrasts may
-include rerun variation between the reused and the new fits, and its in-house
-collection stopped at 110 eligible runs (Section~\ref{sec:gen-methods}).
+did not tune any method on its own, so it ranks the methods only under
+that common protocol, and its in-house contrasts may include rerun
+variation between the reused and the new fits. Its first in-house
+collection stopped at 110 eligible runs; the final checks repeated it on
+the 155 PFC2 runs and, for four methods and the geometric pool, on the
+Transformer encoder (Section~\ref{sec:gen-methods}).
 % 근거: RECORD:446--452 (seed 모집단 불확실성 미포함, 인코더 적용판, 학습식·크기
 % 동시 차이, 보안 선행 적용판 3 seed·자체 실험실만, 방법 비교 한 구조·미조정,
 % 110실행), RECORD:507. seed까지 재표집한 구간은 결론의 Future Work 계획이다.
@@ -261,7 +287,8 @@ and 34 runs with simulated users on ADS-24. The results therefore
 support CD as unlabeled adaptation to a target environment from which
 such inputs are available. They do not show robustness to a benign
 workload or user population that the training process never observed,
-and how much unlabeled input is needed was not measured.
+and only reduced amounts of 25\% and 50\%, not the least amount that
+works, were tried (Section~\ref{sec:gen-teachers}).
 
 \textbf{Evidence availability.}
 Command-line visibility and reliable process-event linkage depend
@@ -350,7 +377,10 @@ same environment; in v3 the loss on the seen condition was
 kept; and following the same teachers on FIT inputs, or each seed's own
 predictions, did not narrow the spread in the same way, whereas
 following a geometric pool of the same teachers narrowed it about as
-much (Section~\ref{sec:gen-methods}). The FIT-input control was run
+much (Section~\ref{sec:gen-methods}). The final checks add that the
+narrowing did not depend on which teachers were averaged, while the
+level the students reached did and followed the teachers' own level
+(Section~\ref{sec:gen-teachers}). The FIT-input control was run
 on the plain GRU in-house and on ADS-24, and the self-distillation
 control on the in-house plain GRU and on REL\_GLOBAL-ADS; both are
 development comparisons. The sealed

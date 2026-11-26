@@ -128,41 +128,43 @@ environment; it is not tested on a workload that was never observed in
 any form. The price is paid during training, where 30 baseline models
 must be fitted before the student. The teacher rule also rests on an
 in-house observation: a seed's agreement ranked it by loss in the lab
-(Chapter~\ref{ch:diagnosis}); for ADS-24 see
-Chapter~\ref{ch:ads24}.
+(Chapter~\ref{ch:diagnosis}), and on ADS-24 it did not pick the better
+teachers (Section~\ref{sec:gen-teachers}).
 % 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
-In v3, the last sealed in-house round (Table~\ref{tab:rounds}), with 30 new seeds, 157 new
-eligible runs (Section~\ref{sec:eval-contract}), and 1,611 prediction rows, the stored round report records that
-the CD student met all three criteria sealed before training and
-collection. The seed standard deviation fell on both A+C layouts, on
-FLAT from about 0.056 to 0.010. On the seen condition,
-\texttt{ORIGINAL\_18}, the mean NLL moved from 0.704 to 0.643
-(difference interval $[-0.131, -0.0041]$). The intervals resample runs
-for 30 fixed checkpoints, all students follow one fixed teacher set,
-and the spread after retraining the whole pipeline was not measured
-(Section~\ref{sec:disc-threats}). The seed-level files stay on the
-original experiment machine; the per-seed improvement counts of
-Section~\ref{sec:results-scope} were computed there from the stored
-scores, but the three criteria themselves were not recomputed (Section~\ref{sec:eval-contract},
-Appendix~\ref{app:repro}).
+In v3, the last sealed in-house round (Table~\ref{tab:rounds}), with
+30 new seeds, 157 new eligible runs (Section~\ref{sec:eval-contract}),
+and 1,611 prediction rows, the CD student met all three criteria sealed
+before training and collection. The seed standard deviation fell on
+both A+C layouts, on FLAT from about 0.056 to 0.010. On the seen
+condition, \texttt{ORIGINAL\_18}, the mean NLL moved from 0.704 to
+0.643 (difference interval $[-0.131, -0.0041]$). A later recomputation
+from the saved probabilities matched the stored scores of the round
+(Appendix~\ref{app:repro}). The same frozen checkpoints, applied to a
+new collection of 155 runs, narrowed the spread again and stayed within
+the preservation limit (Section~\ref{sec:results-pfc2}). The intervals
+resample runs for 30 fixed checkpoints, all students of a group follow
+one fixed teacher set, and the spread after retraining the whole
+pipeline was not measured (Section~\ref{sec:disc-threats}).
 % 2026-11-25 리뷰 1회차 문체 P2-4·참신성 P2-3: E.1 의 표현에 맞추고 고정 교사 집합 조건을 넣었다.
 % 2026-11-25 분량 줄이기(반복 단서 T1): 제외 실행 문장은 6.2절에 두고 여기서는 뺐다.
 
-The remaining evidence is weaker. On the public ADS-24 dataset, CD
-reduced the seed standard deviation from 0.163 to 0.025 and the mean
-NLL from 2.276 to 2.060; this is an exploratory development comparison
-on evaluation runs that had already been scored. The ADS-24 task is
-also our own derivation: its prediction boundaries sit at label
-transitions, and we did not rerun the documented rule that places
-attack stages and alerts on one time axis (Chapter~\ref{ch:ads24}). Three general encoders (an LSTM encoder in the style of
-DeepLog, a Transformer encoder in the style of LogBERT, and a plain
-GRU) showed the same direction in all six encoder--dataset
-combinations, again in development comparisons. On ADS-24 every CD
-student of our own model remained worse than a frequency baseline that
-predicts the FIT tactic frequencies (NLL 1.830, Chapter~\ref{ch:ads24}), and CD did not
-improve every seed (Chapters~\ref{ch:ads24} and~\ref{ch:generality}).
+The other evidence is weaker or narrower. On the public ADS-24
+dataset, CD reduced the seed standard deviation from 0.163 to 0.025 and
+the mean NLL from 2.276 to 2.060; this is an exploratory development
+comparison on evaluation runs that had already been scored, on a task
+that we derived ourselves (Chapter~\ref{ch:ads24}). Three general
+encoders (an LSTM encoder in the style of DeepLog, a Transformer
+encoder in the style of LogBERT, and a plain GRU) showed the same
+direction in all six encoder--dataset combinations and again on the
+new runs. Changing the teachers changed the level the students reached
+but not the narrowing: in the lab the five most agreeing teachers were
+the best of the sets tried, while on ADS-24 five random teachers did
+better (Section~\ref{sec:gen-teachers}). On ADS-24 every CD student of
+our own model remained worse than a frequency baseline that predicts
+the FIT tactic frequencies (NLL 1.830), and not every seed improved
+(Chapters~\ref{ch:ads24} and~\ref{ch:generality}).
 % 근거: RECORD:166--184 (v3), 218--221 (ADS-24), 294 (세 인코더).
 % ADS-24의 환경 평가 35실행은 1단계에서, PAG1 156실행은 구조 일반성 1단계에서
 % 이미 채점했으므로 두 2단계는 개발 비교다(answers 2026-11-24 07:10, 4번).
@@ -182,12 +184,11 @@ codistillation~\cite{anil2018large}. With one fixed teacher set, part
 of the students' agreement is expected from distillation itself; what
 we add is evidence on whether it carried to new runs, whether the seen-condition
 loss was preserved, and how it compared with FIT-input distillation and
-self-distillation (Section~\ref{sec:disc-novelty}). In
-development comparisons on the plain GRU, students that followed
-several models on environment inputs narrowed the spread, whether the
-pool was arithmetic or geometric, but neither the number of teachers
-nor the use of environment inputs was varied separately
-(Section~\ref{sec:gen-methods}). (c) Addressing the
+self-distillation (Section~\ref{sec:disc-novelty}). On the plain GRU,
+students that followed several models on environment inputs narrowed
+the spread whether the pool was arithmetic or geometric and whichever
+teachers were averaged, while the level they reached followed the
+teachers (Sections~\ref{sec:gen-methods} and~\ref{sec:gen-teachers}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every
@@ -208,8 +209,9 @@ we built on that diagnosis was not adopted
 % 근거: idea.md "기여" 3항, RECORD:28; 참신성 리뷰 P2-1에 따라 (b)를 무라벨
 % 불일치 관찰 → 합의 목표로 고치고, COPY 국소화·OBSERVED_HEAD를 따로 낮췄다.
 
-Chapter~\ref{ch:background} gives the background that the later
-chapters assume: Windows host auditing, models of adversary behavior,
+Appendix~\ref{sec:app-names} lists the names used for conditions,
+models, and rounds. Chapter~\ref{ch:background} gives the background
+that the later chapters assume: Windows host auditing, models of adversary behavior,
 probabilistic prediction and its scoring, training randomness,
 ensembles and distillation, and distribution shift.
 Chapter~\ref{ch:related} reviews related work and ends with a
@@ -223,5 +225,5 @@ the general encoders, and the comparison with other single-model
 methods (Q3, Chapters~\ref{ch:ads24} and~\ref{ch:generality}). A post
 hoc split of mean seed loss into a consensus term and an unlabeled
 disagreement term (Chapter~\ref{ch:decomposition}) precedes the
-interpretation, the threats to validity, and planned follow-up work
-(Chapters~\ref{ch:discussion} and~\ref{ch:conclusion}).
+discussion and the conclusion (Chapters~\ref{ch:discussion}
+and~\ref{ch:conclusion}).

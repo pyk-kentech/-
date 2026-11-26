@@ -256,6 +256,22 @@ REL\_GLOBAL-ADS, and CD accuracy was 31.5\% against 33.9\% for the
 FIT prior. Not every seed gained: seed 301008, the best REL\_GLOBAL-ADS
 seed at 1.953, scored 2.020 as a CD student, and no CD seed reached
 1.953.
+
+Two later analyses, both outside the contract, point the same way. For
+the plain GRU, the final checks found that students of five randomly
+chosen teachers had a lower environment NLL than students of the five
+most agreeing ones (Section~\ref{sec:gen-teachers}), so on ADS-24 the
+agreement rule did not pick the better teachers. And the 119 usable
+runs outside the 132 of the contract (Appendix~\ref{app:ads24-data}),
+scored post hoc with the frozen models, showed the direction of the
+contract runs: REL\_GLOBAL-ADS moved from 1.948 to 1.862 in NLL and from
+0.069 to 0.019 in seed standard deviation, and the three general
+encoders moved the same way. These runs carry the flags that the
+contract excluded, with and without simulated users, so they are
+another population and not a held-out test.
+% 출처: inputs/data/FINAL_CHECKS_20261125/UNIFIED_REANALYSIS_20261125/ADS_UNUSED_119_GROUPS.csv (REL_GLOBAL BASE 1.948317/0.069278,
+%   KD_ENV 1.862240/0.018549; LSTM 1.949566→1.878155, LogBERT 1.939096→1.788063, PLAIN_GRU 1.937812→1.903430);
+%   UNIFIED_REANALYSIS.md:67--69 (사후, 계약 제외 모집단, 플래그 겹침).
 % 2026-11-25 C13: "이동에 따른 손실은 CD 뒤에도 남는다"는 12.1절(sec:disc-does)에서 다룬다.
 % 근거: RECORD:212, 221, 234, 423; ADS24_STAGE2_REPORT.md "FIT 다수 전술 기준선과
 % 비교" (기준선 1.829580; 평균 차 +0.446462, +0.230810, +0.445642; 0/30) 및

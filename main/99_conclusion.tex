@@ -21,11 +21,17 @@ The remedy keeps the deployed architecture and its single-model
 inference cost: a student of the same
 architecture follows the averaged
 probabilities of five selected teachers on unlabeled inputs from the
-new workload (119 runs) and from the seen conditions (48 runs). In the v3 round (Table~\ref{tab:rounds}), the stored round
-report records that the seed standard deviation narrowed on
-both A+C layouts and that \texttt{ORIGINAL\_18} was preserved. The exploratory check on
-ADS-24 and the three encoder adaptations, all development comparisons
-on inspected runs, moved in the same direction.
+new workload (119 runs) and from the seen conditions (48 runs). In the
+v3 round (Table~\ref{tab:rounds}), sealed before training and
+collection, the seed standard deviation narrowed on both A+C layouts
+and \texttt{ORIGINAL\_18} was preserved, and a later recomputation from
+the saved probabilities matched the stored scores. On a new collection
+the frozen v3 students and the frozen students of three general
+encoders narrowed the spread again, with every preservation interval
+within the limit, and the exploratory check on ADS-24 moved the same
+way. Which teachers the student follows set the level it reached but
+not the narrowing: the agreement rule picked the better teachers in the
+lab and not on ADS-24.
 % 근거: RECORD:23, 44 (측정), 104--110 (진단, 6장), 130, 137, 139 (처방, 4장),
 % 166, 170 (v3), 219 (ADS-24 SD), 294 (세 인코더). 숫자는 개요대로 세 개만 다시 썼다.
 % ADS-24 결과와 세 인코더의 ADS-24 쪽은 이미 열람한 평가 실행의 개발 비교다
@@ -48,28 +54,24 @@ diagnosis holds for one model in one lab.
 \section{Future work}
 \label{sec:future}
 
-A set of further checks was planned before this thesis was written;
-none of them is reported here. Teacher sets of five
-seeds chosen at random, of two seeds, and of all 30 would test whether
-training 30 baselines and ranking them by agreement is worth its cost.
-Students trained on 25\% and 50\% of the unlabeled environment inputs
-would estimate how much new-environment data the KL term needs. A repeat of
-the comparison with other single-model methods on a Transformer
-encoder would keep that comparison from resting on one architecture.
-
-Whether the reported results hold beyond the runs and seeds that
-produced them can be checked with the frozen models. Inference on
-the 119 usable ADS-24 runs outside the 132 of the contract
-(Appendix~\ref{app:ads24-data}), unused by any stage, would give an unused
-ADS-24 test; a fresh in-house collection would complete the method
-comparison that stopped at 110 runs. Intervals recomputed with seeds resampled along
-with runs would let a verdict speak for more than these 30 seeds. Two deployed references, for every encoder and dataset, would complete these checks: temperature scaling~\cite{guo2017calibration}
-of each base model, and probability ensembles of the five teachers and
-of all 30 baseline seeds.
+The checks planned before the final stage, on teacher sets, on the
+amount of unlabeled input, on a second encoder for the method
+comparison, on temperature scaling~\cite{guo2017calibration} and
+probability ensembles, on a completed in-house collection, and on the
+ADS-24 runs outside the contract, were run and are reported above.
+Three questions remain. The spread of the whole pipeline, with the 30
+baselines, the teacher selection, and the student all retrained, was
+not measured; only the teacher set was varied. Every main interval
+holds the 30 seeds fixed, so intervals that resample seeds together with
+runs would let a verdict speak for retraining in general. And every
+in-house run comes from one lab and one source procedure, so
+collections with other hosts, benign workloads, and attack procedures,
+and a defined trigger for the forecast, are needed before the result can
+be read as more than a finding in this lab.
 % 원문: Guo et al. ICML 2017 (PMLR 70) arXiv:1706.04599 §4.2 "Temperature scaling ... uses a single scalar
 %   parameter T > 0 for all classes". 방법 이름 인용, 확인됨.
 Whether the ADS-24 and general-encoder models also split on one
-decision is open.
+decision, as REL\_GLOBAL did in the lab, is open as well.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라

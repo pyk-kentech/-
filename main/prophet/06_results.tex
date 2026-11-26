@@ -8,7 +8,8 @@ found that the REL\_GLOBAL seeds disagree where they fail. Whether a
 single CD student trained toward the consensus of five teachers reduces
 that seed-to-seed spread on new runs, without giving up the seen
 condition, was tested in the in-house lab under a sealed contract, and
-the v3 round is the main evidence. It trained 30 new seeds in each of three groups,
+the v3 round is the main evidence; a later collection, PFC2, applied the
+same frozen checkpoints to new runs (Section~\ref{sec:results-pfc2}). The v3 round trained 30 new seeds in each of three groups,
 REL\_GLOBAL, KD\_ENV\_TOP5, and KD\_ALL (Table~\ref{tab:variants}),
 for 90 new fits.
 
@@ -20,9 +21,13 @@ new seeds. Of 160 planned and attempted runs, 157 were eligible, with
 1,611 rows; none was replaced. The contract, its three criteria, and
 the 98.3333\% Bonferroni level were fixed before training and
 collection (Sections~\ref{sec:eval-criteria} and~\ref{sec:eval-rounds}).
-The values and verdicts are those recorded in the stored round report,
-which cannot be recomputed from this document
-(Sections~\ref{sec:eval-contract} and~\ref{sec:repro-code}).
+The values and verdicts are those of the stored round report. A
+reanalysis on the original experiment machine later recomputed the
+round's scores from the saved probabilities, and from its per-run,
+per-seed table every group mean, seed standard deviation, worst seed,
+and per-seed count in this chapter matches the report
+(Section~\ref{sec:repro-code}). The criteria intervals were not
+recomputed at their sealed level.
 % 2026-11-25 분량 줄이기 C12: 저장 보고서 단서(T1)는 6.2절·E.1 에 두고 여기서는 한 문장으로 줄였다.
 % 근거: RECORD:166; CONTRACT_V3.md (군·초기 tensor·FIT trace 공유, 계획 160,
 % 보충 금지); v3 FINAL_REPORT_KO.md "수집과 계보" (계획 160, 시도 160, 적격 157,
@@ -139,7 +144,10 @@ adding the seen-condition inputs was not isolated. On
 its 95\% interval, $[-0.120, +0.006]$, contains zero. The round
 supports KD\_ALL against REL\_GLOBAL; it does not show that the 48
 seen-condition runs account for the part of the gain that
-KD\_ENV\_TOP5 lacks. Nor did the student reach its teachers.
+KD\_ENV\_TOP5 lacks. Pooling the three collections on which these
+checkpoints were later scored gives $-0.058$ $[-0.101, -0.020]$
+(Section~\ref{sec:results-pfc2}), a post hoc summary rather than a
+test. Nor did the student reach its teachers.
 On every condition the probability average of the five teachers had
 lower NLL than KD\_ALL, for example 0.023 against 0.028 on
 \texttt{A+C FLAT}. The teachers are five models at inference and the
@@ -233,6 +241,79 @@ Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL \\
 \end{tabular}
 \end{table}
 
+\section{A new collection with the frozen checkpoints}
+\label{sec:results-pfc2}
+
+The final checks (Section~\ref{sec:eval-rounds}) applied the same frozen
+v3 checkpoints to the 155 eligible runs and 1,589 rows of PFC2, a new
+collection in the same lab design. Eligibility was sealed before any of
+these checkpoints predicted on the runs, so this is a new-run check:
+the runs are new, and the checkpoints are those of v3.
+Table~\ref{tab:results-pfc2} gives the condition means, and
+Figure~\ref{fig:v3-seeds} shows every seed of v3 and of PFC2 on the
+A+C layouts and on \texttt{ORIGINAL\_18}.
+
+The spread narrowed again. With the two A+C layouts weighted equally,
+the difference in seed standard deviation was $-0.055$
+$[-0.075, -0.036]$ for KD\_ALL and $-0.056$ $[-0.076, -0.036]$ for
+KD\_ENV\_TOP5, at the 99.1667\% level used in the tables of that stage,
+and the mean NLL fell by 0.045 for both. On \texttt{A+C FLAT} the seed
+standard deviation fell from 0.058 to 0.004 and the worst seed from
+0.263 to 0.026. On \texttt{ORIGINAL\_18} the difference was $-0.061$
+$[-0.178, +0.012]$ for KD\_ALL and $+0.0009$ $[-0.0045, +0.0066]$ for
+KD\_ENV\_TOP5. Both upper ends lie below the $+0.020$ limit, so
+preservation held for both students on these runs, and improvement was
+shown for neither. REL\_GLOBAL scored 0.354 on \texttt{ORIGINAL\_18}
+here, against 0.704 in v3 and 0.467 in PAG1, so the tables are again
+read separately.
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:7 (155실행·1,589행),
+%   :32--98 (조건별 평균·SD), :123--130 ("Frozen v3 reference on the same PFC2 rows", 99.1667%:
+%   KD_ENV_TOP5 SD −0.055601 [−0.076317, −0.035997], NLL −0.045440, 원래 +0.000891 [−0.004489, 0.006571];
+%   KD_ALL SD −0.054968 [−0.074902, −0.035938], NLL −0.045256, 원래 −0.060991 [−0.177761, 0.012194]).
+%   최악 seed 0.262961 → 0.026136: V3_LINEAGE_SEED_METRICS_derived.csv.
+
+\begin{table}[htbp]
+\centering
+\caption[Mean NLL of the frozen v3 checkpoints on the PFC2 runs]{Mean NLL of the frozen v3 checkpoints on the new PFC2 runs
+(new-run check; no new fits). Values are 30-seed means as in
+Table~\ref{tab:results-v3-nll}, with four decimals because the two
+students tie at three on both A+C layouts. The runs differ from those
+of Tables~\ref{tab:results-v3-nll} and~\ref{tab:results-pag1}.}
+\label{tab:results-pfc2}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Condition & Runs / rows & REL\_GLOBAL & KD\_ENV\_TOP5 & KD\_ALL \\
+\midrule
+\texttt{A+C FLAT}     & 30 / 330 & 0.0603 & 0.0167 & 0.0170 \\
+\texttt{A+C NESTED}   & 30 / 330 & 0.0702 & 0.0229 & 0.0230 \\
+\texttt{C\_ONLY}      & 31 / 341 & 0.0724 & 0.0342 & 0.0355 \\
+\texttt{B+C}          & 32 / 352 & 0.0696 & 0.0398 & 0.0410 \\
+\texttt{ORIGINAL\_18} & 32 / 236 & 0.3542 & 0.3551 & 0.2933 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A post hoc reanalysis then pooled the three collections on which these
+checkpoints were scored, the v3 runs, PAG1, and PFC2, weighting each
+collection equally, with 95\% intervals that resample configurations
+within each collection and keep the 30 seeds fixed. For KD\_ALL minus
+REL\_GLOBAL, the A+C mean NLL difference was $-0.049$
+$[-0.057, -0.041]$, the A+C seed-SD difference $-0.052$
+$[-0.060, -0.044]$, and the \texttt{ORIGINAL\_18} difference $-0.057$
+$[-0.098, -0.021]$. For KD\_ENV\_TOP5 the \texttt{ORIGINAL\_18}
+difference was $+0.0009$ $[-0.0075, +0.0106]$. Across these
+collections, then, the seen-condition inputs of KD\_ALL went with a
+lower seen-condition loss, while the background inputs alone left it
+unchanged. These are summaries of collections already seen, not a
+further confirmation.
+% 출처: inputs/data/FINAL_CHECKS_20261125/UNIFIED_REANALYSIS_20261125/UNIFIED_REANALYSIS.md:45--57 (사후, 차수 동일 가중,
+%   RNG 2026112501); COLLECTION_INTEGRATED.csv (KD_ALL 원래 −0.057112 [−0.098146, −0.020694], A+C NLL
+%   −0.048539 [−0.056869, −0.040555], SD −0.051618 [−0.060340, −0.044470]; KD_ENV_TOP5 원래 +0.000932
+%   [−0.007454, +0.010552]; KD_ALL−KD_ENV_TOP5 원래 −0.058044 [−0.100713, −0.020344]).
+
+\input{main/prophet/fig_v3_seeds}
+
 \section{Scope of the in-house test}
 \label{sec:results-scope}
 
@@ -244,7 +325,8 @@ than REL\_GLOBAL of the same seed for 22 of 30 seeds on \texttt{A+C FLAT},
 26 on \texttt{A+C NESTED}, 19 on \texttt{C\_ONLY}, 25 on \texttt{B+C}
 and 25 on \texttt{ORIGINAL\_18}. In the PAG1 re-inference the counts
 were 25, 24, 15, 24 and 27 for KD\_ALL and 20, 23, 15, 25 and 15 for
-KD\_ENV\_TOP5; on \texttt{C\_ONLY} only half of the seeds improved.
+KD\_ENV\_TOP5; on \texttt{C\_ONLY} only half of the seeds improved. On
+the PFC2 runs the counts for KD\_ALL were 24, 22, 22, 18 and 25.
 
 The new runs repeat the lab, the benign workers, and the configuration
 design of the development runs (Section~\ref{sec:eval-rounds}), so they

@@ -1,5 +1,8 @@
-\chapter{Action Vocabulary}
+\chapter{Action Vocabulary and Names}
 \label{app:actions}
+
+\section{Action vocabulary}
+\label{sec:app-action-list}
 
 The table lists the semantic labels in descriptive language. The
 same label vocabulary is used when an evaluation procedure happens
@@ -25,3 +28,56 @@ No. & Action & No. & Action \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\section{Names used in this thesis}
+\label{sec:app-names}
+
+The thesis keeps the identifiers under which the conditions, models,
+and rounds were stored, so that each result can be traced to its
+record. Table~\ref{tab:names} explains them.
+% 2026-11-26 심사 대비 평가(세 건 모두 내부 이름 지적): 본문 이름은 기록과 대조할 수 있게 두고 대응표를 더했다.
+
+{\small\setstretch{1}% 표는 1배수(작성 안내)
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X@{}}
+\caption[Names used for conditions, models, and rounds]{Names used for conditions, models, and rounds, with the place
+where each is defined.}
+\label{tab:names}\\
+\toprule
+Name & Meaning \\
+\midrule
+\endfirsthead
+\multicolumn{2}{@{}l}{\emph{Table~\ref{tab:names}, continued}}\\
+\toprule
+Name & Meaning \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\multicolumn{2}{@{}l}{\emph{Data and conditions}} \\
+FIT set, C-fold & The 603 labeled training runs; the C-fold withholds every run with benign worker~C (Section~\ref{sec:conditions}) \\
+\texttt{ORIGINAL\_18} & The seen condition: the source procedure without a benign worker \\
+\texttt{A+C}, \texttt{B+C}, \texttt{C\_ONLY} & Unseen conditions: the procedure with benign workers A and C, B and C, or C alone \\
+\texttt{FLAT}, \texttt{NESTED} & The two placements of the four file targets \\
+Natural row, view & One prediction boundary of one run as received; a view replays it under a delivery schedule (Section~\ref{sec:task-rows}) \\
+Adaptation inputs & Unlabeled runs read by the KL term: 119 background runs, and for KD\_ALL 48 seen-condition runs (Section~\ref{sec:method-variants}) \\
+\midrule
+\multicolumn{2}{@{}l}{\emph{Models}} \\
+REL\_GLOBAL & The baseline predictor (Section~\ref{sec:method-baseline}); REL\_GLOBAL-ADS is its ADS-24 adaptation \\
+CD & Consensus distillation: a student follows the mean of five teachers on unlabeled inputs (Section~\ref{sec:method-cd}) \\
+KD\_ENV\_TOP5 & CD student with the background adaptation inputs \\
+KD\_ALL & CD student with the background and seen-condition inputs; the final in-house student \\
+KD\_ENV, KD\_FIT, KD\_SELF & Students of all 30 baselines, of all 30 on FIT inputs, and of the same seed's own baseline (Table~\ref{tab:variants}) \\
+Base model & A general encoder trained with cross-entropy alone (Chapter~\ref{ch:generality}) \\
+\texttt{OBSERVED\_HEAD} & The head given the lab-specific lookup of Section~\ref{sec:diag-intervention}; \texttt{SHUFFLED\_HEAD} and \texttt{GENERIC\_HEAD} are its controls \\
+\midrule
+\multicolumn{2}{@{}l}{\emph{Rounds and collections}} \\
+10-seed, v2, v3 & The in-house rounds that tested CD; v2 and v3 are stored as \texttt{PEKD2}--\texttt{PEKD4} (Table~\ref{tab:rounds}) \\
+PAG1 & The in-house collection of the generality study \\
+PFC1, PFC2 & The collections of the final checks; PFC1 ended in a safety stop \\
+\midrule
+\multicolumn{2}{@{}l}{\emph{Evidence and analysis}} \\
+Sealed criterion, development comparison, new-run check, post hoc & The status labels of Section~\ref{sec:eval-rounds} \\
+S1--S3 & The three seed-selection scores of Section~\ref{sec:diag-size} \\
+$V$ & The disagreement term of the log-loss decomposition (Chapter~\ref{ch:decomposition}) \\
+\texttt{THME0064} & The run of the recorded file decision (Section~\ref{sec:recorded-case}) \\
+\end{xltabular}}

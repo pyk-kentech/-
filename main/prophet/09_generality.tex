@@ -7,9 +7,12 @@ commonly used for log sequences are unstable under unseen conditions in
 the same way, and whether CD, unchanged, reduces that
 instability for them as well (Section~\ref{sec:gen-arch}). It then asks
 whether simpler single-model methods achieve the same reduction
-(Section~\ref{sec:gen-methods}). Both studies cover the in-house lab
-and ADS-24, and both are development comparisons on both datasets, for
-reasons each section states.
+(Section~\ref{sec:gen-methods}), and how the result depends on the
+teacher set and on the amount of unlabeled input
+(Section~\ref{sec:gen-teachers}). All three cover the in-house lab and
+ADS-24. The first two began as development comparisons; the final
+checks later scored their frozen checkpoints on the new PFC2 runs, a
+new-run check (Section~\ref{sec:eval-rounds}).
 
 \section{Generality across encoders}
 \label{sec:gen-arch}
@@ -212,6 +215,25 @@ essentially the base-model values of 1.139 and 0.579. This is the second
 dataset, after ADS-24, on which distillation without a consensus left
 the instability in place.
 
+The final checks applied the frozen base models and CD students of the
+three encoders to the 155 new PFC2 runs, with the 99.1667\% intervals
+of the original families. Because these runs played no part in
+choosing the combinations, regression toward the mean from that choice
+does not apply here. With the two A+C layouts weighted equally, the
+difference in seed standard deviation was $-0.205$ $[-0.247, -0.173]$
+for the LSTM encoder, $-0.813$ $[-0.851, -0.779]$ for the Transformer
+encoder, and $-0.705$ $[-0.773, -0.641]$ for the plain GRU, and the
+mean NLL fell by 0.240, 0.579, and 1.026. On \texttt{ORIGINAL\_18} the
+differences were $-0.033$ $[-0.100, +0.015]$, $-0.061$
+$[-0.122, -0.017]$, and $-0.039$ $[-0.076, -0.011]$, all with upper
+ends below the $+0.020$ limit. The ranking by absolute level did not
+change: on PFC2 \texttt{A+C FLAT} the three students scored 0.459,
+0.427, and 0.213, against 0.060 for REL\_GLOBAL and 0.017 for KD\_ALL.
+CD narrowed the spread of each encoder; it did not bring the general
+encoders near REL\_GLOBAL.
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:100--108 (구조 2단계 비교,
+%   99.1667%), :19--34 (A+C FLAT 평균); RESEARCH_CLOSURE_DECISION.md:7--8.
+
 For context, we also ran our own adaptations
 of ORTHRUS~\cite{jiang2025orthrus}, BiTA~\cite{nayeri2026bita}, and
 CL-AP$^{2}$~\cite{liu2024clap2} with three seeds each on the same new
@@ -247,8 +269,9 @@ carried forward (Appendix~\ref{app:rejected}).
 
 The second study compares CD with five other ways of training one
 model, all on the plain GRU; with the reused base model and
-self-distillation control, it scores eight groups. The whole comparison
-is a development comparison. The in-house runs were newly collected
+self-distillation control, it scores eight groups. The original
+comparison is a development comparison; its repeat on the PFC2 runs,
+at the end of this section, is a new-run check. The in-house runs were newly collected
 under a sealed contract in the same lab design, but the contract fixed
 the contrasts and intervals without a pass-or-fail rule
 (Table~\ref{tab:rounds}, note~c), and the ADS-24 runs are the inspected
@@ -451,6 +474,55 @@ a warning about reading low disagreement as success. It made all 30
 seeds agree, so that every seed had the same accuracy of 80.5\% on
 \texttt{A+C FLAT}, while their loss rose to 2.702.
 Chapter~\ref{ch:decomposition} returns to this case.
+
+The final checks repeated four of the methods, and the geometric pool,
+on the Transformer encoder, with 30 new models per method trained under
+the settings of Section~\ref{sec:gen-arch} and compared with that
+encoder's CD student (Table~\ref{tab:gen-logbert}). The pattern held on
+both datasets. Four-checkpoint weight averaging, the hard-label control,
+entropy minimization, and FIT-input distillation all had a larger
+spread and a higher mean NLL than CD, with every interval above zero,
+in-house on the new PFC2 runs and on ADS-24. The geometric pool came
+closest: its spread was larger by 0.012 on ADS-24 and by 0.016
+in-house, and its mean NLL higher by 0.096 on ADS-24, while the
+in-house mean difference, $+0.014$ $[-0.026, +0.056]$, was not
+resolved. The CD student in these contrasts is the stored one, so the
+in-house contrasts can again include rerun variation.
+
+\begin{table}[htbp]
+\centering
+\caption[Method repeat on the Transformer encoder]{Paired contrasts of the method repeat on the Transformer encoder,
+each method minus that encoder's CD student, with two-sided Bonferroni
+intervals at 99.5833\% over the 12 comparisons of the final checks per
+dataset. In-house values are the 1:1 average of \texttt{A+C FLAT} and
+\texttt{A+C NESTED} on the PFC2 runs (new-run check); ADS-24 values are
+on the 35 environment-evaluation runs (development comparison).
+Positive values favor CD. The last column states whether the method's
+preservation interval against the base model lies below the limit.}
+\label{tab:gen-logbert}
+\small
+\begin{tabular}{@{}llrlrlc@{}}
+\toprule
+Data & Method & \multicolumn{2}{c}{Seed SD difference}
+ & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
+\midrule
+In-house & Four-checkpoint weight averaging & 0.702 & $[0.664, 0.750]$ & 0.515 & $[0.474, 0.549]$ & yes \\
+In-house & Hard-label control     & 1.007 & $[0.944, 1.068]$ & 1.012 & $[0.915, 1.092]$ & no \\
+In-house & Entropy minimization   & 0.108 & $[0.065, 0.149]$ & 1.665 & $[1.047, 2.236]$ & no \\
+In-house & FIT-input distillation & 0.756 & $[0.705, 0.807]$ & 0.565 & $[0.496, 0.622]$ & yes \\
+In-house & Geometric-pool distillation & 0.016 & $[0.006, 0.026]$ & 0.014 & $[-0.026, 0.056]$ & yes \\
+\midrule
+ADS-24 & Four-checkpoint weight averaging & 0.094 & $[0.068, 0.125]$ & 0.315 & $[0.242, 0.386]$ & yes \\
+ADS-24 & Hard-label control     & 0.201 & $[0.164, 0.241]$ & 1.172 & $[0.956, 1.369]$ & no \\
+ADS-24 & Entropy minimization   & 0.336 & $[0.289, 0.400]$ & 4.904 & $[4.225, 5.526]$ & no \\
+ADS-24 & FIT-input distillation & 0.082 & $[0.061, 0.107]$ & 0.309 & $[0.235, 0.379]$ & yes \\
+ADS-24 & Geometric-pool distillation & 0.012 & $[0.005, 0.019]$ & 0.096 & $[0.067, 0.124]$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/ABLATION_REPORT.md:16--20, 28--32 (LOGBERT_ENCODER 군,
+%   99.5833%, 자료당 12비교 가족, 보존 열); FINAL_CHECKS_RECOVERY_REPORT.md:196 (720 fit, 같은 seed·초기 tensor·
+%   FIT trace·1,346 update, 같은 구조 KD_ENV 와 비교).
 % 근거: RECORD:351--356, 404 (기하평균 교사 교체: 교사 NLL 56회 중 24회만 우세,
 % 학생 우열 미확인, 산술평균 유지); METHOD_BASELINES_REPORT.md "V와 합의 예측"
 % (ENTROPY A_PLUS_C_FLAT V 0.000007, 합의 NLL 2.701564; 이 수치는 10장에서 쓴다).
@@ -464,9 +536,20 @@ as 160 attempts, and a sealed safety stop ended it after 119, leaving
 110 eligible runs and 1,119 rows; the 41 runs not attempted were neither
 retried nor replaced. The \texttt{A+C} intervals therefore rest on six
 complete \texttt{FLAT} configurations and nine complete \texttt{NESTED}
-configurations.
+configurations. The final checks scored the same frozen checkpoints on
+the 155 PFC2 runs, with 14 complete configurations per A+C layout, and
+added a seventh arm, the base model with a single temperature fitted on
+FIT~\cite{guo2017calibration}. Against CD, at 99.1667\% over the six
+arms, every arm except the geometric pool again had a larger seed
+standard deviation and a higher mean NLL, by 0.264 to 1.210 and by
+1.002 to 2.274. Temperature scaling left the base model's spread where
+it was, 0.694 $[0.630, 0.760]$ above that of CD. The geometric pool
+remained indistinguishable from CD, with differences of $+0.001$
+$[-0.008, +0.011]$ in spread and $-0.020$ $[-0.057, +0.013]$ in mean.
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:110--121 (PLAIN_GRU 방법
+%   기준선 PFC2, 여섯 군 가족 99.1667%, TEMPERATURE = FIT 전용 온도), :17--31 (완전 구성 14).
 
-The comparison used one encoder, and no method was tuned
+The original comparison used one encoder, and no method was tuned
 on its own: coefficient, exposure, and schedule were fixed for all, and
 four-checkpoint weight averaging kept the cosine schedule rather than
 the cyclical or constant learning rate of stochastic weight averaging,
@@ -487,3 +570,95 @@ On the same new runs the A+C score of REL\_GLOBAL was 0.086, against
 % PROPHET 0/30, CPU GRU 비결정성).
 % 4회차 지시 1번·방법 리뷰 P1-1: 온도 보정·확률 앙상블 문단과 표 tab:gen-reference는
 % 2026-11-23 이후 마무리 확인 묶음이라 지우고 결론 Future Work에 계획으로만 남겼다.
+
+
+\section{Teacher sets and the amount of unlabeled input}
+\label{sec:gen-teachers}
+
+CD as tested trains 30 baselines and keeps the five that agree most
+with the majority. The final checks asked whether that choice, and the
+amount of unlabeled input, matter, on the plain GRU of
+Section~\ref{sec:gen-methods}. Seven groups of 30 new students each
+replaced one part of CD: three sets of five teachers drawn at random
+from the 30 baselines, a set of two random teachers, all 30 baselines as
+teachers, and the five agreeing teachers with 25\% and with 50\% of the
+unlabeled adaptation runs. Every group kept the seeds, initial weights,
+FIT trace, and 1,346 updates of CD, and its teachers or subsets were
+fixed before training. Each is compared with the plain-GRU CD student,
+with two-sided Bonferroni intervals at 99.5833\% over the 12
+comparisons of the final checks per dataset
+(Table~\ref{tab:gen-teachers}). In-house the comparison is a new-run
+check on the PFC2 A+C runs; on ADS-24 it is a development comparison.
+
+Every teacher set kept the spread small. In-house the base model had a
+seed standard deviation of about 0.72 on these runs, and no teacher set
+raised the students' spread more than 0.045 above that of CD; on ADS-24
+no set changed it by more than 0.006. The teachers decided the mean
+instead, in opposite directions on the two datasets. In-house the five
+agreeing teachers were the best set: students of five random teachers
+had a mean NLL 0.295 to 0.339 higher, of two random teachers 0.439
+higher, and of all 30 teachers 0.255 higher. On ADS-24 the random sets
+of five did better than the agreeing five, by 0.120 to 0.131, and all 30
+teachers by 0.119; only the two-teacher set did worse. The students
+followed their teachers closely. On PFC2 \texttt{A+C FLAT} the teacher
+averages scored 0.204 for the agreeing five, 0.489 to 0.569 for the
+random fives, and 0.439 for all 30, and each student group lay within
+0.03 of its teachers; on ADS-24 the agreeing five scored 2.080 and all 30
+scored 1.963.
+
+The amount of unlabeled input mattered little. With 25\% or 50\% of the
+adaptation runs the in-house mean differed from that of CD by $+0.007$
+$[-0.001, +0.014]$ and $+0.006$ $[-0.000, +0.012]$, and on ADS-24 it
+was lower by 0.021 and 0.018.
+
+These results leave three limits. The 30 baselines were kept, so the
+spread that would follow from retraining them together with the
+teachers was not measured. The in-house contrasts compare new students
+with a stored CD student and can include rerun variation. And the
+agreement rule was favorable on one dataset and unfavorable on the
+other, so we read it as a design choice that worked in the lab, not as
+a rule that picks the best teachers in general. One random set's
+preservation interval in-house crossed the limit
+(Table~\ref{tab:gen-teachers}).
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/ABLATION_REPORT.md:9--15, 21--27 (PLAIN_GRU 교사 구성·입력량,
+%   99.5833%, 보존 열); FINAL_CHECKS_RECOVERY_REPORT.md:196 (720 fit, 미리 정한 교사·부분집합);
+%   UNIFIED_REANALYSIS_20261125/TEACHER_POOLS_ALL.csv·STUDENT_TEACHER_ALL.csv (교사 단독 NLL: PFC2 FLAT TOP5
+%   0.204193, ALL30 0.438754, RANDOM5 A/B/C 0.569056/0.530258/0.488659, RANDOM2 0.620384; ADS-24 TOP5 2.079862,
+%   ALL30 1.962718; 학생−교사 PFC2 FLAT −0.021~+0.029). 기준 SD: FINAL_CHECKS_RECOVERY_REPORT.md:23,39
+%   (PLAIN_GRU BASE FLAT 0.727170, NESTED 0.721446).
+
+\begin{table}[htbp]
+\centering
+\caption[Teacher sets and amounts of unlabeled input on the plain GRU]{Teacher sets and amounts of unlabeled input on the plain GRU,
+each group minus the CD student, with two-sided Bonferroni intervals at
+99.5833\% over the 12 comparisons of the final checks per dataset.
+In-house: the PFC2 runs, 1:1 average of \texttt{A+C FLAT} and
+\texttt{A+C NESTED} (new-run check). ADS-24: the 35
+environment-evaluation runs (development comparison). Positive values
+favor CD. The last column states whether the group's preservation
+interval against the base model lies below the limit.}
+\label{tab:gen-teachers}
+\small
+\begin{tabular}{@{}llrlrlc@{}}
+\toprule
+Data & Group & \multicolumn{2}{c}{Seed SD difference}
+ & \multicolumn{2}{c}{Mean NLL difference} & Pres. \\
+\midrule
+In-house & Five random teachers, set A & 0.009 & $[-0.000, 0.017]$ & 0.339 & $[0.287, 0.398]$ & yes \\
+In-house & Five random teachers, set B & 0.023 & $[0.016, 0.031]$ & 0.295 & $[0.265, 0.331]$ & yes \\
+In-house & Five random teachers, set C & 0.020 & $[0.013, 0.028]$ & 0.303 & $[0.266, 0.341]$ & no \\
+In-house & Two random teachers         & 0.045 & $[0.026, 0.060]$ & 0.439 & $[0.346, 0.537]$ & yes \\
+In-house & All 30 teachers             & $-0.001$ & $[-0.006, 0.002]$ & 0.255 & $[0.238, 0.274]$ & yes \\
+In-house & 25\% of adaptation runs     & 0.006 & $[-0.001, 0.017]$ & 0.007 & $[-0.001, 0.014]$ & yes \\
+In-house & 50\% of adaptation runs     & 0.003 & $[-0.002, 0.010]$ & 0.006 & $[-0.000, 0.012]$ & yes \\
+\midrule
+ADS-24 & Five random teachers, set A & $-0.006$ & $[-0.010, -0.002]$ & $-0.131$ & $[-0.165, -0.099]$ & yes \\
+ADS-24 & Five random teachers, set B & $-0.003$ & $[-0.008, 0.003]$ & $-0.130$ & $[-0.178, -0.086]$ & yes \\
+ADS-24 & Five random teachers, set C & 0.000 & $[-0.004, 0.004]$ & $-0.120$ & $[-0.152, -0.088]$ & yes \\
+ADS-24 & Two random teachers         & 0.003 & $[-0.003, 0.010]$ & 0.028 & $[0.009, 0.049]$ & yes \\
+ADS-24 & All 30 teachers             & $-0.000$ & $[-0.003, 0.003]$ & $-0.119$ & $[-0.153, -0.087]$ & yes \\
+ADS-24 & 25\% of adaptation runs     & $-0.004$ & $[-0.007, 0.002]$ & $-0.021$ & $[-0.029, -0.013]$ & yes \\
+ADS-24 & 50\% of adaptation runs     & $-0.001$ & $[-0.004, 0.004]$ & $-0.018$ & $[-0.024, -0.012]$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table}

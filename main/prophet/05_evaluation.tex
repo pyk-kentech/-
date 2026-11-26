@@ -43,10 +43,9 @@ them: the sample standard deviation of the 30 values $L_s$ (the
 seed}), and, for the encoders of Chapter~\ref{ch:generality}, the range
 of per-seed accuracy. The seed standard deviation
 is the statistic of the v3 stability criteria; the other
-two describe the spread it summarizes. For the v3 round the stored
-material gives the seed standard deviation on the A+C layouts and on
-\texttt{ORIGINAL\_18} and the worst seed on the A+C layouts, and
-Chapter~\ref{ch:results} reports those.
+two describe the spread it summarizes. For the v3 round they come
+from per-seed scores recomputed after the round from the saved
+probabilities (Section~\ref{sec:repro-code}).
 % 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
 % METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
 % 구조 일반성·방법 비교 보고서: "정확도도 실행 동등". v3 보고서: "행 정확도
@@ -100,8 +99,9 @@ three failed at the source collection stage (Appendix~\ref{app:repro}).
 The four background runs excluded from PAG1, the in-house
 collection of the generality study (Section~\ref{sec:eval-rounds}),
 failed at the same stage: in each, the START or STOP record of a
-source action was not found. No exclusion in either round depends on a
-score. The seed-level score files of both collections stay on the
+source action was not found. The five background runs excluded from
+PFC2 failed in the same way (Appendix~\ref{app:repro}). No exclusion in
+any of these collections depends on a score. The seed-level score files of both collections stay on the
 original experiment machine; the per-seed figures taken from them were
 computed there from the stored scores, without new inference.
 % 출처(PAG1 제외 4실행): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/ELIGIBILITY_SEAL.json:19
@@ -215,7 +215,11 @@ contrast, a family of the six encoder--dataset contrasts (99.1667\%).
 It defines no family of all 18 contrasts, and we do not claim that all
 18 hold jointly at a 5\% familywise level, which would need 99.7222\%
 intervals that were not computed. The method comparison has one family
-of the five comparison methods per dataset and statistic (99\%).
+of the five comparison methods per dataset and statistic (99\%). The
+final checks keep the families of the original studies when they score
+frozen checkpoints on PFC2, add the temperature-scaled base model to
+the method family (six arms, 99.1667\%), and give their added
+comparisons one family of 12 per dataset and statistic (99.5833\%).
 Estimates and interval ends are rounded to three decimals. A value is
 written to four where three would not separate it from a limit, from
 zero, or from a neighboring value in the same table, and a table keeps
@@ -233,7 +237,7 @@ values behind the rounded estimates and intervals of the main chapters.
 \label{sec:eval-rounds}
 
 Every result in the following chapters carries one of three labels,
-and one intermediate check is named at the end of this section. A
+and an intermediate kind of check is named at the end of this section. A
 \emph{sealed criterion} is a contrast whose form, limit, and interval
 level were fixed in a contract before the round's models were trained
 and its executions collected, and which was then read once on those
@@ -259,11 +263,25 @@ is compared, but the runs had already informed the decision to run the
 stage, so its outcome is not a confirmation. The method comparison of
 Section~\ref{sec:gen-methods} is a development comparison as well: its
 contract fixed no pass rule, and its in-house contrasts may include
-rerun variation. One check falls between the first two labels. The
-\texttt{OBSERVED\_HEAD} check of Section~\ref{sec:diag-intervention}
-was fixed before its runs were collected but after its models had been
-trained; we call it a \emph{new-run check} and use it only for the
-diagnosis, never for a claim about CD.
+rerun variation. One kind of check falls between the first two
+labels. A \emph{new-run check} is fixed before its runs are collected
+but after its models were trained, so the runs are new while the
+checkpoints are not. The \texttt{OBSERVED\_HEAD} check of
+Section~\ref{sec:diag-intervention} is one, used only for the
+diagnosis. The \emph{final checks} are the other. Their collection,
+PFC2, was sealed after a first attempt, PFC1, had ended in a safety
+stop; all 160 planned PFC2 runs were attempted once, and eligibility
+was sealed before any model predicted on them. On these runs we scored
+the frozen checkpoints of v3, of the generality study, and of the
+method comparison, together with added comparisons whose groups,
+seeds, and settings were fixed before training
+(Section~\ref{sec:gen-teachers}); the stage report states that no
+group, seed, or coefficient was changed after scores were seen. The
+ADS-24 parts of the final checks reuse the inspected
+environment-evaluation runs and remain development comparisons.
+% 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:3,7,9,244
+%   (PFC1 안전 중지 보존, PFC2 계획 160·시도 160·적격 155·1,589행, 예측 전 적격 봉인, 점수 보고 바꾼 것 없음);
+%   ABLATION_REPORT.md:38 ("열람한 점수로 군·seed·계수를 바꾸지 않았다"). 봉인 계약 원문은 받은 자료에 없다.
 % 근거: 개요 전체 규칙 "증거의 지위 표시"; RECORD:126, 334, 442, 443.
 % 방법 리뷰 P1-1, P1-2와 answers 2026-11-24 07:10 4번에 따라 ADS-24 2단계와 구조
 % 일반성 2단계를 개발 비교로 낮췄다. PAG1 재추론도 같은 이유(PAG1 실행이 구조
@@ -316,7 +334,7 @@ v2 round, first (\texttt{PEKD2}) & 120 & 116 / 1,187 of 160 planned
 v2 round, recheck (\texttt{PEKD3}) & 0 & 159 / 1,633
   & sealed criterion & stability passed; preservation undecided (interval crosses limit); not adopted \\
 v3 round (\texttt{PEKD4}) & 90 & 157 / 1,611
-  & sealed criterion & all three criteria passed, as stored; exclusions recorded as collection failures \\
+  & sealed criterion & all three criteria passed (scores later recomputed); exclusions recorded as collection failures \\
 PAG1 re-inference & 0 & 156 / 1,600
   & development comparison$^{a}$ & stability favorable; preservation undecided \\
 ADS-24, stage 1 & 30 (+9 pilot) & 35 / 5,639 and 15 / 2,982
@@ -329,6 +347,12 @@ Generality, stage 2 & 210 & as stage 1
   & development comparison$^{a}$ & contrasts favorable in all six combinations \\
 Method comparison & 300 & 110 / 1,119 of 160 planned; ADS-24 35 / 5,639
   & development comparison$^{c}$ & reported contrasts; no pass rule \\
+Final checks, first (PFC1) & --- & none eligible
+  & sealed contract, not adjudicated & safety stop \\
+Final checks, frozen checkpoints (PFC2) & 0 & 155 / 1,589
+  & new-run check & spread narrowed for all four CD lines; their preservation within limit \\
+Final checks, added comparisons & 720 & PFC2 A+C; ADS-24 35 / 5,639
+  & new-run check / development$^{f}$ & reported contrasts \\
 \end{xltabular}}
 \vspace{-\medskipamount}
 \noindent\begin{minipage}{\textwidth}\footnotesize\setstretch{1}
@@ -349,6 +373,9 @@ mean-NLL contrasts favor KD\_ENV (Section~\ref{sec:results-failed}).
 $^{e}$The condition for running stage~2: a baseline seed standard
 deviation of at least 0.050 whose 95\% interval has a lower end of at
 least 0.020 (Section~\ref{sec:ads24-task}).
+$^{f}$A new-run check on the PFC2 runs and a development comparison on
+ADS-24, whose environment-evaluation runs had been inspected
+(Section~\ref{sec:gen-teachers}).
 The 10-seed round reused the 157 runs first collected, as new runs, for
 the \texttt{OBSERVED\_HEAD} check of Section~\ref{sec:diag-intervention};
 they are not the runs of the v3 round.
