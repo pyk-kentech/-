@@ -25,10 +25,8 @@ without showing preservation, and v3 passed all three criteria. A later
 new-run check on the frozen checkpoints of v3 and of the three general
 encoders narrowed the spread for all four and kept every preservation
 interval within the limit (Sections~\ref{sec:results-pfc2}
-and~\ref{sec:gen-arch}). Part of the narrowing is also expected from
+and~\ref{sec:gen-arch}).
 % 2026-11-25 분량 줄이기(반복 단서 T1·T2): 고정 seed·저장 보고서 단서는 12.5절에서 다룬다.
-distillation itself, since all students of a group follow one fixed
-teacher set (Section~\ref{sec:disc-novelty}).
 
 What CD did not do is close the gap to a frequency baseline on ADS-24:
 every CD seed of REL\_GLOBAL-ADS stayed worse than the FIT prior there,
@@ -119,8 +117,9 @@ gain was in probabilities, with accuracy almost unchanged, and
 \texttt{ORIGINAL\_18} was the single evaluation set on which $V$ rose
 after distillation, for REL\_GLOBAL. Preservation has so far held in
 one sealed round and one new-run check, both in the same lab.
-Section~\ref{sec:disc-rejected} in Appendix~\ref{app:rejected} gives
-the explanations that were tested and rejected along the way.
+Explanations tested and rejected along the way, such as the seeds
+mistaking a benign worker's \texttt{ipconfig} records for
+reconnaissance, are in Section~\ref{sec:disc-rejected}.
 % 근거: RECORD:430--437 (원인 규명은 자체 모델 한정, 합의도 seed 선택 ADS-24 미재현,
 % ORIGINAL_18 보존 차수별: v2 불확실 / v3 통과 / PAG1 미확인, V 증가, KD_ALL 단독
 % 효과 미분리, 정확도 79.87%→80.14%). 6장 sec:diag-intervention (GENERIC_HEAD 실패,
@@ -130,6 +129,21 @@ the explanations that were tested and rejected along the way.
 
 \section{Threats to validity}
 \label{sec:disc-threats}
+
+\textbf{What the stability criteria measure.}
+All students of a group follow one fixed teacher set on the same
+unlabeled inputs, so part of their agreement, and of the narrower seed
+standard deviation that the sealed stability criteria read, is expected
+from distillation itself. The controls bound this only in part: each
+self-distillation or hard-label student follows its own teacher, and a
+single teacher shared by all students, which would separate sharing one
+target from averaging several models, was not tried. Codistillation,
+which also follows other models' average to reduce retraining
+churn~\cite{anil2018large}, was not compared. The criteria that do not
+follow from the construction are preservation and mean improvement,
+and preservation is the result that moved most with the collection
+(Section~\ref{sec:disc-mechanism}).
+% 2026-11-26 심사(Opus P2-2, Sonnet P2): 흩어져 있던 이 단서를 위협 요인의 첫 항목으로 세웠다.
 
 \textbf{Data.}
 Arp et al.\ list lab-only evaluation and the reuse of inspected data
@@ -145,7 +159,8 @@ period. The same four scenarios appear in every role, so the unseen
 condition contains no unseen attack scenario.
 
 The ADS-24 task is also derived. We did not rerun the documented rule
-that places Lore stages and Wazuh alerts on one time axis, whether an
+that places the stages of the dataset's attack log (Lore) and the
+Wazuh alerts on one time axis, whether an
 alert timestamp is a receipt time was not confirmed, and the 132 runs
 were matched to the episodes of the dataset paper in number only
 (Appendix~\ref{app:ads24-data}). Its boundaries are oracle boundaries
@@ -180,9 +195,8 @@ did not measure the spread of the whole pipeline, in which baselines,
 teacher selection, and student are all retrained. Correlations between
 seed rankings are descriptive statistics without intervals.
 
-The preservation limits of
-$+0.020$ and 3\% were not derived from an operational need, and two
-outcomes sit close enough to $+0.020$ to depend on it: $+0.0198$ for
+Two outcomes sit close enough to the $+0.020$ preservation limit
+(Section~\ref{sec:eval-criteria}) to depend on it: $+0.0198$ for
 the in-house plain GRU of the generality study, which lay below it, and
 $+0.0207$ for KD\_ALL in the PAG1 re-inference, which did not. A limit
 of $+0.015$ would have reversed the first and a limit of $+0.025$ the
@@ -257,9 +271,8 @@ and 0.915; Chapter~\ref{ch:diagnosis}), not on their result.
 % 원문: Baek et al. NeurIPS 2022 §3.4 "agreement can be estimated with just unlabeled data". 동기로만 인용, 확인됨.
 % 2026-11-25 패널 6회차 참신성 P2-1: Baek 등의 전제가 이 seed들에서 서지 않았다는 점과 규칙의 실제 근거(S1)를 적었다.
 The
-decomposition of Chapter~\ref{ch:decomposition} is that of
-Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty
-measure in the way Gruber and Buettner propose~\cite{gruber2022uncertainty}.
+decomposition of Chapter~\ref{ch:decomposition} is an existing
+identity (Section~\ref{sec:related-decomposition}).
 % 원문: Heskes NIPS 10 (1997) §2 식 (3)(모호성 = Σ w K(p̄,p_α) = −log Z); Gruber & Buettner AISTATS 2023
 %   §3.4 Corollary 3.6, §5 "we proposed Bregman Information as uncertainty measure". 확인됨.
 % 원문: Ovadia et al. NeurIPS 2019 (arXiv v2) §4.2 pp.6–7 "ensembles achieve highest accuracy under distributional
@@ -277,11 +290,6 @@ through a shared subspace~\cite{raghu2017svcca}
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를
 % 메커니즘 차이(목표 보간 대 gradient 공간 교사 가중)까지 적어 좁혔다.
 
-Students that follow one fixed teacher set on unlabeled inputs are
-expected to agree with one another there; that much follows from
-distillation itself, and following other models' average to reduce
-retraining churn was shown for codistillation~\cite{anil2018large},
-with which we did not compare CD.
 
 What the thesis adds is evidence on
 one security task: the measured instability, the unlabeled
@@ -295,9 +303,7 @@ following a geometric pool of the same teachers narrowed it about as
 much (Section~\ref{sec:gen-methods}). The final checks add that the
 narrowing did not depend on which teachers were averaged, while the
 level the students reached did and followed the teachers' own level
-(Section~\ref{sec:gen-teachers}). A single teacher shared by all students was not tried, so the role of
-averaging several models, beyond sharing one fixed target, is open. The
-sealed contracts and status labels respond to the warning of Arp et
+(Section~\ref{sec:gen-teachers}). The sealed contracts and status labels respond to the warning of Arp et
 al.\ about reusing inspected data~\cite{arp2020dos}; lab-only
 evaluation remains a limitation.
 % 원문(arp2020dos): arXiv 2010.09470 2.2절 P3(3쪽) test snooping, 2.4절 P9 Lab-Only Evaluation(6쪽). 확인됨.

@@ -196,13 +196,9 @@ otherwise; under the C-fold, every condition that contains worker~C is
 unseen. The \emph{seen condition} is \texttt{ORIGINAL\_18}, the source
 procedure without a benign worker, and the rest of the thesis calls it
 by one of these two names only. ``Unseen''
-refers to the labeled training data only. The baseline models never
-receive any record of worker~C, but the CD student of
+refers to the labeled training data only: the CD student of
 Chapter~\ref{ch:method} does read unlabeled inputs from other runs of
-the unseen conditions during training. Its results therefore concern
-adaptation to a target environment from which unlabeled inputs are
-available, not generalization to a benign workload never observed in
-any form. The B-fold withholds
+the unseen conditions (Section~\ref{sec:disc-threats}). The B-fold withholds
 worker~B instead. It appears only in the older comparisons of
 Appendix~\ref{app:secondary-results} and is not used for any result in
 the main chapters.
@@ -267,54 +263,3 @@ cause of any seed's success or failure.
 % 4,824는 원 파일의 "자연 경계" 수다.
 % 출처(IP hint): atlas OT/PROPHET_SEED_INPUT_AUDIT_20261118/FINAL_REPORT_KO.md:7;
 %   LAB/DIVERSE3K_20261027/COMMAND_REPRESENTATION_20261028/REPORT_V1.md:11 (defs.md 14(b)).
-
-\section{A recorded file-processing decision}
-\label{sec:recorded-case}
-
-Two terms of the synthetic procedure are needed here. A \emph{payload
-search} is the synthetic file search (DISCOVERY) that looks for a
-target's payload file, and its exit status records whether it found
-one. A \emph{marker search} is a later search on the same target that
-marks it as the current one; its own exit status is not the payload
-result. Execution \texttt{THME0064} comes from an earlier three-target
-collection of this project (Appendix~\ref{app:secondary-results}), not
-from the C-fold data. Table~\ref{tab:recorded-case} shows part of its
-received prefix before its first file-processing decision
-(recorded as \texttt{SEQ\_5}). The path
-names distinguish three synthetic targets. The marker concerns
-\texttt{alpha}, whose earlier payload search returned a nonzero exit
-status, while the marker's own zero exit status belongs to a different
-process. The most recent exit status received in the \texttt{alpha}
-group is therefore the marker's zero, even though the payload search
-on that target failed; a model that read only the latest status would
-see a success that the search never had. Grouping the records by
-target lets a model read the two processes together while keeping
-their results apart. In this execution the action that followed was
-again a synthetic file search. The example illustrates the kind of
-target-result lookup examined in Chapter~\ref{ch:diagnosis}.
-
-\begin{table}[htbp]
-\centering
-\caption[Selected records received before the decision in \texttt{THME0064}]{Selected records received before the decision in
-\texttt{THME0064}. Rows show the observed target groups. For the
-two other targets, only the search termination is shown.}
-\label{tab:recorded-case}
-\begin{tabularx}{\textwidth}{@{}llX@{}}
-\toprule
-Target group & Record ID & Evidence available before the decision \\
-\midrule
-\texttt{bravo}, \texttt{charlie} & & Payload search END at each target, zero exit status \\
-\texttt{alpha} & 207481 & Payload search END, nonzero exit status \\
-\texttt{alpha} & 207483 & Marker START \\
-\texttt{alpha} & 207485 & Marker END, zero exit status \\
-\bottomrule
-\end{tabularx}
-\end{table}
-% 기존 원고의 target-wise GRU 대 relation attention 확률 비교 문장
-% (0.434/0.450/0.481, 0.984/0.483/0.517)은 개요에 따라 부록 B.5로 옮긴다.
-% 4회차 지시 9번: 표와 맞지 않던 "latest received result is therefore a success"를
-% 고쳤다. alpha 그룹에서 마지막으로 받은 종료 상태는 marker END(0)이고 payload
-% 검색 END는 nonzero다.
-% 부록 B의 target-wise GRU 확률 비교는 한때 원 파일에서 찾지 못해 TODO로 바꿨으나, 2026-11-24
-% sources/atlas_answers/defs.md 에서 원 보고서 값(.434/.450/.481)을 찾아 부록 B 에 되살렸다(방법 리뷰 P1-5).
-% 이 장의 질문은 결론 뒤 "저자 확인 목록"에 모았다.

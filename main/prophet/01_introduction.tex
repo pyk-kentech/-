@@ -128,13 +128,16 @@ from runs of the unseen workloads that are separate from the evaluation
 runs, so CD is a form of unlabeled adaptation to a known target
 environment; it is not tested on a workload that was never observed in
 any form. The price is paid during training, where 30 baseline models
-must be fitted before the student. The teacher rule also rests on an
-in-house observation: a seed's agreement ranked it by loss in the lab
-(Chapter~\ref{ch:diagnosis}), though not on ADS-24.
+must be fitted before the student. Because all students of a group
+follow one fixed teacher set, part of their narrower spread is expected
+from distillation itself, and a single teacher shared by all students
+was not tried (Section~\ref{sec:disc-threats}). The teacher rule also
+rests on an in-house observation: a seed's agreement ranked it by loss
+in the lab (Chapter~\ref{ch:diagnosis}), though not on ADS-24.
 % 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
-In v3, the last sealed in-house round (Table~\ref{tab:rounds}), with
+In v3, the last sealed in-house round (Table~\ref{tab:round-summary}), with
 30 new seeds, 157 new eligible runs (Section~\ref{sec:eval-contract}),
 and 1,611 prediction rows, the CD student met all three criteria sealed
 before training and collection. The seed standard deviation fell on
@@ -174,21 +177,11 @@ the FIT tactic frequencies (NLL 1.830), and not every seed improved
 The thesis makes three contributions. (a) It measures seed instability
 with 30 seeds per model setting, for REL\_GLOBAL and three general
 encoders, on the in-house task and on ADS-24. (b) It observes that, on
-inputs from the unseen workload, the NLL of the 30-model
-probability average concentrates on the rows where the seeds' top-1
-predictions differ, rows that can be found without labels. This
-motivated a consensus target on those inputs that keeps the architecture
-and single-model inference. Following other models'
-average to reduce retraining churn was shown for
-codistillation~\cite{anil2018large}. With one fixed teacher set, part
-of the students' agreement is expected from distillation itself; what
-we add is evidence on whether it carried to new runs, whether the seen-condition
-loss was preserved, and how it compared with FIT-input distillation and
-self-distillation (Section~\ref{sec:disc-novelty}). On the plain GRU,
-students that shared one fixed target on environment inputs narrowed
-the spread whether the pool was arithmetic or geometric and whichever
-teachers were averaged, while the level they reached followed the
-teachers (Sections~\ref{sec:gen-methods} and~\ref{sec:gen-teachers}). (c) Addressing the
+inputs from the unseen workload, the NLL of the 30-model probability
+average concentrates on rows where the seeds' top-1 predictions differ,
+rows that can be found without labels, and it tests a consensus target
+on those inputs against other single-model methods and teacher sets
+(Sections~\ref{sec:gen-methods} and~\ref{sec:gen-teachers}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every result by the status of its evidence
@@ -212,8 +205,7 @@ models, and rounds. Chapter~\ref{ch:background} gives the background
 that the later chapters assume: Windows host auditing, models of adversary behavior,
 probabilistic prediction and its scoring, training randomness,
 ensembles and distillation, and distribution shift.
-Chapter~\ref{ch:related} reviews related work and ends with a
-comparison table. The thesis then sets up the task, the receipt boundary, the seen and unseen conditions,
+Chapter~\ref{ch:related} reviews related work. The thesis then sets up the task, the receipt boundary, the seen and unseen conditions,
 REL\_GLOBAL and CD, and the rules of evidence
 (Chapters~\ref{ch:task}--\ref{ch:evaluation}). The evidence follows in
 the order of the three questions: the measured instability and where

@@ -553,41 +553,11 @@ Geometric-pool distillation, mean NLL & 0.107978 & $[0.082388, 0.133180]$ \\
 \label{sec:app-method-tables}
 % 2026-11-26: 10장 X-2 의 표 두 개를 옮겼다(본문 분량). 본문은 표 번호로 가리킨다.
 
-Table~\ref{tab:gen-methods} gives the point estimates of the method
-comparison of Section~\ref{sec:gen-methods},
-Table~\ref{tab:gen-methods-contrast} its paired contrasts against CD,
+Table~\ref{tab:gen-methods-contrast} gives the paired contrasts against
+CD of the method comparison of Section~\ref{sec:gen-methods},
 and Table~\ref{tab:gen-logbert} the contrasts of its repeat on the
 Transformer encoder.
 
-\begin{table}[htbp]
-\centering
-\caption[Point estimates for the method comparison on the plain GRU]{Point estimates for the method comparison on the plain GRU
-(30 seeds per method). In-house columns are \texttt{A+C FLAT} of the
-new runs of this comparison (21 runs, 231 rows); ADS-24 columns are the
-35 environment-evaluation runs (5,639 rows), a development comparison.
-The in-house runs differ from those of Table~\ref{tab:gen-arch}, so the
-base-model and CD values of the two tables are not compared with each
-other. The self-distillation control was not part of the ADS-24 comparison.}
-\label{tab:gen-methods}
-\small
-\begin{tabular}{@{}lrrcrr@{}}
-\toprule
- & \multicolumn{3}{c}{In-house \texttt{A+C FLAT}}
- & \multicolumn{2}{c}{ADS-24} \\
-\cmidrule(lr){2-4}\cmidrule(l){5-6}
-Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
-\midrule
-Base model                    & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
-CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
-Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
-Four-checkpoint weight averaging & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
-FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
-Self-distillation control     & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
-Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
-Entropy minimization          & 2.702 & 0.324 & 80.5 (all seeds) & 6.873 & 0.490 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \begin{table}[htbp]
 \centering

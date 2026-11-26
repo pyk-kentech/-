@@ -295,8 +295,8 @@ the labeled runs.
 Provenance-based work shares our host-level evidence but not our
 forecasting goal. It grew out of the audit-based reconstruction of
 BackTracker~\cite{king2003backtracking} and
-SLEUTH~\cite{hossain2017sleuth} (Section~\ref{sec:bg-audit}), which
-ask how an intrusion that was noticed came about.
+SLEUTH~\cite{hossain2017sleuth}, which ask how an intrusion that was
+noticed came about.
 % 원문: King & Chen (SOSP 2003) §2.1 p.224 "Three types of OS-level objects are relevant to
 %   BackTracker's analysis: processes, files, and filenames"; 초록 p.223 "Starting with a single detection point". 확인됨.
 % 원문: Hossain et al. (USENIX Security 2017) 초록 p.487 "dependency graph abstraction of audit-log data",
@@ -385,14 +385,9 @@ and the pipeline cannot distinguish among them~\cite{damour2020underspecificatio
 %   §2.1 "a pipeline may return a different predictor because it cannot distinguish between them".
 %   "does not choose among them"를 원문 표현 "cannot distinguish among them"으로 고쳤다.
 % 원문: 같은 논문 §3, §5--8 사례(영상·의료 영상·자연어·임상 위험 예측·유전체). 확인됨.
-Our
-measurements on next attacker action prediction resemble the
-deployment-selection difficulty they discuss: the scores we computed on
-the training side did not rank the seeds by their loss on the unseen
-conditions. They do not establish underspecification, because the seeds
-are not equally good on the seen condition
-(Chapter~\ref{ch:diagnosis}), and the thesis then tries to reduce the
-spread it measures.
+Our measurements resemble the deployment-selection difficulty they
+discuss without establishing underspecification
+(Chapter~\ref{ch:introduction}).
 
 A related line asks how far models that fit the data equally well
 disagree on individual predictions. Marx et al.\ define predictive
@@ -412,7 +407,7 @@ of predictions that a replacement would change (discrepancy).
 For neural networks, the competing models usually come from
 randomness in training, whose sources Section~\ref{sec:bg-seeds}
 lists after Summers and Dinneen~\cite{summers2021nondeterminism}.
-They measure the standard deviation of accuracy and cross-entropy
+Summers and Dinneen measure the standard deviation of accuracy and cross-entropy
 across runs and reduce it by accelerated ensembling and test-time
 augmentation, both of which average several predictions at test time.
 % 원문: 같은 논문 §1 p.2 "two approaches that reduce model variability without any increase in model
@@ -581,8 +576,7 @@ data by minimizing the entropy of its predictions~\cite{wang2021tent}.
 % 원문: Wang et al. (ICLR 2021) 초록 p.1 "the model has only the test data and its own parameters", "optimize the
 %   model for confidence as measured by the entropy of its predictions", "estimates normalization statistics and
 %   optimizes channel-wise affine transformations to update online on each batch"; §2 표 1 p.3 설정 비교. 확인됨.
-Labelless
-adaptation to drift has also been studied for malware
+Kan et al.\ studied labelless adaptation to drift in malware
 detection, where a detector that updates on its own pseudo-labels can
 degrade quickly by poisoning itself~\cite{kan2021investigating}.
 % 출처: Kan et al. (AISec 2021) 초록 "a rapid onset of performance degradation as the model poisons

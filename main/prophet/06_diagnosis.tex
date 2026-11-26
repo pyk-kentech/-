@@ -101,9 +101,10 @@ FLAT and 0.915 on NESTED; neither S2 nor S3 exceeded 0.160 in either
 layout (Table~\ref{tab:seed-population}).
 % 출처: ORIGINAL_TEXT/outputs/PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:39
 % (S1 .8768/.9150, S2 .1146/.1506, S3 .1604/.0331).
-S1 is still not a rule for choosing one seed: the seed it ranked first
-failed preservation (Section~\ref{sec:method-teachers}), and it was not
-computed on ADS-24 (Section~\ref{sec:ads24-results}).
+S1 and the losses it ranks come from the same development runs, so
+the correlation is in-sample, and S1 is not a rule for choosing one
+seed: the seed it ranked first failed preservation
+(Section~\ref{sec:method-teachers}).
 Section~\ref{sec:diag-agreement} returns to it.
 
 S3 is not an NLL on held-out FIT runs, which was not computed for this

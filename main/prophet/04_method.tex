@@ -20,9 +20,7 @@ general encoders.
 REL\_GLOBAL maps the received prefix $X_t$ of
 Equation~\ref{eq:receipt} to a distribution over the 18 actions. Its
 parts are an event encoder, an event-level recurrent state, a relational
-residual, and an output head (Figure~\ref{fig:relglobal}). The
-definitions below follow the selected method contract and the round
-contracts that extend it.
+residual, and an output head (Figure~\ref{fig:relglobal}).
 
 \input{main/prophet/fig_relglobal}
 
@@ -53,7 +51,7 @@ padding and unknown entries.
 The vocabularies and normalizers are those
 fitted on the original 404 FIT runs and are kept fixed for every
 extension of FIT; tokens that occur only in the added runs map to the
-unknown entry. The round reports call this the 404-only preprocessor.
+unknown entry.
 
 \paragraph{Recurrent state and head.} Events enter a gated recurrent
 unit cell~\cite{cho2014gru} with a 64-dimensional state, one event per
@@ -134,7 +132,7 @@ which target (Appendix~\ref{app:secondary-results}). Those models were
 trained on other data and are not comparable with later chapters, and
 no criterion of this thesis tests the residual. REL was then trained
 on the 603-run C-fold FIT set, which includes the benign-worker runs,
-for 1,346 updates (hard REL in the round reports). LogitNorm was then
+for 1,346 updates. LogitNorm was then
 added (REL\_NORM), and finally $\mathcal{R}_{\mathrm{GLOBAL}}$ with
 coefficient 0.1. The parameter count stayed at 59,882 throughout.
 % 2026-11-26 본문 분량: 옛 4.2절 "Evidence for the relational residual"을 이 문단으로 줄였다.
@@ -275,7 +273,8 @@ form $J$; Section~\ref{sec:repro-training} gives the tie rules.
 %   같은 폴더 PREPROCESSOR_V2.json:280 (저장된 18열, 행동 ID 알파벳순).
 % 출처(다수결 동률): 원래 PC: ARCH_GENERALITY_STAGE1_20261122/predict_stage1.py:232 (majority = votes.argmax(0)).
 The five selected are the teachers of KD\_ENV\_TOP5 and KD\_ALL in
-the v2 and v3 rounds (Table~\ref{tab:variants}); the ranking is not
+the v2 and v3 rounds (Table~\ref{tab:round-summary} lists the rounds);
+the ranking is not
 the agreement estimator of Baek et al.~\cite{baek2022agreement}
 (Section~\ref{sec:related-underspec}).
 % 원문: Baek et al. NeurIPS 2022 §4 ALine-S/ALine-D(짝별 일치도 선). 본문은 관계 설명만 넘긴다. 확인됨.
@@ -285,8 +284,7 @@ runs that had already been inspected, so the teacher choice is not
 blind. For REL\_GLOBAL no round compared it with other teacher sets.
 For the plain GRU the final checks did (Section~\ref{sec:gen-teachers}):
 in the lab the five most agreeing teachers gave the best students of the
-sets tried, while on ADS-24 five random teachers did better. The rule
-is thus a design choice that worked in the lab.
+sets tried, while on ADS-24 five random teachers did better.
 % 2026-11-26 패널 7회차 문체 P1-1·참신성 P1-1: 10.3절 결과와 어긋나던 "비교한 적이 없다"를 고쳤다.
 % 근거: PAPER_DEFINITIONS.md §2 "고정 상위 5개 교사 선정". 상위 5 seed는
 % 50572, 91513, 71556, 68498, 37406. 입력은 이미 열람한 A+C FLAT·NESTED.
@@ -301,9 +299,7 @@ the 30 seeds, against the preservation limit of $+0.020$
 (Section~\ref{sec:eval-criteria}), while
 the average of the top five passed it at the cost of running five models
 at inference. Distillation is what returns that five-model target to a
-single model. The link between agreement and loss that motivates the rule was
-observed in-house (Chapter~\ref{ch:diagnosis}), not on ADS-24
-(Chapter~\ref{ch:ads24}).
+single model.
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:3,43,47
 % (S1 단일 seed 50572의 ORIGINAL_18 NLL .739376, 한도 .650865(모집단 평균
 % .630865 + .020), 초과 +.108511; 상위5 결합 .548374로 통과. 135실행 개발 집합).
@@ -325,8 +321,10 @@ in the teacher set and in the unlabeled inputs of the KL term, which we
 call \emph{adaptation inputs}. The
 background inputs are 119 runs (1,309 rows) under background conditions.
 KD\_ALL adds 48 runs (354 rows) of the seen condition to them, the 16
-of the development set and the 32 new \texttt{ORIGINAL\_18} runs of the
-\texttt{OBSERVED\_HEAD} check (Section~\ref{sec:diag-intervention}), and
+of the development set and the 32 \texttt{ORIGINAL\_18} runs of an
+earlier new-run check (\texttt{OBSERVED\_HEAD},
+Section~\ref{sec:eval-rounds}); none of these runs belongs to a
+collection that KD\_ALL is later scored on. KD\_ALL
 draws the 32 unlabeled rows of each update by picking one of the 167
 runs uniformly and then one row within it. The draw is run-uniform, not
 row-uniform, so the seen-condition rows weigh more in the KL term than
@@ -351,7 +349,7 @@ Equation~\ref{eq:cd-loss}.}
 Group & Teacher & Unlabeled KL inputs & Rounds \\
 \midrule
 REL\_GLOBAL & none (control) & none & all \\
-KD\_ENV / KD\_ENV\_ALL30 & mean of all 30 REL\_GLOBAL models
+KD\_ENV (KD\_ENV\_ALL30 in v2) & mean of all 30 REL\_GLOBAL models
   & background inputs (119 runs, 1,309 rows) & 10-seed, v2 \\
 KD\_FIT & mean of all 30, in-sample on FIT & FIT inputs & 10-seed \\
 KD\_SELF & the same seed's single REL\_GLOBAL & background inputs
@@ -366,7 +364,7 @@ KD\_ALL & mean of the top five & background inputs and 48 seen-condition
 KD\_SELF is the in-house \emph{self-distillation control}; the same
 control appears under that name in Chapters~\ref{ch:ads24}
 and~\ref{ch:generality}. The round names in the last column are
-defined in Table~\ref{tab:rounds}.
+listed in Table~\ref{tab:round-summary}.
 \end{minipage}
 \end{table}
 % KD_ENV_ALL30은 v2에서 KD_ENV 계산을 새 seed로 재현한 것(PAPER_DEFINITIONS.md §2).

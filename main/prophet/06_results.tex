@@ -41,7 +41,7 @@ inputs alone, came within 0.002 of KD\_ALL, and on \texttt{C\_ONLY} and
 \texttt{B+C} it was slightly lower. The two students separate only on
 \texttt{ORIGINAL\_18}, the seen condition, whose unlabeled inputs KD\_ALL adds.
 \texttt{OBSERVED\_HEAD}, the frozen head variant of
-Section~\ref{sec:diag-intervention}, is a reference outside every criterion.
+Section~\ref{sec:eval-rounds}, is a reference outside every criterion.
 % 근거: RECORD:168--174; v3 FINAL_REPORT_KO.md "같은 새 입력의 전체 NLL"
 % (여섯 자리 원값은 부록 B.6). OBSERVED_HEAD는 계약상 "기존 OBSERVED_HEAD 참고"
 % (CONTRACT_V3.md "함께 보고").
@@ -53,7 +53,7 @@ estimates, with the sealed criteria in
 Table~\ref{tab:results-v3-criteria}. Each value is the mean over the 30 seeds of the execution-weighted NLL
 over all natural boundaries; only the top-five teacher column averages
 probabilities, those of five fixed models. \texttt{OBSERVED\_HEAD} is a
-frozen reference from Chapter~\ref{ch:diagnosis}. Four decimals, because
+frozen reference (Appendix~\ref{sec:diag-intervention}). Four decimals, because
 the two students tie at three decimals on \texttt{C\_ONLY}.}
 \label{tab:results-v3-nll}
 \small
@@ -190,8 +190,7 @@ shown. For
 KD\_ALL the NLL difference was $-0.050$ with interval
 $[-0.141, +0.0207]$, whose upper end lies just above the limit, and for
 KD\_ENV\_TOP5 it was $+0.009$ $[-0.012, +0.039]$, so preservation
-was undecided for both. On \texttt{ORIGINAL\_18} REL\_GLOBAL scored
-0.467 here and 0.704 in v3, so the two tables are read separately.
+was undecided for both.
 % 근거: RECORD:196, 198--208; ORIG:ARCH_GENERALITY_STAGE2_20261122/
 % V3_REINFERENCE_TABLE.md ("구조 일반성 주 판정 밖에 사전 등록한 별도 확인",
 % 신규 fit 0, 98.3333%, "보존 미확인은 동등성 또는 실패 확정이 아니다");
@@ -219,9 +218,9 @@ standard deviation fell from 0.058 to 0.004 and the worst seed from
 $[-0.178, +0.012]$ for KD\_ALL and $+0.0009$ $[-0.0045, +0.0066]$ for
 KD\_ENV\_TOP5. Both upper ends lie below the $+0.020$ limit, so
 preservation held for both students on these runs, and improvement was
-shown for neither. REL\_GLOBAL scored 0.354 on \texttt{ORIGINAL\_18}
-here, against 0.704 in v3 and 0.467 in PAG1, so the tables are again
-read separately.
+shown for neither. As Section~\ref{sec:eval-rounds} notes, the level
+of \texttt{ORIGINAL\_18} differs between collections (0.354 for
+REL\_GLOBAL here), so each table is read on its own.
 % 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/FINAL_CHECKS_RECOVERY_REPORT.md:7 (155실행·1,589행),
 %   :32--98 (조건별 평균·SD), :123--130 ("Frozen v3 reference on the same PFC2 rows", 99.1667%:
 %   KD_ENV_TOP5 SD −0.055601 [−0.076317, −0.035997], NLL −0.045440, 원래 +0.000891 [−0.004489, 0.006571];

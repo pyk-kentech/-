@@ -215,8 +215,7 @@ PAG1 inputs.
 %   arXiv:2604.22781 식 (1)--(9)·Algorithm 1, CL-AP2 JNCA 2024 예측 단계). 확인됨.
 The ORTHRUS and BiTA adaptations reached an A+C NLL of 0.133 to 0.159,
 close to REL\_GLOBAL, and the CL-AP$^{2}$ adaptation 0.967 and 0.976;
-three seeds say nothing about stability. Two attempts to extend CD
-failed their preliminary checks (Appendix~\ref{app:rejected}).
+three seeds say nothing about stability.
 % 근거: RECORD:296, 299, 301, 302; ARCH_GENERALITY_STAGE2_REPORT.md "주 판정"
 % (PROPHET PLAIN_GRU 보존 −0.037245, 99.1667% [−0.096992, 0.019818]),
 % "전체 성능과 정확도" (ORIGINAL_18 정확도 0.845410 → 0.839917; KD_SELF FLAT
@@ -232,10 +231,13 @@ failed their preliminary checks (Appendix~\ref{app:rejected}).
 
 The second study compares CD with five other ways of training one
 model, all on the plain GRU. It is a development comparison: its
-in-house runs were newly collected, but its contract fixed no
-pass-or-fail rule, and the ADS-24 runs are the inspected ones. Its
-repeat on the PFC2 runs, at the end of this section, is a new-run
-check.
+contract fixed no pass-or-fail rule, and the ADS-24 runs are the
+inspected ones. Its in-house runs were a new collection, which a safety
+stop ended after 119 of 160 attempts, leaving 110 eligible runs and six
+and nine complete configurations per A+C layout; they differ from the
+PAG1 runs of Section~\ref{sec:gen-arch}, so the base-model and CD values
+here are not those of Table~\ref{tab:gen-arch}. Its repeat on the PFC2
+runs, at the end of this section, is a new-run check.
 
 Each method changes one thing relative to CD or to the base model, and
 what separates them is the target a model follows on unlabeled inputs.
@@ -275,6 +277,37 @@ and the initial weights. The base-model, CD, and self-distillation
 groups were reused from Section~\ref{sec:gen-arch}, so in-house a
 contrast can include rerun variation as well as the effect of the
 method.
+
+\begin{table}[htbp]
+\centering
+\caption[Point estimates for the method comparison on the plain GRU]{Point estimates for the method comparison on the plain GRU
+(30 seeds per method). In-house columns are \texttt{A+C FLAT} of the
+new runs of this comparison (21 runs, 231 rows); ADS-24 columns are the
+35 environment-evaluation runs (5,639 rows), a development comparison.
+The in-house runs differ from those of Table~\ref{tab:gen-arch}, so the
+base-model and CD values of the two tables are not compared with each
+other. The self-distillation control was not part of the ADS-24 comparison.}
+\label{tab:gen-methods}
+\small
+\begin{tabular}{@{}lrrcrr@{}}
+\toprule
+ & \multicolumn{3}{c}{In-house \texttt{A+C FLAT}}
+ & \multicolumn{2}{c}{ADS-24} \\
+\cmidrule(lr){2-4}\cmidrule(l){5-6}
+Method & NLL & Seed SD & Accuracy range (\%) & NLL & Seed SD \\
+\midrule
+Base model                    & 1.233 & 0.693 & 45.9--93.1 & 2.221 & 0.180 \\
+CD student                    & 0.222 & 0.013 & 87.9--93.1 & 2.130 & 0.026 \\
+Geometric-pool distillation   & 0.216 & 0.020 & 87.4--93.1 & 2.238 & 0.030 \\
+Four-checkpoint weight averaging & 1.212 & 0.681 & 46.3--89.2 & 2.201 & 0.174 \\
+FIT-input distillation        & 1.290 & 0.815 & 43.7--90.0 & 2.226 & 0.193 \\
+Self-distillation control     & 1.171 & 0.691 & 44.6--93.9 & ---   & ---   \\
+Hard-label control            & 2.012 & 1.215 & 44.2--90.5 & 3.355 & 0.438 \\
+Entropy minimization          & 2.702 & 0.324 & 80.5 (all seeds) & 6.873 & 0.490 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% 2026-11-26 심사(Opus P1-5, Sonnet P1-3): 부록 B 로 옮겼던 점추정 표를 본문으로 되돌렸다.
 % 근거: RECORD:338, 452; ORIG:METHOD_BASELINES_20261123/METHOD_BASELINES_REPORT.md:3
 % (ADS-24 ON35 = 이미 열람한 실행의 사후 방법 비교, PROPHET = 같은 실험실 설계의
 % 새 실행); METHOD_BASELINES_CONTRACT_SEALED.md:7 (다섯 기준선, 300 fit), :15
@@ -291,11 +324,7 @@ method.
 Under this protocol, only the
 two groups that follow a consensus of several models on environment
 inputs produced a very small seed standard deviation on both datasets
-(Table~\ref{tab:gen-methods}). On \texttt{A+C FLAT} the CD student had
-a seed standard deviation of 0.013 and the geometric-pool student
-0.020, while the base model and the other five groups stayed
-between 0.324 and 1.215. On ADS-24 the two consensus groups had 0.026
-and 0.030, against 0.174 to 0.490 for the others. In the paired contrasts against CD
+(Table~\ref{tab:gen-methods}). In the paired contrasts against CD
 (Table~\ref{tab:gen-methods-contrast} in
 Appendix~\ref{sec:app-method-tables}), CD had a lower mean NLL in-house
 than four-checkpoint weight averaging, the hard-label control, entropy
@@ -366,10 +395,8 @@ resolved.
 % 교사에 대해서는 확인하지 않았다.
 % 11.4절이 기각한 가설과 충돌하던 because절("FIT에서 교사가 대체로 같다")은 뺐다.
 
-The original in-house collection ended in a safety stop after 119 of
-160 attempts, leaving 110 eligible runs and six and nine complete
-configurations per A+C layout. On the PFC2 runs, with 14 per layout,
-the final checks scored the same frozen checkpoints and added a sixth
+On the PFC2 runs, with 14 complete configurations per layout, the
+final checks scored the same frozen checkpoints and added a sixth
 comparison arm, the base model with a single temperature fitted on
 FIT~\cite{guo2017calibration}. Against CD, at 99.1667\% over the six
 arms, every arm except the geometric pool again had a larger seed
@@ -435,8 +462,7 @@ $[-0.001, +0.014]$ and $+0.006$ $[-0.000, +0.012]$, and on ADS-24 it
 was lower by 0.021 and 0.018.
 
 The 30 baselines were kept, so the spread that would follow from
-retraining them with the teachers was not measured, and the agreement
-rule was favorable on one dataset and unfavorable on the other.
+retraining them with the teachers was not measured.
 % 출처: inputs/data/FINAL_CHECKS_20261125/FINAL_CHECKS_RECOVERY_20261123/ABLATION_REPORT.md:9--15, 21--27 (PLAIN_GRU 교사 구성·입력량,
 %   99.5833%, 보존 열); FINAL_CHECKS_RECOVERY_REPORT.md:196 (720 fit, 미리 정한 교사·부분집합);
 %   UNIFIED_REANALYSIS_20261125/TEACHER_POOLS_ALL.csv·STUDENT_TEACHER_ALL.csv (교사 단독 NLL: PFC2 FLAT TOP5

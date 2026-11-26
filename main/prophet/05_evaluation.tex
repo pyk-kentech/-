@@ -185,9 +185,11 @@ no pass rule.
 
 One kind of check falls between the first two labels. A \emph{new-run check} is fixed before its runs are collected
 but after its models were trained, so the runs are new while the
-checkpoints are not. The \texttt{OBSERVED\_HEAD} check of
-Section~\ref{sec:diag-intervention} is one, used only for the
-diagnosis. The \emph{final checks} are the other. Their collection,
+checkpoints are not. The \texttt{OBSERVED\_HEAD} check is one: it
+scored, on 157 new runs, a variant of REL\_GLOBAL whose head also reads
+a parameter-free lookup of the observed result for the current target
+(Appendix~\ref{app:diagnosis}); the variant was not adopted, and the
+check served only the diagnosis. The \emph{final checks} are the other. Their collection,
 PFC2, was sealed after a first attempt, PFC1, had ended in a safety
 stop; all 160 planned PFC2 runs were attempted once, and eligibility
 was sealed before any model predicted on them. On these runs we scored the frozen checkpoints of v3, of the
@@ -205,9 +207,11 @@ development comparisons.
 % 함께 낮췄다. 출처: atlas OT/ARCH_GENERALITY_STAGE1_20261122/ARCH_GENERALITY_STAGE1_REPORT.md:5
 %   (PAG1은 1단계에서 이미 채점된 뒤 재추론이 등록됨; defs.md 17번).
 
-Table~\ref{tab:rounds} in Appendix~\ref{sec:repro-ledger} is the ledger
-of every round in which the method was tested, including the rounds
-that failed. The in-house loss level
+Table~\ref{tab:round-summary} lists the rounds in the order they were
+run; Table~\ref{tab:rounds} in Appendix~\ref{sec:repro-ledger} is the
+full ledger, with fits and notes. Every in-house collection has its own
+run identifiers, so no run of one collection is scored in another. The
+in-house loss level
 of \texttt{ORIGINAL\_18} differs widely between collections: the same v3
 REL\_GLOBAL checkpoints scored 0.704 on the v3 runs and 0.467 on the
 PAG1 runs (Section~\ref{sec:results-pag1}). We did not analyze the
@@ -215,6 +219,32 @@ cause, so a score
 is compared only with scores from the same round. The two plain-GRU
 baselines of Chapter~\ref{ch:generality} come from different
 collections for the same reason and are never placed on one scale.
+
+\begin{table}[htbp]
+\centering
+\caption[Rounds in the order they were run]{Rounds in the order they were run. In-house runs are eligible
+evaluation runs; each in-house collection is new unless marked
+inspected. The full ledger is Table~\ref{tab:rounds}.}
+\label{tab:round-summary}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}X@{}}
+\toprule
+Round & In-house runs & Status & Outcome \\
+\midrule
+\texttt{OBSERVED\_HEAD} check & 157 & new-run check & head held on new runs; not adopted \\
+10-seed development round & the same 157, inspected & development & mean-NLL gate failed \\
+v2 round (first run; recheck) & stopped; 159 & sealed & stability passed; preservation undecided \\
+v3 round & 157 & sealed & all three criteria passed \\
+PAG1: generality study and v3 re-inference & 156 & development & spread narrowed; v3 preservation undecided \\
+ADS-24, stages 1 and 2 & --- (35 ADS-24 runs) & development & all three contrasts favorable \\
+Method comparison & 110 (stopped) & development & contrasts reported, no pass rule \\
+Final checks (PFC1 stopped; PFC2) & 155 & new-run check & spread narrowed; preservation within limit \\
+\bottomrule
+\end{tabularx}
+\end{table}
+% 2026-11-26 심사(Opus P1-3, Sonnet P1-2): 라운드 이름이 부록 표에서만 정의돼 본문에 순서 요약을 두었다.
+%   값은 부록 E 의 tab:rounds·tab:repro-eligibility 와 같다. 수집별 실행 ID 접두(POHC, PEKD3, PEKD4, PAG1, PFC2)가 다르다.
 % 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
 
 % 근거: PAPER_DEFINITIONS.md:52--56 (10-seed 157/1,611 = FLAT 30/330, NESTED

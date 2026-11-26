@@ -207,8 +207,9 @@ with coefficient 0.1, and LogitNorm with $\tau=0.1$. Each fit runs
 gradient clipping at 2) and a cosine learning rate from 0.002 to
 0.0002, and the last checkpoint is kept. Within a seed, all groups of a
 round share the initial tensors and the FIT occurrence and delivery
-trace. All in-house fits use the 404-only preprocessor of
-Section~\ref{sec:method-baseline}. The three general encoders and
+trace. All in-house fits use the vocabularies and normalizers fitted on
+the original 404 FIT runs (Section~\ref{sec:method-baseline}), called
+the 404-only preprocessor in the round reports. The three general encoders and
 their CD students drop LogitNorm, $\mathcal{R}_{\mathrm{GLOBAL}}$, and
 the relational residual; their settings are given in
 Section~\ref{sec:repro-encoders}.
