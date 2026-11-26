@@ -132,8 +132,8 @@ Chapter~\ref{ch:ads24}.
 % 근거: RECORD:130--139, idea.md 방법 항목. 교사 선정 규칙은 개발 실행을
 % 연구하는 중에 정했으므로 blind 선택이 아니라는 점은 4.4절에 쓴다.
 
-In the sealed in-house v3 round, with 30 new seeds, 157 new eligible
-runs, and 1,611 prediction rows, the stored round report records that
+In v3, the last sealed in-house round (Table~\ref{tab:rounds}), with 30 new seeds, 157 new
+eligible runs (Section~\ref{sec:eval-contract}), and 1,611 prediction rows, the stored round report records that
 the CD student met all three criteria sealed before training and
 collection. The seed standard deviation fell on both A+C layouts, on
 FLAT from about 0.056 to 0.010. On the seen condition,
@@ -142,8 +142,9 @@ FLAT from about 0.056 to 0.010. On the seen condition,
 for 30 fixed checkpoints, all students follow one fixed teacher set,
 and the spread after retraining the whole pipeline was not measured
 (Section~\ref{sec:disc-threats}). The seed-level files stay on the
-original experiment machine; seed counts were read there, but the three
-criteria were not recomputed (Section~\ref{sec:eval-contract},
+original experiment machine; the per-seed improvement counts of
+Section~\ref{sec:results-scope} were computed there from the stored
+scores, but the three criteria themselves were not recomputed (Section~\ref{sec:eval-contract},
 Appendix~\ref{app:repro}).
 % 2026-11-25 리뷰 1회차 문체 P2-4·참신성 P2-3: E.1 의 표현에 맞추고 고정 교사 집합 조건을 넣었다.
 % 2026-11-25 분량 줄이기(반복 단서 T1): 제외 실행 문장은 6.2절에 두고 여기서는 뺐다.
@@ -180,8 +181,9 @@ codistillation~\cite{anil2018large}; what we add is a measurement of
 that effect with fixed teachers on unlabeled target inputs. In
 development comparisons on the plain GRU, students that followed
 several models on environment inputs narrowed the spread, whether the
-pool was arithmetic or geometric; neither factor was isolated
-(Section~\ref{sec:disc-novelty}). (c) Addressing the
+pool was arithmetic or geometric, but neither the number of teachers
+nor the use of environment inputs was varied separately
+(Section~\ref{sec:gen-methods}). (c) Addressing the
 data-snooping pitfall named by Arp et al.~\cite{arp2020dos}, it
 evaluates the method under contracts sealed before training and
 collection, and it labels every

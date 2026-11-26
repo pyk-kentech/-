@@ -718,7 +718,9 @@ and the unlabeled environment inputs enter during training, not at
 inference~\cite{wang2021tent}.
 % 원문: Wang et al. (ICLR 2021) §2 표 1 p.3: domain adaptation 은 "xs, ys | xt | L(xs,ys) + L(xs,xt)",
 %   fully test-time adaptation 은 "- | xt | - | L(xt)". CD 의 FIT 손실·무라벨 환경 입력은 4장 식(eq:cd-loss). 확인됨.
-Its target differs from all of the above. Entropy minimization, Tent,
+The computation itself is the ensemble-average distillation of Hinton
+et al.; its target differs from those of the self-training and
+adaptation methods above. Entropy minimization, Tent,
 pseudo-labeling, and SHOT follow the adapted model's own predictions;
 Mean Teacher follows an average of the student's own weights;
 codistillation follows peers trained at the same time on the same

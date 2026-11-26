@@ -503,8 +503,8 @@ cross-entropy on the true labels:
 The KL term equals the soft-target cross-entropy minus the teacher's
 entropy, which does not depend on the student. The factor $T^2$
 compensates for the $1/T^2$ scaling of the soft-target gradients, so
-that the balance of the two terms does not change with
-$T$~\cite{hinton2015distilling}. The teacher may be an ensemble, whose
+that the relative contributions of the two terms stay roughly unchanged
+as $T$ changes~\cite{hinton2015distilling}. The teacher may be an ensemble, whose
 arithmetic or geometric mean serves as the soft target, and the
 transfer set on which the soft term is computed may consist entirely
 of unlabeled data~\cite{hinton2015distilling}.

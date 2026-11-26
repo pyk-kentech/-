@@ -326,7 +326,9 @@ weight averaging at 0.681 and
 the base model here, and the table gives no interval for them.
 
 Table~\ref{tab:gen-methods-contrast} gives the paired contrasts against
-CD. In the in-house lab CD had a lower mean NLL than four-checkpoint
+CD. In-house, CD and the base model were reused while the other methods
+were trained later, so these intervals compare stored models and include
+rerun variation; they are not a test of the algorithms. In the in-house lab CD had a lower mean NLL than four-checkpoint
 weight averaging, the
 hard-label control, entropy minimization, and FIT-input distillation,
 with every interval above zero. Against geometric-pool distillation the
@@ -425,10 +427,10 @@ multi-model teacher target contributing to the reduction, but the
 number of teachers, their selection, and the averaging were not varied
 separately, so their effects are not identified. Following the same
 five-teacher average on FIT inputs left the spread at the base-model
-level; as a point comparison with controls trained later than the
-reused base models, this does not isolate an effect of the environment
-inputs; why the FIT inputs
-did not help was not established (Section~\ref{sec:disc-rejected}).
+level. Because the base models it is compared with were reused from an
+earlier run, this does not isolate an effect of the environment inputs.
+Why the FIT inputs did not help was not established
+(Section~\ref{sec:disc-rejected}).
 Four-checkpoint weight averaging, which averages along a single
 training trajectory, stayed at the base model's spread on both
 datasets.
