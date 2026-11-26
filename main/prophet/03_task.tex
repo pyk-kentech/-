@@ -235,6 +235,20 @@ An \emph{evaluation set} is one condition scored as one group of runs.
 chapters use five evaluation sets: \texttt{A+C FLAT},
 \texttt{A+C NESTED}, \texttt{C\_ONLY}, \texttt{B+C}, and
 \texttt{ORIGINAL\_18}.
+
+The conditions differ in more than the benign work.
+\texttt{ORIGINAL\_18} exercises the whole procedure and its 18 actions,
+whereas the background runs exercise its file-processing part: in the
+60 \texttt{A+C} runs of the development set every label is the
+synthetic file search (DISCOVERY) or the synthetic file copy (COPY),
+and a rule that predicts only these two matched 1,290 of the 1,309
+background rows (Appendix~\ref{app:diagnosis}). The models still output
+a distribution over all 18 actions, but on the unseen conditions the
+decision being scored is mostly that between COPY and DISCOVERY, and a
+difference between seen and unseen conditions can come from the
+procedure as well as from the benign work.
+% 2026-11-26 GPT 심사 권고: 조건별 정답 범주를 본문에 밝혔다. 근거는 부록 F(sec:diag-errors "Every label of
+%   the 660 A+C rows is COPY or DISCOVERY", sec:diag-rule 1,290/1,309).
 % 8회차 문장 P2-2: 조건(condition)과 평가 묶음(evaluation set)을 나눴다.
 % 출처(C_ONLY·B+C = FLAT, manifest layout 필드, 기본값 없음):
 %   원래 PC: PROPHET_ENV_CONSENSUS_KD_V3_20261120/BG_MAIN_PLAN.json:2530 (v3);

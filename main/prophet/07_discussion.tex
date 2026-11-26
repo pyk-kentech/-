@@ -254,9 +254,12 @@ boundary.
 \section{Relation to existing techniques}
 \label{sec:disc-novelty}
 
-None of the computational parts is new. The loss is distillation
-toward an ensemble average~\cite{hinton2015distilling} added to the
-regularizers of REL\_GLOBAL.
+CD applies the established distillation toward an ensemble
+average~\cite{hinton2015distilling}, added to the regularizers of our
+baseline, to receipt-bounded attacker action prediction, and
+evaluates its effect on seed stability under unseen benign workloads;
+distillation against retraining churn is itself
+established~\cite{anil2018large,jiang2022churn,hidey2022reducing}.
 % 원문: Hinton et al. arXiv:1503.02531 §2 앙상블의 "arithmetic or geometric mean ... as the soft targets". 확인됨.
 Ranking teachers by
 unlabeled agreement takes its motivation from Baek et

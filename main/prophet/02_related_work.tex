@@ -493,16 +493,22 @@ that matches the average prediction of the
 others~\cite{anil2018large}.
 % 원문: Anil et al. (ICLR 2018) §1 p.2 "Codistillation trains n copies of a model in parallel by adding a term
 %   to the loss function of the ith model to match the average prediction of the other models". 확인됨.
-On prediction churn, the change in a network's predictions when it
-is retrained after a minor change or none, codistillation reduced the
-difference between two retrains by 35\%, close to an ensemble of two,
-without the ensemble's serving cost~\cite{anil2018large}.
+It also reduced prediction churn, the change in a network's
+predictions when it is retrained after a minor change or none, by 35\%,
+close to an ensemble of two without its serving cost~\cite{anil2018large}.
 % 원문: 같은 논문 §3.5 p.10 "retraining a neural network after a minor (or even no) change causes a change to
 %   the predictions as prediction churn"; "measured the mean absolute difference between the predictions of two
 %   retrains"; "codistillation reduces prediction churn by 35%, achieving similar results to ensembling, but does
 %   not increase serving costs"; 표 1 (DNN .029, 두 DNN 앙상블 .022, two-way codistilled .019). 확인됨.
-Of the methods in this section, codistillation is the closest to the
-goal of CD.
+Distilling from the base model is equivalent to training under an
+explicit churn constraint~\cite{jiang2022churn}, and where retraining
+with only a new seed changed a semantic parser's predictions,
+co-distillation balanced churn and resource use~\cite{hidey2022reducing}.
+These works are the closest to the goal of CD.
+% 원문(초록): Jiang et al. arXiv 2106.02654 "equivalence between training with distillation using the base model
+%   as the teacher and training with an explicit constraint on the predictive churn"; Hidey et al. SIGDIAL 2022
+%   초록: 같은 자료·하이퍼파라미터에서 seed 만 바꿔도 달라짐(model churn), ensembling·distillation 비교,
+%   co-distillation 이 "sweet spot". 확인됨(초록 수준).
 
 The
 method in Chapter~\ref{ch:method} uses the simplest of these
