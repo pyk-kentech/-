@@ -22,7 +22,19 @@
       \IfFontExistsTF{NanumMyeongjo}{\setmainhangulfont{NanumMyeongjo}}{}}}
   % 곡선 따옴표·괄호 같은 문장 부호가 한글 글꼴로 찍히지 않게 영문 글꼴로 둔다.
   \xetexkofontregime{latin}
+\else
+  % 2026-11-26 Overleaf 의 pdfLaTeX 판(eng_full.pdf)에서 확인: 위 글꼴 설정이 빠져 Computer Modern 으로
+  % 찍히고(작성 안내는 Times 계열), 그림 상자 안 글자가 잘리고, 쪽수가 13쪽 늘었다.
+  % Overleaf 에서는 저장소의 latexmkrc 가 XeLaTeX 로 돌리게 한다. 다른 엔진으로 직접 돌리면 로그에 이 오류가 남는다.
+  \PackageError{kentech}{Compile this thesis with XeLaTeX}{The Times text fonts and the
+    math font are set up for XeLaTeX only. On Overleaf: Menu > Settings > Compiler > XeLaTeX.}
 \fi
+% 지시함수 기호. unicode-math(XeLaTeX)에서는 \mathbb{1}, 그 밖의 엔진에서는 굵은 1.
+% pdfLaTeX 의 \mathbb 글꼴에는 숫자가 없어 \mathbb{1}이 다른 기호로 찍혔다(식 II.2).
+\newcommand{\indicator}{\ifXeTeX\mathbb{1}\else\mathbf{1}\fi}
+% 표 제목은 표 위에 온다. 클래스의 \belowcaptionskip 이 0 이라 제목 마지막 줄이 표 윗줄(\toprule)에
+% 닿았다. booktabs 의 윗줄 위 간격으로 띄운다.
+\setlength{\abovetopsep}{6pt}
 
 % TODO(사람): 제목은 answers 2에 따라 지금 제목을 유지한다. 본문의 논지가
 % "무라벨 환경 합의 증류"로 바뀌었으므로 아래 후보 중 하나로 바꿀지 결정할 것.

@@ -7,7 +7,7 @@
 
 For seed $s$, let $R$ be the set of eligible executions, with $n_r$
 natural prediction rows in execution $r$. The primary metric is
-negative log likelihood (NLL) in nats with equal weight on each
+negative log-likelihood (NLL) in nats with equal weight on each
 execution,
 \begin{equation}
   L_s = -\frac{1}{|R|}
@@ -37,12 +37,16 @@ Chapter~\ref{ch:results}, as in the report of that round. Accuracy can stay
 constant while NLL changes, because the probability assigned to the
 observed label can move without changing the highest-scoring action.
 Because the problem studied here is variation across training runs, we
-also report three seed-stability statistics for each group and
-condition: the sample standard deviation of the 30 values $L_s$ (the
+also report seed-stability statistics where the stored reports give
+them: the sample standard deviation of the 30 values $L_s$ (the
 \emph{seed standard deviation}), the largest $L_s$ (the \emph{worst
-seed}), and the range of per-seed accuracy. The seed standard deviation
+seed}), and, for the encoders of Chapter~\ref{ch:generality}, the range
+of per-seed accuracy. The seed standard deviation
 is the statistic of the v3 stability criteria; the other
-two describe the spread it summarizes.
+two describe the spread it summarizes. For the v3 round the stored
+material gives the seed standard deviation on the A+C layouts and on
+\texttt{ORIGINAL\_18} and the worst seed on the A+C layouts, and
+Chapter~\ref{ch:results} reports those.
 % 근거: ADS24_CONTRACT_SEALED.md:21 ("30개 값의 표본 SD");
 % METHOD_BASELINES_CONTRACT_SEALED.md:35 (네 통계).
 % 구조 일반성·방법 비교 보고서: "정확도도 실행 동등". v3 보고서: "행 정확도
@@ -127,9 +131,9 @@ reasons for the exclusions and stops that the reports record.
 We use \emph{contrast} for a paired difference, student minus
 baseline, read from an adjusted interval; whether it counts as a sealed
 criterion, a development comparison, or a post hoc quantity is set by
-the rules of Section~\ref{sec:eval-rounds}. Every contrast is a one-sided reading
-of a two-sided adjusted interval on a paired difference, student minus
-baseline (REL\_GLOBAL or REL\_GLOBAL-ADS). Stability holds on an unseen condition if the upper end of
+the rules of Section~\ref{sec:eval-rounds}. Each is a one-sided reading
+of a two-sided adjusted interval, and the baseline is REL\_GLOBAL or
+REL\_GLOBAL-ADS. Stability holds on an unseen condition if the upper end of
 the interval for the difference in seed standard deviation lies below
 zero. Where the contract includes it, mean improvement holds if the
 upper end for the difference in $L$ lies below zero. Preservation holds
@@ -271,16 +275,19 @@ Table~\ref{tab:rounds} is the ledger of every round in which the method
 was tested, including the rounds that failed. The code names
 \texttt{PEKD2}--\texttt{PEKD4} appear only in the table, and the text
 uses the round names in its first column. The in-house loss level
-of \texttt{ORIGINAL\_18} differs widely between collections, so a score
+of \texttt{ORIGINAL\_18} differs widely between collections: the same v3
+REL\_GLOBAL checkpoints scored 0.704 on the v3 runs and 0.467 on the
+PAG1 runs (Section~\ref{sec:results-pag1}). We did not analyze the
+cause, so a score
 is compared only with scores from the same round. The two plain-GRU
 baselines of Chapter~\ref{ch:generality} come from different
 collections for the same reason and are never placed on one scale.
 % 근거: RECORD:189--196, 208, 512--524; PAPER_DEFINITIONS.md:52--56.
 
 % 표와 주가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
-{\small\setstretch{1}% 표는 1배수(작성 안내)
-\begin{xltabular}{\textwidth}{@{}lrXlX@{}}
-\caption{Ledger of the rounds that tested distillation toward a seed
+{\small\setstretch{1}\setlength{\tabcolsep}{4pt}% 표는 1배수(작성 안내)
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedleft\arraybackslash}p{0.11\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X@{}}
+\caption[Ledger of the rounds that tested distillation toward a seed consensus]{Ledger of the rounds that tested distillation toward a seed
 consensus (the 10-seed round used all 30 baseline models as teachers).
 Evaluation runs and rows are those scored in the round, not the
 unlabeled adaptation inputs. Status uses the three labels defined

@@ -49,7 +49,7 @@ evidence lies outside the attacked host.
 Learned forecasters at the step level work from observed event streams
 rather than from a configuration model such as the attack graphs of
 Section~\ref{sec:related-graphs}. The closest task to ours appears
-in a recent preprint by B\u{a}b\u{a}lau and Nadeem, who build
+in a recent preprint by B\u{a}b\u{a}l\u{a}u and Nadeem, who build
 alert-driven attack graphs from intrusion and endpoint alerts and
 predict the next likely attacker action given a sequence of observed
 actions~\cite{babalau2024forecasting}.
@@ -882,8 +882,7 @@ and~\ref{sec:related-distillation}; we did not assess whether the
 security works report it.
 
 Read together, the tables show what this thesis combines. The security
-works forecast or detect from alerts, events, graphs, or logs; we did
-not assess how they report seed variation. The machine-learning works
+works forecast or detect from alerts, events, graphs, or logs. The machine-learning works
 study the spread among models, or use unlabeled target inputs, mostly
 on benchmarks outside security, with Kan et al.\ on malware as an
 exception. We forecast the next attacker action from Windows process
@@ -894,7 +893,7 @@ those conditions to reduce that spread in one deployed model.
 % 2026-11-25: 표를 xltabular 로 바꿔 쪽을 넘기게 했다(행이 늘어 한 쪽을 넘음).
 {\small\setstretch{1}% 표는 1배수(작성 안내)
 \begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
-\caption{Evidence and outputs of the security and log-modeling work
+\caption[Evidence and outputs of the security and log-modeling work]{Evidence and outputs of the security and log-modeling work
 discussed in this chapter, in the order of the sections.}
 \label{tab:related-tasks}\\
 \toprule
@@ -917,7 +916,7 @@ Liu et al.~\cite{liu2015cloudy}
 Sabottke et al.~\cite{sabottke2015vulnerability}
  & Twitter posts about disclosed vulnerabilities
  & Whether a vulnerability is exploited in the real world \\
-B\u{a}b\u{a}lau and Nadeem~\cite{babalau2024forecasting} (preprint)
+B\u{a}b\u{a}l\u{a}u and Nadeem~\cite{babalau2024forecasting} (preprint)
  & Intrusion and endpoint alerts, as alert-driven attack graphs
  & Next likely attacker action given a sequence of observed actions \\
 % 원문: arXiv 2408.09888 초록·3.3절(EDR 경보 추가). 고침: 입력 칸에 endpoint, 출력 칸 "observed actions".
@@ -1012,6 +1011,8 @@ ORTHRUS~\cite{jiang2025orthrus}
  & Whole-system provenance graph
   & Attack detection and attribution \\
 % 원문: KAIROS 초록 탐지 + "reconstructs attack footprints"; ORTHRUS 초록 노드 수준 탐지 + 공격 경로 재구성. 확인됨.
+\midrule
+\multicolumn{3}{@{}l}{\emph{Performance when the data at use differ from the training data (Section~\ref{sec:related-provenance})}} \\
 Transcend~\cite{jordaney2017transcend}
  & Malware samples at deployment compared with training samples
  & Credibility and confidence of each decision \\
@@ -1028,7 +1029,7 @@ PROPHET (this thesis)
 
 {\small\setstretch{1}% 표는 1배수(작성 안내)
 \begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.2\textwidth}>{\raggedright\arraybackslash}X@{}}
-\caption{Models, data without labels, and object of study in the
+\caption[Models, unlabeled data, and object of study in the machine-learning work]{Models, data without labels, and object of study in the
 machine-learning work discussed in this chapter. A dash means that the
 work, as cited here, uses no unlabeled data beyond its training and
 test sets.}

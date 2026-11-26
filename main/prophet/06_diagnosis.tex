@@ -78,7 +78,7 @@ first tend to have the lower loss.
 
 \begin{table}[htbp]
 \centering
-\caption{The 30 REL\_GLOBAL seeds on the 135-run development set. Top:
+\caption[The 30 REL\_GLOBAL seeds on the 135-run development set]{The 30 REL\_GLOBAL seeds on the 135-run development set. Top:
 per-seed NLL, execution-weighted within each seed. Bottom: Spearman
 correlation between the ranking of the seeds by a quantity and their
 ranking by NLL on A+C, so that a positive value means the seeds ranked
@@ -233,8 +233,11 @@ run held out in turn, it reached 82.5\% accuracy and an NLL of 0.376,
 and splitting each key into two bins of the time since the last received
 batch (age) lowered the NLL to 0.338. On the seen condition the
 hint-branch table, which knows nothing about targets, thus did better
-than the mean of the trained seeds (0.554 against 0.631), which leaves
-little for a change of encoder to gain there.
+than the mean of the trained seeds (0.554 against 0.631). The trained
+seeds were about 0.08 worse than a table that sees only the order of
+the hints, so on this condition they have not used all that the hint
+order offers; how much a better encoder could still gain there was not
+measured.
 
 Under the background workers the same table does not transfer. Benign START
 records lengthen and reorder the hint sequences, to as many as 22 in
@@ -387,7 +390,7 @@ on the lookup that is general and leaves the seen condition intact.
 
 \begin{table}[htbp]
 \centering
-\caption{Mean single-seed NLL of the lookup and of the head variants
+\caption[Mean single-seed NLL of the lookup and of the head variants]{Mean single-seed NLL of the lookup and of the head variants
 over the same 30 seeds. Development: the 135-run set, development
 comparison; the lookup column is the post hoc probabilistic rule of
 Section~\ref{sec:diag-rule} applied to REL\_GLOBAL. New runs: the

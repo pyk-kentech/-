@@ -134,13 +134,14 @@ comparison changes several things at once: the number of teachers,
 their quality, the averaging, and the selection by agreement, whose
 separate effects were not tested (Section~\ref{sec:future}). Section~\ref{sec:app-raw} gives the stage-1 statistics to six
 decimals.
+\looseness=-1 % 끝줄 한 낱말을 당긴다
 % 근거: RECORD:216--227, 232; ADS24_STAGE2_REPORT.md "세 군의 전체 성과",
 % "봉인한 주 판정", "TOP5−SELF 보조 대비" (env_mean −0.214832 [−0.248399, −0.181309];
 % env_sd −0.136728 [−0.162917, −0.114904]). 해결된 label TODO는 지웠다.
 
 \begin{table}[htbp]
 \centering
-\caption{The three groups of 30 seeds on ADS-24. Environment columns
+\caption[The three groups of 30 seeds on ADS-24]{The three groups of 30 seeds on ADS-24. Environment columns
 are the 35 runs with simulated users (5,639 boundaries); preservation is
 the 15 runs without users (2,982 boundaries). NLL is execution-weighted
 as in Equation~\ref{eq:nll}; accuracy is top-1 accuracy. The last
@@ -167,7 +168,7 @@ FIT prior                  & 1.830 & ---   & ---   & 33.9\% & ---   & --- \\
 
 \begin{table}[htbp]
 \centering
-\caption{Pre-specified contrasts of the ADS-24 second stage, a
+\caption[Pre-specified contrasts of the ADS-24 second stage]{Pre-specified contrasts of the ADS-24 second stage, a
 development comparison: CD student minus REL\_GLOBAL-ADS, with two-sided
 Bonferroni-adjusted 98.3333\% intervals from 100,000 execution resamples
 stratified by scenario. The 30 seeds are fixed. The 35
@@ -198,10 +199,12 @@ standard deviation of 0.015; on the environment evaluation it was
 about which seed will hold up on the unseen one. In a post hoc
 computation from the 30 per-seed rows of the stage-1 report, the
 Spearman correlation between the seeds' preservation and environment
-losses was about $-0.39$ (no interval computed), so ranking seeds by their score on
-the condition without users would not have found the good seeds under
-simulated users, much as \texttt{ORIGINAL\_18} did not for A+C in
-Section~\ref{sec:diag-size}.
+losses was about $-0.39$ (no interval computed): seeds that scored
+better without users tended to score worse with them, so ranking seeds
+by that score would not have found the good seeds under simulated
+users. The sign is the one a trade between the two conditions would
+give (Section~\ref{sec:diag-size}; in-house $-0.131$), but the figure
+is post hoc on 30 seeds and we draw no conclusion from it.
 % 근거: RECORD:231; ADS24_STAGE2_REPORT.md (REL_BASE 보존 seed SD 0.015182).
 % 출처(−0.39): atlas OT/PROPHET_ENV_CONSENSUS_KD_V3_20261120/ADS24_STAGE1_REPORT.md:23-54
 %   (30 seed 표: 열 2 환경 NLL, 열 4 보존 OFF NLL). 원 보고서 수치가 아니라 이 표에서 다시 계산한

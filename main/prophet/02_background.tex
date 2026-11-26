@@ -289,7 +289,7 @@ loss and the quadratic or Brier loss,
 \begin{equation}
   \ell_{\log}(p,y)=-\log p(y\mid x),
   \qquad
-  \ell_{\mathrm{B}}(p,y)=\sum_{a=1}^{K}\bigl(p(a\mid x)-\mathbb{1}[a=y]\bigr)^2 .
+  \ell_{\mathrm{B}}(p,y)=\sum_{a=1}^{K}\bigl(p(a\mid x)-\indicator[a=y]\bigr)^2 .
   \label{eq:bg-scores}
 \end{equation}
 % 원문: Gneiting & Raftery (JASA 2007) §3.1 p.363 Example 1 "quadratic score or Brier score",
@@ -307,7 +307,7 @@ also why a few confident errors can dominate a mean log loss.
 % 원문: Gneiting & Raftery (JASA 2007) §3.1 p.363 Example 3 "The associated Bregman distance is the
 %   Kullback–Leibler divergence"; 같은 곳 "criticized for its unboundedness". 확인됨.
 %   "몇 개의 확신 오류가 평균을 지배할 수 있다"는 무한성에서 나오는 일반 사실로, 원문의 주장으로 쓰지 않았다.
-Negative log likelihood (NLL) is the mean of $\ell_{\log}$ over
+Negative log-likelihood (NLL) is the mean of $\ell_{\log}$ over
 evaluation rows. Our NLL weights each execution equally
 (Equation~\ref{eq:nll} in Section~\ref{sec:eval-metrics}).
 

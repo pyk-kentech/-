@@ -8,8 +8,8 @@ events~\cite{shen2018tiresias}, EFI predicts the attacker's next move
 during post-exploitation from endpoint provenance~\cite{zhu2024nip},
 and DeepCASE uses the events around an alert to decide which events
 need inspection~\cite{vanede2022deepcase}; a recent preprint by
-B\u{a}b\u{a}lau and Nadeem forecasts the next attacker action from
-alerts~\cite{babalau2024forecasting}. Except for EFI, these work from
+B\u{a}b\u{a}l\u{a}u and Nadeem forecasts the next attacker action from
+alerts~\cite{babalau2024forecasting}. Except for EFI, these systems work from
 events or alerts raised by monitoring systems, whereas we work from
 host audit records. Such a forecast is only useful if it rests
 on evidence the defender actually held at the time: an audit record has
@@ -101,8 +101,9 @@ estimate that accuracy~\cite{baek2022agreement}.
 %   estimates" (§2.4 무작위 초기화로 독립 학습). Baek et al. NeurIPS 2022 초록 "whenever
 %   accuracy-on-the-line holds" ... "we can predict the OOD accuracy of classifiers" (§3.4, §4). 확인됨.
 Consistent with
-these results, the rows of unlabeled in-house inputs on which the
-baseline models' top-1 predictions differ carry most of the NLL of
+these results, on in-house inputs from the unseen workload, the rows on
+which the baseline models' top-1 predictions differ, which can be found
+without labels, carry most of the NLL of
 their 30-model probability average (Chapter~\ref{ch:diagnosis}); we
 report this as a measurement on our task, not as a new phenomenon. CD turns that observation into a
 training target. We train 30 seeds of
@@ -172,14 +173,14 @@ improve every seed (Chapters~\ref{ch:ads24} and~\ref{ch:generality}).
 The thesis makes three contributions. (a) It measures seed instability
 with 30 seeds per model setting, for REL\_GLOBAL and three general
 encoders, on the in-house task and on ADS-24. (b) It observes that, on
-unlabeled inputs from the unseen workload, the NLL of the 30-model
+inputs from the unseen workload, the NLL of the 30-model
 probability average concentrates on the rows where the seeds' top-1
-predictions differ. It then applies a consensus target that keeps the
+predictions differ, rows that can be found without labels. It then applies a consensus target that keeps the
 architecture and single-model inference. Following other models'
 average to reduce retraining churn was shown for
 codistillation~\cite{anil2018large}. With one fixed teacher set, part
 of the students' agreement is expected from distillation itself; what
-we add is whether it carried to new runs, whether the seen-condition
+we add is evidence on whether it carried to new runs, whether the seen-condition
 loss was preserved, and how it compared with FIT-input distillation and
 self-distillation (Section~\ref{sec:disc-novelty}). In
 development comparisons on the plain GRU, students that followed

@@ -61,14 +61,14 @@ in-house REL\_GLOBAL barely moved (1.1 times). In the in-house lab, disagreement
 about half of the unseen-condition loss for the LSTM and Transformer
 encoders and for REL\_GLOBAL, and 70\% for the plain GRU, against 15\%
 to 28\% on \texttt{ORIGINAL\_18}. On ADS-24 the share was 7\% to 14\%.
-The ADS-24 loss is therefore mostly a loss on which the seeds agree,
-which matches Chapter~\ref{ch:ads24}: there the models stay near or
-above the NLL of the FIT prior, and lowering $V$ alone cannot
+The ADS-24 loss is therefore mostly one on which the seeds agree,
+as in Chapter~\ref{ch:ads24}, where the models stay near or
+above the FIT prior and lowering $V$ alone cannot
 move them far.
 
 \begin{table}[htbp]
 \centering
-\caption{Disagreement term $V$ of the 30 baseline seeds (for REL\_GLOBAL, the teacher population) on the seen and
+\caption[Disagreement term $V$ on the seen and unseen conditions]{Disagreement term $V$ of the 30 baseline seeds (for REL\_GLOBAL, the teacher population) on the seen and
 unseen conditions (post hoc). In-house: seen is \texttt{ORIGINAL\_18}
 (32 runs, 236 rows) and unseen is the 1:1 mean of \texttt{A+C FLAT}
 (31 runs, 341 rows) and \texttt{A+C NESTED} (30 runs, 330 rows) of the
@@ -121,18 +121,16 @@ encoders (0.317, 0.455, and 0.700 against 0.339, 0.554, and 0.790).
 % anticipate evaluation instability?" (ADS 34실행/5,811행, 자체 167실행/1,663행).
 
 Each of the same 28 model--set pairs also compares a baseline with the
-students of its seed list: for the three general encoders and REL\_GLOBAL-ADS these are
-the populations above, while for in-house REL\_GLOBAL they are the v3
+students of its seed list; for in-house REL\_GLOBAL these are the v3
 baseline seeds and their KD\_ENV\_TOP5 students, scored on the PAG1 runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
 mainly on the disagreement term, and part of it is expected from
 distillation toward one fixed teacher set
-(Section~\ref{sec:disc-novelty}). The ensemble analogue of this
-reduction is shown by Gruber and Buettner: averaging members over
-initializations shrinks the Bregman Information that this randomness
-contributes, and with it the expected
+(Section~\ref{sec:disc-novelty}). Gruber and Buettner show the
+ensemble analogue: averaging over initializations shrinks the Bregman
+Information from this randomness, and with it the expected
 loss~\cite{gruber2022uncertainty}.
 % 원문: Gruber & Buettner AISTATS 2023 §3.5 Prop. 3.8 식 (1)–(3), 식 (4)–(5) pp.6–7: W(초기값)에 대한 조건부
 %   Bregman Information 이 앙상블 크기와 함께 줄고 n→∞ 에서 0, "the expected negative log-likelihood reduces"
@@ -160,15 +158,19 @@ seen condition; for the three general encoders, $V$ on
 
 A small $V$ is not the same as a correct prediction, because the
 identity puts the remaining loss into the consensus term. Entropy
-minimization, one of the controls of Section~\ref{sec:gen-methods},
+minimization (Section~\ref{sec:gen-methods})
 drove $V$ on in-house \texttt{A+C FLAT} to essentially zero
 ($7\times10^{-6}$), and the consensus loss rose to 2.702: the seeds
-agreed, and they agreed on the wrong actions. The same can happen in a
-milder form after CD. For the plain GRU on the ADS-24 environment
+agreed, and they agreed on the wrong actions. Their losses still
+spread, with a seed standard deviation of 0.324 against 0.013 for the
+CD students (Table~\ref{tab:gen-methods}), because $V$ weights
+differences by the pooled probability and barely registers them on a
+label that the pool rates as very unlikely. A milder form follows CD:
+for the plain GRU on the ADS-24 environment
 evaluation, $V$ fell from 0.149 to 0.025 while the consensus loss rose
 from 2.073 to 2.104; the seed-mean loss improved only because the drop
-in $V$ was larger. $V$ thus reads how much the seeds diverge, not whether
-their common answer is right.
+in $V$ was larger. $V$ thus reads how closely the seeds' distributions
+agree, not whether their common answer is right.
 % 근거: RECORD:332; METHOD_BASELINES_REPORT.md "V와 합의 예측" (PROPHET A_PLUS_C_FLAT
 % ENTROPY 합의 NLL 2.701564, V 0.000007; ADS24 EVAL_ON BASE 2.072554/0.148804,
 % KD_ENV 2.104398/0.025253); VARIANCE_DECOMPOSITION_REPORT.md "Interpretation and

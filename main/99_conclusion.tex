@@ -12,8 +12,8 @@ execution and audit records received before a cutoff. The thesis
 first measured that seeds of REL\_GLOBAL trained on the same 603 FIT
 runs disagree widely once the benign worker~C appears, and that the
 final FIT minibatch loss did not rank them by how they would hold up.
-Most of the loss of their averaged prediction sat on the unlabeled
-rows where they disagreed; a separate diagnosis traced many
+Most of the loss of their averaged prediction sat on the
+rows where they disagreed, which can be found without labels; a separate diagnosis traced many
 in-house errors to one file decision, COPY or DISCOVERY, although the
 head built on it was not adopted.
 
@@ -45,31 +45,31 @@ diagnosis holds for one model in one lab.
 % 424 (모든 seed가 좋아지지는 않음; 20~30/30은 원자료 미확인으로 뺐다), 405 (합의도 seed 선택 ADS-24 미재현),
 % 427 (30개 학습 비용). 해석은 11장 sec:disc-does에서 이미 했으므로 되풀이하지 않았다.
 
-\section{Future Work}
+\section{Future work}
 \label{sec:future}
 
 A set of further checks was planned before this thesis was written;
 none of them is reported here. Teacher sets of five
-seeds chosen at random, of two seeds, and of all 30 test whether
+seeds chosen at random, of two seeds, and of all 30 would test whether
 training 30 baselines and ranking them by agreement is worth its cost.
 Students trained on 25\% and 50\% of the unlabeled environment inputs
-estimate how much new-environment data the KL term needs. A repeat of
+would estimate how much new-environment data the KL term needs. A repeat of
 the comparison with other single-model methods on a Transformer
-encoder keeps that comparison from resting on one architecture.
+encoder would keep that comparison from resting on one architecture.
 
 Whether the reported results hold beyond the runs and seeds that
 produced them can be checked with the frozen models. Inference on
 the 119 usable ADS-24 runs outside the 132 of the contract
-(Appendix~\ref{app:ads24-data}), unused by any stage, gives an unused
-ADS-24 test; a fresh in-house collection completes the in-house method
+(Appendix~\ref{app:ads24-data}), unused by any stage, would give an unused
+ADS-24 test; a fresh in-house collection would complete the method
 comparison that stopped at 110 runs. Intervals recomputed with seeds resampled along
-with runs let a verdict speak for more than these 30 seeds. Two deployed references, for every encoder and dataset, would complete these checks: temperature scaling~\cite{guo2017calibration}
+with runs would let a verdict speak for more than these 30 seeds. Two deployed references, for every encoder and dataset, would complete these checks: temperature scaling~\cite{guo2017calibration}
 of each base model, and probability ensembles of the five teachers and
 of all 30 baseline seeds.
 % 원문: Guo et al. ICML 2017 (PMLR 70) arXiv:1706.04599 §4.2 "Temperature scaling ... uses a single scalar
 %   parameter T > 0 for all classes". 방법 이름 인용, 확인됨.
-Whether the ADS-24 and general-encoder models split on one decision,
-as in-house REL\_GLOBAL did, is open.
+Whether the ADS-24 and general-encoder models also split on one
+decision is open.
 % 근거: RECORD:488--498 (마무리 확인 묶음 표; 불리한 결과도 한계에 적고 새 실험으로
 % 덮지 않는다). 결과는 쓰지 않았다(answers 추가 지시).
 % 4회차 지시 1번: 온도 보정·확률 앙상블은 2026-11-23 이후 마무리 확인 묶음이라

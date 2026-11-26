@@ -38,7 +38,7 @@ Section~\ref{sec:task-rows}.
 
 \begin{table}[htbp]
 \centering
-\caption{Evaluation cohorts of the earlier stage. Repeated evaluations on
+\caption[Evaluation cohorts of the earlier stage]{Evaluation cohorts of the earlier stage. Repeated evaluations on
 the same saved executions are grouped in one row. Cohorts marked
 $^{*}$ are reused in the main chapters (Sections~\ref{sec:method-relation-evidence},
 \ref{sec:diag-errors}, and~\ref{sec:diag-size}); the scores of the
@@ -130,7 +130,7 @@ target-aware models shared one target parser.
     {History query} (rel.north);
   \draw[->,semithick] (plus.east) -- (pred.west);
 \end{tikzpicture}
-\caption{The earlier residual models THM and REL. The receipt-order
+\caption[The earlier residual models THM and REL]{The earlier residual models THM and REL. The receipt-order
 history supplies the base scores and a query for the target-linked
 evidence, and the relation readout supplies a correction to the action
 scores. This is not the architecture of REL\_GLOBAL.}
@@ -155,7 +155,7 @@ of those configurations rather than over new ones.
 
 \begin{table}[htbp]
 \centering
-\caption{Target-aware prediction on 64 new executions and 512 rows from
+\caption[Target-aware prediction on 64 new executions]{Target-aware prediction on 64 new executions and 512 rows from
 16 held configurations (FIT 476, 900 updates). NLL is execution-weighted
 and accuracy is per row; each value averages the scores of seeds 11, 29,
 and 47.}
@@ -229,7 +229,7 @@ meaningful only together with its benign workload and training fold.
 
 \begin{table}[htbp]
 \centering
-\caption{Event-wise and final-state history exposure on selected
+\caption[Event-wise and final-state history exposure]{Event-wise and final-state history exposure on selected
 conditions of the 111-execution collection. \texttt{B+C} and
 \texttt{C\_ONLY} each have 32 executions and 352 rows, and both folds are
 scored on the same executions of a condition. The EVENT GRU column has
@@ -313,8 +313,8 @@ off two earlier residual models in a post hoc development diagnosis on
 cell per target with that target's events in receipt order and adds a
 residual read of those states to the base logits; it has more active
 parameters than its comparison models. Over the seeds 11, 29, and 47,
-it gave the observed file search at \texttt{SEQ\_5} of
-\texttt{THME0064} probabilities of 0.434, 0.450, and 0.481, against
+it gave the observed file search at the decision recorded as
+\texttt{SEQ\_5} in \texttt{THME0064} probabilities of 0.434, 0.450, and 0.481, against
 0.984, 0.483, and 0.517 for an adapter version of the relation model,
 which is not the REL checkpoint of Table~\ref{tab:relations}.
 % 출처: atlas OT/TARGET_SEQUENTIAL_UPDATE_FIXED_20261109/CONTRACT.md:9,11;
@@ -359,7 +359,7 @@ each of five seeds, 20 fits in all.
 
 \begin{table}[htbp]
 \centering
-\caption{Fixed probability combination on newly collected runs from the
+\caption[Fixed probability combination on newly collected runs]{Fixed probability combination on newly collected runs from the
 same lab. All values are execution-weighted NLL. Rows with no usable
 target receive the baseline distribution.}
 \label{tab:mix}
@@ -390,7 +390,7 @@ architecture.
 
 \begin{table}[htbp]
 \centering
-\caption{A+C comparison after training with five new seeds. Every
+\caption[A+C comparison after training with five new seeds]{A+C comparison after training with five new seeds. Every
 combination uses the target-conditioned 50:50 average of
 Equation~\ref{eq:mixture} and shares the baseline within each seed. The
 evaluation executions are those of Table~\ref{tab:mix}.}
@@ -460,7 +460,7 @@ in the main text follow from them.
 
 \begin{table}[htbp]
 \centering
-\caption{Six-digit values behind the main results. Differences are
+\caption[Six-digit values behind the main results]{Six-digit values behind the main results. Differences are
 the first group minus the second. For the method comparison, each
 method minus the CD student, so positive values favor CD; the in-house
 score there is the 1:1 average of \texttt{A+C FLAT} and

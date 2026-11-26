@@ -96,8 +96,9 @@ the lookup held on new runs from the same lab, except for the
 three-target contrast against its shuffled control; its generic form
 did not keep the gain, and the head was not adopted. CD
 does not use this lookup. It rests on the separate observation that the
-NLL of the 30-model probability average concentrates on the unlabeled
-rows where the seeds' top-1 predictions differ, and it reduced the
+NLL of the 30-model probability average concentrates on the
+rows where the seeds' top-1 predictions differ, rows that can be found
+without labels, and it reduced the
 spread on ADS-24 without any matching diagnosis there.
 Whether the general encoders and the ADS-24 models diverge for a
 comparable reason is unknown.
@@ -318,17 +319,14 @@ hypothesis that a student of a consensus would vary less across seeds
 %   shift", 큰 shift 에서 ECE 도 앞섬; §5 p.9 앙상블이 "more robust to dataset shift". 학생 모델은 다루지 않음.
 %   Gruber & Buettner §3.5 식 (4)–(5) pp.6–7 앙상블 평균이 초기값에서 오는 Bregman Information 을 줄임.
 %   (옛 인용 rathmanakidis2022reduction 을 바꿈. shift 에서의 분산 관련 오차는 원문이 직접 재지 않아 정확도·보정으로 좁힘.)
-Two extensions of CD failed
-their preliminary checks (Appendix~\ref{app:rejected}). The first, the
-confidence-conditioned target (candidate~A), like the adaptive ensemble distillation of Du
-et al.~\cite{du2020agree}, responds to disagreement among teachers, but
-it does so by interpolating the target toward the boundary-weighted FIT
-action frequencies rather than by weighting teachers in gradient space.
+Two extensions of CD, the confidence-conditioned target (candidate~A)
+and the shared-subspace projection (candidate~B), failed their
+preliminary checks. Section~\ref{sec:rej-candidates} describes them and
+how they relate to adaptive ensemble
+distillation~\cite{du2020agree} and to the comparison of networks
+through a shared subspace~\cite{raghu2017svcca}.
 % 원문: Du et al. NeurIPS 2020 (vol. 33, pp. 12345--12355) 초록 "a dynamic weighting method for each teacher",
 %   "a tolerance parameter to accommodate disagreement among teachers" (§3.1 gradient 공간). 확인됨.
-The second, the shared-subspace projection (candidate~B), builds on
-comparing networks through the subspace their representations
-share~\cite{raghu2017svcca}.
 % 원문: Raghu et al. NIPS 2017 초록 "a tool for quickly comparing two representations"; §2 SVD 로 각 층의
 %   부분공간을 줄인 뒤 CCA 로 두 부분공간의 상관을 최대화. 확인됨.
 % Du 등: decisions.md 33번에 따라 ref.bib의 du2020agree로 되살렸다. 8회차 인용 P1-1: "close to"를

@@ -28,10 +28,14 @@ table keeps them as one line each so that the ledger is complete.
 \section{Hypotheses of the diagnostic phase}
 \label{sec:rej-hypotheses}
 
+Table~\ref{tab:rej-hypotheses} states each hypothesis or attempt as it
+was posed and the outcome recorded for it. A section reference marks
+the entries that the main chapters discuss.
+
 \begin{table}[htbp]
 \centering
 \small
-\caption{Hypotheses and attempts of the diagnostic phase on the in-house
+\caption[Hypotheses and attempts of the diagnostic phase]{Hypotheses and attempts of the diagnostic phase on the in-house
 lab, with their outcomes.}
 \label{tab:rej-hypotheses}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
@@ -156,7 +160,7 @@ condition of ADS-24 but raised the loss on its preservation runs from 1.449 to
 % 표가 한 쪽보다 길어 xltabular 로 쪽을 넘기게 했다(컴파일 검사 2026-11-25).
 {\small\setstretch{1}% 표는 1배수(작성 안내)
 \begin{xltabular}{\textwidth}{@{}r>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}X@{}}
-\caption{Method candidates and their stored verdicts. Rows 1--15 were
+\caption[Method candidates and their stored verdicts]{Method candidates and their stored verdicts. Rows 1--15 were
 judged under criteria written before scoring; rows 16--20 are post hoc
 development analyses on runs whose scores had already been seen. The
 preservation limit is $+0.020$ in NLL on the seen condition, \texttt{ORIGINAL\_18}. Rows
@@ -307,7 +311,9 @@ Withdrawn claim & What replaced it \\
 \midrule
 The baseline's output read as the distribution of the action that
 follows the last received action
-  & Withdrawn \\
+  & Withdrawn; the output is read as Section~\ref{sec:task-rows}
+    defines the label, the first attacker action that starts after the
+    boundary \\
 A 10-seed contract whose main gate used the mean NLL
   & From v2 on, the seed standard deviation is the primary measure \\
 The general encoders, lacking LogitNorm, would vary less across seeds

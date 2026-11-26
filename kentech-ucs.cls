@@ -668,6 +668,9 @@
 %%
 \newcommand{\makecontents}{%
     \clearpage
+    % 작성 안내·샘플: 앞부분(Abstract~그림 목차)의 쪽 번호는 로마자 소문자만 쓴다. 각 목차의 첫 쪽은
+    % \thispagestyle{plain} 이라 "iii" 인데 이어지는 쪽은 본문 모양("-- iv --")으로 찍혀 섞였다.
+    \pagestyle{plain}%
     \setcounter{pagemarker}{\value{page}}%
     \pagenumbering{roman}%
     \setcounter{page}{\value{pagemarker}}%
@@ -675,6 +678,7 @@
     \listoftables
 	\listoffigures
     \clearpage
+    \pagestyle{kentech}% 본문부터 원래 쪽 번호 모양
     \setstretch{\@kentechdouble}% 본문부터 2배수(작성 안내)
 }
 

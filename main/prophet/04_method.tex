@@ -113,7 +113,11 @@ set a count, the
 % 원문: Ross & Doshi-Velez (AAAI 2018) 'Input Gradient Regularization' 절 식 (6) p.3, 목적함수 H(y, y_hat) + lambda * ||grad_x H(y, y_hat)||_2^2.
 number $k$ of worker events; the penalty then draws exactly $k$ events
 at random from all received events, so it does not target the worker
-events themselves. For each drawn event it takes the
+events themselves. The count is kept from an earlier variant that
+penalized only the worker events: that variant showed no advantage over
+penalizing the same number of randomly drawn events
+(Table~\ref{tab:rej-candidates}, row~7), and the random draw was kept.
+Where the count is zero, no penalty is applied. For each drawn event it takes the
 squared gradient, with respect to that event's 48-dimensional vector
 $e_i$, of a single Rademacher projection of the centered 18-way logits;
 this is an unbiased estimate of the squared Frobenius norm of the
@@ -374,7 +378,7 @@ final student of Chapter~\ref{ch:results}.
 
 \begin{table}[htbp]
 \centering
-\caption{Trained groups in the in-house rounds. All groups use the FIT
+\caption[Trained groups in the in-house rounds]{Trained groups in the in-house rounds. All groups use the FIT
 loss of Equation~\ref{eq:base-loss}; the KD groups add the KL term of
 Equation~\ref{eq:cd-loss}.}
 \label{tab:variants}
@@ -436,7 +440,7 @@ candidate grid, the validation split, and the selected settings.
 
 \begin{table}[htbp]
 \centering
-\caption{What was changed and what was kept when the method was applied to
+\caption[Changes for ADS-24 and for the three general encoders]{What was changed and what was kept when the method was applied to
 ADS-24 and to the three general encoders.}
 \label{tab:transfer}
 \small

@@ -151,7 +151,7 @@ collection.
   \node[txt,anchor=east,text=blue!60!black] at (7.14,0.45) {Admitted prefix};
   \node[txt,anchor=west,text=black!65] at (8.12,0.45) {Received after boundary};
 \end{tikzpicture}
-\caption{A schematic prediction boundary. P$_1$ and P$_2$ denote two
+\caption[A schematic prediction boundary]{A schematic prediction boundary. P$_1$ and P$_2$ denote two
 observed processes. The predictor receives both START records before
 the boundary. The END of P$_1$ arrives afterward even though P$_1$ has
 already exited. The next attacker action supplies the evaluation label.}
@@ -209,7 +209,7 @@ the main chapters.
 
 \begin{table}[htbp]
 \centering
-\caption{Evaluation conditions and target layouts. ``C-fold FIT'' states
+\caption[Evaluation conditions and target layouts]{Evaluation conditions and target layouts. ``C-fold FIT'' states
 whether the condition's benign work, or the layout, occurs in the 603
 training runs of the C-fold.}
 \label{tab:conditions}
@@ -257,9 +257,10 @@ runs (660 rows) of the development set of Chapter~\ref{ch:diagnosis}, all 353 na
 belong instead to the lineage of benign worker~C. The same kind of
 evidence is thus produced by the attacker during training and by benign
 work at evaluation. Lineage was determined from audit information that
-the model never receives. We use this case to show what a condition
+the model never receives. The case shows what a condition
 unseen in training looks like; the audit does not establish it as the
 cause of any seed's success or failure.
+\looseness=-1 % 끝줄을 당겨 표 IV.2 가 같은 쪽에 들어가게 한다(표 제목 간격을 넓힌 만큼)
 % 근거: ORIG:PROPHET_REL_GLOBAL_SEED_POPULATION_20261118/FINAL_REPORT_KO.md:9.
 % 60실행·660행 = A+C FLAT 31·341 + NESTED 29·319 (같은 파일, 135실행 개발 집합).
 % 4,824는 원 파일의 "자연 경계" 수다.
@@ -278,7 +279,7 @@ result. Execution \texttt{THME0064} comes from an earlier three-target
 collection of this project (Appendix~\ref{app:secondary-results}), not
 from the C-fold data. Table~\ref{tab:recorded-case} shows part of its
 received prefix before its first file-processing decision
-(\texttt{SEQ\_5}). The path
+(recorded as \texttt{SEQ\_5}). The path
 names distinguish three synthetic targets. The marker concerns
 \texttt{alpha}, whose earlier payload search returned a nonzero exit
 status, while the marker's own zero exit status belongs to a different
@@ -293,7 +294,7 @@ target-result lookup examined in Chapter~\ref{ch:diagnosis}.
 
 \begin{table}[htbp]
 \centering
-\caption{Selected records received before the decision in
+\caption[Selected records received before the decision in \texttt{THME0064}]{Selected records received before the decision in
 \texttt{THME0064}. Rows show the observed target groups. For the
 two other targets, only the search termination is shown.}
 \label{tab:recorded-case}
