@@ -292,8 +292,16 @@ added to the regularizers already in REL\_GLOBAL.
 % 원문: Hinton et al. arXiv:1503.02531 §2 앙상블의 "arithmetic or geometric mean ... as the soft targets". 확인됨.
 Ranking teachers by
 unlabeled agreement takes its motivation from Baek et
-al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}).
+al.~\cite{baek2022agreement} (Section~\ref{sec:related-underspec}),
+and, for agreement among runs of one architecture, from Jiang et
+al.~\cite{jiang2022assessing}. Baek et al.'s premise, that accuracy
+under shift tracks in-distribution accuracy across models, did not hold
+for these seeds: their seen-condition and A+C FLAT losses correlated at
+$-0.131$ (Chapter~\ref{ch:diagnosis}). The rule therefore rests on the
+in-house S1 correlation (0.877 and 0.915), not on their result, and
+that correlation did not recur on ADS-24 (Chapter~\ref{ch:ads24}).
 % 원문: Baek et al. NeurIPS 2022 §3.4 "agreement can be estimated with just unlabeled data". 동기로만 인용, 확인됨.
+% 2026-11-25 패널 6회차 참신성 P2-1: Baek 등의 전제가 이 seed들에서 서지 않았다는 점과 규칙의 실제 근거(S1)를 적었다.
 The
 decomposition of Chapter~\ref{ch:decomposition} is that of
 Heskes~\cite{heskes1997selecting}, read as a label-free uncertainty

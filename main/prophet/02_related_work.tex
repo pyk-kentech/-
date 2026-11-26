@@ -99,9 +99,10 @@ adversary's next technique~\cite{liu2024clap2}.
 %   "Tactic-based Cyber Kill Chain (TCKC) model highlights the attacker's portrait", "Soft Actor–Critic
 %   ... most possible attack trajectory", "transformer model finally derives the specific attack technique
 %   to be taken next". 확인됨(전문은 유료라 사용자 drop 폴더의 사본 paper.txt 로 읽음).
-EFI extracts attack-scene
-graphs from threat intelligence reports, matches them against endpoint
-provenance, and forecasts the next interactions with a technique-level
+EFI trains a serialized graph forecast model on attack-scene graphs
+extracted from threat intelligence reports, applies it to an endpoint
+provenance graph to forecast the next interactions, and aligns the
+forecast graph with attack-template graphs for a technique-level
 interpretation~\cite{zhu2024nip}. EFI thus shares host-level endpoint
 evidence and the forecasting goal with our task; it differs in drawing
 on threat-intelligence scene graphs and in its technique-level output.

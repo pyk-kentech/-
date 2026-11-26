@@ -61,8 +61,11 @@ that has already been inspected.
 To limit choices made after inspection,
 each round of this study followed a written contract. The contract, the seeds, and
 the hashes of the code, the training inputs, and the collection plan
-were sealed before any model of the round was trained and before any of
-its executions were collected. Each planned execution identifier was
+were sealed before any model of the round was trained and, in rounds
+that collected new executions, before any of them were collected.
+Stages that reused executions scored earlier were specified before
+fitting, on evaluation runs already observed, and count as development
+comparisons (below). Each planned execution identifier was
 attempted once; executions that failed collection or the eligibility
 checks were recorded with their reason and not replaced. After
 collection, every model wrote its probabilities over all actions for

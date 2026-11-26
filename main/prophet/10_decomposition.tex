@@ -47,10 +47,11 @@ the natural boundaries of a run and then over runs with equal weight.
 % 같은 보고서 Status: ADS-24 ON35는 이미 열람, PAG1은 구조 실험의 새 실행이지만
 % 분해는 점수를 본 뒤에 정했다.
 
-We applied the identity to the baselines of
-Chapter~\ref{ch:generality}, that is, the three general encoders and
-REL\_GLOBAL (the 30-seed teacher population of
-Section~\ref{sec:method-teachers}),
+We applied the identity to the three general encoders of
+Chapter~\ref{ch:generality} and, for REL\_GLOBAL, to the 30-seed
+teacher population of Section~\ref{sec:method-teachers}; the student
+comparison below instead uses the v3 baseline seeds and their
+KD\_ENV\_TOP5 students. Both were scored
 on the PAG1 runs of the in-house lab and on ADS-24
 (Table~\ref{tab:decomposition}). On conditions
 absent from FIT, $V$ was three to seven times its value on the seen
@@ -122,8 +123,7 @@ encoders (0.317, 0.455, and 0.700 against 0.339, 0.554, and 0.790).
 Each of the same 28 model--set pairs also compares a baseline with the
 students of its seed list: for the three general encoders and REL\_GLOBAL-ADS these are
 the populations above, while for in-house REL\_GLOBAL they are the v3
-baseline seeds, a different population from that of the table, and
-their KD\_ENV\_TOP5 students, scored on the PAG1 runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
+baseline seeds and their KD\_ENV\_TOP5 students, scored on the PAG1 runs. After distillation, $V$ fell in 27 of these 28 pairs, often by an order
 of magnitude: on in-house \texttt{A+C FLAT} it went from 0.796 to 0.011
 for the plain GRU, and on the ADS-24 environment evaluation from 0.197
 to 0.031 for the LSTM encoder. This is consistent with CD acting
@@ -145,8 +145,7 @@ deviation.
 The exception is REL\_GLOBAL on \texttt{ORIGINAL\_18}. Between the v3
 baseline seeds and their paired KD\_ENV\_TOP5 students, distilled on the
 background inputs alone, $V$ rose from 0.068 to 0.077, and the seed
-standard deviation rose with it. These v3 seeds are not the
-REL\_GLOBAL population of Table~\ref{tab:decomposition}.
+standard deviation rose with it.
 % 9회차 문장 P2-6 출처: VARIANCE_DECOMPOSITION_REPORT.md:11 ("its student V change instead uses
 %   the paired v3 2M-seed baseline and KD_ENV_TOP5 student on the same new PAG1 input"), :66, :100.
 For REL\_GLOBAL and its

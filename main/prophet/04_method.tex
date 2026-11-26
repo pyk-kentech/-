@@ -282,8 +282,11 @@ and carries no model of the spread among teachers.
 \section{Teacher selection}
 \label{sec:method-teachers}
 
+The unlabeled background inputs are the 119 background runs (1,309
+rows) of the 135-run development set (Section~\ref{sec:conditions}),
+and teachers are ranked on its 60 A+C runs (660 rows).
 Teachers are chosen from 30 REL\_GLOBAL seeds trained with
-Equation~\ref{eq:base-loss}. For each row of the unlabeled A+C inputs,
+Equation~\ref{eq:base-loss}. For each row of these unlabeled A+C inputs,
 the 30 models vote with their top-1 actions, and the majority action
 serves as the reference. Each model's own vote is included, which
 adds a mechanical self-agreement term of up to one vote in 30; the
@@ -350,7 +353,9 @@ share the FIT procedure of Section~\ref{sec:method-baseline}; they differ
 in the teacher set and in the unlabeled inputs of the KL term, which we
 call \emph{adaptation inputs}. The
 background inputs are 119 runs (1,309 rows) under background conditions.
-KD\_ALL adds 48 runs (354 rows) of the seen condition to them and
+KD\_ALL adds 48 runs (354 rows) of the seen condition to them, the 16
+of the development set and the 32 new \texttt{ORIGINAL\_18} runs of the
+\texttt{OBSERVED\_HEAD} check (Section~\ref{sec:diag-intervention}), and
 draws the 32 unlabeled rows of each update from the two sources in
 the ratio of their run counts, 119:48. Each of the 32 slots draws one
 of the 167 runs uniformly and then one row uniformly within it, with

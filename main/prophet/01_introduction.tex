@@ -177,8 +177,11 @@ probability average concentrates on the rows where the seeds' top-1
 predictions differ. It then applies a consensus target that keeps the
 architecture and single-model inference. Following other models'
 average to reduce retraining churn was shown for
-codistillation~\cite{anil2018large}; what we add is a measurement of
-that effect with fixed teachers on unlabeled target inputs. In
+codistillation~\cite{anil2018large}. With one fixed teacher set, part
+of the students' agreement is expected from distillation itself; what
+we add is whether it carried to new runs, whether the seen-condition
+loss was preserved, and how it compared with FIT-input distillation and
+self-distillation (Section~\ref{sec:disc-novelty}). In
 development comparisons on the plain GRU, students that followed
 several models on environment inputs narrowed the spread, whether the
 pool was arithmetic or geometric, but neither the number of teachers

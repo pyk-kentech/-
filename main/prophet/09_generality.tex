@@ -61,9 +61,11 @@ REL\_GLOBAL on the same runs, and the accuracy of plain-GRU seeds ranged
 from 51.0\% to 87.7\%. We had expected that encoders without LogitNorm,
 which keeps logits at a fixed norm, would spread less. The opposite
 happened. The Transformer figure is driven partly by one seed whose
-\texttt{A+C FLAT} loss was 4.690. Without it, the remaining 29 seeds
-still had a standard deviation of 0.466 on the A+C score (the mean of
-\texttt{FLAT} and \texttt{NESTED}), against 0.040 for their CD students. On ADS-24 the spread was smaller in absolute
+\texttt{A+C FLAT} loss was 4.690. Over all 30 seeds both components of
+the A+C score had a standard deviation near 0.83 (0.833 on
+\texttt{FLAT}, 0.835 on \texttt{NESTED}); without that seed, the
+remaining 29 still had 0.466 on the A+C score itself, against 0.040 for
+their CD students. On ADS-24 the spread was smaller in absolute
 terms for the Transformer and the plain GRU but not for the LSTM
 encoder, and the environment evaluation again separated the seeds far
 more than the preservation runs did.
